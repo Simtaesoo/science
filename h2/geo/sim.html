@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>지질 시대와 진화 실험실 · 통합과학2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-earth">
+<div class="wrap">
+  <nav class="topbar" data-topbar="통합과학2|01 지질 시대와 생물 다양성" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학2 · 01 지질 시대와 생물 다양성 <span class="code">통과2 Ⅰ</span></div>
+      <h1>지질 시대와 진화 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="era">1. 지질 시대와 대멸종</button>
+      <button type="button" data-mode="select">2. 변이와 자연선택</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="지질 시대와 자연선택"></canvas></div>
+      <div class="controls">
+        <label class="field" data-only="era" for="age">시간 <input type="range" id="age" min="0" max="541" step="1" value="541"><output id="ageOut"></output></label>
+        <div class="field" data-only="select"><div class="seg" id="envSeg"><button type="button" data-env="clean">깨끗한 숲 (밝은 나무껍질)</button><button type="button" data-env="soot">공장 매연 숲 (어두운 나무껍질)</button></div></div>
+        <div class="field" data-only="select"><div class="seg" id="hSeg"><button type="button" data-h="me">내가 새가 되어 사냥</button><button type="button" data-h="auto">자동 사냥</button></div></div>
+        <button class="btn primary" type="button" id="gen" data-only="select">다음 세대</button>
+        <button class="btn" type="button" id="reset" data-only="select">처음부터</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>대멸종 뒤에 생물 다양성이 오히려 크게 늘어나는 까닭은?</summary><p>대멸종으로 많은 생물이 사라지면 빈 서식지와 생태적 지위가 생깁니다. 살아남은 생물이 그 환경에 적응하며 빠르게 다양한 종으로 분화합니다. 예를 들어 중생대 말 공룡이 멸종한 뒤 포유류가 크게 번성했습니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>자연선택에서 '환경이 생물을 바꾼다'는 말은 맞을까?</summary><p>정확하지 않습니다. 환경이 개체를 직접 바꾸는 것이 아니라, 이미 존재하는 여러 변이 중 환경에 유리한 변이를 가진 개체가 더 많이 살아남아 자손을 남기므로, 여러 세대에 걸쳐 집단의 형질 비율이 달라지는 것입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>항생제를 처방대로 끝까지 먹어야 하는 까닭을 자연선택으로 설명하면?</summary><p>중간에 멈추면 항생제에 조금 더 잘 견디는 변이를 가진 세균이 살아남아 번식합니다. 이것이 반복되면 항생제 내성 세균 집단이 됩니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="생물 다양성 곡선과 나방 집단은 원리를 보여 주는 모형입니다."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+// 지질 시대 (백만 년 전)
+const ERAS = [['고생대', 541, 252, '#7fb2d8', '삼엽충, 갑주어, 양치식물, 최초의 육상 생물', '삼엽충 · 필석 · 갑주어'], ['중생대', 252, 66, '#8fca7a', '공룡, 암모나이트, 겉씨식물, 시조새', '암모나이트 · 공룡'], ['신생대', 66, 0, '#e8c86a', '포유류, 속씨식물, 화폐석, 인류 등장', '화폐석 · 매머드']];
+const EXT = [[444, '오르도비스기 말', '빙하기로 해수면 하강'], [372, '데본기 말', '해양 산소 부족 추정'], [252, '페름기 말 (최대)', '대규모 화산 활동, 판게아 형성 → 해양 생물 약 90 % 이상 멸종'], [201, '트라이아스기 말', '대규모 화산 활동'], [66, '백악기 말', '소행성 충돌 → 공룡 멸종']];
+function diversity(t){ // t: 백만 년 전 → 과(family) 수 모형
+  let d = 100 + (541 - t) * 1.4; EXT.forEach(([e], i) => { if (t <= e) d -= [60, 70, 260, 90, 120][i] * Math.exp(-(e - t) / 30); }); return Math.max(40, d + (t < 66 ? (66 - t) * 4 : 0)); }
+const st = {mode: 'era', age: 541, env: 'clean', hunt: 'me', moths: [], genN: 0, hist: [], caught: 0, huntT: 0, hunting: false};
+function drawEra(){ const g = S.g, W = S.w, H = S.h, x0 = 40, x1 = W - 40, X = t => x0 + (541 - t) / 541 * (x1 - x0), y = H * .2;
+  ERAS.forEach(e => { g.fillStyle = e[3]; g.fillRect(X(e[1]), y, X(e[2]) - X(e[1]), 40); label(g, e[0], (X(e[1]) + X(e[2])) / 2, y + 20, {size: 14, weight: 700}); });
+  g.fillStyle = '#c9c0b0'; g.fillRect(x0 - 30, y, 30, 40); label(g, '선캄브리아', x0 - 15, y - 10, {size: 9, color: C.muted});
+  [541, 400, 252, 100, 66, 0].forEach(t => label(g, t + '', X(t), y + 54, {size: 10, color: C.muted})); label(g, '백만 년 전', x1, y + 70, {size: 10, color: C.muted, align: 'right'});
+  EXT.forEach(([t, n]) => { g.strokeStyle = C.hot; g.lineWidth = 2; g.beginPath(); g.moveTo(X(t), y - 6); g.lineTo(X(t), y + 46); g.stroke(); label(g, '💀', X(t), y - 14, {size: 14}); });
+  g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.moveTo(X(st.age), y - 30); g.lineTo(X(st.age), H * .92); g.stroke();
+  const era = ERAS.find(e => st.age <= e[1] && st.age >= e[2]) || ERAS[0]; const ext = EXT.find(e => Math.abs(e[0] - st.age) < 6);
+  label(g, `${st.age}백만 년 전 · ${era[0]}`, W / 2, H * .5, {size: 20, weight: 700}); label(g, '번성한 생물: ' + era[4], W / 2, H * .5 + 28, {size: 13}); label(g, '표준 화석: ' + era[5], W / 2, H * .5 + 50, {size: 13, color: C.accent});
+  if (ext) { label(g, `대멸종! ${ext[1]}`, W / 2, H * .5 + 86, {size: 16, weight: 700, color: C.hot}); label(g, ext[2], W / 2, H * .5 + 108, {size: 12, color: C.hot}); }
+  const icons = {고생대: ['🪲', '🐟', '🌿'], 중생대: ['🦕', '🐚', '🌲'], 신생대: ['🦣', '🐒', '🌸']}[era[0]]; icons.forEach((ic, i) => label(g, ic, W / 2 + (i - 1) * 60, H * .86, {size: 30})); }
+/* ===== 자연선택 ===== */
+function newPop(){ st.moths = Array.from({length: 40}, () => ({dark: Math.random() < .1, x: Math.random(), y: Math.random(), alive: true})); st.genN = 0; st.hist = [[0, frac()]]; }
+const frac = () => { const a = st.moths.filter(m => m.alive); return a.length ? a.filter(m => m.dark).length / a.length : 0; };
+function startHunt(){ st.moths.forEach(m => { m.x = .04 + Math.random() * .92; m.y = .06 + Math.random() * .86; m.alive = true; }); st.caught = 0; st.huntT = 8; st.hunting = true; render(); }
+function nextGen(){ const surv = st.moths.filter(m => m.alive); const pool = surv.length ? surv : st.moths; st.moths = Array.from({length: 40}, () => { const p = pool[Math.floor(Math.random() * pool.length)]; let dark = p.dark; if (Math.random() < .02) dark = !dark; return {dark, x: 0, y: 0, alive: true}; }); st.genN++; st.hist.push([st.genN, frac()]); startHunt(); }
+function autoHunt(){ const bg = st.env === 'clean' ? 0 : 1; st.moths.forEach(m => { const visible = m.dark !== !!bg; if (Math.random() < (visible ? .55 : .12)) m.alive = false; }); st.hunting = false; }
+function drawSelect(){ const g = S.g, W = S.w, H = S.h, bg = st.env === 'clean';
+  g.fillStyle = bg ? '#d8d2c2' : '#3a352e'; g.fillRect(0, 0, W, H); let seed = 3; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 260; i++) { g.fillStyle = bg ? `rgba(${150 + r() * 80},${150 + r() * 70},${130 + r() * 60},.6)` : `rgba(${30 + r() * 40},${28 + r() * 35},${24 + r() * 30},.7)`; g.beginPath(); g.ellipse(r() * W, r() * H, 6 + r() * 26, 3 + r() * 8, r() * 3, 0, TAU); g.fill(); }
+  st.moths.forEach(m => { if (!m.alive) return; const x = m.x * W, y = m.y * H; g.fillStyle = m.dark ? '#2a2622' : '#e6e0d0'; g.beginPath(); g.ellipse(x - 7, y, 9, 6, -.4, 0, TAU); g.ellipse(x + 7, y, 9, 6, .4, 0, TAU); g.fill(); g.fillStyle = m.dark ? '#1a1612' : '#b8b0a0'; g.fillRect(x - 1.5, y - 6, 3, 12); });
+  if (st.hunting && st.hunt === 'me') { label(g, `🐦 눈에 띄는 나방을 빨리 잡으세요! 남은 시간 ${Math.ceil(st.huntT)}초 · 잡은 수 ${st.caught}`, W / 2, 18, {size: 14, weight: 700, color: bg ? '#222' : '#fff'}); }
+  else label(g, `${st.genN}세대 · 살아남은 나방 ${st.moths.filter(m => m.alive).length}마리 → [다음 세대]`, W / 2, 18, {size: 14, weight: 700, color: bg ? '#222' : '#fff'}); }
+S.cv.addEventListener('click', ev => { if (st.mode !== 'select' || !st.hunting || st.hunt !== 'me') return; const r = S.cv.getBoundingClientRect(), x = (ev.clientX - r.left) / S.w, y = (ev.clientY - r.top) / S.h; const m = st.moths.find(m => m.alive && Math.hypot((m.x - x) * S.w, (m.y - y) * S.h) < 16); if (m) { m.alive = false; st.caught++; if (st.caught >= 20) { st.hunting = false; } render(); } });
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'era') { const m = axes(G, {x: [0, 541, 100, '백만 년 전 (오른쪽이 현재)'], y: [0, 1200, 200, '해양 생물 과의 수 (모형)']}); const P = []; for (let t = 541; t >= 0; t -= 2) P.push([541 - t, diversity(t)]); const m2 = {X: v => m.X(v), Y: m.Y}; line(G, P, m2, C.accent, 2.4); EXT.forEach(([t]) => { g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(541 - t), m.Y(diversity(t - 4)), 4, 0, TAU); g.fill(); }); g.strokeStyle = C.ink; g.beginPath(); g.moveTo(m.X(541 - st.age), m.Y(0)); g.lineTo(m.X(541 - st.age), m.Y(1200)); g.stroke(); }
+  else { const m = axes(G, {x: [0, Math.max(10, st.genN), Math.max(1, Math.ceil(Math.max(10, st.genN) / 10)), '세대'], y: [0, 1, .2, '어두운 나방 비율']}); line(G, st.hist, m, C.ink, 2.5); st.hist.forEach(([x, y]) => { g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(x), m.Y(y), 3, 0, TAU); g.fill(); }); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
+  if (st.mode === 'era') { const era = ERAS.find(e => st.age <= e[1] && st.age >= e[2]) || ERAS[0]; s.innerHTML = `<div><b>${st.age} Ma</b><span>백만 년 전</span></div><div><b>${era[0]}</b><span>지질 시대</span></div><div><b>${Math.round(diversity(st.age))}</b><span>해양 생물 과의 수(모형)</span></div>`; $('ageOut').textContent = st.age + '백만 년 전';
+    $('explain').innerHTML = '<b>지질 시대</b>는 생물계의 큰 변화(대멸종)와 지각 변동을 기준으로 선캄브리아 시대, 고생대, 중생대, 신생대로 나눠요. <b>표준 화석</b>은 지층의 생성 시대를, <b>시상 화석</b>은 당시 환경을 알려 줘요.'; $('tip').textContent = '대멸종이 일어날 때마다 생물 다양성이 급감했지만, 살아남은 생물이 새 환경에 적응하며 다시 다양해졌어요.';
+    th.innerHTML = '<tr><th>대멸종</th><th>시기</th><th>원인(추정)</th></tr>'; tb.innerHTML = EXT.map(e => `<tr><td>${e[1]}</td><td>${e[0]}백만 년 전</td><td>${e[2]}</td></tr>`).join(''); $('tTitle').textContent = '5번의 대멸종'; $('gTitle').textContent = '생물 다양성의 변화'; $('gSub').textContent = '빨간 점: 대멸종'; }
+  else { const a = st.moths.filter(m => m.alive); s.innerHTML = `<div><b>${st.genN}</b><span>세대</span></div><div><b>${Math.round(frac() * 100)} %</b><span>어두운 나방 비율</span></div><div><b>${a.length}</b><span>살아남은 수</span></div>`;
+    $('explain').innerHTML = '<b>자연선택</b>: 같은 종이라도 개체마다 형질이 다른 <b>변이</b>가 있어요. 환경에 유리한 변이를 가진 개체가 더 많이 살아남아 자손을 남기고, 이 과정이 반복되면 집단의 형질 비율이 달라져요(진화). 배경색과 비슷한 나방이 새의 눈에 덜 띄어요.'; $('tip').textContent = '영국의 회색가지나방: 산업 혁명기 매연으로 나무껍질이 어두워지자 어두운 나방이 늘었고, 대기 오염이 줄자 다시 밝은 나방이 늘었어요.';
+    th.innerHTML = '<tr><th>세대</th><th>어두운 나방 비율</th></tr>'; tb.innerHTML = st.hist.slice(-8).map(([n, f]) => `<tr><td>${n}</td><td>${Math.round(f * 100)} %</td></tr>`).join(''); $('tTitle').textContent = '세대별 기록 (최근 8세대)'; $('gTitle').textContent = '어두운 나방 비율의 변화'; $('gSub').textContent = '환경을 바꾸면 어떻게 될까요?'; } }
+$('age').oninput = e => { st.age = +e.target.value; render(); };
+Kit.seg($('envSeg'), 'env', v => { st.env = v; render(); })('clean');
+Kit.seg($('hSeg'), 'h', v => { st.hunt = v; render(); })('me');
+$('gen').onclick = () => { if (st.hunt === 'auto') { if (st.hunting) autoHunt(); nextGen(); autoHunt(); } else { st.hunting = false; nextGen(); } render(); };
+$('reset').onclick = () => { newPop(); startHunt(); if (st.hunt === 'auto') autoHunt(); render(); };
+newPop(); startHunt();
+Kit.tabs(m => { st.mode = m; render(); }, ['era', 'select']);
+Kit.loop(dt => { if (st.mode === 'select' && st.hunting && st.hunt === 'me') { st.huntT -= dt; if (st.huntT <= 0) { st.hunting = false; render(); } } }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); (st.mode === 'era' ? drawEra : drawSelect)(); drawGraph(); });
+})();
+</script>
+</body>
+</html>

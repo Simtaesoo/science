@@ -77,7 +77,7 @@ window.CATALOG = [
   { no:30, disp:7, area:'bio', title:'생명 시스템', code:'통과1 Ⅲ', dir:'h1/life', items:[{kind:'sim', title:'1차시 세포막을 통한 물질 이동', href:'h1/life/sim.html#membrane'}, {kind:'sim', title:'2차시 물질대사와 효소', href:'h1/life/sim.html#enzyme'}, {kind:'sim', title:'3차시 유전자 발현 (전사와 번역)', href:'h1/life/sim.html#gene'}, {kind:'ws', title:'학습지', href:'h1/life/worksheet.html'}]}
  ]},
  { id:'hi2', level:'고', grade:'고1', book:'통합과학2', units:[
-  { no:31, disp:1, area:'earth', title:'지질 시대와 생물 다양성', code:'통과2 Ⅰ', dir:'h2/geo', items:[{kind:'sim', title:'1차시 지질 시대와 대멸종', href:''}, {kind:'sim', title:'2차시 변이와 자연선택', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:31, disp:1, area:'earth', title:'지질 시대와 생물 다양성', code:'통과2 Ⅰ', dir:'h2/geo', items:[{kind:'sim', title:'1차시 지질 시대와 대멸종', href:'h2/geo/sim.html#era'}, {kind:'sim', title:'2차시 변이와 자연선택', href:'h2/geo/sim.html#select'}, {kind:'ws', title:'학습지', href:'h2/geo/worksheet.html'}]},
   { no:32, disp:2, area:'chem', title:'화학 변화', code:'통과2 Ⅰ', dir:'h2/redox', items:[{kind:'sim', title:'1차시 산화와 환원', href:''}, {kind:'sim', title:'2차시 산·염기와 중화 반응', href:''}, {kind:'ws', title:'학습지', href:''}]},
   { no:33, disp:3, area:'bio', title:'생태계와 환경', code:'통과2 Ⅱ', dir:'h2/eco', items:[{kind:'sim', title:'1차시 생태계 구성 요소와 먹이 그물', href:''}, {kind:'sim', title:'2차시 생태 피라미드와 생태계 평형', href:''}, {kind:'ws', title:'학습지', href:''}]},
   { no:34, disp:4, area:'earth', title:'지구 환경 변화', code:'통과2 Ⅱ', dir:'h2/climate', items:[{kind:'sim', title:'1차시 대기 대순환과 해류', href:''}, {kind:'sim', title:'2차시 엘니뇨와 라니냐', href:''}, {kind:'sim', title:'3차시 지구 온난화와 기후 변화', href:''}, {kind:'ws', title:'학습지', href:''}]},
