@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>지권 탐사실 · 중2 지권의 변화</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+<style>
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:3px 10px;font:500 13px var(--f-body);cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--area);color:var(--surface);border-color:var(--area)}
+</style>
+</head>
+<body data-root="../../" class="area-earth">
+<div class="wrap">
+  <nav class="topbar" data-topbar="2학년|09 지권의 변화" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 2 · 09 지권의 변화 <span class="code">9과09-01</span><span class="code">9과09-02</span><span class="code">9과09-03</span><span class="code">9과09-04</span><span class="code">9과09-05</span></div>
+      <h1>지권 탐사실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="layer">1. 지구계와 층상 구조</button>
+      <button type="button" data-mode="mineral">2. 광물</button>
+      <button type="button" data-mode="rock">3. 암석의 순환</button>
+      <button type="button" data-mode="weather">4. 풍화와 토양</button>
+      <button type="button" data-mode="plate">5. 판의 경계</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="탐사 화면">
+      <div class="canvas-box"><canvas id="scene" aria-label="지구 모형"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <div class="field" data-only="layer"><div class="seg" id="lySeg"><button type="button" data-ly="inner">지권의 층상 구조</button><button type="button" data-ly="sys">지구계</button></div></div>
+        <div class="field" data-only="mineral">광물 <select id="mn"></select></div>
+        <div class="field" data-only="mineral"><div class="seg" id="testSeg"><button type="button" data-test="color">색</button><button type="button" data-test="streak">조흔색</button><button type="button" data-test="hard">굳기</button><button type="button" data-test="acid">염산</button><button type="button" data-test="mag">자성</button></div></div>
+        <div class="field" data-only="rock">과정
+          <div class="seg" id="procSeg"><button type="button" data-pr="weather">풍화·침식·퇴적</button><button type="button" data-pr="compact">다짐·굳어짐</button><button type="button" data-pr="meta">열과 압력</button><button type="button" data-pr="melt">녹음</button><button type="button" data-pr="fast">빨리 식음 (지표)</button><button type="button" data-pr="slow">천천히 식음 (지하)</button></div></div>
+        <button class="btn" type="button" id="rockReset" data-only="rock">처음으로</button>
+        <div class="field" data-only="weather"><div class="seg" id="wSeg"><button type="button" data-w="ice">물이 얼고 녹음</button><button type="button" data-w="root">식물 뿌리</button><button type="button" data-w="chem">빗물 (화학적)</button></div></div>
+        <label class="field" data-only="weather" for="years">시간 <input type="range" id="years" min="0" max="100" step="1" value="0"><output id="yearsOut">처음</output></label>
+        <div class="field" data-only="plate"><div class="seg" id="plSeg"><button type="button" data-pl="drift">대륙 이동설</button><button type="button" data-pl="map">판의 경계</button></div></div>
+        <label class="field" data-only="plate" for="ma" id="maWrap">시간 <input type="range" id="ma" min="0" max="200" step="10" value="200"><output id="maOut">약 2억 년 전</output></label>
+        <div class="field" data-only="plate" id="mapCtl"><label for="sBnd"><input type="checkbox" id="sBnd" checked> 판의 경계</label><label for="sEq"><input type="checkbox" id="sEq" checked> 지진</label><label for="sVol"><input type="checkbox" id="sVol" checked> 화산</label></div>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="chips" id="chips"></div>
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">정리</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>가장 깊은 시추공도 지각을 뚫지 못했는데, 지구 속을 어떻게 알까?</summary>
+        <p>지진이 일어날 때 생기는 파동이 지구 내부를 통과하는 모습을 분석해 층의 경계와 상태를 알아냈습니다. 자세한 원리는 고등학교에서 배웁니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>대리석 건물이 산성비에 잘 상하는 까닭은?</summary>
+        <p>대리암의 주성분인 방해석은 산과 반응해 녹기 때문입니다. 염산을 떨어뜨리면 거품이 생기는 것도 같은 성질입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>일본에는 화산과 지진이 많은데 우리나라는 비교적 적은 까닭은?</summary>
+        <p>일본은 여러 판이 만나는 경계 가까이에 있고, 우리나라는 판의 안쪽에 있어 판의 경계에서 비교적 멀기 때문입니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="세계 지도와 판의 경계는 수업용으로 단순화하여 그렸습니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+const st = {mode:'layer', t:0, ly:'inner', pickL:2, mn:'quartz', test:'color', rock:'granite', path:['granite'], w:'ice', years:0, pl:'drift', ma:200};
+
+/* ===== 1. 층상 구조 ===== */
+const LAYERS = [
+  {n:'지각', d:'지표 ~ 약 35 km (대륙), 약 5 km (해양)', s:'고체', r:[6371, 6336], c:'#a67c52'},
+  {n:'맨틀', d:'지각 아래 ~ 약 2900 km', s:'고체 (유동성이 있음)', r:[6336, 3471], c:'#d27a3a'},
+  {n:'외핵', d:'약 2900 ~ 5100 km', s:'액체', r:[3471, 1271], c:'#e8b040'},
+  {n:'내핵', d:'약 5100 ~ 6400 km (중심)', s:'고체', r:[1271, 0], c:'#f6e08a'}
+];
+const SYS = [['지권', '암석과 토양, 지구 내부'], ['수권', '바다, 호수, 빙하, 지하수'], ['기권', '지구를 둘러싼 대기'], ['생물권', '지구에 사는 모든 생물'], ['외권', '기권 바깥의 우주 공간']];
+function drawLayer(){
+  const g = S.g;
+  if (st.ly === 'sys') {
+    const cx = S.w / 2, cy = S.h / 2, R = Math.min(S.w, S.h) * .3;
+    g.fillStyle = '#0b1220'; g.fillRect(0, 0, S.w, S.h);
+    g.fillStyle = 'rgba(120,170,255,.25)'; g.beginPath(); g.arc(cx, cy, R * 1.18, 0, TAU); g.fill();
+    g.fillStyle = '#3f84d6'; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill();
+    g.fillStyle = '#4f9a4a'; [[-.3, -.2, .35], [.25, .15, .3], [-.05, .45, .18]].forEach(([u, v, r]) => { g.beginPath(); g.ellipse(cx + u * R, cy + v * R, r * R, r * R * .7, u, 0, TAU); g.fill(); });
+    const pos = [[cx - R * .3, cy - R * .2], [cx + R * .5, cy - R * .5], [cx + R * 1.1, cy + R * .8], [cx + R * .25, cy + R * .15], [cx - R * 1.4, cy - R * 1.1]];
+    SYS.forEach(([n], i) => { g.fillStyle = 'rgba(255,255,255,.9)'; g.font = font(13, 700); g.textAlign = 'center'; g.fillText(n, pos[i][0], pos[i][1]); });
+    label(g, '지구계: 지권, 수권, 기권, 생물권, 외권이 서로 영향을 주고받는 하나의 계', S.w / 2, S.h - 14, {size: 12, color: 'rgba(255,255,255,.85)'});
+    return;
+  }
+  const cx = S.w * .42, cy = S.h * .55, R = Math.min(S.w * .38, S.h * .48);
+  LAYERS.forEach((L, i) => { const r = R * (i === 0 ? 1 : L.r[0] / 6371 * (i === 1 ? .985 : 1)); g.fillStyle = L.c; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, r, Math.PI, Math.PI * 2); g.closePath(); g.fill();
+    if (i === st.pickL) { g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.arc(cx, cy, r, Math.PI, Math.PI * 2); g.stroke(); } });
+  g.fillStyle = '#a67c52'; g.fillRect(cx - R, cy - 2, 2 * R, 4);
+  const ys = [[R * .99, '지각'], [R * .78, '맨틀'], [R * .38, '외핵'], [R * .1, '내핵']];
+  ys.forEach(([r, n], i) => { const y = cy - r; g.strokeStyle = C.ink; g.lineWidth = 1; g.beginPath(); g.moveTo(cx + 4, y + 6); g.lineTo(cx + R + 30, y + 6); g.stroke(); label(g, n, cx + R + 36, y + 6, {align: 'left', weight: i === st.pickL ? 700 : 500, color: i === st.pickL ? C.earth : C.ink}); });
+  label(g, '층을 누르면 설명이 나옵니다', 12, 16, {align: 'left', size: 11, color: C.muted});
+  st.layerHit = (x, y) => { const d = Math.hypot(x - cx, y - cy) / R * 6371; if (y > cy || d > 6371) return -1; return d > 6336 - 60 ? 0 : d > 3471 ? 1 : d > 1271 ? 2 : 3; };
+}
+$('scene').addEventListener('click', e => { const r = $('scene').getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  if (st.mode === 'layer' && st.ly === 'inner' && st.layerHit) { const k = st.layerHit(x, y); if (k >= 0) st.pickL = k; } });
+
+/* ===== 2. 광물 ===== */
+const MN = {
+  quartz:{n:'석영', col:'무색·흰색', streak:'흰색', hard:7, acid:false, mag:false, c:'#eef2f6'},
+  feld:{n:'장석', col:'흰색·분홍색', streak:'흰색', hard:6, acid:false, mag:false, c:'#f2d8cc'},
+  bio:{n:'흑운모', col:'검은색', streak:'흰색', hard:2.5, acid:false, mag:false, c:'#2b2622'},
+  calc:{n:'방해석', col:'무색·흰색', streak:'흰색', hard:3, acid:true, mag:false, c:'#f6f1e2'},
+  mag:{n:'자철석', col:'검은색', streak:'검은색', hard:6, acid:false, mag:true, c:'#25272b'},
+  pyr:{n:'황철석', col:'노란색', streak:'검은색', hard:6.5, acid:false, mag:false, c:'#d6b84a'},
+  gold:{n:'금', col:'노란색', streak:'노란색', hard:2.5, acid:false, mag:false, c:'#e8c24a'}
+};
+function drawMineral(){
+  const g = S.g, m = MN[st.mn], cx = S.w * .35, cy = S.h * .45;
+  // 광물 표본
+  g.fillStyle = m.c; g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath();
+  [[-50, -10], [-20, -45], [30, -40], [55, 0], [30, 40], [-25, 38]].forEach(([u, v], i) => i ? g.lineTo(cx + u, cy + v) : g.moveTo(cx + u, cy + v)); g.closePath(); g.fill(); g.stroke();
+  label(g, m.n, cx, cy + 70, {weight: 700, size: 15});
+  const ox = S.w * .72;
+  if (st.test === 'color') { label(g, `겉보기 색: ${m.col}`, ox, cy, {weight: 600}); label(g, '같은 광물도 불순물에 따라 색이 다를 수 있다', ox, cy + 24, {size: 11, color: C.muted}); }
+  if (st.test === 'streak') { g.fillStyle = '#f7f4ee'; g.strokeStyle = C.line; g.fillRect(ox - 70, cy - 30, 140, 60); g.strokeRect(ox - 70, cy - 30, 140, 60);
+    const sc = {'흰색': '#e6e6e6', '검은색': '#1a1a1a', '노란색': '#d9b23a'}[m.streak]; g.strokeStyle = sc; g.lineWidth = 8; g.lineCap = 'round'; g.beginPath(); g.moveTo(ox - 50, cy + 10); g.lineTo(ox + 40, cy - 8); g.stroke(); g.lineCap = 'butt';
+    label(g, `조흔판에 긁은 가루의 색: ${m.streak}`, ox, cy + 50, {weight: 600}); label(g, '조흔판', ox, cy - 42, {size: 11, color: C.muted}); }
+  if (st.test === 'hard') { const vsQ = m.hard > 7 ? '긁힘 안 남' : m.hard >= 7 ? '서로 긁히지 않음' : '석영에 긁힘'; const vsC = m.hard > 3 ? '방해석을 긁음' : m.hard === 3 ? '서로 긁히지 않음' : '방해석에 긁힘';
+    label(g, `방해석과 서로 긁어 보기: ${vsC}`, ox, cy - 14, {weight: 600}); label(g, `석영과 서로 긁어 보기: ${vsQ}`, ox, cy + 14, {weight: 600});
+    label(g, '단단한 광물이 무른 광물에 흠집을 낸다', ox, cy + 44, {size: 11, color: C.muted}); }
+  if (st.test === 'acid') { const bub = m.acid; label(g, bub ? '묽은 염산: 거품(이산화 탄소)이 생긴다' : '묽은 염산: 변화 없음', ox, cy, {weight: 600, color: bub ? C.hot : C.ink});
+    if (bub) for (let i = 0; i < 14; i++) { const x = cx - 30 + (i * 13) % 60, y = cy - 40 - ((st.t * 40 + i * 17) % 50); g.strokeStyle = C.muted; g.lineWidth = 1; g.beginPath(); g.arc(x, y, 3, 0, TAU); g.stroke(); } }
+  if (st.test === 'mag') { const pull = m.mag ? Math.min(30, st.t * 20 % 40) : 0;
+    g.fillStyle = C.hot; g.fillRect(ox - 50, cy - 60, 40, 20); g.fillStyle = C.phy; g.fillRect(ox - 10, cy - 60, 40, 20); label(g, 'N', ox - 30, cy - 50, {color: '#fff', weight: 700}); label(g, 'S', ox + 10, cy - 50, {color: '#fff', weight: 700});
+    label(g, m.mag ? '클립(쇠붙이)처럼 자석에 붙는다: 자성 있음' : '자석에 붙지 않는다: 자성 없음', ox, cy + 10, {weight: 600, color: m.mag ? C.hot : C.ink}); }
+}
+
+/* ===== 3. 암석의 순환 ===== */
+const RK = {
+  basalt:{n:'현무암', t:'화성암 (화산암)', d:'어두운 색, 결정이 작음, 구멍이 있기도 함', c:'#3a3a3e', g:'fine'},
+  rhyolite:{n:'유문암', t:'화성암 (화산암)', d:'밝은 색, 결정이 작음', c:'#d8cfc4', g:'fine'},
+  granite:{n:'화강암', t:'화성암 (심성암)', d:'밝은 색, 결정이 큼', c:'#e3d6cc', g:'coarse'},
+  gabbro:{n:'반려암', t:'화성암 (심성암)', d:'어두운 색, 결정이 큼', c:'#4a4a48', g:'coarse'},
+  sediment:{n:'퇴적물', t:'자갈·모래·진흙', d:'풍화·침식되어 쌓인 알갱이', c:'#c9a26b', g:'grain'},
+  shale:{n:'이암', t:'퇴적암', d:'진흙이 굳어진 암석, 알갱이가 매우 작음', c:'#8a7a6a', g:'fine'},
+  sandstone:{n:'사암', t:'퇴적암', d:'모래가 굳어진 암석', c:'#d6b07a', g:'grain'},
+  conglom:{n:'역암', t:'퇴적암', d:'자갈이 굳어진 암석', c:'#b49a7a', g:'pebble'},
+  limestone:{n:'석회암', t:'퇴적암', d:'석회질 물질(조개껍데기 등)이 쌓여 굳어짐', c:'#e9e4d6', g:'fine'},
+  schist:{n:'편암', t:'변성암', d:'이암이 열과 압력을 받음, 엽리(줄무늬)', c:'#6f7a6a', g:'foliated'},
+  gneiss:{n:'편마암', t:'변성암', d:'화강암 등이 변성, 굵은 줄무늬', c:'#b8a99a', g:'banded'},
+  marble:{n:'대리암', t:'변성암', d:'석회암이 변성', c:'#f2f2ee', g:'crystal'},
+  quartzite:{n:'규암', t:'변성암', d:'사암이 변성, 매우 단단함', c:'#e6d8c4', g:'crystal'},
+  magma:{n:'마그마', t:'녹은 암석', d:'암석이 높은 온도에서 녹은 것', c:'#e05a2a', g:'magma'}
+};
+function applyProc(p){
+  const r = st.rock, igneous = ['basalt', 'rhyolite', 'granite', 'gabbro'], sedi = ['shale', 'sandstone', 'conglom', 'limestone'];
+  let next = null;
+  if (p === 'weather' && r !== 'magma' && r !== 'sediment') next = 'sediment';
+  else if (p === 'compact' && r === 'sediment') next = ['shale', 'sandstone', 'conglom', 'limestone'][Math.floor(Math.random() * 4)];
+  else if (p === 'meta') next = {shale: 'schist', schist: 'gneiss', granite: 'gneiss', sandstone: 'quartzite', limestone: 'marble', conglom: 'gneiss', basalt: 'schist', gabbro: 'gneiss', rhyolite: 'gneiss'}[r] || null;
+  else if (p === 'melt' && r !== 'magma' && r !== 'sediment') next = 'magma';
+  else if (p === 'fast' && r === 'magma') next = Math.random() < .5 ? 'basalt' : 'rhyolite';
+  else if (p === 'slow' && r === 'magma') next = Math.random() < .5 ? 'granite' : 'gabbro';
+  if (next) { st.rock = next; st.path.push(next); if (st.path.length > 8) st.path.shift(); st.msg = ''; table(); }
+  else st.msg = `${RK[r].n}에는 이 과정을 바로 적용하기 어려워요. 다른 과정을 골라 보세요.`;
+}
+function texture(g, x, y, w, h, R){
+  const rnd = (i => () => (i = (i * 9301 + 49297) % 233280) / 233280)(7);
+  g.fillStyle = R.c; g.fillRect(x, y, w, h);
+  if (R.g === 'coarse') for (let i = 0; i < 70; i++) { g.fillStyle = ['#1e1e1e', '#f5f0ea', '#d9a59a'][i % 3]; g.globalAlpha = .8; g.fillRect(x + rnd() * w, y + rnd() * h, 8 + rnd() * 10, 6 + rnd() * 8); }
+  if (R.g === 'fine') for (let i = 0; i < 400; i++) { g.fillStyle = rnd() > .5 ? 'rgba(0,0,0,.15)' : 'rgba(255,255,255,.15)'; g.fillRect(x + rnd() * w, y + rnd() * h, 2, 2); }
+  if (R.g === 'grain') for (let i = 0; i < 300; i++) { g.fillStyle = 'rgba(120,80,40,.35)'; g.beginPath(); g.arc(x + rnd() * w, y + rnd() * h, 2, 0, TAU); g.fill(); }
+  if (R.g === 'pebble') for (let i = 0; i < 30; i++) { g.fillStyle = ['#7a6a5a', '#a89a8a', '#5a5048'][i % 3]; g.beginPath(); g.ellipse(x + rnd() * w, y + rnd() * h, 8 + rnd() * 10, 6 + rnd() * 6, rnd() * 3, 0, TAU); g.fill(); }
+  if (R.g === 'foliated' || R.g === 'banded') for (let i = 0; i < (R.g === 'banded' ? 9 : 24); i++) { g.strokeStyle = R.g === 'banded' ? (i % 2 ? '#3a3a3a' : '#f0e8e0') : 'rgba(255,255,255,.4)'; g.lineWidth = R.g === 'banded' ? 6 : 1.5; g.beginPath(); for (let k = 0; k <= w; k += 10) { const yy = y + (i + .5) * h / (R.g === 'banded' ? 9 : 24) + Math.sin(k / 30 + i) * 4; k ? g.lineTo(x + k, yy) : g.moveTo(x + k, yy); } g.stroke(); }
+  if (R.g === 'crystal') for (let i = 0; i < 60; i++) { g.strokeStyle = 'rgba(0,0,0,.12)'; g.lineWidth = 1; const px = x + rnd() * w, py = y + rnd() * h; g.strokeRect(px, py, 10, 8); }
+  if (R.g === 'magma') { const gr = g.createRadialGradient(x + w / 2, y + h / 2, 5, x + w / 2, y + h / 2, w * .6); gr.addColorStop(0, '#ffd27a'); gr.addColorStop(1, '#b8341a'); g.fillStyle = gr; g.fillRect(x, y, w, h); }
+}
+function drawRock(){
+  const g = S.g, R = RK[st.rock], w = Math.min(260, S.w * .45), h = w * .7, x = S.w * .08, y = 40;
+  texture(g, x, y, w, h, R); g.strokeStyle = C.ink; g.lineWidth = 2; g.strokeRect(x, y, w, h);
+  label(g, R.n, x + w / 2, y + h + 22, {weight: 700, size: 16}); label(g, R.t, x + w / 2, y + h + 44, {size: 12, color: C.muted});
+  // 순환 도식
+  const cx = S.w * .78, cy = S.h * .45, r = Math.min(S.w * .17, S.h * .3);
+  const nodes = {ig: [cx, cy - r, '화성암'], se: [cx + r * .95, cy + r * .6, '퇴적암'], me: [cx - r * .95, cy + r * .6, '변성암'], mg: [cx, cy + r * .15, '마그마'], sd: [cx + r * .2, cy + r * 1.15, '퇴적물']};
+  const cur = st.rock === 'magma' ? 'mg' : st.rock === 'sediment' ? 'sd' : R.t.startsWith('화성') ? 'ig' : R.t.startsWith('퇴적') ? 'se' : 'me';
+  [['ig', 'sd'], ['sd', 'se'], ['se', 'me'], ['me', 'mg'], ['mg', 'ig'], ['ig', 'me'], ['se', 'mg']].forEach(([a, b]) => { const A = nodes[a], B = nodes[b], dx = B[0] - A[0], dy = B[1] - A[1], d = Math.hypot(dx, dy); arrow(g, A[0] + dx / d * 26, A[1] + dy / d * 16, B[0] - dx / d * 30, B[1] - dy / d * 18, C.line, 1.5); });
+  Object.entries(nodes).forEach(([k, [x0, y0, n]]) => { g.fillStyle = k === cur ? C.earth : C.soft; g.strokeStyle = C.ink; g.lineWidth = 1; g.beginPath(); g.ellipse(x0, y0, 32, 15, 0, 0, TAU); g.fill(); g.stroke(); label(g, n, x0, y0, {size: 11, weight: 700, color: k === cur ? C.surface : C.ink}); });
+}
+
+/* ===== 4. 풍화와 토양 ===== */
+function drawWeather(){
+  const g = S.g, k = st.years / 100, x0 = 30, w = S.w - 60, top = 40, bot = S.h - 30;
+  // 토양 단면 (오른쪽 절반) 과 풍화 장면 (왼쪽)
+  const lw = w * .48;
+  g.fillStyle = '#c9cbcf'; g.fillRect(x0, top + 60, lw, bot - top - 60);
+  // 균열
+  const cracks = Math.round(k * 9);
+  for (let i = 0; i < cracks; i++) { const cx = x0 + 20 + i * lw / 9.5; g.strokeStyle = '#4a4a4a'; g.lineWidth = 1 + k * 2; g.beginPath(); g.moveTo(cx, top + 60); g.lineTo(cx + 8, top + 60 + (bot - top - 60) * (.3 + .5 * k)); g.stroke();
+    if (st.w === 'ice') { g.fillStyle = 'rgba(160,210,250,.9)'; g.fillRect(cx - 2, top + 64, 6 + 6 * k, 18 + 30 * k); }
+    if (st.w === 'root') { g.strokeStyle = '#6b4a2b'; g.lineWidth = 2; g.beginPath(); g.moveTo(cx + 2, top + 60); g.quadraticCurveTo(cx + 12, top + 100, cx + 4, top + 60 + (bot - top - 60) * .6 * k); g.stroke(); } }
+  if (st.w === 'root') { g.fillStyle = '#3c9a3c'; for (let i = 0; i < cracks; i++) { g.beginPath(); g.arc(x0 + 22 + i * lw / 9.5, top + 50, 10, 0, TAU); g.fill(); } }
+  if (st.w === 'chem') { for (let i = 0; i < 30; i++) { g.strokeStyle = 'rgba(80,150,230,.6)'; g.lineWidth = 1.5; const x = x0 + (i * 37 + st.t * 60) % lw, y = top + ((i * 23 + st.t * 140) % 60); g.beginPath(); g.moveTo(x, y); g.lineTo(x - 3, y + 8); g.stroke(); }
+    g.fillStyle = `rgba(190,140,90,${k * .8})`; g.fillRect(x0, top + 60, lw, 14 + 30 * k); }
+  // 부서진 조각
+  for (let i = 0; i < Math.round(k * 26); i++) { g.fillStyle = '#9a9ca0'; g.fillRect(x0 + (i * 29) % lw, top + 56 - (i % 3) * 3, 6, 5); }
+  label(g, {ice: '틈 속의 물이 얼면 부피가 커져 틈을 넓힌다', root: '식물 뿌리가 자라며 틈을 넓힌다', chem: '빗물 속 이산화 탄소 등이 암석 성분을 녹이고 변화시킨다'}[st.w], x0 + lw / 2, top + 20, {size: 12});
+  // 토양 단면
+  const sx = x0 + w * .55, sw = w * .45, H = bot - top, layers = [['A층 (표토)', '#5a3e2b', .15 * k], ['B층 (심토)', '#9a6a3e', .2 * k], ['C층 (풍화 중인 암석)', '#b9a58a', .25 * Math.min(1, k * 1.5)], ['모암', '#c9cbcf', 1]];
+  let y = top; layers.forEach(([n, c, f], i) => { const hh = i === 3 ? bot - y : H * f; if (hh <= 0) return; g.fillStyle = c; g.fillRect(sx, y, sw, hh); g.strokeStyle = C.ink; g.lineWidth = .8; g.strokeRect(sx, y, sw, hh); if (hh > 16) label(g, n, sx + sw / 2, y + hh / 2, {size: 12, color: i < 2 ? '#fff' : C.ink, weight: 600}); y += hh; });
+  label(g, '토양 단면', sx + sw / 2, top - 12, {size: 12, color: C.muted});
+}
+
+/* ===== 5. 판의 경계 ===== */
+const CONT = {
+  NA: [[-168,66],[-140,70],[-95,72],[-80,62],[-60,55],[-55,48],[-70,43],[-76,35],[-81,25],[-90,29],[-97,26],[-105,20],[-95,16],[-83,9],[-78,8],[-87,14],[-105,22],[-112,30],[-118,34],[-124,40],[-125,48],[-135,58],[-150,60],[-165,60]],
+  SA: [[-80,9],[-72,12],[-60,10],[-50,0],[-35,-6],[-39,-15],[-48,-26],[-58,-38],[-65,-45],[-68,-55],[-74,-50],[-72,-35],[-71,-18],[-81,-6]],
+  EU: [[-10,36],[-9,43],[-2,48],[-5,58],[5,62],[15,70],[30,71],[60,70],[80,73],[110,77],[140,72],[180,68],[175,62],[160,58],[142,47],[135,43],[129,35],[121,31],[120,22],[108,20],[105,10],[100,13],[98,8],[92,22],[80,15],[77,8],[72,20],[67,25],[57,25],[52,15],[43,12],[35,30],[28,37],[23,37],[15,38],[12,44],[5,43],[0,38]],
+  AF: [[-17,21],[-16,12],[-8,5],[5,5],[10,3],[9,-2],[13,-10],[12,-17],[18,-35],[28,-33],[35,-25],[40,-15],[40,-3],[51,11],[43,12],[32,30],[20,32],[10,37],[-6,36]],
+  AU: [[113,-22],[114,-34],[130,-32],[140,-38],[150,-37],[153,-25],[145,-15],[142,-11],[136,-12],[130,-12],[122,-17]],
+  JP: [[130,31],[132,34],[136,35],[140,36],[141,41],[142,45],[145,44],[141,39],[140,35],[135,33]]
+};
+const BND = {
+  sub: [[[-75,-50],[-72,-20],[-80,0],[-90,15],[-105,20]], [[-125,40],[-150,58],[-175,52],[-180,51]], [[160,52],[145,40],[140,30],[130,5],[125,-5],[105,-8],[95,5]], [[175,-15],[180,-35],[172,-45]], [[-10,36],[10,38],[25,37],[45,35],[60,30],[75,33],[90,28],[100,25],[95,5]]],
+  ridge: [[[-20,70],[-30,50],[-40,30],[-45,10],[-15,-5],[-15,-30],[-15,-55]], [[-105,20],[-110,0],[-110,-30],[-115,-55]], [[57,12],[65,-10],[70,-30],[80,-45]], [[40,10],[36,-10]]]
+};
+const EQ = [], VOL = [];
+{ const rnd = (i => () => (i = (i * 9301 + 49297) % 233280) / 233280)(11);
+  [...BND.sub, ...BND.ridge].forEach((pl, k) => { for (let s = 0; s < pl.length - 1; s++) { const [a, b] = [pl[s], pl[s + 1]]; for (let i = 0; i < 9; i++) { const f = rnd(); EQ.push([a[0] + (b[0] - a[0]) * f + (rnd() - .5) * 5, a[1] + (b[1] - a[1]) * f + (rnd() - .5) * 5]); if (k < BND.sub.length && k !== 5 && rnd() < .35) VOL.push([a[0] + (b[0] - a[0]) * f + (rnd() - .5) * 4, a[1] + (b[1] - a[1]) * f + (rnd() - .5) * 4]); } } });
+  VOL.push([-155, 19.5], [-19, 64], [37, 0], [14, 37.7]); }
+function drawPlate(){
+  const g = S.g;
+  if (st.pl === 'drift') {
+    g.fillStyle = '#cfe3f5'; g.fillRect(0, 0, S.w, S.h);
+    // 맞물리는 해안선을 가진 두 대륙 모형 (해안선 일치를 보여 주기 위해 단순화)
+    const sc = Math.min(S.w, S.h) / 300, cx = S.w / 2, cy = S.h / 2, gap = (200 - st.ma) / 200 * S.w * .32;
+    const EDGE = [[0, -110], [18, -95], [30, -70], [22, -45], [38, -20], [30, 5], [12, 25], [-2, 50], [-10, 80], [-20, 110]];
+    const AFR = [...EDGE, [10, 120], [60, 110], [95, 60], [110, 0], [95, -60], [70, -100], [30, -118]];
+    const SAM = [...EDGE, [-40, 125], [-70, 80], [-85, 30], [-95, -20], [-80, -70], [-50, -105], [-20, -118]];
+    const drawC = (pts, dx, col) => { g.fillStyle = col; g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(cx + dx + x * sc, cy + y * sc) : g.moveTo(cx + dx + x * sc, cy + y * sc)); g.closePath(); g.fill(); g.stroke(); };
+    drawC(SAM, -gap / 2, '#d8c08a'); drawC(AFR, gap / 2, '#e8d6a8');
+    // 같은 화석·지층이 양쪽에 이어진다
+    g.fillStyle = 'rgba(47,138,78,.6)'; g.beginPath(); g.ellipse(cx - gap / 2 - 10 * sc, cy + 10 * sc, 30 * sc, 14 * sc, 0, 0, TAU); g.fill(); g.beginPath(); g.ellipse(cx + gap / 2 + 25 * sc, cy + 10 * sc, 25 * sc, 14 * sc, 0, 0, TAU); g.fill();
+    g.strokeStyle = 'rgba(122,63,196,.8)'; g.lineWidth = 4; g.beginPath(); g.moveTo(cx - gap / 2 - 60 * sc, cy - 60 * sc); g.lineTo(cx - gap / 2 + 25 * sc, cy - 60 * sc); g.moveTo(cx + gap / 2 + 25 * sc, cy - 60 * sc); g.lineTo(cx + gap / 2 + 85 * sc, cy - 60 * sc); g.stroke();
+    label(g, '초록: 메소사우루스 화석 · 보라: 같은 지질 구조', 12, S.h - 14, {align: 'left', size: 11});
+    label(g, '남아메리카', cx - gap / 2 - 50 * sc, cy - 20 * sc, {weight: 700, size: 12}); label(g, '아프리카', cx + gap / 2 + 60 * sc, cy - 20 * sc, {weight: 700, size: 12});
+    if (gap > 20) label(g, '대서양', cx, cy + 90 * sc, {color: C.phy, weight: 700});
+    label(g, st.ma >= 190 ? '약 2억 년 전: 하나로 붙어 있던 초대륙 판게아의 일부' : st.ma > 0 ? '대륙이 서서히 멀어지며 대서양이 넓어진다' : '현재', S.w / 2, 18, {weight: 700});
+    return;
+  }
+  g.fillStyle = '#cfe3f5'; g.fillRect(0, 0, S.w, S.h);
+  const P = ([lo, la]) => [(lo + 180) / 360 * S.w, (90 - la) / 160 * S.h - S.h * .06];
+  Object.values(CONT).forEach(pts => { g.fillStyle = '#e8dcc0'; g.strokeStyle = '#a69878'; g.lineWidth = 1; g.beginPath(); pts.forEach((p, i) => { const [x, y] = P(p); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.closePath(); g.fill(); g.stroke(); });
+  g.fillStyle = '#eef2f6'; g.fillRect(0, P([0, -66])[1], S.w, S.h);
+  if ($('sBnd').checked) { [['sub', C.hot], ['ridge', C.phy]].forEach(([k, c]) => BND[k].forEach(pl => { g.strokeStyle = c; g.lineWidth = 2.2; g.setLineDash(k === 'ridge' ? [6, 3] : []); g.beginPath(); pl.forEach((p, i) => { const [x, y] = P(p); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke(); g.setLineDash([]); })); }
+  if ($('sEq').checked) EQ.forEach(p => { const [x, y] = P(p); g.fillStyle = 'rgba(220,60,40,.55)'; g.beginPath(); g.arc(x, y, 2.2, 0, TAU); g.fill(); });
+  if ($('sVol').checked) VOL.forEach(p => { const [x, y] = P(p); g.fillStyle = '#7a2a10'; g.beginPath(); g.moveTo(x, y - 5); g.lineTo(x + 4.5, y + 3); g.lineTo(x - 4.5, y + 3); g.closePath(); g.fill(); });
+  const [kx, ky] = P([127.5, 36.5]); g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.arc(kx, ky, 6, 0, TAU); g.stroke(); label(g, '한국', kx - 8, ky - 12, {size: 11, weight: 700, align: 'right'});
+  label(g, '빨간 실선: 판이 모이는 경계 · 파란 점선: 판이 멀어지는 경계 · 점: 지진 · 삼각형: 화산', S.w / 2, S.h - 10, {size: 11});
+}
+
+/* ===== 그래프·표·설명 ===== */
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'layer') { const m = axes(G, {x: [0, 6400, 1600, '깊이 (km)'], y: [0, 4, 1, '']}, {L: 60});
+    LAYERS.forEach((L, i) => { const a = 6371 - L.r[0], b = 6371 - L.r[1]; g.fillStyle = L.c; g.fillRect(m.X(a), m.Y(3.6), m.X(b) - m.X(a), m.Y(0.4) - m.Y(3.6)); if (m.X(b) - m.X(a) > 30) label(g, `${L.n} (${L.s.split(' ')[0]})`, (m.X(a) + m.X(b)) / 2, m.Y(2), {size: 11, weight: 700}); }); }
+  else if (st.mode === 'mineral') { const m = axes(G, {x: [0, 8, 1, '굳기 (값이 클수록 단단함)'], y: [0, 8, 1, '']}, {L: 60});
+    Object.values(MN).forEach((M, i) => { const y = m.Y(7.3 - i); g.fillStyle = M.n === MN[st.mn].n ? C.earth : C.line; g.fillRect(m.X(0), y - 6, m.X(M.hard) - m.X(0), 12); label(g, M.n, m.L - 6, y, {align: 'right', size: 11}); }); }
+  else if (st.mode === 'rock') { G.g.fillStyle = C.surface; G.g.fillRect(0, 0, G.w, G.h);
+    const p = st.path.map(k => RK[k].n); label(g, '지나온 길: ' + p.join(' → '), G.w / 2, G.h / 2 - 10, {size: 13, weight: 600}); label(g, st.msg || '아래 과정 버튼을 눌러 암석을 바꿔 보세요.', G.w / 2, G.h / 2 + 16, {size: 12, color: st.msg ? C.hot : C.muted}); }
+  else if (st.mode === 'weather') { const m = axes(G, {x: [0, 100, 25, '시간 (상대값)'], y: [0, 100, 25, '토양 두께 (상대값)']}); const p = []; for (let x = 0; x <= st.years; x += 2) p.push([x, x * .6]); line(G, p, m, C.earth); }
+  else if (st.pl === 'drift') { const m = axes(G, {x: [0, 200, 50, '지금으로부터 (백만 년 전)'], y: [0, 6000, 1500, '두 대륙 사이 거리 (km)']}); line(G, [[200, 0], [0, 5000]], m, C.earth, 2); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.ma), m.Y((200 - st.ma) * 25), 6, 0, TAU); g.fill(); }
+  else { const m = axes(G, {x: [-180, 180, 60, '경도'], y: [0, 40, 10, '지진 수 (모형)']}); const bins = new Array(12).fill(0); EQ.forEach(([lo]) => bins[Math.min(11, Math.floor((lo + 180) / 30))]++); bins.forEach((v, i) => { g.fillStyle = C.earth; g.fillRect(m.X(-180 + i * 30) + 2, m.Y(v), m.X(-150) - m.X(-180) - 4, m.Y(0) - m.Y(v)); }); }
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>'; $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
+function table(){
+  if (st.mode === 'layer') st.ly === 'sys' ? setTable('지구계의 구성 요소', ['요소', '포함하는 것'], SYS) : setTable('지권의 층상 구조', ['층', '깊이', '상태'], LAYERS.map(L => [L.n, L.d, L.s]));
+  else if (st.mode === 'mineral') setTable('광물의 특성', ['광물', '색', '조흔색', '굳기', '염산', '자성'], Object.values(MN).map(M => [M.n, M.col, M.streak, M.n === '석영' ? '방해석보다 단단' : M.n === '방해석' ? '석영보다 무름' : '-', M.acid ? '거품' : '-', M.mag ? '있음' : '-']));
+  else if (st.mode === 'rock') setTable('대표적인 암석', ['종류', '암석'], [['화성암 (화산암)', '현무암, 유문암'], ['화성암 (심성암)', '화강암, 반려암'], ['퇴적암', '이암, 사암, 역암, 석회암'], ['변성암', '편암, 편마암, 대리암, 규암']]);
+  else if (st.mode === 'weather') setTable('풍화의 종류', ['종류', '예'], [['물리적 풍화', '얼음 쐐기 작용, 식물 뿌리, 온도 변화'], ['화학적 풍화', '빗물·지하수가 암석 성분을 녹임 (석회 동굴)'], ['토양 생성 순서', '모암 → C층 → B층 → A층']]);
+  else setTable('판의 경계와 대륙 이동', ['구분', '내용'], [['대륙 이동설 증거', '해안선 모양 일치, 같은 화석 분포, 빙하 흔적, 지질 구조 연속'], ['판', '지각과 맨틀 윗부분을 포함한 단단한 조각'], ['지진대·화산대', '판의 경계와 거의 일치']]);
+}
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'layer') {
+    if (st.ly === 'sys') { s = stat('구성 요소', 5, '개'); e = '<b>지구계</b>는 지권, 수권, 기권, 생물권, 외권으로 이루어지며, 구성 요소들이 서로 물질과 에너지를 주고받습니다. 예: 화산 폭발(지권) → 화산재가 대기로(기권) → 기온 변화 → 생물에 영향(생물권)'; t = ''; }
+    else { const L = LAYERS[st.pickL]; s = stat('층', L.n) + stat('상태', L.s); e = `<b>${L.n}</b>: ${L.d}. 지권은 깊이에 따라 지각, 맨틀, 외핵, 내핵의 층상 구조를 이룹니다.`; t = '맨틀은 지구 전체 부피의 약 80%를 차지합니다. 외핵만 액체 상태입니다.'; }
+  } else if (st.mode === 'mineral') { const M = MN[st.mn];
+    s = stat('광물', M.n) + stat('조흔색', M.streak) + stat('염산 반응', M.acid ? '거품' : '없음') + stat('자성', M.mag ? '있음' : '없음');
+    e = '<b>광물</b>: 암석을 이루는 작은 알갱이. 암석을 이루는 주된 광물을 <b>조암 광물</b>(석영, 장석, 흑운모, 각섬석 등)이라고 합니다. 광물은 색, 조흔색, 굳기, 염산 반응, 자성으로 구별합니다.';
+    t = '황철석과 금은 겉보기 색이 비슷하지만 조흔색이 달라(검은색 / 노란색) 구별할 수 있습니다.';
+  } else if (st.mode === 'rock') { const R = RK[st.rock];
+    s = stat('암석', R.n) + stat('종류', R.t);
+    e = `<b>${R.n}</b>: ${R.d}. 암석은 생성 과정에 따라 <b>화성암</b>(마그마가 식음), <b>퇴적암</b>(퇴적물이 굳음), <b>변성암</b>(열과 압력으로 성질이 변함)으로 나뉘며, 서로 다른 암석으로 계속 변하는 것을 <b>암석의 순환</b>이라고 합니다.`;
+    t = '마그마가 지표 근처에서 빨리 식으면 결정이 작고(화산암), 지하 깊은 곳에서 천천히 식으면 결정이 큽니다(심성암).';
+  } else if (st.mode === 'weather') {
+    s = stat('풍화 원인', {ice: '얼음', root: '식물 뿌리', chem: '빗물'}[st.w]) + stat('토양 발달', st.years < 20 ? '시작' : st.years < 70 ? '진행 중' : '성숙');
+    e = '<b>풍화</b>: 암석이 오랜 시간에 걸쳐 잘게 부서지거나 성분이 변하는 현상. 풍화로 만들어진 물질에 생물이 썩어 만든 물질이 섞여 <b>토양</b>이 됩니다.';
+    t = '토양은 모암 → C층 → B층 → A층 순서로 만들어집니다. 1 cm의 토양이 만들어지는 데 수백 년이 걸리기도 합니다.';
+  } else if (st.pl === 'drift') {
+    s = stat('시간', st.ma, '백만 년 전');
+    e = '<b>대륙 이동설</b>(베게너): 과거에 하나로 붙어 있던 초대륙 <b>판게아</b>가 갈라져 이동하여 오늘날의 대륙 분포가 되었다는 학설. 증거: 해안선 모양의 일치, 같은 고생물 화석 분포, 빙하의 흔적, 지질 구조의 연속성.';
+    t = '시간 막대를 줄이며 남아메리카와 아프리카의 해안선이 어떻게 맞물려 있었는지 보세요.';
+  } else {
+    s = stat('지진 (모형)', EQ.length, '곳') + stat('화산 (모형)', VOL.length, '곳');
+    e = '지구 표면은 여러 개의 <b>판</b>으로 나뉘어 움직입니다. 지진과 화산 활동은 대부분 <b>판의 경계</b>를 따라 띠 모양으로 분포합니다. 태평양 둘레의 화산대는 "불의 고리"라고 부릅니다.';
+    t = '체크 상자를 하나씩 끄고 켜며 지진·화산 분포가 판의 경계와 일치하는지 확인하세요.';
+  }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+  $('chips').innerHTML = st.mode === 'rock' ? `<span class="note">지금 암석: <b>${RK[st.rock].n}</b></span>` : '';
+}
+
+/* ===== 조작 ===== */
+Kit.seg($('lySeg'), 'ly', v => { st.ly = v; table(); })('inner');
+$('mn').innerHTML = Object.entries(MN).map(([k, v]) => `<option value="${k}">${v.n}</option>`).join('');
+$('mn').onchange = e => st.mn = e.target.value;
+Kit.seg($('testSeg'), 'test', v => { st.test = v; st.t = 0; })('color');
+Kit.seg($('procSeg'), 'pr', v => applyProc(v));
+document.querySelectorAll('#procSeg button').forEach(b => b.addEventListener('click', () => setTimeout(() => b.setAttribute('aria-pressed', 'false'), 300)));
+$('rockReset').onclick = () => { st.rock = 'granite'; st.path = ['granite']; st.msg = ''; };
+Kit.seg($('wSeg'), 'w', v => { st.w = v; })('ice');
+$('years').oninput = e => { st.years = +e.target.value; $('yearsOut').textContent = st.years === 0 ? '처음' : st.years < 50 ? '오랜 시간 뒤' : '아주 오랜 시간 뒤'; };
+Kit.seg($('plSeg'), 'pl', v => { st.pl = v; $('maWrap').hidden = v !== 'drift' || st.mode !== 'plate'; $('mapCtl').hidden = v !== 'map' || st.mode !== 'plate'; })('drift');
+$('ma').oninput = e => { st.ma = +e.target.value; $('maOut').textContent = st.ma === 0 ? '현재' : `약 ${st.ma >= 100 ? (st.ma / 100) + '억' : st.ma + '00만'} 년 전`; };
+Kit.tabs(m => { st.mode = m; table();
+  $('maWrap').hidden = !(m === 'plate' && st.pl === 'drift'); $('mapCtl').hidden = !(m === 'plate' && st.pl === 'map');
+  $('gTitle').textContent = {layer: '깊이에 따른 층', mineral: '광물의 굳기 비교 (상대값)', rock: '암석이 변해 온 과정', weather: '시간에 따른 토양 발달', plate: '그래프'}[m];
+  $('gSub').textContent = {layer: '지구 반지름은 약 6400 km입니다.', mineral: '중학교에서는 방해석과 석영의 굳기 비교를 중심으로 다룹니다.', rock: '', weather: '', plate: ''}[m]; }, ['layer', 'mineral', 'rock', 'weather', 'plate']);
+Kit.loop(dt => { st.t += dt; if (st.mode === 'plate' && st.pl === 'drift' && st.autoMa) {} }, () => {
+  S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h);
+  ({layer: drawLayer, mineral: drawMineral, rock: drawRock, weather: drawWeather, plate: drawPlate})[st.mode](); drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>

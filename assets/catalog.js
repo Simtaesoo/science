@@ -38,7 +38,10 @@ window.CATALOG = [
     {kind:'sim', title:'1차시 물질의 특성과 밀도', href:'g2/matter/sim.html#dens'}, {kind:'sim', title:'2차시 용해도', href:'g2/matter/sim.html#sol'},
     {kind:'sim', title:'3차시 녹는점과 끓는점', href:'g2/matter/sim.html#mp'}, {kind:'sim', title:'4차시 순물질과 혼합물', href:'g2/matter/sim.html#mix'},
     {kind:'sim', title:'5차시 혼합물의 분리', href:'g2/matter/sim.html#sep'}, {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g2/matter/worksheet.html'} ]},
-  { no:9, area:'earth', title:'지권의 변화', code:'9과09', items:[{kind:'sim', title:'암석의 순환'}, {kind:'sim', title:'판의 경계와 지진·화산'}]},
+  { no:9, area:'earth', title:'지권의 변화', code:'9과09', items:[
+    {kind:'sim', title:'1차시 지구계와 지권의 층상 구조', href:'g2/earth/sim.html#layer'}, {kind:'sim', title:'2차시 광물의 특성과 활용', href:'g2/earth/sim.html#mineral'},
+    {kind:'sim', title:'3차시 암석의 분류와 순환', href:'g2/earth/sim.html#rock'}, {kind:'sim', title:'4차시 풍화 작용과 토양', href:'g2/earth/sim.html#weather'},
+    {kind:'sim', title:'5차시 대륙 이동과 판의 경계', href:'g2/earth/sim.html#plate'}, {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g2/earth/worksheet.html'} ]},
   { no:10, area:'phy', title:'빛과 파동', code:'9과10', items:[{kind:'sim', title:'거울과 렌즈의 상'}, {kind:'sim', title:'빛의 합성과 물체의 색'}, {kind:'sim', title:'소리의 진폭·진동수'}]},
   { no:11, area:'chem', title:'물질의 구성', code:'9과11', items:[{kind:'sim', title:'원자 모형과 이온 만들기'}]},
   { no:12, area:'bio', title:'식물과 에너지', code:'9과12', items:[{kind:'sim', title:'광합성에 영향을 주는 요인'}]},
