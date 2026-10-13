@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>별과 우주 관측소 · 중2 별과 우주</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-earth">
+<div class="wrap">
+  <nav class="topbar" data-topbar="2학년|15 별과 우주" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 2 · 15 별과 우주 <span class="code">9과15-01</span><span class="code">9과15-02</span><span class="code">9과15-03</span><span class="code">9과15-04</span></div>
+      <h1>별과 우주 관측소</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="parallax">1. 연주 시차</button>
+      <button type="button" data-mode="mag">2. 밝기·등급·색</button>
+      <button type="button" data-mode="galaxy">3. 우리은하</button>
+      <button type="button" data-mode="expand">4. 팽창하는 우주</button>
+      <button type="button" data-mode="explore">4. 우주 탐사</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="우주 모형">
+      <div class="canvas-box"><canvas id="scene" aria-label="별과 우주 모형"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <label class="field" data-only="parallax" for="dist">별까지 거리 <input type="range" id="dist" min="1" max="5" step="0.5" value="2"><output id="distOut">2 pc</output></label>
+        <div class="field" data-only="mag"><div class="seg" id="magSeg"><button type="button" data-mg="dist">거리와 밝기</button><button type="button" data-mg="color">색과 표면 온도</button></div></div>
+        <label class="field" data-only="mag" id="mdF" for="md">관측 거리 <input type="range" id="md" min="1" max="5" step="0.5" value="1"><output id="mdOut">1배</output></label>
+        <label class="field" data-only="mag" id="tempF" for="temp">표면 온도 <input type="range" id="temp" min="0" max="100" step="1" value="35"><output id="tempOut"></output></label>
+        <div class="field" data-only="galaxy"><div class="seg" id="galSeg"><button type="button" data-gal="top">위에서 본 모습</button><button type="button" data-gal="side">옆에서 본 모습</button><button type="button" data-gal="obj">성운과 성단</button></div></div>
+        <label class="field" data-only="expand" for="inf">팽창 <input type="range" id="inf" min="0" max="100" step="1" value="0"><output id="infOut">처음</output></label>
+        <button class="btn" type="button" id="blow" data-only="expand">풍선 불기</button>
+        <div class="field" data-only="expand">기준 은하 <div class="seg" id="refSeg"><button type="button" data-ref="0">A</button><button type="button" data-ref="3">D</button><button type="button" data-ref="5">F</button></div></div>
+        <label class="field" data-only="explore" for="ev">연도 <input type="range" id="ev" min="0" max="10" step="1" value="0"><output id="evOut"></output></label>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">정리</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>아주 멀리 있는 별은 왜 연주 시차로 거리를 구하기 어려울까?</summary>
+        <p>별이 멀수록 연주 시차가 작아져서, 너무 먼 별은 시차가 너무 작아 정확히 측정하기 어렵기 때문입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>밤하늘에서 가장 밝아 보이는 별이 실제로도 가장 밝을까?</summary>
+        <p>꼭 그렇지 않습니다. 겉보기 밝기는 별이 실제로 내는 빛의 양과 거리에 따라 달라집니다. 가까이 있으면 실제로는 어두운 별도 밝게 보일 수 있습니다. 실제 밝기는 같은 거리(10 pc)에 놓고 비교한 절대 등급으로 비교합니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>풍선 모형에서 은하 스티커의 크기가 변하지 않는 것은 무엇을 뜻할까?</summary>
+        <p>우주가 팽창할 때 은하 사이의 공간이 늘어나는 것이지, 은하 자체가 커지는 것이 아니라는 뜻입니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="거리와 크기는 보기 쉽게 크게 줄였거나 늘렸습니다. 별의 등급과 표면 온도는 대표값입니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+const st = {mode:'parallax', t:0, d:2, mg:'dist', md:1, temp:35, gal:'top', inf:0, blow:false, ref:0, ev:0};
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const SKY = '#0d1424';
+const BG = Array.from({length: 26}, () => [rnd(), rnd(), .6 + rnd() * 1.4]);
+
+/* ===== 1. 연주 시차 ===== */
+function drawParallax(){
+  const g = S.g; g.fillStyle = SKY; g.fillRect(0, 0, S.w, S.h);
+  const cx = S.w * .32, cy = S.h * .78, r = 54, bgY = 22, D = 40 + (st.d - 1) / 4 * (cy - bgY - 90), sx = cx, sy = cy - D;
+  g.save(); g.beginPath(); g.rect(0, 0, S.w * .62, S.h); g.clip();
+  // 배경 별
+  for (let i = 0; i < 18; i++) { g.fillStyle = 'rgba(255,255,255,.8)'; g.beginPath(); g.arc(20 + i * (S.w * .6 - 20) / 17, bgY + (i % 3) * 6, 1.6, 0, TAU); g.fill(); }
+  label(g, '아주 멀리 있는 배경 별', S.w * .32, bgY + 26, {size: 11, color: '#9fb0d0'});
+  g.strokeStyle = 'rgba(255,255,255,.25)'; g.setLineDash([3, 4]); g.beginPath(); g.arc(cx, cy, r, 0, TAU); g.stroke(); g.setLineDash([]);
+  g.fillStyle = '#ffcc4d'; g.beginPath(); g.arc(cx, cy, 10, 0, TAU); g.fill(); label(g, '태양', cx, cy + 22, {size: 11, color: '#ffcc4d'});
+  const E1 = [cx - r, cy], E2 = [cx + r, cy], th = st.t * .9, E = [cx + Math.cos(th) * r, cy - Math.sin(th) * r * .35];
+  const ext = (A) => { const k = (bgY - A[1]) / (sy - A[1]); return [A[0] + (sx - A[0]) * k, bgY]; };
+  [[E1, '#7fb3ff', '1월'], [E2, '#ff9f7f', '7월']].forEach(([A, col, n]) => { const B = ext(A); g.strokeStyle = col; g.lineWidth = 1.3; g.beginPath(); g.moveTo(...A); g.lineTo(...B); g.stroke(); g.fillStyle = col; g.beginPath(); g.arc(A[0], A[1], 5, 0, TAU); g.fill(); label(g, '지구 (' + n + ')', A[0] + (A === E1 ? -8 : 8), A[1] + 16, {size: 11, color: col, align: A === E1 ? 'right' : 'left'}); g.beginPath(); g.arc(B[0], B[1] + 4, 4, 0, TAU); g.strokeStyle = col; g.stroke(); });
+  // 현재 지구
+  g.strokeStyle = 'rgba(120,220,160,.8)'; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(...E); g.lineTo(...ext(E)); g.stroke(); g.setLineDash([]);
+  g.fillStyle = '#5bd08a'; g.beginPath(); g.arc(E[0], E[1], 6, 0, TAU); g.fill();
+  // 시차 각
+  const a1 = Math.atan2(E1[1] - sy, E1[0] - sx), a2 = Math.atan2(E2[1] - sy, E2[0] - sx);
+  g.strokeStyle = '#ffe28a'; g.lineWidth = 2; g.beginPath(); g.arc(sx, sy, 22, Math.min(a1, a2), Math.max(a1, a2)); g.stroke();
+  g.strokeStyle = 'rgba(255,226,138,.5)'; g.setLineDash([2, 3]); g.beginPath(); g.moveTo(sx, sy); g.lineTo(cx, cy); g.stroke(); g.setLineDash([]);
+  label(g, 'p (연주 시차) = 이 각의 1/2', sx + 30, sy + 26, {size: 11, color: '#ffe28a', align: 'left'});
+  g.fillStyle = '#fff'; g.beginPath(); g.arc(sx, sy, 6, 0, TAU); g.fill(); label(g, '가까운 별', sx + 12, sy - 8, {size: 12, color: '#fff', align: 'left', weight: 700});
+  g.restore();
+  // 망원경 시야
+  const vx = S.w * .66, vy = 34, vw = S.w * .31, vh = S.h * .5; g.fillStyle = '#060a14'; g.fillRect(vx, vy, vw, vh); g.strokeStyle = '#3a4a6a'; g.strokeRect(vx, vy, vw, vh);
+  label(g, '지구에서 본 하늘 (배경 별과 비교)', vx + vw / 2, vy - 14, {size: 11, color: C.muted});
+  BG.forEach(([u, v, s]) => { g.fillStyle = 'rgba(255,255,255,.75)'; g.beginPath(); g.arc(vx + u * vw, vy + v * vh, s, 0, TAU); g.fill(); });
+  const K = 2400 / D, off = -(E[0] - cx) / r * K * .5, mid = vx + vw / 2, my = vy + vh / 2;
+  g.strokeStyle = 'rgba(255,226,138,.35)'; g.lineWidth = 6; g.beginPath(); g.moveTo(mid - K * .5, my); g.lineTo(mid + K * .5, my); g.stroke();
+  g.fillStyle = '#fff'; g.beginPath(); g.arc(mid + off, my, 5, 0, TAU); g.fill();
+  label(g, '7월', mid - K * .5, my + 16, {size: 10, color: '#ff9f7f'}); label(g, '1월', mid + K * .5, my + 16, {size: 10, color: '#7fb3ff'});
+  label(g, `연주 시차 ${(1 / st.d).toFixed(2)}″`, vx + vw / 2, vy + vh + 24, {weight: 700, size: 13});
+  label(g, '가까운 별이 1년 주기로 왔다 갔다 보인다', vx + vw / 2, vy + vh + 46, {size: 11, color: C.muted});
+  label(g, '(그림은 시차를 크게 과장함)', vx + vw / 2, vy + vh + 64, {size: 10, color: C.muted});
+}
+
+/* ===== 2. 밝기·등급·색 ===== */
+const STARS = [['베텔게우스', 3500, '적색'], ['알데바란', 3900, '주황색'], ['태양', 5800, '노란색'], ['프로키온', 6500, '황백색'], ['시리우스', 9900, '백색'], ['리겔', 12000, '청백색'], ['스피카', 22000, '청색']];
+const STOPS = [[3000, [255, 110, 60]], [4000, [255, 165, 90]], [5000, [255, 208, 140]], [5800, [255, 236, 190]], [7000, [255, 248, 235]], [10000, [228, 236, 255]], [15000, [190, 208, 255]], [30000, [150, 178, 255]]];
+function starRGB(T){ const lt = Math.log(T); for (let i = 0; i < STOPS.length - 1; i++) { const [a, ca] = STOPS[i], [b, cb] = STOPS[i + 1]; if (T <= b) { const f = Math.max(0, (lt - Math.log(a)) / (Math.log(b) - Math.log(a))); return ca.map((v, k) => Math.round(v + (cb[k] - v) * f)); } } return STOPS[STOPS.length - 1][1]; }
+const tempOf = v => Math.round(3000 * Math.pow(10, v / 100) / 100) * 100;
+function glow(g, x, y, r, rgb, a){ const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, `rgba(${rgb},${a})`); gr.addColorStop(.25, `rgba(${rgb},${a * .7})`); gr.addColorStop(1, `rgba(${rgb},0)`); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill(); }
+function drawMag(){
+  const g = S.g; g.fillStyle = SKY; g.fillRect(0, 0, S.w, S.h);
+  if (st.mg === 'dist') {
+    const x0 = 50, cy = S.h * .42, step = S.w * .16;
+    glow(g, x0, cy, 34, '255,240,200', 1); label(g, '별', x0, cy + 40, {color: '#fff', weight: 700});
+    for (let k = 1; k <= 3; k++) { const x = x0 + step * k, h = 34 * k;
+      g.strokeStyle = 'rgba(255,240,200,.25)'; g.beginPath(); g.moveTo(x0, cy); g.lineTo(x, cy - h); g.moveTo(x0, cy); g.lineTo(x, cy + h); g.stroke();
+      g.fillStyle = `rgba(255,236,170,${.55 / (k * k)})`; g.fillRect(x - 4, cy - h, 8, h * 2); g.strokeStyle = 'rgba(255,255,255,.5)'; g.strokeRect(x - 4, cy - h, 8, h * 2);
+      for (let j = 1; j < k; j++) { g.beginPath(); g.moveTo(x - 4, cy - h + j * 2 * h / k); g.lineTo(x + 4, cy - h + j * 2 * h / k); g.stroke(); }
+      label(g, `거리 ${k}배`, x, cy + h + 16, {size: 11, color: '#cfd8ea'}); label(g, `넓이 ${k * k}배 → 밝기 1/${k * k}`, x, cy + h + 32, {size: 11, color: '#ffe28a'}); }
+    // 관측자
+    const ox = x0 + step * st.md, b = 1 / (st.md * st.md);
+    g.fillStyle = '#5bd08a'; g.beginPath(); g.arc(ox, S.h * .86, 7, 0, TAU); g.fill(); label(g, '관측자', ox, S.h * .86 + 18, {size: 11, color: '#5bd08a'});
+    g.strokeStyle = 'rgba(91,208,138,.5)'; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(ox, S.h * .86 - 8); g.lineTo(ox, cy); g.stroke(); g.setLineDash([]);
+    const px = S.w * .86, py = S.h * .3; g.fillStyle = '#060a14'; g.fillRect(px - 70, py - 70, 140, 140); glow(g, px, py, 10 + 50 * Math.sqrt(b), '255,240,200', Math.min(1, .25 + b));
+    label(g, '관측자에게 보이는 밝기', px, py - 82, {size: 11, color: C.muted});
+    label(g, `밝기 ${b === 1 ? '1' : '1/' + (st.md * st.md).toFixed(st.md % 1 ? 2 : 0)}`, px, py + 90, {weight: 700, size: 13, color: '#ffe28a'});
+    label(g, `등급 숫자 +${(5 * Math.log10(st.md)).toFixed(1)}`, px, py + 110, {size: 12, color: '#cfd8ea'});
+    label(g, '같은 별도 멀어질수록 어둡게 보인다 (등급 숫자가 커진다)', S.w * .5, S.h - 14, {size: 12, color: '#cfd8ea'});
+    return;
+  }
+  const T = tempOf(st.temp), rgb = starRGB(T).join(',');
+  glow(g, S.w * .35, S.h * .4, 150, rgb, 1); g.fillStyle = `rgb(${rgb})`; g.beginPath(); g.arc(S.w * .35, S.h * .4, 40, 0, TAU); g.fill();
+  label(g, `표면 온도 약 ${T.toLocaleString()} K`, S.w * .35, S.h * .4 + 92, {weight: 700, size: 14, color: '#fff'});
+  // 온도 막대
+  const bx = 40, bw = S.w - 80, by = S.h * .82, X = t => bx + bw * Math.log(t / 3000) / Math.log(10);
+  for (let i = 0; i < bw; i += 2) { const t = 3000 * Math.pow(10, i / bw); g.fillStyle = `rgb(${starRGB(t).join(',')})`; g.fillRect(bx + i, by, 2, 14); }
+  label(g, '낮음 · 붉은색', bx, by + 28, {size: 11, color: '#cfd8ea', align: 'left'}); label(g, '높음 · 파란색', bx + bw, by + 28, {size: 11, color: '#cfd8ea', align: 'right'});
+  STARS.forEach(([n, t], i) => { const x = X(t); g.strokeStyle = 'rgba(255,255,255,.6)'; g.beginPath(); g.moveTo(x, by); g.lineTo(x, by - 10 - (i % 2) * 16); g.stroke(); label(g, n, x, by - 16 - (i % 2) * 16, {size: 10, color: '#fff'}); });
+  g.fillStyle = '#fff'; g.beginPath(); g.moveTo(X(T), by + 16); g.lineTo(X(T) - 6, by + 26); g.lineTo(X(T) + 6, by + 26); g.fill();
+  const near = STARS.reduce((a, s) => Math.abs(Math.log(s[1] / T)) < Math.abs(Math.log(a[1] / T)) ? s : a);
+  label(g, `비슷한 별: ${near[0]} (${near[2]})`, S.w * .8, S.h * .3, {size: 13, color: '#fff', weight: 700});
+  label(g, '파란 별일수록 표면 온도가 높고,', S.w * .8, S.h * .3 + 28, {size: 12, color: '#cfd8ea'}); label(g, '붉은 별일수록 표면 온도가 낮다', S.w * .8, S.h * .3 + 46, {size: 12, color: '#cfd8ea'});
+}
+
+/* ===== 3. 우리은하 ===== */
+seed = 11;
+const GAL = []; for (let k = 0; k < 2; k++) for (let i = 0; i < 520; i++) { const t = rnd(), a = k * Math.PI + t * 4.4 + (rnd() - .5) * .35, r = .1 + .9 * t + (rnd() - .5) * .06; GAL.push([a, r, rnd() < .15 ? 1 : 0]); }
+for (let i = 0; i < 260; i++) { const t = rnd(), a = rnd() * TAU, r = Math.min(.95, Math.abs((rnd() + rnd() + rnd() - 1.5)) * .5 + rnd() * .1); GAL.push([a, r * (t < .5 ? 1 : .35), 2]); }
+const GC = Array.from({length: 14}, () => [rnd() * TAU, .35 + rnd() * .75]);
+const OBJ = (() => { seed = 23; return Array.from({length: 5}, () => Array.from({length: 120}, () => [rnd(), rnd(), rnd(), rnd()])); })();
+function drawGalaxy(){
+  const g = S.g; g.fillStyle = SKY; g.fillRect(0, 0, S.w, S.h);
+  const cx = S.w * .4, cy = S.h * .5, R = Math.min(S.w * .36, S.h * .44);
+  if (st.gal === 'top') {
+    glow(g, cx, cy, R * .35, '255,225,170', .9);
+    const rot = st.t * .03;
+    GAL.forEach(([a, r, k]) => { const x = cx + Math.cos(a + rot) * r * R, y = cy + Math.sin(a + rot) * r * R; g.fillStyle = k === 1 ? 'rgba(170,200,255,.95)' : k === 2 ? 'rgba(255,220,160,.8)' : 'rgba(230,235,255,.6)'; g.beginPath(); g.arc(x, y, k === 1 ? 1.8 : 1.2, 0, TAU); g.fill(); });
+    const sa = Math.PI * .1 + .62 * 4.4 + rot, sr = .6, sx = cx + Math.cos(sa) * sr * R, sy = cy + Math.sin(sa) * sr * R;
+    g.strokeStyle = '#ffe28a'; g.lineWidth = 2; g.beginPath(); g.arc(sx, sy, 7, 0, TAU); g.stroke(); label(g, '태양계', sx + 12, sy - 10, {align: 'left', color: '#ffe28a', weight: 700});
+    g.strokeStyle = 'rgba(255,226,138,.5)'; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(cx, cy); g.lineTo(sx, sy); g.stroke(); g.setLineDash([]);
+    label(g, '약 3만 광년', (cx + sx) / 2 + 10, (cy + sy) / 2, {size: 11, color: '#ffe28a', align: 'left'});
+    label(g, '중심부', cx, cy + R * .2, {size: 11, color: '#fff'});
+    g.strokeStyle = 'rgba(255,255,255,.5)'; g.beginPath(); g.moveTo(cx - R, cy + R + 8); g.lineTo(cx + R, cy + R + 8); g.stroke(); label(g, '지름 약 10만 광년', cx, cy + R + 22, {size: 11, color: '#cfd8ea'});
+    label(g, '나선팔: 젊고 푸른 별, 성운이 많다', S.w * .86, S.h * .3, {size: 12, color: '#aac8ff'}); label(g, '중심부: 늙고 붉은 별이 많다', S.w * .86, S.h * .3 + 22, {size: 12, color: '#ffd8a0'});
+    return;
+  }
+  if (st.gal === 'side') {
+    g.strokeStyle = 'rgba(200,210,255,.35)'; g.setLineDash([4, 5]); g.beginPath(); g.ellipse(cx, cy, R * 1.05, R * .7, 0, 0, TAU); g.stroke(); g.setLineDash([]);
+    label(g, '헤일로', cx + R * .8, cy - R * .62, {size: 12, color: '#cfd8ea'});
+    GC.forEach(([a, r]) => { const x = cx + Math.cos(a) * r * R * .95, y = cy + Math.sin(a) * r * R * .62; glow(g, x, y, 7, '255,210,150', .9); });
+    label(g, '구상 성단', cx - R * .6, cy - R * .52, {size: 12, color: '#ffd8a0'});
+    const gr = g.createLinearGradient(0, cy - 10, 0, cy + 10); gr.addColorStop(0, 'rgba(200,215,255,0)'); gr.addColorStop(.5, 'rgba(200,215,255,.8)'); gr.addColorStop(1, 'rgba(200,215,255,0)');
+    g.fillStyle = gr; g.beginPath(); g.ellipse(cx, cy, R, 12, 0, 0, TAU); g.fill();
+    glow(g, cx, cy, R * .3, '255,225,170', 1); g.fillStyle = 'rgba(255,225,170,.6)'; g.beginPath(); g.ellipse(cx, cy, R * .22, R * .12, 0, 0, TAU); g.fill();
+    const sx = cx + R * .6; g.strokeStyle = '#ffe28a'; g.lineWidth = 2; g.beginPath(); g.arc(sx, cy, 6, 0, TAU); g.stroke(); label(g, '태양계', sx, cy + 24, {color: '#ffe28a', weight: 700, size: 12});
+    label(g, '원반 (나선팔)', cx - R * .7, cy + 26, {size: 12, color: '#cfd8ea'}); label(g, '중심부', cx, cy - R * .18, {size: 12, color: '#fff'});
+    label(g, '태양계는 원반 안에 있어서, 원반 방향을 보면 별이 많이 모인 띠(은하수)로 보인다', S.w / 2, S.h - 14, {size: 12, color: '#cfd8ea'});
+    return;
+  }
+  const cards = [['산개 성단', '젊고 푸른 별 수십~수만 개가 비교적 엉성하게 모임 · 나선팔'], ['구상 성단', '늙고 붉은 별 수만~수십만 개가 공 모양으로 빽빽이 모임 · 헤일로'], ['방출 성운', '가까운 뜨거운 별의 빛을 받아 스스로 빛을 냄 (주로 붉은색)'], ['반사 성운', '가까운 별의 빛을 반사하여 밝게 보임 (주로 파란색)'], ['암흑 성운', '뒤쪽 별빛을 가려 어둡게 보임']];
+  const cw = (S.w - 40) / 3, ch = (S.h - 30) / 2;
+  cards.forEach(([n, d], i) => { const x = 14 + (i % 3) * (cw + 6), y = 10 + Math.floor(i / 3) * (ch + 6), w = cw, h = ch, ox = x + w / 2, oy = y + h * .4, P = OBJ[i];
+    g.fillStyle = '#060a14'; g.fillRect(x, y, w, h); g.strokeStyle = '#2a3654'; g.strokeRect(x, y, w, h);
+    g.save(); g.beginPath(); g.rect(x, y, w, h * .72); g.clip();
+    if (i === 4) { P.forEach(([u, v, s]) => { g.fillStyle = 'rgba(255,255,255,.8)'; g.beginPath(); g.arc(x + u * w, y + v * h * .72, .6 + s, 0, TAU); g.fill(); }); g.fillStyle = '#060a14'; g.beginPath(); g.ellipse(ox, oy, w * .2, h * .2, .4, 0, TAU); g.fill(); g.beginPath(); g.ellipse(ox + 20, oy - 18, w * .1, h * .13, -.2, 0, TAU); g.fill(); }
+    else { P.forEach(([u, v, s]) => { g.fillStyle = 'rgba(255,255,255,.4)'; g.beginPath(); g.arc(x + u * w, y + v * h * .72, .5 + s * .5, 0, TAU); g.fill(); });
+      if (i === 0) P.slice(0, 26).forEach(([u, v, s]) => glow(g, ox + (u - .5) * w * .5, oy + (v - .5) * h * .4, 6 + s * 4, '170,200,255', .95));
+      if (i === 1) { glow(g, ox, oy, h * .3, '255,215,150', .8); P.forEach(([u, v, s, q]) => { const a = u * TAU, r = Math.pow(v, 1.8) * h * .28; g.fillStyle = 'rgba(255,225,170,.9)'; g.beginPath(); g.arc(ox + Math.cos(a) * r, oy + Math.sin(a) * r, 1.1, 0, TAU); g.fill(); }); }
+      if (i === 2) { P.slice(0, 40).forEach(([u, v, s]) => glow(g, ox + (u - .5) * w * .55, oy + (v - .5) * h * .45, 18 + s * 20, '235,80,110', .25)); glow(g, ox, oy, 8, '200,220,255', 1); }
+      if (i === 3) { P.slice(0, 30).forEach(([u, v, s]) => glow(g, ox + (u - .5) * w * .45, oy + (v - .5) * h * .4, 16 + s * 18, '110,150,255', .25)); glow(g, ox - 8, oy + 4, 8, '255,255,240', 1); } }
+    g.restore();
+    label(g, n, ox, y + h * .8, {weight: 700, color: '#fff', size: 13}); wrapT(g, d, ox, y + h * .88, w - 16, 14); });
+}
+function wrapT(g, txt, cx, y, w, lh){ g.font = font(11); const words = txt.split(' '); let line = '', ys = y; const lines = []; words.forEach(wd => { if (g.measureText(line + wd).width > w && line) { lines.push(line); line = ''; } line += wd + ' '; }); lines.push(line); lines.forEach((l, i) => label(g, l.trim(), cx, ys + i * lh, {size: 11, color: '#cfd8ea'})); }
+
+/* ===== 4. 팽창하는 우주 ===== */
+const GX = [[-.5, -.35, 'A'], [.15, -.6, 'B'], [.55, -.15, 'C'], [-.1, .05, 'D'], [-.6, .4, 'E'], [.35, .5, 'F'], [.7, .3, 'G']];
+const R0 = 70, Rk = k => R0 + k * 120;
+const gpos = (i, k, cx, cy) => [cx + GX[i][0] * Rk(k), cy + GX[i][1] * Rk(k)];
+function drawExpand(){
+  const g = S.g; g.fillStyle = C.surface; g.fillRect(0, 0, S.w, S.h);
+  const cx = S.w * .38, cy = S.h * .5, k = st.inf / 100, R = Rk(k);
+  const gr = g.createRadialGradient(cx - R * .3, cy - R * .3, R * .1, cx, cy, R); gr.addColorStop(0, '#fff3f0'); gr.addColorStop(1, '#f2b6aa');
+  g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill(); g.strokeStyle = '#d08070'; g.lineWidth = 1.5; g.stroke();
+  g.fillStyle = '#d08070'; g.beginPath(); g.moveTo(cx - 8, cy + R); g.lineTo(cx + 8, cy + R); g.lineTo(cx, cy + R + 14); g.fill();
+  const P0 = gpos(st.ref, k, cx, cy);
+  GX.forEach((q, i) => { if (i === st.ref) return; const P = gpos(i, k, cx, cy); g.strokeStyle = 'rgba(40,60,120,.45)'; g.lineWidth = 1.2; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(...P0); g.lineTo(...P); g.stroke(); g.setLineDash([]);
+    const dd = Math.hypot(P[0] - P0[0], P[1] - P0[1]) / 20; label(g, dd.toFixed(1), (P0[0] + P[0]) / 2, (P0[1] + P[1]) / 2 - 8, {size: 10, color: '#334'}); });
+  GX.forEach((q, i) => { const [x, y] = gpos(i, k, cx, cy); g.save(); g.translate(x, y); g.rotate(i); g.fillStyle = i === st.ref ? '#1d3a8a' : '#4a5a8a'; g.beginPath(); g.ellipse(0, 0, 10, 5, 0, 0, TAU); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 1; g.beginPath(); g.arc(0, 0, 3, 0, Math.PI * 1.5); g.stroke(); g.restore();
+    label(g, q[2], x + 12, y - 10, {weight: 700, size: 12, color: i === st.ref ? C.hot : C.ink}); });
+  label(g, '숫자: 기준 은하로부터의 거리 (cm, 모형)', cx, S.h - 14, {size: 12, color: C.muted});
+  const rx = S.w * .85; label(g, '은하 스티커의 크기는', rx, S.h * .3, {size: 12}); label(g, '그대로!', rx, S.h * .3 + 20, {size: 12, weight: 700});
+  label(g, '늘어나는 것은 은하 사이의', rx, S.h * .3 + 50, {size: 12}); label(g, '공간 (풍선 표면)', rx, S.h * .3 + 70, {size: 12, weight: 700});
+  label(g, '팽창의 중심은 없다', rx, S.h * .3 + 110, {size: 12, color: C.hot, weight: 700});
+}
+function expandRows(){ const k = st.inf / 100, cx = 0, cy = 0, P0 = gpos(st.ref, 0, 0, 0), P1 = gpos(st.ref, k, 0, 0);
+  return GX.map((q, i) => { if (i === st.ref) return null; const a = gpos(i, 0, 0, 0), b = gpos(i, k, 0, 0), d0 = Math.hypot(a[0] - P0[0], a[1] - P0[1]) / 20, d1 = Math.hypot(b[0] - P1[0], b[1] - P1[1]) / 20; return [q[2], d0, d1, d1 - d0]; }).filter(Boolean).sort((a, b) => a[1] - b[1]); }
+
+/* ===== 4. 우주 탐사 ===== */
+const EV = [[1957, '스푸트니크 1호', '구소련, 최초의 인공위성 발사', 'sat'], [1961, '보스토크 1호', '가가린, 최초의 유인 우주 비행', 'rocket'], [1969, '아폴로 11호', '미국, 인류 최초로 달에 착륙', 'rocket'], [1977, '보이저 1·2호', '목성·토성 등 외행성 탐사 후 태양계 바깥으로 나아감', 'probe'], [1990, '허블 우주 망원경', '대기의 방해 없이 먼 우주를 선명하게 관측', 'scope'], [1992, '우리별 1호', '우리나라 최초의 인공위성', 'sat'], [1998, '국제 우주 정거장', '여러 나라가 함께 건설 시작, 우주에서 장기간 실험', 'iss'], [2004, '스피릿·오퍼튜니티', '화성 탐사 로버, 물이 있었던 흔적 발견', 'probe'], [2013, '나로호', '우리나라 땅에서 처음으로 위성을 궤도에 올림', 'rocket'], [2021, '제임스 웹 우주 망원경', '적외선으로 초기 우주의 은하를 관측', 'scope'], [2022, '누리호 · 다누리', '우리 기술로 만든 발사체 누리호 발사 성공, 달 궤도선 다누리 발사', 'rocket']];
+function icon(g, kind, x, y){
+  g.strokeStyle = '#fff'; g.lineWidth = 2; g.fillStyle = '#c9d4ea';
+  if (kind === 'sat') { g.beginPath(); g.arc(x, y, 16, 0, TAU); g.fill(); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { g.beginPath(); g.moveTo(x + a * 10, y + b * 10); g.lineTo(x + a * 36, y + b * 30); g.stroke(); }); }
+  else if (kind === 'rocket') { g.beginPath(); g.moveTo(x, y - 40); g.quadraticCurveTo(x + 14, y - 20, x + 12, y + 24); g.lineTo(x - 12, y + 24); g.quadraticCurveTo(x - 14, y - 20, x, y - 40); g.fill(); g.fillStyle = '#ff9a4d'; g.beginPath(); g.moveTo(x - 8, y + 24); g.lineTo(x, y + 44 + Math.sin(st.t * 20) * 4); g.lineTo(x + 8, y + 24); g.fill(); }
+  else if (kind === 'probe') { g.beginPath(); g.ellipse(x, y - 14, 22, 8, 0, 0, TAU); g.fill(); g.fillRect(x - 8, y - 8, 16, 18); g.beginPath(); g.moveTo(x, y + 10); g.lineTo(x + 30, y + 24); g.stroke(); }
+  else if (kind === 'scope') { g.save(); g.translate(x, y); g.rotate(-.5); g.fillRect(-34, -12, 68, 24); g.fillStyle = '#5a6a8a'; g.fillRect(28, -14, 8, 28); g.restore(); g.fillStyle = '#6a8ee0'; g.fillRect(x - 46, y + 18, 30, 10); g.fillRect(x + 16, y + 18, 30, 10); }
+  else { g.fillRect(x - 50, y - 3, 100, 6); g.fillStyle = '#6a8ee0'; [-44, -28, 16, 32].forEach(dx => g.fillRect(x + dx, y - 24, 12, 48)); g.fillStyle = '#c9d4ea'; g.fillRect(x - 10, y - 8, 20, 16); }
+}
+function drawExplore(){
+  const g = S.g; g.fillStyle = SKY; g.fillRect(0, 0, S.w, S.h);
+  BG.forEach(([u, v, s]) => { g.fillStyle = 'rgba(255,255,255,.4)'; g.beginPath(); g.arc(u * S.w, v * S.h * .7, s * .8, 0, TAU); g.fill(); });
+  const e = EV[st.ev], ty = S.h * .82, X = y => 40 + (S.w - 80) * (y - 1950) / 80;
+  g.strokeStyle = '#7a8aaa'; g.lineWidth = 2; g.beginPath(); g.moveTo(X(1950), ty); g.lineTo(X(2030), ty); g.stroke();
+  for (let y = 1950; y <= 2030; y += 10) { g.beginPath(); g.moveTo(X(y), ty - 4); g.lineTo(X(y), ty + 4); g.stroke(); label(g, y, X(y), ty + 18, {size: 10, color: '#9fb0d0'}); }
+  EV.forEach((v, i) => { g.fillStyle = i === st.ev ? '#ffe28a' : i < st.ev ? '#7fb3ff' : '#4a5a7a'; g.beginPath(); g.arc(X(v[0]), ty, i === st.ev ? 7 : 4.5, 0, TAU); g.fill(); });
+  icon(g, e[3], S.w * .28, S.h * .38);
+  label(g, e[0] + '년', S.w * .62, S.h * .24, {size: 14, color: '#ffe28a', weight: 700});
+  label(g, e[1], S.w * .62, S.h * .34, {size: 20, color: '#fff', weight: 700});
+  wrapT(g, e[2], S.w * .62, S.h * .44, S.w * .55, 16);
+  label(g, {sat: '인공위성', rocket: '발사체·유인 탐사', probe: '탐사선', scope: '우주 망원경', iss: '우주 정거장'}[e[3]], S.w * .62, S.h * .58, {size: 12, color: '#7fb3ff'});
+}
+
+/* ===== 그래프 ===== */
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'parallax') { const m = axes(G, {x: [0, 5, 1, '별까지의 거리 (pc)'], y: [0, 2, .5, '연주 시차 (″)']}); const p = []; for (let d = .5; d <= 5; d += .05) p.push([d, 1 / d]); line(G, p, m, C.earth, 2.5);
+    g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.d), m.Y(1 / st.d), 5, 0, TAU); g.fill(); label(g, '거리가 멀수록 연주 시차가 작다', m.X(3), m.Y(1.4), {size: 11, color: C.muted}); }
+  else if (st.mode === 'mag') {
+    if (st.mg === 'dist') { const m = axes(G, {x: [0, 5, 1, '거리 (배)'], y: [0, 1, .25, '보이는 밝기 (상대값)']}); const p = []; for (let d = 1; d <= 5; d += .05) p.push([d, 1 / (d * d)]); line(G, p, m, C.warn, 2.5); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.md), m.Y(1 / (st.md * st.md)), 5, 0, TAU); g.fill(); }
+    else { const m = axes(G, {x: [0, STARS.length, 1, ''], y: [0, 25000, 5000, '표면 온도 (K)']}); STARS.forEach(([n, t], i) => { g.fillStyle = `rgb(${starRGB(t).map(v => Math.round(v * .85)).join(',')})`; g.fillRect(m.X(i + .2), m.Y(t), m.X(.6) - m.X(0), m.Y(0) - m.Y(t)); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 10}); }); } }
+  else if (st.mode === 'galaxy') { const m = axes(G, {x: [0, 3, 1, ''], y: [0, 100, 25, '젊은 별의 비율 (상대값)']}); [['나선팔', 85, '#7fa6ff'], ['중심부', 25, '#e0a860'], ['구상 성단', 5, '#d08040']].forEach(([n, v, col], i) => { g.fillStyle = col; g.fillRect(m.X(i + .25), m.Y(v), m.X(.5) - m.X(0), m.Y(0) - m.Y(v)); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 11}); }); }
+  else if (st.mode === 'expand') { const rows = expandRows(), m = axes(G, {x: [0, 8, 2, '처음 거리 (cm)'], y: [0, 14, 2, '늘어난 거리 (cm)']}); line(G, [[0, 0], [8, 8 * 120 / 70 * st.inf / 100]], m, C.line, 1.5, [4, 4]); rows.forEach(r => { g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(r[1]), m.Y(r[3]), 5, 0, TAU); g.fill(); label(g, r[0], m.X(r[1]) + 8, m.Y(r[3]) - 8, {size: 11}); }); }
+  else { const items = [['달', 1.3], ['태양', 500], ['화성 (평균)', 760], ['목성 (평균)', 2600], ['보이저 1호', 8.4e4], ['프록시마 센타우리', 1.33e8]];
+    const L = 120, R = G.w - 20, T = 14, H = G.h - 40, lg = v => Math.log10(v), X = v => L + (R - L) * (lg(v)) / 8.5;
+    items.forEach(([n, v], i) => { const y = T + i * H / items.length; g.fillStyle = C.earth; g.fillRect(L, y, X(v) - L, H / items.length - 6); label(g, n, L - 6, y + H / items.length / 2 - 3, {align: 'right', size: 11}); });
+    [[1, '1초'], [60, '1분'], [3600, '1시간'], [86400, '1일'], [3.15e7, '1년']].forEach(([v, n]) => { g.strokeStyle = C.line; g.beginPath(); g.moveTo(X(v), T); g.lineTo(X(v), T + H); g.stroke(); label(g, n, X(v), T + H + 12, {size: 10, color: C.muted}); }); }
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>'; $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
+function table(){
+  if (st.mode === 'parallax') setTable('가까운 별의 연주 시차', ['별', '연주 시차', '거리'], [['프록시마 센타우리', '0.77″', '약 1.3 pc (4.2광년)'], ['시리우스', '0.38″', '약 2.6 pc (8.6광년)'], ['베가', '0.13″', '약 7.7 pc (25광년)'], ['기준', '1″', '1 pc (약 3.26광년)']]);
+  else if (st.mode === 'mag') { if (st.mg === 'dist') setTable('겉보기 등급과 절대 등급', ['별', '겉보기 등급', '절대 등급'], [['태양', '−26.7', '+4.8'], ['시리우스', '−1.5', '+1.4'], ['베가', '0.0', '+0.6'], ['리겔', '+0.1', '−7.0'], ['북극성', '+2.0', '−3.6']]);
+    else setTable('별의 색과 표면 온도', ['색', '표면 온도', '예'], [['청색', '높음 (약 2만 K 이상)', '스피카'], ['청백색', '약 1만~2만 K', '리겔'], ['백색', '약 1만 K', '시리우스, 베가'], ['노란색', '약 6000 K', '태양'], ['적색', '낮음 (약 3500 K 이하)', '베텔게우스, 안타레스']]); }
+  else if (st.mode === 'galaxy') setTable('성단과 성운', ['종류', '특징', '주로 있는 곳'], [['산개 성단', '젊고 푸른 별이 엉성하게 모임', '나선팔 (원반)'], ['구상 성단', '늙고 붉은 별이 공 모양으로 빽빽이 모임', '헤일로, 중심부'], ['방출 성운', '스스로 빛을 냄', '나선팔'], ['반사 성운', '별빛을 반사', '나선팔'], ['암흑 성운', '뒤쪽 빛을 가림', '나선팔']]);
+  else if (st.mode === 'expand') setTable('기준 은하에서 다른 은하까지의 거리 (cm)', ['은하', '처음', '지금', '늘어난 거리'], expandRows().map(r => [r[0], r[1].toFixed(1), r[2].toFixed(1), r[3].toFixed(1)]));
+  else setTable('우주 탐사 방법', ['방법', '하는 일', '예'], [['인공위성', '지구 주위를 돌며 관측·통신', '우리별 1호, 천리안, 아리랑'], ['우주 망원경', '대기 밖에서 먼 우주 관측', '허블, 제임스 웹'], ['탐사선', '천체에 가까이 가거나 착륙하여 탐사', '보이저, 다누리, 화성 로버'], ['우주 정거장', '우주에 머물며 실험·관측', '국제 우주 정거장']]);
+}
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'parallax') { s = stat('별까지 거리', st.d, ' pc') + stat('연주 시차', (1 / st.d).toFixed(2), '″');
+    e = '<b>연주 시차</b>: 지구가 태양 주위를 공전하면서 6개월 간격으로 별을 관측할 때 생기는 시차의 1/2. 별까지의 거리가 멀수록 연주 시차는 <b>작아진다</b>. 연주 시차가 1″인 별까지의 거리를 <b>1 pc(파섹)</b>이라 하며 약 3.26광년입니다.';
+    t = '거리를 바꾸며 망원경 시야 속 별이 움직이는 폭을 비교하세요. 가까운 별일수록 크게 움직입니다.'; }
+  else if (st.mode === 'mag') { if (st.mg === 'dist') { s = stat('관측 거리', st.md, '배') + stat('보이는 밝기', '1/' + (st.md * st.md).toFixed(st.md % 1 ? 2 : 0));
+      e = '별의 <b>밝기</b>는 거리의 제곱에 반비례합니다. 별의 밝기는 <b>등급</b>으로 나타내며, 등급 숫자가 작을수록 밝습니다. 1등급 별은 6등급 별보다 약 100배 밝습니다. <b>겉보기 등급</b>은 눈에 보이는 밝기, <b>절대 등급</b>은 모든 별을 10 pc 거리에 놓았다고 가정한 밝기입니다.';
+      t = '태양은 겉보기 등급이 매우 작지만(아주 밝음) 절대 등급은 +4.8로 평범한 별입니다. 표에서 확인하세요.'; }
+    else { const T = tempOf(st.temp); s = stat('표면 온도', T.toLocaleString(), ' K') + stat('별의 색', T > 20000 ? '청색' : T > 10500 ? '청백색' : T > 7500 ? '백색' : T > 6000 ? '황백색' : T > 5000 ? '노란색' : T > 4000 ? '주황색' : '적색');
+      e = '별의 <b>색</b>은 <b>표면 온도</b>에 따라 다릅니다. 표면 온도가 높은 별은 파란색, 낮은 별은 붉은색을 띱니다. 별의 색을 보면 표면 온도를 비교할 수 있습니다.';
+      t = '오리온자리의 베텔게우스(붉은색)와 리겔(청백색) 중 표면 온도가 높은 별은 어느 것일까요?'; } }
+  else if (st.mode === 'galaxy') { s = stat('지름', '약 10만', ' 광년') + stat('태양계 위치', '중심에서 약 3만', ' 광년');
+    e = '<b>우리은하</b>는 태양계가 속한 은하로, 위에서 보면 막대 모양 중심부와 나선팔이 있는 모습이고, 옆에서 보면 가운데가 볼록한 원반 모양입니다. 원반을 둘러싼 <b>헤일로</b>에는 구상 성단이 분포합니다. 밤하늘의 <b>은하수</b>는 우리은하의 원반을 안에서 본 모습입니다.';
+    t = '[성운과 성단]에서 성단과 성운의 종류를 비교하세요.'; }
+  else if (st.mode === 'expand') { s = stat('풍선 반지름', (Rk(st.inf / 100) / 20).toFixed(1), ' cm') + stat('기준 은하', GX[st.ref][2]);
+    e = '<b>우주 팽창</b>: 은하들은 서로 멀어지고 있으며, 멀리 있는 은하일수록 더 빨리 멀어집니다. 풍선 표면의 은하처럼 어느 은하에서 보아도 다른 은하들이 멀어지므로 <b>팽창의 중심은 없습니다</b>. 우주는 아주 작은 한 점에서 대폭발로 시작되어 지금도 팽창하고 있습니다.';
+    t = '기준 은하를 바꾸어도 ‘멀리 있는 은하일수록 더 많이 멀어진다’가 성립하는지 확인하세요.'; }
+  else { const e2 = EV[st.ev]; s = stat('연도', e2[0]) + stat('탐사', e2[1]);
+    e = '<b>우주 탐사</b>는 인공위성, 우주 망원경, 탐사선, 우주 정거장 등으로 이루어집니다. 우주 탐사로 얻은 기술은 위성 항법(GPS), 일기 예보, 통신, 메모리폼, 정수기 필터 등 생활 곳곳에 쓰입니다. 한편 우주 쓰레기 같은 문제도 생겼습니다.';
+    t = '연도를 바꾸며 우주 탐사의 역사를 살펴보세요. 아래 그래프는 빛이 각 천체까지 가는 데 걸리는 시간입니다.'; }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 조작 ===== */
+$('dist').oninput = e => { st.d = +e.target.value; $('distOut').textContent = st.d + ' pc'; };
+function syncMag(){ const d = st.mg === 'dist', on = st.mode === 'mag'; $('mdF').hidden = !d || !on; $('tempF').hidden = d || !on; if (on) { $('gTitle').textContent = d ? '거리에 따른 보이는 밝기' : '별의 표면 온도'; } }
+Kit.seg($('magSeg'), 'mg', v => { st.mg = v; syncMag(); table(); })('dist');
+$('md').oninput = e => { st.md = +e.target.value; $('mdOut').textContent = st.md + '배'; };
+$('temp').oninput = e => { st.temp = +e.target.value; $('tempOut').textContent = tempOf(st.temp).toLocaleString() + ' K'; }; $('tempOut').textContent = tempOf(st.temp).toLocaleString() + ' K';
+Kit.seg($('galSeg'), 'gal', v => st.gal = v)('top');
+$('inf').oninput = e => { st.inf = +e.target.value; st.blow = false; $('infOut').textContent = st.inf === 0 ? '처음' : st.inf + '%'; table(); };
+$('blow').onclick = () => { if (st.inf >= 100) st.inf = 0; st.blow = true; };
+Kit.seg($('refSeg'), 'ref', v => { st.ref = +v; table(); })('0');
+$('ev').max = EV.length - 1; $('ev').oninput = e => { st.ev = +e.target.value; $('evOut').textContent = EV[st.ev][0]; }; $('evOut').textContent = EV[0][0];
+Kit.tabs(m => { st.mode = m; table();
+  $('gTitle').textContent = {parallax: '거리와 연주 시차', mag: '', galaxy: '우리은하 각 부분의 별', expand: '처음 거리와 늘어난 거리', explore: '빛이 가는 데 걸리는 시간'}[m];
+  $('gSub').textContent = {parallax: '', mag: '', galaxy: '대략적인 경향을 나타낸 상대값', expand: '점이 한 직선 위에 놓일까?', explore: '눈금이 10배씩 커짐'}[m]; syncMag(); }, ['parallax', 'mag', 'galaxy', 'expand', 'explore']);
+let tick = 0;
+Kit.loop(dt => { st.t += dt; if (st.blow && st.mode === 'expand') { st.inf = Math.min(100, st.inf + dt * 25); $('inf').value = Math.round(st.inf); $('infOut').textContent = Math.round(st.inf) + '%'; if ((tick += dt) > .25) { tick = 0; table(); } if (st.inf >= 100) { st.blow = false; table(); } } },
+  () => { ({parallax: drawParallax, mag: drawMag, galaxy: drawGalaxy, expand: drawExpand, explore: drawExplore})[st.mode](); drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>
