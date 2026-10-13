@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>생태계와 환경 실험실 · 통합과학2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-bio">
+<div class="wrap">
+  <nav class="topbar" data-topbar="통합과학2|03 생태계와 환경" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학2 · 03 생태계와 환경 <span class="code">통과2 Ⅱ</span></div>
+      <h1>생태계 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="web">1. 먹이 그물</button>
+      <button type="button" data-mode="pyramid">2. 생태 피라미드와 평형</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="생태계 모형"></canvas></div>
+      <div class="controls">
+        <div class="field" data-only="web"><div class="seg" id="netSeg"><button type="button" data-net="web">복잡한 먹이 그물</button><button type="button" data-net="chain">단순한 먹이 사슬</button></div></div>
+        <button class="btn" type="button" id="restore" data-only="web">모두 되돌리기</button>
+        <div class="field" data-only="pyramid"><div class="seg" id="pySeg"><button type="button" data-py="energy">에너지 피라미드</button><button type="button" data-py="eq">생태계 평형</button></div></div>
+        <button class="btn primary" type="button" id="dist" data-only="pyramid">교란: 1차 소비자 급증</button>
+        <button class="btn" type="button" id="play">일시정지</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>먹이 그물이 복잡할수록 생태계가 안정한 까닭은?</summary><p>한 생물이 사라져도 그 생물을 먹던 소비자가 다른 먹이를 먹을 수 있어 영향이 분산되기 때문입니다. 단순한 먹이 사슬에서는 한 단계가 사라지면 그 위 단계 생물이 먹이를 잃고 함께 사라질 수 있습니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>상위 영양 단계로 갈수록 에너지가 줄어드는 까닭은?</summary><p>각 영양 단계의 생물은 얻은 에너지의 대부분을 호흡(생명 활동)에 쓰고 열로 방출하며, 먹히지 않고 죽은 부분은 분해자에게 갑니다. 그래서 다음 단계로 전달되는 에너지는 대략 10 % 정도에 불과합니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>사람이 생태계 평형을 깨뜨리는 예와 회복을 돕는 방법은?</summary><p>무분별한 사냥(늑대 제거), 외래종 도입, 서식지 파괴, 환경 오염 등이 평형을 깨뜨립니다. 생태 통로 설치, 멸종 위기종 복원(예: 반달가슴곰), 보호 구역 지정 등으로 회복을 도울 수 있습니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="개체 수 변화는 단순화한 수학 모형입니다."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+// 먹이 그물: id, 이름, 그림, 영양 단계, 위치
+const SPW = [['grass', '풀', '🌿', 1, .3, .86], ['tree', '나무 열매', '🌳', 1, .7, .86], ['bug', '메뚜기', '🦗', 2, .15, .62], ['rabbit', '토끼', '🐇', 2, .45, .62], ['mouse', '쥐', '🐁', 2, .78, .62], ['frog', '개구리', '🐸', 3, .2, .38], ['snake', '뱀', '🐍', 3, .58, .38], ['bird', '참새', '🐦', 3, .85, .38], ['hawk', '매', '🦅', 4, .5, .12]];
+const EW = [['grass', 'bug'], ['grass', 'rabbit'], ['tree', 'mouse'], ['grass', 'mouse'], ['tree', 'bird'], ['bug', 'frog'], ['bug', 'bird'], ['rabbit', 'snake'], ['mouse', 'snake'], ['frog', 'snake'], ['rabbit', 'hawk'], ['snake', 'hawk'], ['bird', 'hawk'], ['mouse', 'hawk']];
+const SPC = [['grass', '풀', '🌿', 1, .5, .86], ['bug', '메뚜기', '🦗', 2, .5, .62], ['frog', '개구리', '🐸', 3, .5, .38], ['hawk', '매', '🦅', 4, .5, .12]], EC = [['grass', 'bug'], ['bug', 'frog'], ['frog', 'hawk']];
+const st = {mode: 'web', net: 'web', gone: new Set(), py: 'energy', x: 1, y: 1, hist: [], t: 0};
+const SP = () => st.net === 'web' ? SPW : SPC, ED = () => st.net === 'web' ? EW : EC;
+// 정성적 상태: 각 종의 먹이가 남아 있는지 판정 → 생존/위험/증가
+function status(){ const res = {}; const sp = SP(), ed = ED(); for (let pass = 0; pass < 5; pass++) sp.forEach(([id, , , lv]) => { if (st.gone.has(id)) { res[id] = 'gone'; return; } if (lv === 1) { res[id] = res[id] || 'ok'; return; } const prey = ed.filter(e => e[1] === id).map(e => e[0]); const alive = prey.filter(p => !st.gone.has(p) && res[p] !== 'gone'); res[id] = alive.length === 0 ? 'gone' : alive.length < prey.length ? 'down' : 'ok'; });
+  sp.forEach(([id]) => { if (res[id] === 'ok' || res[id] === 'down') { const preds = ed.filter(e => e[0] === id).map(e => e[1]); if (preds.length && preds.some(p => res[p] === 'gone' || st.gone.has(p)) && res[id] === 'ok') res[id] = 'up'; } }); return res; }
+function drawWeb(){ const g = S.g, W = S.w, H = S.h, sp = SP(), R = status(), P = id => { const s = sp.find(s => s[0] === id); return [s[4] * W * .68 + W * .02, s[5] * H]; };
+  ED().forEach(([a, b]) => { const [x0, y0] = P(a), [x1, y1] = P(b), off = R[a] === 'gone' || R[b] === 'gone'; g.globalAlpha = off ? .15 : .7; arrow(g, x0 + (x1 - x0) * .2, y0 + (y1 - y0) * .2, x0 + (x1 - x0) * .78, y0 + (y1 - y0) * .78, '#8a7a5a', 2); g.globalAlpha = 1; });
+  sp.forEach(([id, n, ic]) => { const [x, y] = P(id), s = R[id]; g.fillStyle = s === 'gone' ? 'rgba(150,150,150,.25)' : s === 'down' ? 'rgba(242,140,122,.35)' : s === 'up' ? 'rgba(246,211,101,.5)' : 'rgba(155,227,181,.35)'; g.beginPath(); g.arc(x, y, 30, 0, TAU); g.fill(); g.globalAlpha = s === 'gone' ? .3 : 1; label(g, ic, x, y - 2, {size: 28}); g.globalAlpha = 1; label(g, n, x, y + 40, {size: 12, weight: 700}); if (s !== 'ok') label(g, {gone: '사라짐 ✖', down: '감소 ↓', up: '일시 증가 ↑'}[s], x, y + 56, {size: 11, weight: 700, color: s === 'gone' ? C.muted : s === 'down' ? C.hot : '#b07f00'}); });
+  label(g, '생물을 눌러 사라지게 해 보세요 · 화살표: 먹이 → 포식자 (에너지 흐름)', W * .36, 14, {size: 12, weight: 600});
+  const lx = W * .82; [['생산자', 1], ['1차 소비자', 2], ['2차 소비자', 3], ['최종 소비자', 4]].forEach(([n, lv], i) => label(g, n, lx, [.86, .62, .38, .12][i] * H, {size: 12, color: C.muted})); label(g, '🍄 분해자: 모든 생물의 사체·배설물 분해', lx, H * .97, {size: 11, color: C.muted}); }
+S.cv.addEventListener('click', ev => { if (st.mode !== 'web') return; const r = S.cv.getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top; const s = SP().find(s => Math.hypot(s[4] * S.w * .68 + S.w * .02 - x, s[5] * S.h - y) < 34); if (s) { st.gone.has(s[0]) ? st.gone.delete(s[0]) : st.gone.add(s[0]); render(); } });
+/* ===== 피라미드·평형 ===== */
+function drawPyramid(){ const g = S.g, W = S.w, H = S.h;
+  if (st.py === 'energy') { const L = [['생산자 (풀)', 10000, '#5fb37a'], ['1차 소비자 (메뚜기)', 1000, '#e8c34a'], ['2차 소비자 (개구리)', 100, '#e8973a'], ['3차 소비자 (뱀)', 10, '#d0533f']], cx = W * .38, lh = H * .17, base = H * .88;
+    L.forEach(([n, e, c], i) => { const w = W * .6 * (1 - i * .22), y = base - (i + 1) * lh; g.fillStyle = c; g.beginPath(); g.moveTo(cx - w / 2, y + lh); g.lineTo(cx + w / 2, y + lh); const wt = W * .6 * (1 - (i + 1) * .22); g.lineTo(cx + wt / 2, y); g.lineTo(cx - wt / 2, y); g.closePath(); g.fill(); i < 3 ? label(g, `${n}: ${e.toLocaleString()} kJ`, cx, y + lh / 2, {size: 13, weight: 700, color: '#fff'}) : label(g, `${n}: ${e} kJ`, cx - W * .1, y + lh / 2, {size: 13, weight: 700, color: c, align: 'right'});
+      if (i < 3) { const rx = cx + w / 2 + 30; arrow(g, rx, y + lh * .3, rx + 50, y + lh * .3, C.hot, 2); label(g, `열·호흡 ${(e * .9).toLocaleString()}`, rx + 56, y + lh * .3, {size: 11, color: C.hot, align: 'left'}); } });
+    label(g, '태양 에너지의 약 1 %만 광합성으로 생산자에게 저장 → 각 단계마다 약 10 %만 다음 단계로 전달', W / 2, 18, {size: 12, weight: 600}); }
+  else { const cx = W * .35, t = st.t; const nP = Math.round(st.x * 30), nC = Math.round(st.y * 12); let seed = 9; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    g.fillStyle = '#e8f3e0'; g.fillRect(0, 0, W * .68, H); for (let i = 0; i < 40; i++) label(g, '🌿', r() * W * .66, H * .5 + r() * H * .48, {size: 16});
+    for (let i = 0; i < Math.min(80, nP); i++) label(g, '🐇', (r() * W * .64 + Math.sin(t + i) * 6) % (W * .66), H * .1 + r() * H * .8, {size: 16}); for (let i = 0; i < Math.min(40, nC); i++) label(g, '🦊', (r() * W * .64 + Math.cos(t * .7 + i) * 8) % (W * .66), H * .1 + r() * H * .8, {size: 20});
+    const rx = W * .84; label(g, `🐇 토끼(1차 소비자) ${Math.round(st.x * 300)}`, rx, H * .3, {size: 14, weight: 700}); label(g, `🦊 여우(2차 소비자) ${Math.round(st.y * 40)}`, rx, H * .3 + 28, {size: 14, weight: 700}); const off = Math.abs(st.x - 1) + Math.abs(st.y - 1); label(g, off < .08 ? '평형 상태' : '평형을 회복하는 중…', rx, H * .3 + 60, {size: 14, weight: 700, color: off < .08 ? C.bio : C.hot}); } }
+function stepEq(dt){ // 로지스틱 먹이 + 포식자 (감쇠 진동 → 평형 (1,1))
+  for (let k = 0; k < 10; k++) { const d = dt / 10 * 2, x = st.x, y = st.y; const dx = 1.2 * x * (1 - x / 4) - .9 * x * y, dy = .8 * x * y - .8 * y; st.x = Math.max(.01, x + dx * d); st.y = Math.max(.01, y + dy * d); } }
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'web') { const R = status(), sp = SP(), m = axes(G, {x: [0, sp.length, 1, ''], y: [0, 2, .5, '개체 수 경향']}); sp.forEach(([id, n], i) => { const v = {ok: 1, down: .5, up: 1.6, gone: 0}[R[id]]; g.fillStyle = {ok: C.bio, down: C.hot, up: '#e0a400', gone: C.muted}[R[id]]; g.fillRect(m.X(i + .2), m.Y(v), m.X(i + .8) - m.X(i + .2), m.Y(0) - m.Y(v)); label(g, n, m.X(i + .5), m.Y(0) + 12, {size: 10}); }); }
+  else if (st.py === 'energy') { const m = axes(G, {x: [0, 4, 1, '영양 단계'], y: [0, 4, 1, 'log₁₀(에너지 kJ)']}); [[1, 4], [2, 3], [3, 2], [4, 1]].forEach(([lv, v]) => { g.fillStyle = C.bio; g.fillRect(m.X(lv - .8), m.Y(v), m.X(lv - .2) - m.X(lv - .8), m.Y(0) - m.Y(v)); label(g, ['10000', '1000', '100', '10'][lv - 1], m.X(lv - .5), m.Y(v) - 9, {size: 10, weight: 700}); }); }
+  else { const m = axes(G, {x: [0, 60, 10, '시간'], y: [0, 2.5, .5, '개체 수 (평형 = 1)']}); line(G, st.hist.map(h => [h[0], h[1]]), m, '#b07a3a', 2.4); line(G, st.hist.map(h => [h[0], h[2]]), m, C.hot, 2.4); label(g, '갈색: 토끼 · 빨강: 여우', m.X(45), m.Y(2.3), {size: 10, color: C.muted}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
+  if (st.mode === 'web') { const R = status(), sp = SP(); s.innerHTML = `<div><b>${sp.filter(x => R[x[0]] === 'gone').length}종</b><span>사라진 생물</span></div><div><b>${sp.filter(x => R[x[0]] === 'down').length}종</b><span>감소 위험</span></div>`;
+    $('explain').innerHTML = '<b>생태계</b>는 생물 요소(생산자·소비자·분해자)와 비생물 요소(빛, 물, 온도, 토양 등)가 서로 영향을 주고받는 체계예요. 여러 먹이 사슬이 얽힌 <b>먹이 그물</b>이 복잡할수록 한 종이 사라져도 대체 먹이가 있어 생태계가 안정해요.'; $('tip').textContent = '[단순한 먹이 사슬]로 바꾸어 메뚜기를 없애 보세요. 위 단계 생물은 어떻게 되나요?';
+    th.innerHTML = '<tr><th>구성 요소</th><th>예</th><th>역할</th></tr>'; tb.innerHTML = [['생산자', '식물, 식물성 플랑크톤', '광합성으로 유기물 생산'], ['소비자', '동물', '다른 생물을 먹어 유기물 획득'], ['분해자', '세균, 곰팡이', '사체·배설물을 무기물로 분해'], ['비생물 요소', '빛, 물, 온도, 공기, 토양', '생물의 생존에 영향']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); $('tTitle').textContent = '생태계의 구성 요소'; $('gTitle').textContent = '종별 개체 수 경향'; $('gSub').textContent = ''; }
+  else { s.innerHTML = st.py === 'energy' ? '<div><b>약 10 %</b><span>다음 단계로 전달되는 에너지</span></div><div><b>약 90 %</b><span>호흡·열로 방출</span></div>' : `<div><b>${Math.round(st.x * 300)}</b><span>토끼</span></div><div><b>${Math.round(st.y * 40)}</b><span>여우</span></div>`;
+    $('explain').innerHTML = st.py === 'energy' ? '<b>생태 피라미드</b>: 영양 단계별로 개체 수, 생물량, 에너지양을 쌓은 그림. 상위 영양 단계로 갈수록 대체로 줄어들어 피라미드 모양이 돼요. 에너지는 한 방향으로 흐르고 결국 열로 빠져나가지만, 물질은 순환해요.' : '<b>생태계 평형</b>: 생물의 종류와 개체 수, 물질의 양이 비교적 일정하게 유지되는 상태. 교란이 일어나도 먹이 관계에 의해 개체 수가 조절되어 평형을 회복해요(회복력).'; $('tip').textContent = st.py === 'eq' ? '[교란] 버튼을 눌러 보세요. 토끼가 늘면 → 여우 증가 → 토끼 감소 → 여우 감소 … 진동하며 평형으로 돌아와요.' : '같은 땅에서 고기보다 곡물을 먹으면 더 많은 사람을 먹일 수 있는 까닭도 에너지 피라미드로 설명할 수 있어요.';
+    th.innerHTML = '<tr><th>단계</th><th>변화</th></tr>'; tb.innerHTML = [['1', '1차 소비자 증가'], ['2', '생산자 감소, 2차 소비자 증가'], ['3', '1차 소비자 감소'], ['4', '생산자 증가, 2차 소비자 감소'], ['5', '평형 회복']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = '평형 회복 과정'; $('gTitle').textContent = st.py === 'energy' ? '영양 단계별 에너지' : '개체 수 변화'; $('gSub').textContent = ''; } }
+Kit.seg($('netSeg'), 'net', v => { st.net = v; st.gone = new Set(); render(); })('web'); $('restore').onclick = () => { st.gone = new Set(); render(); };
+Kit.seg($('pySeg'), 'py', v => { st.py = v; $('dist').style.display = v === 'eq' ? '' : 'none'; st.t = 0; st.hist = []; st.x = 1; st.y = 1; render(); })('energy');
+$('dist').onclick = () => { st.x = 2.1; st.t = 0; st.hist = []; };
+Kit.tabs(m => { st.mode = m; if (m === 'pyramid') $('pySeg').querySelector(`[data-py="${st.py}"]`).click(); render(); }, ['web', 'pyramid']);
+let acc = 0;
+Kit.loop(dt => { st.t += dt; if (st.mode === 'pyramid' && st.py === 'eq' && st.t < 60) { stepEq(dt); acc += dt; if (acc > .2) { acc = 0; st.hist.push([st.t, st.x, st.y]); render(); } } }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); (st.mode === 'web' ? drawWeb : drawPyramid)(); drawGraph(); }, $('play'));
+})();
+</script>
+</body>
+</html>
