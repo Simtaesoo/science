@@ -58,7 +58,7 @@ window.CATALOG = [
   { no:15, area:'earth', title:'별과 우주', code:'9과15', items:[{kind:'sim', title:'1차시 연주 시차와 별까지의 거리', href:'g2/space/sim.html#parallax'}, {kind:'sim', title:'2차시 별의 밝기·등급, 색과 표면 온도', href:'g2/space/sim.html#mag'}, {kind:'sim', title:'3차시 우리은하와 성운·성단', href:'g2/space/sim.html#galaxy'}, {kind:'sim', title:'4차시 팽창하는 우주 (풍선 모형)', href:'g2/space/sim.html#expand'}, {kind:'sim', title:'4차시 우주 탐사의 역사', href:'g2/space/sim.html#explore'}, {kind:'ws', title:'학습지 1~4차시 (8쪽)', href:'g2/space/worksheet.html'}]}
  ]},
  { id:'g3', grade:'3학년', book:'과학 3', units:[
-  { no:16, area:'chem', title:'화학 반응의 규칙성', code:'9과16', items:[{kind:'sim', title:'질량 보존과 일정 성분비'}]},
+  { no:16, area:'chem', title:'화학 반응의 규칙성과 에너지 변화', code:'9과16', items:[{kind:'sim', title:'1차시 물리 변화와 화학 변화', href:'g3/react/sim.html#change'}, {kind:'sim', title:'2차시 화학 반응식', href:'g3/react/sim.html#eq'}, {kind:'sim', title:'3차시 질량 보존 법칙', href:'g3/react/sim.html#mass'}, {kind:'sim', title:'4차시 일정 성분비 법칙', href:'g3/react/sim.html#ratio'}, {kind:'sim', title:'5차시 화학 반응에서의 에너지 출입', href:'g3/react/sim.html#energy'}, {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g3/react/worksheet.html'}]},
   { no:17, area:'earth', title:'날씨와 기후변화', code:'9과17', items:[{kind:'sim', title:'온실 효과 모형'}, {kind:'sim', title:'기단과 전선'}]},
   { no:18, area:'earth', title:'수권과 해수의 순환', code:'9과18', items:[{kind:'sim', title:'해수의 수온·염분 분포'}]},
   { no:19, area:'phy', title:'운동과 에너지', code:'9과19', items:[
