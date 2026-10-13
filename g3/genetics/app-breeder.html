@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>완두 육종가 · 중3 생식과 유전</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<style>.acts{display:grid;grid-template-columns:1fr 1fr;gap:6px}.acts .tool{justify-content:center;font-size:14px}.log{font-size:13px;line-height:1.6;max-height:180px;overflow:auto}</style>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'breeder', title: '완두 육종가', unit: '중3 · 21 생식과 유전', back: '../../index.html#g3', sim: 'sim.html#mendel',
+  lead: '멘델의 온실에 오신 것을 환영해요! 겉모습(표현형)만 보이는 완두를 <b>교배</b>하고 <b>자가 수분</b>해서, 의뢰받은 <b>순종</b> 완두를 찾아내거나 만들어 내세요.',
+  howto: ['온실의 완두를 눌러 고르세요. 2개 → <b>교배</b>, 1개 → <b>자가 수분</b> 또는 <b>순종 인증</b>.', '자손 씨앗 8개가 나와요. 씨앗을 눌러 온실(최대 8칸)에 심을 수 있어요.', '인증이 틀리면 -100점. 교배할 때마다 -15점. 적은 교배로 확실하게!'],
+  options: [],
+  recap: '멘델의 <b>우열의 원리</b>: 대립 형질이 다른 순종을 교배하면 잡종 1대에는 우성 형질만 나타나요. <b>분리의 법칙</b>: 잡종 1대를 자가 수분하면 잡종 2대에서 우성 : 열성 = 3 : 1. <b>독립의 법칙</b>: 두 쌍의 형질은 서로 영향을 주지 않고 독립적으로 유전되어 9 : 3 : 3 : 1로 나타나요. 우성 표현형의 유전자형을 알려면 열성 순종과 교배(<b>검정 교배</b>)하면 돼요 — 자손이 모두 우성이면 순종, 열성이 섞이면 잡종!',
+  startLabel: '온실 입장'
+});
+const {S, sfx, toast} = app, D = Draw;
+const MIS = [
+  {t: '둥근 완두 중에서 <b>순종(RR)</b>을 찾아 인증하세요.', two: false, start: ['Rr', 'RR', 'Rr', 'rr'], goal: g => g.R === 'RR', hint: '주름진 완두(rr)와 교배해 보세요(검정 교배). 자손 중 주름진 것이 하나라도 나오면 잡종이에요.'},
+  {t: '잡종끼리만 있어요. <b>주름진 순종</b> 완두를 만들어 인증하세요.', two: false, start: ['Rr', 'Rr'], goal: g => g.R === 'rr', hint: '열성 형질이 겉으로 나타나면 그 완두는 반드시 순종(rr)이에요!'},
+  {t: '<b>둥글고 초록색(RRyy)</b>인 순종 완두를 만들어 인증하세요.', two: true, start: ['RRYY', 'rryy'], goal: g => g.R === 'RR' && g.Y === 'yy', hint: '잡종 1대(RrYy)를 자가 수분하면 잡종 2대에서 둥글고 초록색(R_yy)이 3/16 나와요. 그중 RRyy를 검정 교배로 가려내세요.'},
+  {t: '<b>노란색 잡종(Yy)</b>이면서 <b>주름진(rr)</b> 완두를 찾아 인증하세요.', two: true, start: ['RrYy', 'RrYy', 'rryy'], goal: g => g.R === 'rr' && g.Y === 'Yy', hint: '주름진 노란색 완두(rrY_)를 찾아 초록색 순종(yy)과 교배하면 Yy인지 알 수 있어요.'}];
+let mi, plants, seeds, sel, ui = {}, crosses, wrongs, uid, born;
+const parse = s => s.length === 2 ? {R: s, Y: 'YY'} : {R: s.slice(0, 2), Y: s.slice(2)};
+const norm = p => p.split('').sort((a, b) => a === a.toUpperCase() ? -1 : 1).join('');
+const ph = g => ({round: g.R.includes('R'), yellow: g.Y.includes('Y')});
+const phName = (g, two) => { const p = ph(g); return (p.round ? '둥근' : '주름진') + (two ? (p.yellow ? ' 노란색' : ' 초록색') : ''); };
+const gamete = g => ({R: g.R[Math.random() < .5 ? 0 : 1], Y: g.Y[Math.random() < .5 ? 0 : 1]});
+function child(a, b){ const x = gamete(a), y = gamete(b); return {R: norm(x.R + y.R), Y: norm(x.Y + y.Y)}; }
+app.onStart = () => { mi = -1; ui.m = app.panel('의뢰'); ui.a = app.panel('작업'); ui.l = app.panel('실험 기록'); ui.l.className = 'log'; app.startTimer(); next(); };
+function next(){ mi++; if (mi >= MIS.length) return app.finish({stars: app.player.score >= 900 ? 3 : app.player.score >= 600 ? 2 : 1, summary: `육종 점수 <b>${app.player.score}</b>`, best: app.player.score + '점', bestValue: app.player.score});
+  const M = MIS[mi]; uid = 0; plants = M.start.map(s => ({id: ++uid, g: parse(s)})); seeds = []; sel = []; crosses = 0; wrongs = 0; born = performance.now(); app.setLevel(mi, MIS.length);
+  ui.m.innerHTML = `<p class="mission">${M.t}</p><details style="margin-top:6px"><summary class="note-c">힌트 보기</summary><p class="note-c">${M.hint}</p></details>`; ui.l.innerHTML = ''; acts(); }
+function acts(){ const n = sel.length; ui.a.innerHTML = `<p class="note-c" style="margin-bottom:6px">선택: ${n ? sel.map(i => '#' + i).join(', ') : '없음'}</p><div class="acts"><button class="tool" id="x" ${n === 2 ? '' : 'disabled'}>🌸 교배</button><button class="tool" id="s" ${n === 1 ? '' : 'disabled'}>🌼 자가 수분</button><button class="tool" id="c" ${n === 1 ? '' : 'disabled'}>🏅 순종 인증</button><button class="tool" id="d" ${n >= 1 ? '' : 'disabled'}>🗑️ 뽑기</button></div>`;
+  const P = id => plants.find(p => p.id === id);
+  ui.a.querySelector('#x').onclick = () => breed(P(sel[0]), P(sel[1])); ui.a.querySelector('#s').onclick = () => breed(P(sel[0]), P(sel[0]));
+  ui.a.querySelector('#d').onclick = () => { plants = plants.filter(p => !sel.includes(p.id)); sel = []; sfx.click(); acts(); };
+  ui.a.querySelector('#c').onclick = () => certify(P(sel[0])); }
+function breed(a, b){ crosses++; app.addScore(-15); seeds = Array.from({length: 8}, () => child(a.g, b.g)); sfx.pop(); const two = MIS[mi].two, cnt = {}; seeds.forEach(s => { const n = phName(s, two); cnt[n] = (cnt[n] || 0) + 1; });
+  ui.l.insertAdjacentHTML('afterbegin', `<p>${a === b ? `🌼 #${a.id} 자가 수분` : `🌸 #${a.id} × #${b.id}`} → ${Object.entries(cnt).map(([k, v]) => `${k} ${v}`).join(', ')}</p>`); sel = []; acts(); }
+function certify(p){ const ok = MIS[mi].goal(p.g), gs = p.g.R + (MIS[mi].two ? p.g.Y : '');
+  if (ok) { const pts = Math.max(60, 300 - wrongs * 100); app.addScore(pts); sfx.win(); app.confetti(80); ui.l.insertAdjacentHTML('afterbegin', `<p>🏅 #${p.id} 인증 성공! 유전자형 <b>${gs}</b></p>`);
+    ui.a.innerHTML = `<p style="color:var(--mint);font-weight:700">✔ 의뢰 완료! +${pts}</p><p class="note-c">교배 ${crosses}번 사용</p><button class="big" type="button" style="width:100%;margin-top:8px">다음 의뢰 ▶</button>`; ui.a.querySelector('button').onclick = next; sel = []; plants.forEach(q => q.reveal = true); }
+  else { wrongs++; app.addScore(-100); sfx.bad(); toast(`틀렸어요! #${p.id}의 유전자형은 ${gs}`, 'bad'); p.reveal = true; ui.l.insertAdjacentHTML('afterbegin', `<p>❌ #${p.id} 인증 실패 (${gs})</p>`); sel = []; acts(); } }
+function L(){ const W = S.w, H = S.h, cw = W / 4, ch = H * .3; return {slots: Array.from({length: 8}, (_, i) => ({x: (i % 4) * cw, y: H * .06 + Math.floor(i / 4) * ch, w: cw, h: ch})), seeds: seeds.map((s, i) => ({s, i, x: W * (.08 + i * .115), y: H * .84, r: Math.min(22, W * .035)}))}; }
+app.pointer({tap(x, y){ if (!plants) return; const G = L(); const s = G.seeds.find(s => Math.hypot(x - s.x, y - s.y) < s.r + 8);
+  if (s) { if (plants.length >= 8) { toast('온실이 꽉 찼어요. 필요 없는 완두를 뽑으세요', 'bad'); return; } plants.push({id: ++uid, g: s.s, t0: performance.now()}); seeds.splice(s.i, 1); sfx.pop(); acts(); return; }
+  const i = G.slots.findIndex(r => x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h); if (i < 0 || !plants[i]) return; const id = plants[i].id;
+  if (sel.includes(id)) sel = sel.filter(v => v !== id); else { sel.push(id); if (sel.length > 2) sel.shift(); } sfx.click(); acts(); }});
+function pea(g, x, y, r, gen){ const p = ph(gen); g.fillStyle = p.yellow ? '#f3d34a' : '#8cc63f'; g.strokeStyle = p.yellow ? '#b89a1c' : '#5a8a24'; g.lineWidth = 2; g.beginPath();
+  if (p.round) g.arc(x, y, r, 0, 7); else for (let k = 0; k <= 24; k++) { const a = k / 24 * 6.283, rr = r * (.9 + .06 * Math.sin(a * 9) + .03 * Math.sin(a * 23)); g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+  g.closePath(); g.fill(); g.stroke(); g.fillStyle = 'rgba(255,255,255,.45)'; g.beginPath(); g.arc(x - r * .35, y - r * .35, r * .25, 0, 7); g.fill(); }
+app.draw = (g, W, H) => { if (!plants) return; const G = L(), t = performance.now() / 1000, two = MIS[mi].two;
+  g.fillStyle = '#eef5e6'; g.fillRect(0, 0, W, H); g.fillStyle = 'rgba(255,255,255,.6)'; for (let i = 0; i < 8; i++) { g.beginPath(); g.moveTo(i * W / 8, 0); g.lineTo(i * W / 8 + W / 16, H * .66); g.lineTo(i * W / 8 - W / 16, H * .66); g.fill(); }
+  D.text(g, '🌿 멘델의 온실', 12, 14, {size: 13, weight: 700, color: '#4f6b3a', align: 'left'});
+  G.slots.forEach((r, i) => { const p = plants[i]; g.fillStyle = '#8a6a4f'; D.rr(g, r.x + r.w * .3, r.y + r.h * .72, r.w * .4, r.h * .2, 6); g.fill(); if (!p) return; const on = sel.includes(p.id), grow = D.clamp((performance.now() - (p.t0 || 0)) / 600, 0, 1);
+    if (on) { g.strokeStyle = '#e0a400'; g.lineWidth = 4; D.rr(g, r.x + 6, r.y + 4, r.w - 12, r.h - 8, 12); g.stroke(); }
+    g.strokeStyle = '#4f8a3a'; g.lineWidth = 3; g.beginPath(); g.moveTo(r.x + r.w / 2, r.y + r.h * .72); g.quadraticCurveTo(r.x + r.w * .4, r.y + r.h * .5, r.x + r.w / 2, r.y + r.h * (.72 - .5 * grow)); g.stroke();
+    g.fillStyle = '#6fae4f'; g.beginPath(); g.ellipse(r.x + r.w * .4, r.y + r.h * .5, 10 * grow, 5 * grow, -.6, 0, 7); g.fill(); g.beginPath(); g.ellipse(r.x + r.w * .6, r.y + r.h * .42, 10 * grow, 5 * grow, .6, 0, 7); g.fill();
+    pea(g, r.x + r.w / 2, r.y + r.h * .22, Math.min(r.w, r.h) * .13 * grow + .1, p.g); D.text(g, '#' + p.id, r.x + 18, r.y + 16, {size: 12, weight: 700, color: '#4f6b3a'});
+    if (p.reveal) D.text(g, p.g.R + (two ? p.g.Y : ''), r.x + r.w - 10, r.y + 16, {size: 12, weight: 700, color: '#a5462f', align: 'right'});
+    D.text(g, phName(p.g, two), r.x + r.w / 2, r.y + r.h * .96, {size: 11, color: '#4f6b3a'}); });
+  // 씨앗 쟁반
+  g.fillStyle = '#d9c7a5'; D.rr(g, W * .03, H * .73, W * .94, H * .22, 14); g.fill(); D.text(g, seeds.length ? '자손 씨앗 (눌러서 심기)' : '교배하면 여기에 씨앗이 나와요', W * .05, H * .76, {size: 12, color: '#6a5a3a', weight: 700, align: 'left'});
+  G.seeds.forEach(s => pea(g, s.x, s.y + Math.sin(t * 3 + s.i) * 1.5, s.r, s.s));
+};
+</script>
+</body>
+</html>
