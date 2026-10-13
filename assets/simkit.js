@@ -30,7 +30,7 @@ window.Kit = (() => {
     g.textAlign = 'center'; g.textBaseline = 'top';
     for (let v = x0; v <= x1 + 1e-9; v += xs) g.fillText(+v.toFixed(2), X(v), P.T + h + 5);
     if (xl) g.fillText(xl, P.L + w / 2, cvo.h - 13);
-    if (yl) { g.save(); g.translate(P.L - 37, P.T + h / 2); g.rotate(-Math.PI / 2); g.textBaseline = 'middle'; g.fillText(yl, 0, 0); g.restore(); }
+    if (yl) { g.save(); g.translate(P.keep ? P.L - 37 : 11, P.T + h / 2); g.rotate(-Math.PI / 2); g.textBaseline = 'middle'; g.fillText(yl, 0, 0); g.restore(); }
     g.strokeStyle = C.line; g.beginPath(); g.moveTo(P.L, P.T); g.lineTo(P.L, P.T + h); g.lineTo(P.L + w, P.T + h); g.stroke();
     return {X, Y, L: P.L, T: P.T, w, h};
   }
