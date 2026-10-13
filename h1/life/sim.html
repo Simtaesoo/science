@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>생명 시스템 실험실 · 통합과학1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-bio">
+<div class="wrap">
+  <nav class="topbar" data-topbar="통합과학1|07 생명 시스템" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학1 · 07 생명 시스템 <span class="code">통과1 Ⅲ</span></div>
+      <h1>세포와 생명 시스템 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="membrane">1. 세포막과 물질 이동</button>
+      <button type="button" data-mode="enzyme">2. 물질대사와 효소</button>
+      <button type="button" data-mode="gene">3. 유전자 발현</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="세포 모형"></canvas></div>
+      <div class="controls">
+        <div class="field" data-only="membrane"><div class="seg" id="mbSeg"><button type="button" data-mb="diff">확산</button><button type="button" data-mb="osmo">삼투 (적혈구)</button><button type="button" data-mb="plant">삼투 (식물 세포)</button></div></div>
+        <label class="field" data-only="membrane" id="concF" for="conc">바깥 용액 농도 <input type="range" id="conc" min="0" max="2" step="0.1" value="0.9"><output id="concOut">0.9 %</output></label>
+        <label class="field" data-only="enzyme" for="temp">온도 <input type="range" id="temp" min="0" max="70" step="1" value="37"><output id="tempOut">37 ℃</output></label>
+        <label class="field" data-only="enzyme" for="sub">기질 농도 <input type="range" id="sub" min="1" max="40" step="1" value="12"><output id="subOut">12</output></label>
+        <div class="field" data-only="enzyme"><label><input type="checkbox" id="enz" checked> 효소 넣기</label></div>
+        <button class="btn" type="button" id="newGene" data-only="gene">새 유전자</button>
+        <button class="btn primary" type="button" id="step" data-only="gene">다음 단계 ▶</button>
+        <button class="btn" type="button" id="play">일시정지</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>배추를 소금에 절이면 숨이 죽는 까닭은?</summary><p>배추 세포 바깥의 소금물 농도가 세포 안보다 높아, 삼투에 의해 세포 안의 물이 밖으로 빠져나가기 때문입니다. 세포막이 세포벽에서 떨어지는 원형질 분리가 일어나 배추가 흐물흐물해집니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>고열이 오래 지속되면 위험한 까닭을 효소와 관련지어 설명하면?</summary><p>효소의 주성분은 단백질이라 온도가 너무 높으면 입체 구조가 변형(변성)되어 기질과 결합하지 못합니다. 그러면 체내 화학 반응(물질대사)이 제대로 일어나지 않아 생명 활동에 문제가 생깁니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>사람과 대장균의 유전자로 같은 단백질(예: 인슐린)을 만들 수 있는 까닭은?</summary><p>거의 모든 생물이 같은 유전 암호(코돈과 아미노산의 대응 관계)를 사용하기 때문입니다. 그래서 사람의 인슐린 유전자를 대장균에 넣으면 대장균이 사람과 같은 인슐린을 만들 수 있습니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="효소 반응 속도와 세포 부피 변화는 원리를 보여 주는 모형입니다."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+const st = {mode: 'membrane', mb: 'diff', conc: .9, vol: 1, T: 37, sub: 12, enz: true, prod: 0, hist: [], gs: 0, dna: '', t: 0, parts: []};
+/* ===== 1. 세포막 ===== */
+function initParts(){ st.parts = Array.from({length: 56}, (_, i) => ({x: Math.random(), y: Math.random() * .42 + (i < 50 ? 0 : .58), k: i < 25 ? 'o2' : i < 50 ? 'glu' : 'o2', vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .3})); }
+function stepDiff(dt){ st.parts.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; if (p.x < 0 || p.x > 1) p.vx *= -1; if (p.y < 0) { p.y = 0; p.vy *= -1; } if (p.y > 1) { p.y = 1; p.vy *= -1; } const mem = Math.abs(p.y - .5) < .06; if (mem) { const ch = Math.abs(((p.x * 6) % 1) - .5) < .12; const pass = p.k === 'o2' || (p.k === 'glu' && ch); if (!pass) { p.vy *= -1; p.y = p.y < .5 ? .44 : .56; } } p.vx += (Math.random() - .5) * .05; p.vy += (Math.random() - .5) * .05; const s = Math.hypot(p.vx, p.vy); if (s > .35) { p.vx *= .35 / s; p.vy *= .35 / s; } }); }
+function drawMembrane(){ const g = S.g, W = S.w, H = S.h, my = H * .5, t = st.t;
+  if (st.mb === 'diff') { g.fillStyle = 'rgba(142,205,242,.12)'; g.fillRect(0, 0, W, H);
+    for (let x = 6; x < W; x += 12) { [-1, 1].forEach(s => { g.fillStyle = '#e8a33a'; g.beginPath(); g.arc(x, my + s * 22, 5, 0, TAU); g.fill(); g.strokeStyle = '#c9b48a'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x - 2, my + s * 17); g.lineTo(x - 2, my + s * 3); g.moveTo(x + 2, my + s * 17); g.lineTo(x + 2, my + s * 3); g.stroke(); }); }
+    for (let k = 0; k < 6; k++) { const x = (k + .5) / 6 * W; g.fillStyle = '#7a6ab0'; g.fillRect(x - 12, my - 30, 8, 60); g.fillRect(x + 4, my - 30, 8, 60); }
+    st.parts.forEach(p => { const x = p.x * W, y = p.y * H; if (p.k === 'o2') { g.fillStyle = '#e04a3c'; g.beginPath(); g.arc(x - 3, y, 3.5, 0, TAU); g.arc(x + 3, y, 3.5, 0, TAU); g.fill(); } else { g.fillStyle = '#2fa36a'; g.beginPath(); for (let k = 0; k < 6; k++) { const a = k * TAU / 6; g.lineTo(x + Math.cos(a) * 6, y + Math.sin(a) * 6); } g.fill(); } });
+    const up = st.parts.filter(p => p.y < .5), cnt = k => [up.filter(p => p.k === k).length, st.parts.filter(p => p.k === k && p.y >= .5).length];
+    label(g, `세포 밖  O₂ ${cnt('o2')[0]} · 포도당 ${cnt('glu')[0]}`, 12, 16, {size: 12, weight: 700, align: 'left'}); label(g, `세포 안  O₂ ${cnt('o2')[1]} · 포도당 ${cnt('glu')[1]}`, 12, H - 14, {size: 12, weight: 700, align: 'left'});
+    label(g, '보라: 막단백질(통로) · 주황 머리+꼬리: 인지질 2중층', W - 12, H - 14, {size: 11, color: C.muted, align: 'right'}); }
+  else { const iso = st.mb === 'osmo' ? .9 : .9, out = st.conc, cx = W * .36, cy = H * .5, base = Math.min(W, H) * .2;
+    g.fillStyle = `rgba(142,205,242,${.1 + out * .12})`; g.fillRect(0, 0, W, H); for (let i = 0; i < out * 30; i++) { g.fillStyle = 'rgba(255,255,255,.8)'; g.fillRect((i * 97 + 13) % W, (i * 61 + 7) % H, 3, 3); }
+    if (st.mb === 'osmo') { const r = base * Math.cbrt(st.vol), burst = st.vol > 1.6; if (burst) { g.fillStyle = 'rgba(200,40,40,.25)'; for (let k = 0; k < 8; k++) { g.beginPath(); g.arc(cx + Math.cos(k) * base, cy + Math.sin(k * 2) * base * .6, 14, 0, TAU); g.fill(); } label(g, '용혈! (세포막이 터짐)', cx, cy, {size: 16, weight: 700, color: C.hot}); }
+      else { g.fillStyle = '#d0453a'; g.beginPath(); if (st.vol < .8) { for (let k = 0; k <= 40; k++) { const a = k / 40 * TAU, rr = r * (1 + .12 * Math.sin(a * 9)); g.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * .55); } } else g.ellipse(cx, cy, r, r * (st.vol > 1.2 ? .9 : .55), 0, 0, TAU); g.fill(); g.fillStyle = 'rgba(0,0,0,.12)'; g.beginPath(); g.ellipse(cx, cy, r * .45, r * .2, 0, 0, TAU); g.fill(); } }
+    else { const w = base * 2.2, h = base * 1.5, sh = Math.max(0, Math.min(1, (1 - st.vol) * 2)); g.strokeStyle = '#5a8a3a'; g.lineWidth = 6; g.strokeRect(cx - w / 2, cy - h / 2, w, h); const iw = w * (1 - sh * .45), ih = h * (1 - sh * .45); g.fillStyle = 'rgba(95,179,122,.55)'; g.beginPath(); g.ellipse(cx, cy, iw / 2 - 4, ih / 2 - 4, 0, 0, TAU); g.fill(); g.strokeStyle = '#2e7d4f'; g.lineWidth = 2; g.stroke(); if (sh > .2) label(g, '원형질 분리', cx, cy + h / 2 + 18, {size: 13, weight: 700, color: C.hot}); else if (st.vol > 1.05) label(g, '세포가 팽팽해짐 (세포벽 때문에 터지지 않음)', cx, cy + h / 2 + 18, {size: 12, color: C.bio}); }
+    const dir = out < iso - .05 ? '물이 세포 안으로 ↓' : out > iso + .05 ? '물이 세포 밖으로 ↑' : '들어오고 나가는 물의 양이 같음'; label(g, dir, W * .78, H * .3, {size: 15, weight: 700, color: C.phy}); label(g, `바깥 ${out.toFixed(1)} % vs 세포 안 ${iso} %`, W * .78, H * .3 + 26, {size: 12}); label(g, out < iso - .05 ? '저장액' : out > iso + .05 ? '고장액' : '등장액', W * .78, H * .3 + 50, {size: 14, weight: 700, color: C.accent});
+    const n = Math.round(Math.abs(out - iso) * 6); for (let k = 0; k < n; k++) { const a = k / Math.max(1, n) * TAU + t, r0 = base * 1.6, r1 = base * 1.05, inw = out < iso; const u = (t * .6 + k / n) % 1, rr = inw ? r0 - (r0 - r1) * u : r1 + (r0 - r1) * u; g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * .7, 3, 0, TAU); g.fill(); } } }
+/* ===== 2. 효소 ===== */
+const activity = T => Math.max(0, Math.exp(-(((T - 37) / 14) ** 2)) * (T < 55 ? 1 : Math.max(0, 1 - (T - 55) / 8)));
+const rate = (s, T, e) => e ? 30 * activity(T) * s / (s + 8) : .6 * s / 40 * Math.exp((T - 37) / 30);
+function drawEnzyme(){ const g = S.g, W = S.w, H = S.h, t = st.t, act = activity(st.T);
+  const n = st.sub; for (let i = 0; i < n; i++) { const x = W * .05 + ((i * 131 + t * 40 * (1 + i % 3)) % (W * .6)), y = H * .1 + ((i * 67 + t * 25 * (1 + i % 2)) % (H * .8)); g.fillStyle = '#e0a400'; g.beginPath(); g.moveTo(x - 8, y - 6); g.lineTo(x + 8, y - 6); g.lineTo(x + 8, y + 6); g.lineTo(x, y + 2); g.lineTo(x - 8, y + 6); g.closePath(); g.fill(); }
+  if (st.enz) for (let k = 0; k < 3; k++) { const x = W * (.15 + k * .2), y = H * (.3 + (k % 2) * .35), dn = st.T > 55, bound = (t * act * 1.5 + k * .3) % 1 < .5 && !dn && act > .1; g.fillStyle = dn ? '#9a9aa6' : '#5a7ad0'; g.beginPath(); g.moveTo(x - 30, y - 22); g.lineTo(x + 30, y - 22); g.lineTo(x + 30, y + 22); g.lineTo(x - 30, y + 22); g.closePath(); g.fill(); g.fillStyle = C.surface; if (!dn) { g.beginPath(); g.moveTo(x - 8, y - 22); g.lineTo(x + 8, y - 22); g.lineTo(x + 8, y - 10); g.lineTo(x, y - 14); g.lineTo(x - 8, y - 10); g.closePath(); g.fill(); } else { g.beginPath(); g.arc(x, y - 18, 7, 0, TAU); g.fill(); }
+      if (bound) { g.fillStyle = '#e0a400'; g.beginPath(); g.moveTo(x - 8, y - 34); g.lineTo(x + 8, y - 34); g.lineTo(x + 8, y - 22); g.lineTo(x, y - 26); g.lineTo(x - 8, y - 22); g.closePath(); g.fill(); } label(g, dn ? '변성된 효소' : '효소', x, y + 6, {size: 11, color: '#fff', weight: 700}); }
+  for (let i = 0; i < Math.min(60, st.prod / 3); i++) { g.fillStyle = '#2fa36a'; g.beginPath(); g.arc(W * .66 + (i % 10) * 12, H * .85 - Math.floor(i / 10) * 12, 4, 0, TAU); g.fill(); } label(g, '생성물', W * .72, H * .94, {size: 11, color: C.muted});
+  // 활성화 에너지 그림
+  const ax = W * .7, ay = H * .1, aw = W * .27, ah = H * .5; g.strokeStyle = C.line; g.strokeRect(ax, ay, aw, ah); const curve = (Ea, col, dash) => { g.strokeStyle = col; g.lineWidth = 2.5; g.setLineDash(dash || []); g.beginPath(); for (let i = 0; i <= 60; i++) { const u = i / 60, base = .7 - .35 * u, bump = Ea * Math.exp(-(((u - .45) / .14) ** 2)); g.lineTo(ax + u * aw, ay + ah * (base - bump + .1)); } g.stroke(); g.setLineDash([]); }; curve(.55, C.hot, [5, 4]); if (st.enz) curve(.22, C.phy); label(g, '반응 진행 →', ax + aw / 2, ay + ah + 12, {size: 10, color: C.muted}); label(g, '빨간 점선: 효소 없음 · 파랑: 효소 있음', ax + aw / 2, ay - 8, {size: 10, color: C.muted}); label(g, '활성화 에너지 ↓', ax + aw * .6, ay + ah * .3, {size: 11, weight: 700, color: C.phy}); }
+/* ===== 3. 유전자 발현 ===== */
+const CODON = {AUG: '메싸이오닌(시작)', UUU: '페닐알라닌', GGC: '글라이신', GCU: '알라닌', UGG: '트립토판', AAA: '라이신', GAA: '글루탐산', CCG: '프롤린', UCU: '세린', CAU: '히스티딘', UAA: '종결'};
+const COMP = {A: 'U', T: 'A', G: 'C', C: 'G'}, DCOMP = {A: 'T', T: 'A', G: 'C', C: 'G'};
+function newGene(){ const pool = Object.keys(CODON).filter(c => c !== 'AUG' && c !== 'UAA'); const mrna = ['AUG', ...Array.from({length: 4}, () => pool[Math.floor(Math.random() * pool.length)]), 'UAA'].join(''); st.dna = [...mrna].map(b => ({A: 'T', U: 'A', G: 'C', C: 'G'})[b]).join(''); st.gs = 0; st.t = 0; }
+const mrna = () => [...st.dna].map(b => COMP[b]).join('');
+function drawGene(){ const g = S.g, W = S.w, H = S.h, n = st.dna.length, bw = Math.min(30, (W - 150) / n), x0 = Math.max(115, (W - bw * n) / 2), m = mrna(), t = st.t;
+  const box = (x, y, b, col) => { g.fillStyle = col; g.fillRect(x + 1, y, bw - 2, bw - 2); label(g, b, x + bw / 2, y + bw / 2, {size: Math.min(14, bw * .5), weight: 700, color: '#fff'}); };
+  const BC = {A: '#e04a3c', T: '#e0a400', U: '#c07ad0', G: '#2fa36a', C: '#2f6fd0'};
+  label(g, 'DNA (주형 가닥)', x0 - 6, H * .12 + bw / 2, {size: 11, align: 'right', weight: 700}); [...st.dna].forEach((b, i) => box(x0 + i * bw, H * .12, b, BC[b]));
+  label(g, '(짝 가닥)', x0 - 6, H * .12 - bw + bw / 2 - 2, {size: 10, align: 'right', color: C.muted}); [...st.dna].forEach((b, i) => { g.globalAlpha = .35; box(x0 + i * bw, H * .12 - bw - 2, DCOMP[b], BC[DCOMP[b]]); g.globalAlpha = 1; });
+  if (st.gs >= 1) { const k = st.gs === 1 ? Math.min(n, Math.floor(t * 6)) : n; label(g, 'mRNA', x0 - 6, H * .34 + bw / 2, {size: 11, align: 'right', weight: 700}); for (let i = 0; i < k; i++) box(x0 + i * bw, H * .34, m[i], BC[m[i]]); if (st.gs === 1 && k < n) { g.fillStyle = 'rgba(122,106,176,.35)'; g.beginPath(); g.ellipse(x0 + k * bw, H * .23, bw * 1.4, bw * 1.6, 0, 0, TAU); g.fill(); label(g, 'RNA 중합 효소', x0 + k * bw, H * .23, {size: 10, weight: 700}); } label(g, '핵 속: 전사', W - 12, H * .26, {size: 12, color: C.muted, align: 'right'}); }
+  if (st.gs >= 2) { const cods = n / 3, k = st.gs === 2 ? Math.min(cods, Math.floor(t * 1.2) + 1) : cods; for (let c = 0; c < cods; c++) { g.strokeStyle = C.ink; g.lineWidth = 1; g.strokeRect(x0 + c * 3 * bw, H * .34 - 2, 3 * bw, bw + 2); label(g, '코돈 ' + (c + 1), x0 + c * 3 * bw + 1.5 * bw, H * .34 + bw + 10, {size: 9, color: C.muted}); }
+    const rx = x0 + (k - 1) * 3 * bw + 1.5 * bw; g.fillStyle = 'rgba(160,128,90,.4)'; g.beginPath(); g.ellipse(rx, H * .34 + bw * .4, bw * 2, bw * 1.2, 0, 0, TAU); g.fill(); label(g, '리보솜', rx, H * .34 - bw * .8, {size: 10, weight: 700});
+    for (let c = 0; c < k; c++) { const cod = m.slice(c * 3, c * 3 + 3), aa = CODON[cod] || '?', x = x0 + c * 3 * bw + 1.5 * bw, y = H * .62; if (aa === '종결') { label(g, '종결', x, y, {size: 12, weight: 700, color: C.hot}); continue; } g.fillStyle = ['#e8a33a', '#5aa0d0', '#8fca5a', '#d06a9a', '#9a7ad0', '#d0c04a'][c % 6]; g.beginPath(); g.arc(x, y, Math.min(22, bw * 1.2), 0, TAU); g.fill(); label(g, aa.replace('(시작)', ''), x, y + Math.min(22, bw * 1.2) + 14, {size: 10, weight: 700}); if (c > 0 && CODON[m.slice(c * 3, c * 3 + 3)] !== '종결') { g.strokeStyle = '#555'; g.lineWidth = 3; g.beginPath(); g.moveTo(x - 3 * bw + Math.min(22, bw * 1.2), y); g.lineTo(x - Math.min(22, bw * 1.2), y); g.stroke(); } }
+    label(g, '세포질: 번역 (리보솜이 코돈 3개 염기마다 아미노산 1개를 연결)', W / 2, H * .9, {size: 12, color: C.muted}); }
+  label(g, ['① DNA 주형 가닥 준비 — [다음 단계]를 누르세요', '② 전사: DNA 염기 서열을 mRNA로 옮겨 적기 (A→U, T→A, G→C, C→G)', '③ 번역: mRNA의 코돈을 읽어 아미노산을 차례로 연결', '④ 완성! 아미노산 사슬(폴리펩타이드) → 접혀서 단백질'][st.gs], W / 2, H * .97 - (st.gs >= 2 ? 0 : 0), {size: 13, weight: 700, color: C.accent}); }
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'membrane') { if (st.mb === 'diff') { const m = axes(G, {x: [0, 30, 5, '시간 (s)'], y: [0, 50, 10, '세포 안 분자 수']}); line(G, st.hist.map(h => [h[0], h[1]]), m, '#e04a3c', 2.2); line(G, st.hist.map(h => [h[0], h[2]]), m, '#2fa36a', 2.2); label(g, '빨강: 산소(인지질층 통과) · 초록: 포도당(통로 단백질로만 통과)', m.X(15), m.Y(46), {size: 10, color: C.muted}); }
+    else { const m = axes(G, {x: [0, 2, .2, '바깥 소금물 농도 (%)'], y: [0, 2, .5, '세포 부피 (상대값)']}); const P = []; for (let c = 0; c <= 2; c += .02) P.push([c, Math.max(.45, Math.min(st.mb === 'plant' ? 1.1 : 1.8, .9 / Math.max(.2, c) * (st.mb === 'plant' ? .3 : .45) + (st.mb === 'plant' ? .72 : .55)))]); line(G, P, m, C.phy, 2.5); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.conc), m.Y(st.vol), 5, 0, TAU); g.fill(); line(G, [[.9, 0], [.9, 2]], m, C.muted, 1, [4, 4]); label(g, '등장액', m.X(.9), m.Y(1.9), {size: 10, color: C.muted}); } }
+  else if (st.mode === 'enzyme') { const half = G.w / 2; const m1 = axes(G, {x: [0, 70, 10, '온도 (℃)'], y: [0, 32, 8, '반응 속도']}, {R: half + 8}); const P = []; for (let T = 0; T <= 70; T++) P.push([T, rate(st.sub, T, true)]); line(G, P, m1, C.phy, 2.5); g.fillStyle = C.hot; g.beginPath(); g.arc(m1.X(st.T), m1.Y(rate(st.sub, st.T, st.enz)), 5, 0, TAU); g.fill();
+    const m2 = axes(G, {x: [0, 40, 10, '기질 농도'], y: [0, 32, 8, '반응 속도']}, {L: half + 48, keep: true}); const Q = []; for (let s = 0; s <= 40; s++) Q.push([s, rate(s, st.T, true)]); line(G, Q, m2, C.phy, 2.5); g.fillStyle = C.hot; g.beginPath(); g.arc(m2.X(st.sub), m2.Y(rate(st.sub, st.T, st.enz)), 5, 0, TAU); g.fill(); label(g, '효소가 모두 기질과 결합 → 일정', m2.X(26), m2.Y(29), {size: 10, color: C.muted}); }
+  else { const m = axes(G, {x: [0, 6, 1, '단계'], y: [0, 20, 5, '염기 / 아미노산 수']}); const n = st.dna.length; [[1, n, 'DNA 염기'], [2, n, 'mRNA 염기'], [3, n / 3, '코돈'], [4, n / 3 - 1, '아미노산']].forEach(([x, v, lb]) => { g.fillStyle = C.accent; g.fillRect(m.X(x) - 18, m.Y(v), 36, m.Y(0) - m.Y(v)); label(g, lb, m.X(x), m.Y(0) + 12, {size: 10}); label(g, v, m.X(x), m.Y(v) - 9, {size: 10, weight: 700}); }); label(g, '염기 3개 = 코돈 1개 = 아미노산 1개', m.X(4.6), m.Y(18), {size: 11, color: C.muted}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
+  if (st.mode === 'membrane') { if (st.mb === 'diff') { s.innerHTML = '<div><b>인지질 2중층</b><span>세포막 구조</span></div><div><b>농도 높은 쪽 → 낮은 쪽</b><span>확산 방향</span></div>'; $('explain').innerHTML = '<b>세포막</b>은 인지질 2중층에 막단백질이 박혀 있는 구조예요. 크기가 작고 지용성인 O₂, CO₂는 인지질층을 직접 통과하고, 포도당·이온은 <b>막단백질(통로)</b>을 통해 확산해요. 확산은 에너지를 쓰지 않아요.'; }
+    else { s.innerHTML = `<div><b>${st.conc.toFixed(1)} %</b><span>바깥 농도</span></div><div><b>${st.vol.toFixed(2)}</b><span>세포 부피(상대값)</span></div>`; $('explain').innerHTML = '<b>삼투</b>: 세포막을 경계로 물이 <b>용질의 농도가 낮은 쪽에서 높은 쪽으로</b> 이동하는 현상. 저장액에서는 물이 들어오고, 고장액에서는 물이 빠져나가요.'; }
+    $('tip').textContent = '세포막은 물질을 선택적으로 통과시키는 선택적 투과성이 있어 세포 안의 환경을 일정하게 유지해요.'; th.innerHTML = '<tr><th>용액</th><th>동물 세포(적혈구)</th><th>식물 세포</th></tr>'; tb.innerHTML = [['저장액', '부풀다 터짐(용혈)', '팽팽해짐(세포벽이 지탱)'], ['등장액', '변화 없음', '변화 없음'], ['고장액', '쭈그러듦', '원형질 분리']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); $('tTitle').textContent = '삼투에 의한 세포의 변화'; $('gTitle').textContent = st.mb === 'diff' ? '세포 안으로 들어온 분자 수' : '바깥 농도와 세포 부피'; $('gSub').textContent = ''; }
+  else if (st.mode === 'enzyme') { s.innerHTML = `<div><b>${rate(st.sub, st.T, st.enz).toFixed(1)}</b><span>반응 속도 (상대값)</span></div><div><b>${st.T > 55 ? '변성' : (activity(st.T) * 100).toFixed(0) + ' %'}</b><span>효소 활성</span></div><div><b>${Math.floor(st.prod)}</b><span>생성물</span></div>`; $('explain').innerHTML = '<b>효소</b>는 생명체 안에서 <b>활성화 에너지를 낮춰</b> 화학 반응을 빠르게 하는 생체 촉매예요. 주성분이 단백질이라 <b>최적 온도(사람 약 37 ℃)</b>와 최적 pH에서 가장 활발하고, 온도가 너무 높으면 변성돼요. 효소는 특정 기질하고만 결합해요(<b>기질 특이성</b>).'; $('tip').textContent = '물질대사: 생명체 안에서 일어나는 모든 화학 반응. 동화 작용(광합성, 단백질 합성)과 이화 작용(세포 호흡, 소화)이 있어요.';
+    th.innerHTML = '<tr><th>특징</th><th>내용</th></tr>'; tb.innerHTML = [['생체 촉매', '활성화 에너지를 낮춤, 반응 후에도 변하지 않음'], ['기질 특이성', '활성 부위에 맞는 기질하고만 결합'], ['최적 온도', '사람 효소는 약 35~40 ℃'], ['최적 pH', '펩신 pH 2, 아밀레이스 pH 7 부근']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = '효소의 특성'; $('gTitle').textContent = '온도·기질 농도와 반응 속도'; $('gSub').textContent = ''; }
+  else { const m = mrna(); s.innerHTML = `<div><b>${st.dna.length}개</b><span>DNA 염기</span></div><div><b>${st.dna.length / 3}개</b><span>코돈</span></div><div><b>${st.dna.length / 3 - 1}개</b><span>아미노산</span></div>`; $('explain').innerHTML = '<b>유전자 발현</b>: 유전자의 정보에 따라 단백질이 만들어지는 과정. 핵 속에서 DNA 정보가 mRNA로 옮겨지는 <b>전사</b>, 세포질의 리보솜에서 mRNA의 <b>코돈</b>(염기 3개)이 아미노산으로 바뀌어 연결되는 <b>번역</b>을 거쳐요.'; $('tip').textContent = 'RNA는 T 대신 U(유라실)를 가져요. 유전자 → 단백질 → 형질 순서로 정보가 전달돼요.';
+    th.innerHTML = '<tr><th>코돈</th><th>아미노산</th></tr>'; tb.innerHTML = [...new Set(m.match(/.../g))].map(c => `<tr><td style="font-family:var(--f-mono)">${c}</td><td>${CODON[c]}</td></tr>`).join(''); $('tTitle').textContent = '이 유전자의 코돈표'; $('gTitle').textContent = '정보의 단위 변화'; $('gSub').textContent = ''; } }
+Kit.seg($('mbSeg'), 'mb', v => { st.mb = v; $('concF').style.display = v === 'diff' ? 'none' : ''; st.hist = []; st.t = 0; initParts(); render(); })('diff');
+$('conc').oninput = e => { st.conc = +e.target.value; $('concOut').textContent = st.conc.toFixed(1) + ' %'; render(); };
+$('temp').oninput = e => { st.T = +e.target.value; $('tempOut').textContent = st.T + ' ℃'; render(); }; $('sub').oninput = e => { st.sub = +e.target.value; $('subOut').textContent = st.sub; render(); }; $('enz').onchange = e => { st.enz = e.target.checked; render(); };
+$('newGene').onclick = () => { newGene(); render(); }; $('step').onclick = () => { st.gs = Math.min(3, st.gs + 1); st.t = 0; render(); }; newGene();
+Kit.tabs(m => { st.mode = m; st.t = 0; if (m === 'membrane') { initParts(); st.hist = []; } render(); }, ['membrane', 'enzyme', 'gene']);
+let acc = 0;
+Kit.loop(dt => { st.t += dt;
+  if (st.mode === 'membrane') { if (st.mb === 'diff') { stepDiff(dt); if (st.t < 30) { acc += dt; if (acc > .25) { acc = 0; st.hist.push([st.t, st.parts.filter(p => p.k === 'o2' && p.y >= .5).length, st.parts.filter(p => p.k === 'glu' && p.y >= .5).length]); } } }
+    else { const target = Math.max(.45, Math.min(st.mb === 'plant' ? 1.1 : 1.8, .9 / Math.max(.2, st.conc) * (st.mb === 'plant' ? .3 : .45) + (st.mb === 'plant' ? .72 : .55))); st.vol += (target - st.vol) * Math.min(1, dt * 1.5); } }
+  if (st.mode === 'enzyme') { st.prod += rate(st.sub, st.T, st.enz) * dt; if (st.prod > 200) st.prod = 0; } },
+  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({membrane: drawMembrane, enzyme: drawEnzyme, gene: drawGene})[st.mode](); drawGraph(); if (st.mode !== 'gene' && Math.random() < .05) render(); }, $('play'));
+})();
+</script>
+</body>
+</html>
