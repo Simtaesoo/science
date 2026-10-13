@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>기상 관측소 · 중3 날씨와 기후변화</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-earth">
+<div class="wrap">
+  <nav class="topbar" data-topbar="3학년|17 날씨와 기후변화" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 3 · 17 날씨와 기후변화 <span class="code">9과17</span></div>
+      <h1>기상 관측소</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="layer">1. 기권</button>
+      <button type="button" data-mode="green">2. 복사 평형·온실 효과</button>
+      <button type="button" data-mode="humid">3. 습도</button>
+      <button type="button" data-mode="cloud">4. 구름</button>
+      <button type="button" data-mode="wind">5. 기압과 바람</button>
+      <button type="button" data-mode="front">6. 기단과 전선</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="기상 모형">
+      <div class="canvas-box"><canvas id="scene" aria-label="기상 현상 모형"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <label class="field" data-only="layer" for="alt">높이 <input type="range" id="alt" min="0" max="110" step="1" value="5"><output id="altOut">5 km</output></label>
+        <label class="field" data-only="green" for="gh">온실 기체 양 <input type="range" id="gh" min="0" max="100" step="5" value="60"><output id="ghOut">현재</output></label>
+        <div class="field" data-only="green"><label for="noAir"><input type="checkbox" id="noAir"> 대기가 없다면</label></div>
+        <label class="field" data-only="humid" for="ht">기온 <input type="range" id="ht" min="0" max="35" step="1" value="25"><output id="htOut">25 ℃</output></label>
+        <label class="field" data-only="humid" for="hv">수증기량 <input type="range" id="hv" min="2" max="30" step="0.5" value="10.6"><output id="hvOut">10.6 g/kg</output></label>
+        <button class="btn" type="button" id="cool" data-only="humid">공기 냉각하기</button>
+        <label class="field" data-only="cloud" for="t0">지표 기온 <input type="range" id="t0" min="15" max="35" step="1" value="27"><output id="t0Out">27 ℃</output></label>
+        <label class="field" data-only="cloud" for="d0">지표 이슬점 <input type="range" id="d0" min="5" max="25" step="1" value="19"><output id="d0Out">19 ℃</output></label>
+        <button class="btn" type="button" id="rise" data-only="cloud">공기 상승시키기</button>
+        <div class="field" data-only="wind"><div class="seg" id="wSeg"><button type="button" data-w="map">고기압과 저기압</button><button type="button" data-w="sea">해륙풍</button></div></div>
+        <label class="field" data-only="wind" id="dpF" for="dp">기압 차 <input type="range" id="dp" min="4" max="40" step="4" value="16"><output id="dpOut">16 hPa</output></label>
+        <label class="field" data-only="wind" id="hourF" for="hour">시각 <input type="range" id="hour" min="0" max="23" step="1" value="14"><output id="hourOut">14시</output></label>
+        <div class="field" data-only="front"><div class="seg" id="fSeg"><button type="button" data-f="cold">한랭 전선</button><button type="button" data-f="warm">온난 전선</button><button type="button" data-f="mass">우리나라 주변 기단</button></div></div>
+        <button class="btn" type="button" id="move" data-only="front">전선 이동</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">정리</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>비행기는 왜 주로 성층권 아래쪽 높이로 날까?</summary>
+        <p>대류권에서는 대류와 기상 현상이 일어나 기류가 불안정하지만, 성층권은 위로 갈수록 기온이 높아져 대류가 거의 일어나지 않아 안정하기 때문입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>찬 음료수 컵 표면에 물방울이 맺히는 까닭은?</summary>
+        <p>컵 주변 공기가 차가워져 이슬점 이하로 냉각되면, 공기 중의 수증기가 응결하여 컵 표면에 물방울로 맺히기 때문입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>온실 효과는 나쁜 것일까?</summary>
+        <p>온실 효과가 없다면 지구의 평균 기온은 약 −18 ℃로 생물이 살기 어렵습니다. 문제는 인간 활동으로 온실 기체가 늘어나 온실 효과가 강해지면서 지구의 평균 기온이 높아지는 지구 온난화입니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="기온·기압·습도 값은 교과서 수준의 단순화된 모형으로 계산했습니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+const st = {mode:'layer', t:0, alt:5, gh:60, noAir:false, Ts:15, ht:25, hv:10.6, cooling:false, t0:27, d0:19, h:0, rising:false, w:'map', dp:16, hour:14, f:'cold', fx:0, moving:false, fh:[]};
+
+/* ===== 1. 기권 ===== */
+function tempAt(z){ if (z <= 11) return 15 - 6.5 * z; if (z <= 20) return -56.5; if (z <= 50) return -56.5 + (z - 20) * 1.8; if (z <= 80) return -2.5 - (z - 50) * 2.9; return -89.5 + (z - 80) * 7; }
+const LAYERS = [[0, 11, '대류권', 'rgba(120,180,240,.30)', '기상 현상, 대류 있음'], [11, 50, '성층권', 'rgba(150,200,170,.30)', '오존층 (20~30 km) · 대류 없음'], [50, 80, '중간권', 'rgba(190,170,230,.30)', '대류 있음, 기상 현상 없음, 유성'], [80, 120, '열권', 'rgba(240,170,140,.30)', '공기 매우 희박, 오로라']];
+function drawLayer(){
+  const g = S.g, L = 70, R = S.w * .55, T = 20, B = S.h - 30, Y = z => B - (B - T) * z / 120, X = tc => L + (R - L) * (tc + 100) / 160;
+  LAYERS.forEach(([a, b, n, col, d]) => { g.fillStyle = col; g.fillRect(L, Y(b), R - L, Y(a) - Y(b)); label(g, n, R + 10, (Y(a) + Y(b)) / 2 - 8, {align: 'left', weight: 700}); label(g, d, R + 10, (Y(a) + Y(b)) / 2 + 10, {align: 'left', size: 11, color: C.muted}); });
+  g.fillStyle = 'rgba(80,160,90,.35)'; g.fillRect(L, Y(30), R - L, Y(20) - Y(30)); label(g, '오존층', L + 30, (Y(20) + Y(30)) / 2, {size: 11, color: '#2d7a3e', weight: 700});
+  g.strokeStyle = C.line; g.lineWidth = 1; g.beginPath(); g.moveTo(L, T); g.lineTo(L, B); g.lineTo(R, B); g.stroke();
+  for (let z = 0; z <= 120; z += 20) label(g, z, L - 8, Y(z), {align: 'right', size: 10, color: C.muted}); label(g, '높이 (km)', L - 40, T - 4, {size: 10, color: C.muted, align: 'left'});
+  for (let tc = -100; tc <= 60; tc += 40) label(g, tc, X(tc), B + 14, {size: 10, color: C.muted}); label(g, '기온 (℃)', R - 20, B + 14, {size: 10, color: C.muted});
+  const pts = []; for (let z = 0; z <= 110; z += .5) pts.push([X(Math.min(60, tempAt(z))), Y(z)]); g.strokeStyle = C.hot; g.lineWidth = 2.5; g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(...p) : g.moveTo(...p)); g.stroke();
+  for (let i = 0; i < 3; i++) { const cx = L + 80 + i * 70 + Math.sin(st.t + i) * 6, cy = Y(3 + i * 2); g.fillStyle = 'rgba(255,255,255,.9)'; [[0, 0, 14], [12, -4, 11], [-12, -2, 10]].forEach(([dx, dy, r]) => { g.beginPath(); g.arc(cx + dx, cy + dy, r, 0, TAU); g.fill(); }); }
+  // 탐사 기구
+  const y = Y(st.alt), x = X(Math.min(60, tempAt(st.alt))); g.strokeStyle = C.ink; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(L, y); g.lineTo(R, y); g.stroke(); g.setLineDash([]);
+  g.fillStyle = C.ink; g.beginPath(); g.arc(x, y, 6, 0, TAU); g.fill();
+  const bx = L + 26, by = y; g.fillStyle = '#f2f2f2'; g.strokeStyle = C.ink; g.beginPath(); g.ellipse(bx, by - 14, 10, 13, 0, 0, TAU); g.fill(); g.stroke(); g.beginPath(); g.moveTo(bx, by - 1); g.lineTo(bx, by + 8); g.stroke(); g.fillRect(bx - 4, by + 8, 8, 6);
+  label(g, `${st.alt} km · ${tempAt(st.alt).toFixed(0)} ℃`, x + 10, y - 12, {align: 'left', weight: 700, size: 12});
+  for (let i = 0; i < 3; i++) { const ph = (st.t * .4 + i * .33) % 1; g.strokeStyle = 'rgba(255,200,80,.8)'; g.lineWidth = 2; g.beginPath(); g.moveTo(R - 40 - i * 60 + ph * 20, Y(95 - ph * 25)); g.lineTo(R - 30 - i * 60 + ph * 20, Y(92 - ph * 25)); g.stroke(); }
+  g.fillStyle = 'rgba(120,230,150,.35)'; g.fillRect(L + 10, Y(110), R - L - 20, 10); label(g, '오로라', L + 50, Y(110) - 10, {size: 10, color: '#2d7a3e'});
+}
+
+/* ===== 2. 복사 평형과 온실 효과 ===== */
+const fOf = () => st.noAir ? 0 : .6 + .3 * st.gh / 100;
+const TsEq = () => 255 * Math.pow(1 / (1 - fOf() / 2), .25) - 273;
+let ghHist = [];
+function drawGreen(){
+  const g = S.g, cx = S.w * .4, cy = S.h * 1.32, R = S.h * .78, f = fOf();
+  g.fillStyle = '#0d1424'; g.fillRect(0, 0, S.w, S.h);
+  if (!st.noAir) { const a = .15 + f * .35; g.fillStyle = `rgba(150,190,255,${a * .5})`; g.beginPath(); g.arc(cx, cy, R + 60, 0, TAU); g.fill(); label(g, '대기 (온실 기체)', cx - R * .55, cy - R - 40, {size: 11, color: '#aac8ff'}); }
+  const gr = g.createRadialGradient(cx, cy - R, 10, cx, cy, R); gr.addColorStop(0, '#5fa86a'); gr.addColorStop(1, '#2a6a8a'); g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill();
+  g.fillStyle = '#ffd04d'; g.beginPath(); g.arc(S.w - 50, 50, 26, 0, TAU); g.fill(); label(g, '태양', S.w - 50, 92, {size: 11, color: '#ffd04d'});
+  const sy = cy - R, ph = st.t * .7 % 1;
+  // 태양 복사 (짧은 파장)
+  for (let i = 0; i < 6; i++) { const x = S.w * .2 + i * S.w * .1, k = (ph + i * .17) % 1, x0 = x + 120, y0 = 20, y1 = sy + 8; const x1 = x + 20, px = x0 + (x1 - x0) * k, py = y0 + (y1 - y0) * k;
+    g.strokeStyle = '#ffd04d'; g.lineWidth = 2; g.beginPath(); g.moveTo(px, py); g.lineTo(px - 10, py + 12); g.stroke();
+    if (i === 1 || i === 4) { if (k > .8) { /* 반사 */ } } }
+  arrow(g, S.w * .82, 70, S.w * .62, sy - 20, '#ffd04d', 3); label(g, '태양 복사 100', S.w * .8, 110, {color: '#ffd04d', weight: 700, size: 12, align: 'left'});
+  arrow(g, S.w * .58, sy - 20, S.w * .5, 40, 'rgba(255,255,255,.7)', 2.5); label(g, '반사 30', S.w * .5, 30, {color: '#fff', size: 12});
+  // 지구 복사 (긴 파장)
+  const n = 7, absorbed = Math.round(n * f);
+  for (let i = 0; i < n; i++) { const x = S.w * .08 + i * S.w * .07, k = (st.t * .5 + i * .23) % 1, abs = i < absorbed, ytop = abs ? sy - 55 : 0, py = sy - 4 - (sy - 4 - ytop) * k;
+    g.strokeStyle = abs ? 'rgba(255,120,90,.9)' : 'rgba(255,120,90,.6)'; g.lineWidth = 2; g.beginPath(); for (let s = 0; s < 14; s++) g.lineTo(x + Math.sin(s * .9 + st.t * 6) * 4, py + s * 2); g.stroke();
+    if (abs && k > .85) { g.fillStyle = 'rgba(255,120,90,.5)'; g.beginPath(); g.arc(x, ytop + 4, 6, 0, TAU); g.fill(); } }
+  if (!st.noAir) for (let i = 0; i < absorbed; i++) { const x = S.w * .08 + i * S.w * .07 + 14, k = (st.t * .5 + i * .23 + .5) % 1, py = sy - 55 + 50 * k; g.strokeStyle = 'rgba(255,170,120,.85)'; g.lineWidth = 2; g.beginPath(); for (let s = 0; s < 10; s++) g.lineTo(x + Math.sin(s * .9 + st.t * 6) * 3, py - s * 2); g.stroke(); arrow(g, x, py - 2, x, py + 6, 'rgba(255,170,120,.85)', 1.5); }
+  label(g, '지구 복사 (적외선)', S.w * .2, sy - 74, {color: '#ff9a7a', size: 12, weight: 700});
+  if (!st.noAir) label(g, '대기가 흡수 → 다시 지표로 방출', S.w * .22, sy - 92, {color: '#ffc0a0', size: 11});
+  label(g, `지구 평균 기온 ${st.Ts.toFixed(1)} ℃`, cx, S.h - 24, {weight: 700, size: 16, color: '#fff'});
+  label(g, Math.abs(st.Ts - TsEq()) < .2 ? '복사 평형: 흡수하는 에너지 = 방출하는 에너지' : (st.Ts < TsEq() ? '흡수 > 방출 → 기온 상승 중' : '흡수 < 방출 → 기온 하강 중'), cx, S.h - 46, {size: 12, color: '#cfd8ea'});
+}
+
+/* ===== 3. 습도 ===== */
+const SAT = [[0, 3.8], [5, 5.4], [10, 7.6], [15, 10.6], [20, 14.7], [25, 20.0], [30, 27.2], [35, 36.5]];
+function sat(T){ if (T <= 0) return 3.8 * Math.pow(1.07, T); for (let i = 0; i < SAT.length - 1; i++) { const [a, sa] = SAT[i], [b, sb] = SAT[i + 1]; if (T <= b) return sa * Math.pow(sb / sa, (T - a) / (b - a)); } return 36.5; }
+function dewOf(v){ let lo = -20, hi = 40; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (sat(m) < v) lo = m; else hi = m; } return (lo + hi) / 2; }
+let drops = [];
+function drawHumid(){
+  const g = S.g, L = 60, R = S.w * .6, T = 24, B = S.h - 40, X = t => L + (R - L) * t / 35, Y = v => B - (B - T) * v / 40;
+  g.strokeStyle = C.line; g.lineWidth = 1; g.beginPath(); g.moveTo(L, T); g.lineTo(L, B); g.lineTo(R, B); g.stroke();
+  for (let t = 0; t <= 35; t += 5) label(g, t, X(t), B + 14, {size: 10, color: C.muted}); for (let v = 0; v <= 40; v += 10) label(g, v, L - 8, Y(v), {size: 10, color: C.muted, align: 'right'});
+  label(g, '기온 (℃)', R - 10, B + 28, {size: 10, color: C.muted}); label(g, '수증기량 (g/kg)', L, T - 12, {size: 10, color: C.muted, align: 'left'});
+  g.fillStyle = 'rgba(120,180,240,.15)'; g.beginPath(); g.moveTo(X(0), Y(0)); for (let t = 0; t <= 35; t += .5) g.lineTo(X(t), Y(sat(t))); g.lineTo(X(35), Y(0)); g.fill();
+  g.strokeStyle = C.phy; g.lineWidth = 2.5; g.beginPath(); for (let t = 0; t <= 35; t += .5) t ? g.lineTo(X(t), Y(sat(t))) : g.moveTo(X(t), Y(sat(t))); g.stroke(); label(g, '포화 수증기량 곡선', X(29), Y(sat(29)) - 14, {size: 11, color: C.phy, align: 'right'});
+  label(g, '불포화', X(28), Y(8), {size: 12, color: C.muted}); label(g, '과포화 → 응결', X(10), Y(22), {size: 12, color: C.muted});
+  const v = Math.min(st.hv, sat(st.ht)), Td = dewOf(st.hv), px = X(st.ht), py = Y(v);
+  g.setLineDash([4, 3]); g.strokeStyle = C.ink; g.beginPath(); g.moveTo(px, B); g.lineTo(px, Y(sat(st.ht))); g.stroke(); g.strokeStyle = C.cold; g.beginPath(); g.moveTo(px, py); g.lineTo(X(Math.max(0, Td)), py); g.lineTo(X(Math.max(0, Td)), B); g.stroke(); g.setLineDash([]);
+  g.fillStyle = C.ink; g.beginPath(); g.arc(px, py, 6, 0, TAU); g.fill(); g.fillStyle = C.cold; g.beginPath(); g.arc(X(Math.max(0, Td)), py, 4, 0, TAU); g.fill();
+  label(g, `이슬점 ${Td.toFixed(1)} ℃`, X(Math.max(0, Td)), B - 10, {size: 11, color: C.cold, weight: 700, align: 'right'});
+  // 공기 상자
+  const bx = S.w * .66, by = S.h * .12, bw = S.w * .3, bh = S.h * .5, cap = Math.round(sat(st.ht) * 3), n = Math.round(v * 3);
+  g.strokeStyle = C.ink; g.lineWidth = 1.5; g.strokeRect(bx, by, bw, bh); label(g, '공기 1 kg 속 수증기 (모형)', bx + bw / 2, by - 12, {size: 11, color: C.muted});
+  for (let i = 0; i < cap; i++) { const c = i % 8, r = Math.floor(i / 8), x = bx + 14 + c * (bw - 28) / 7, y = by + bh - 14 - r * 14; if (y < by + 8) break; g.strokeStyle = 'rgba(90,140,220,.6)'; g.lineWidth = 1.2; g.beginPath(); g.arc(x, y, 4, 0, TAU); g.stroke(); if (i < n) { g.fillStyle = C.phy; g.beginPath(); g.arc(x + Math.sin(st.t * 3 + i) * 1.5, y, 4, 0, TAU); g.fill(); } }
+  drops.forEach(d => { g.fillStyle = 'rgba(60,120,220,.85)'; g.beginPath(); g.arc(d[0], d[1], 4, 0, TAU); g.fill(); });
+  label(g, `상대 습도 ${Math.round(v / sat(st.ht) * 100)} %`, bx + bw / 2, by + bh + 22, {weight: 700, size: 15, color: C.accent});
+  label(g, '빈 원: 담을 수 있는 최대량 · 채운 원: 실제 수증기', bx + bw / 2, by + bh + 42, {size: 10, color: C.muted});
+  if (st.hv > sat(st.ht) + .05) label(g, `응결량 ${(st.hv - sat(st.ht)).toFixed(1)} g/kg → 물방울`, bx + bw / 2, by + bh + 62, {size: 12, color: C.cold, weight: 700});
+}
+
+/* ===== 4. 구름 생성 ===== */
+const cloudBase = () => Math.max(0, (st.t0 - st.d0) / 8);
+const parcelT = z => { const zb = cloudBase(); return z <= zb ? st.t0 - 10 * z : st.t0 - 10 * zb - 5 * (z - zb); };
+const parcelD = z => { const zb = cloudBase(); return z <= zb ? st.d0 - 2 * z : parcelT(z); };
+function drawCloud(){
+  const g = S.g, B = S.h - 40, T = 30, zmax = 4, Y = z => B - (B - T) * z / zmax, cx = S.w * .32, zb = cloudBase();
+  const sky = g.createLinearGradient(0, T, 0, B); sky.addColorStop(0, '#cfe2f7'); sky.addColorStop(1, '#eef5fc'); g.fillStyle = sky; g.fillRect(0, 0, S.w * .62, S.h);
+  g.fillStyle = '#7aa86a'; g.fillRect(0, B, S.w * .62, S.h - B);
+  for (let z = 0; z <= zmax; z += 1) { g.strokeStyle = 'rgba(0,0,0,.08)'; g.beginPath(); g.moveTo(0, Y(z)); g.lineTo(S.w * .62, Y(z)); g.stroke(); label(g, z + ' km', 8, Y(z) - 8, {size: 10, color: C.muted, align: 'left'}); }
+  // 구름
+  if (st.h > zb) { const top = Math.min(st.h, zmax); for (let i = 0; i < 14; i++) { const z = zb + (top - zb) * ((i * 37) % 14) / 14, x = cx + Math.sin(i * 2.3) * 60; g.fillStyle = 'rgba(255,255,255,.95)'; g.beginPath(); g.arc(x, Y(z), 22 + (i % 3) * 6, 0, TAU); g.fill(); } }
+  if (zb < zmax) { g.strokeStyle = C.cold; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(0, Y(zb)); g.lineTo(S.w * .62, Y(zb)); g.stroke(); g.setLineDash([]); g.fillStyle = 'rgba(255,255,255,.85)'; g.fillRect(S.w * .6 - 200, Y(zb) - 20, 200, 18); label(g, `응결 고도 (구름 밑면) 약 ${(zb * 1000).toFixed(0)} m`, S.w * .6, Y(zb) - 10, {size: 11, color: C.cold, align: 'right', weight: 700}); }
+  // 공기 덩어리
+  const r = 16 + st.h * 6, py = Y(st.h); g.fillStyle = st.h > zb ? 'rgba(255,255,255,.6)' : 'rgba(240,120,90,.25)'; g.strokeStyle = C.hot; g.lineWidth = 1.5; g.setLineDash([3, 3]); g.beginPath(); g.arc(cx, py, r, 0, TAU); g.fill(); g.stroke(); g.setLineDash([]);
+  label(g, `${parcelT(st.h).toFixed(1)} ℃`, cx, py, {weight: 700, size: 12}); arrow(g, cx + r + 6, py, cx + r + 22, py, C.muted, 1.5); arrow(g, cx - r - 6, py, cx - r - 22, py, C.muted, 1.5);
+  label(g, '상승 → 기압 낮아짐 → 부피 팽창 → 기온 하강 (단열 팽창)', S.w * .31, 16, {size: 12, weight: 600});
+  const rx = S.w * .81; label(g, `높이 ${(st.h * 1000).toFixed(0)} m`, rx, S.h * .2, {weight: 700, size: 14});
+  label(g, `공기 덩어리 기온 ${parcelT(st.h).toFixed(1)} ℃`, rx, S.h * .2 + 26, {size: 12, color: C.hot}); label(g, `이슬점 ${parcelD(st.h).toFixed(1)} ℃`, rx, S.h * .2 + 46, {size: 12, color: C.cold});
+  label(g, st.h >= zb ? '이슬점에 도달 → 수증기 응결 → 구름' : '아직 불포화 (기온 > 이슬점)', rx, S.h * .2 + 76, {size: 12, weight: 700, color: st.h >= zb ? C.cold : C.muted});
+}
+
+/* ===== 5. 기압과 바람 ===== */
+function drawWind(){
+  const g = S.g;
+  if (st.w === 'map') {
+    const Lc = [S.w * .26, S.h * .5], Hc = [S.w * .7, S.h * .5];
+    g.fillStyle = '#eef3ea'; g.fillRect(0, 0, S.w, S.h);
+    const P = (x, y) => { const dl = Math.hypot(x - Lc[0], y - Lc[1]) / 100, dh = Math.hypot(x - Hc[0], y - Hc[1]) / 100; return 1012 - st.dp / 2 * Math.exp(-dl * dl) + st.dp / 2 * Math.exp(-dh * dh); };
+    // 등압선 (마칭 근사: 원)
+    for (let k = 1; k <= 3; k++) { [[Lc, -1], [Hc, 1]].forEach(([c, s]) => { g.strokeStyle = 'rgba(80,80,80,.5)'; g.lineWidth = 1; g.beginPath(); g.arc(c[0], c[1], k * 46, 0, TAU); g.stroke(); label(g, Math.round(1012 + s * st.dp / 2 * Math.exp(-Math.pow(k * .46, 2))), c[0] + k * 46 * .7, c[1] - k * 46 * .7, {size: 9, color: C.muted}); }); }
+    label(g, 'L', Lc[0], Lc[1], {size: 30, weight: 700, color: C.hot}); label(g, '저기압', Lc[0], Lc[1] + 26, {size: 12, color: C.hot});
+    label(g, 'H', Hc[0], Hc[1], {size: 30, weight: 700, color: C.cold}); label(g, '고기압', Hc[0], Hc[1] + 26, {size: 12, color: C.cold});
+    // 바람 화살표
+    const sp = st.dp / 16;
+    for (let i = 0; i < 9; i++) { const y = S.h * .2 + i * S.h * .075, k = (st.t * .25 * sp + i * .13) % 1, x = Hc[0] - 40 - (Hc[0] - Lc[0] - 80) * k, yy = y + (Lc[1] - y) * k * .5; arrow(g, x, yy, x - 18 - sp * 8, yy + (Lc[1] - y) * .04, 'rgba(40,90,190,.8)', 2); }
+    // 고기압 시계 방향 불어 나감, 저기압 시계 반대 방향 불어 들어옴
+    for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + st.t * .3 * sp, r = 70; const x = Hc[0] + Math.cos(a) * r, y = Hc[1] + Math.sin(a) * r, x2 = Hc[0] + Math.cos(a + .35) * (r + 22), y2 = Hc[1] + Math.sin(a + .35) * (r + 22); arrow(g, x, y, x2, y2, 'rgba(60,120,220,.7)', 1.8);
+      const xa = Lc[0] + Math.cos(a) * (r + 22), ya = Lc[1] + Math.sin(a) * (r + 22), xb = Lc[0] + Math.cos(a - .35) * r, yb = Lc[1] + Math.sin(a - .35) * r; arrow(g, xa, ya, xb, yb, 'rgba(220,80,60,.7)', 1.8); }
+    label(g, '바람은 기압이 높은 곳에서 낮은 곳으로 분다 · 기압 차가 클수록 강하다', S.w / 2, 18, {size: 12, weight: 600});
+    label(g, '(북반구) 고기압: 시계 방향으로 불어 나감 · 하강 기류 · 맑음', S.w / 2, S.h - 32, {size: 11, color: C.cold}); label(g, '저기압: 시계 반대 방향으로 불어 들어옴 · 상승 기류 · 흐리거나 비', S.w / 2, S.h - 14, {size: 11, color: C.hot});
+    return;
+  }
+  // 해륙풍
+  const day = st.hour >= 9 && st.hour <= 18, sea = S.w * .5, gy = S.h * .7;
+  const sky = g.createLinearGradient(0, 0, 0, gy); sky.addColorStop(0, day ? '#9fcbf2' : '#1a2340'); sky.addColorStop(1, day ? '#e4f1fc' : '#3a4870'); g.fillStyle = sky; g.fillRect(0, 0, S.w, gy);
+  g.fillStyle = '#c9a66b'; g.fillRect(0, gy, sea, S.h - gy); g.fillStyle = '#3f7fc0'; g.fillRect(sea, gy, S.w - sea, S.h - gy);
+  label(g, '육지', sea / 2, gy + 30, {weight: 700, color: '#fff'}); label(g, '바다', sea + (S.w - sea) / 2, gy + 30, {weight: 700, color: '#fff'});
+  if (day) { g.fillStyle = '#ffd04d'; g.beginPath(); g.arc(60, 50, 22, 0, TAU); g.fill(); } else { g.fillStyle = '#eee'; g.beginPath(); g.arc(60, 50, 18, 0, TAU); g.fill(); g.fillStyle = '#1a2340'; g.beginPath(); g.arc(68, 44, 16, 0, TAU); g.fill(); }
+  const dir = day ? -1 : 1; // 지표 바람: 낮 바다→육지(-x)
+  const Ttxt = day ? ['기온 높음 (빨리 가열)', '기온 낮음'] : ['기온 낮음 (빨리 냉각)', '기온 높음'];
+  label(g, Ttxt[0], sea / 2, gy - 20, {size: 12, color: day ? C.hot : C.cold, weight: 700}); label(g, Ttxt[1], sea + (S.w - sea) / 2, gy - 20, {size: 12, color: day ? C.cold : C.hot, weight: 700});
+  label(g, day ? '저기압' : '고기압', sea / 2, gy - 44, {size: 13, weight: 700}); label(g, day ? '고기압' : '저기압', sea + (S.w - sea) / 2, gy - 44, {size: 13, weight: 700});
+  // 순환
+  const lx = sea * .5, rx = sea + (S.w - sea) * .5, top = S.h * .2, low = gy - 70;
+  g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 2; g.setLineDash([5, 5]); g.beginPath(); g.moveTo(lx, low); g.lineTo(lx, top); g.lineTo(rx, top); g.lineTo(rx, low); g.closePath(); g.stroke(); g.setLineDash([]);
+  for (let i = 0; i < 6; i++) { const k = (st.t * .15 + i / 6) % 1, x = dir < 0 ? rx - (rx - lx) * k : lx + (rx - lx) * k; arrow(g, x, low + 4, x + dir * 22, low + 4, day ? '#1d5fa8' : '#ffd36a', 3); }
+  arrow(g, day ? lx : rx, low - 10, day ? lx : rx, top + 30, 'rgba(255,255,255,.8)', 2); arrow(g, day ? rx : lx, top + 30, day ? rx : lx, low - 10, 'rgba(255,255,255,.8)', 2);
+  label(g, day ? '해풍: 바다 → 육지' : '육풍: 육지 → 바다', S.w / 2, low + 26, {weight: 700, size: 14, color: day ? '#0d3d7a' : '#ffe9a8'});
+  label(g, '육지는 바다보다 비열이 작아 빨리 데워지고 빨리 식는다', S.w / 2, 18, {size: 12, color: day ? C.ink : '#dde'});
+}
+
+/* ===== 6. 기단과 전선 ===== */
+const MASS = [['시베리아 기단', '한랭 건조', '겨울', [.22, .18], '#5a8be0'], ['오호츠크해 기단', '한랭 다습', '초여름', [.78, .2], '#7ab8e8'], ['북태평양 기단', '고온 다습', '여름', [.78, .78], '#e07a5a'], ['양쯔강 기단', '온난 건조', '봄·가을', [.2, .7], '#e0b05a']];
+function drawFront(){
+  const g = S.g;
+  if (st.f === 'mass') { g.fillStyle = '#e8eef4'; g.fillRect(0, 0, S.w, S.h); g.fillStyle = '#3f7fc0'; g.globalAlpha = .15; g.fillRect(S.w * .55, 0, S.w * .45, S.h); g.globalAlpha = 1;
+    const kx = S.w * .5, ky = S.h * .48; g.fillStyle = '#9ac08a'; g.beginPath(); g.moveTo(kx - 20, ky - 60); g.quadraticCurveTo(kx + 20, ky - 70, kx + 26, ky - 20); g.quadraticCurveTo(kx + 30, ky + 30, kx + 10, ky + 60); g.quadraticCurveTo(kx - 24, ky + 66, kx - 30, ky + 40); g.quadraticCurveTo(kx - 40, ky, kx - 20, ky - 60); g.fill(); label(g, '한반도', kx, ky, {weight: 700, size: 12});
+    MASS.forEach(([n, p, s, [u, v], col], i) => { const x = u * S.w, y = v * S.h, pulse = 1 + Math.sin(st.t * 2 + i) * .04; g.fillStyle = col; g.globalAlpha = .3; g.beginPath(); g.ellipse(x, y, 92 * pulse, 56 * pulse, 0, 0, TAU); g.fill(); g.globalAlpha = 1;
+      label(g, n, x, y - 14, {weight: 700}); label(g, p, x, y + 4, {size: 12}); label(g, s, x, y + 22, {size: 12, color: C.hot, weight: 600}); arrow(g, x + (kx - x) * .45, y + (ky - y) * .45, x + (kx - x) * .6, y + (ky - y) * .6, col, 2.5); });
+    label(g, '대륙에서 생긴 기단은 건조, 바다에서 생긴 기단은 다습 · 북쪽은 한랭, 남쪽은 고온', S.w / 2, S.h - 14, {size: 12, color: C.muted});
+    return; }
+  const cold = st.f === 'cold', B = S.h - 50, fx = S.w * (.25 + st.fx * .5), town = S.w * .62;
+  g.fillStyle = '#eaf2fb'; g.fillRect(0, 0, S.w, B);
+  // 찬 공기 쐐기
+  g.fillStyle = 'rgba(80,130,230,.35)'; g.beginPath();
+  if (cold) { g.moveTo(0, B); g.lineTo(0, B - 220); g.lineTo(fx - 40, B - 200); g.quadraticCurveTo(fx - 10, B - 120, fx, B); }
+  else { g.moveTo(S.w, B); g.lineTo(S.w, B - 120); g.lineTo(fx, B); }
+  g.closePath(); g.fill();
+  g.fillStyle = 'rgba(230,110,80,.2)'; g.beginPath(); if (cold) { g.moveTo(fx, B); g.quadraticCurveTo(fx - 10, B - 120, fx - 40, B - 200); g.lineTo(fx - 40, 0); g.lineTo(S.w, 0); g.lineTo(S.w, B); } else { g.moveTo(0, B); g.lineTo(fx, B); g.lineTo(S.w, B - 120); g.lineTo(S.w, 0); g.lineTo(0, 0); } g.closePath(); g.fill();
+  label(g, '찬 공기', cold ? 60 : S.w - 60, B - 40, {weight: 700, color: C.cold}); label(g, '따뜻한 공기', cold ? S.w - 80 : 70, B - 160, {weight: 700, color: C.hot});
+  // 구름
+  const cloud = (x, y, r, dark) => { g.fillStyle = dark ? '#8a93a3' : '#fff'; [[0, 0, r], [r * .8, r * .2, r * .8], [-r * .8, r * .2, r * .75], [0, -r * .6, r * .7]].forEach(([dx, dy, rr]) => { g.beginPath(); g.arc(x + dx, y + dy, rr, 0, TAU); g.fill(); }); };
+  if (cold) { cloud(fx + 10, B - 210, 34, true); cloud(fx + 20, B - 150, 30, true); cloud(fx + 4, B - 260, 28, false); label(g, '적란운', fx + 70, B - 240, {size: 12, weight: 700});
+    for (let i = 0; i < 14; i++) { const x = fx - 30 + (i * 7) % 60, y = B - 120 + ((st.t * 200 + i * 23) % 110); g.strokeStyle = '#3a6ad8'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, y); g.lineTo(x - 3, y + 9); g.stroke(); }
+    label(g, '좁은 지역에 소나기', fx, B + 18, {size: 11, color: C.cold}); }
+  else { for (let k = 0; k < 4; k++) { const x = fx + 60 + k * 70, y = B - 30 - (x - fx) * 120 / (S.w - fx) - 20; for (let j = 0; j < 3; j++) cloud(x + j * 22, y, 14, k < 2); } label(g, '층운형 구름 (난층운 → 고층운 → 권층운)', fx + 160, B - 160, {size: 11, weight: 600});
+    for (let i = 0; i < 26; i++) { const x = fx + 20 + (i * 11) % 150, y = B - 70 + ((st.t * 120 + i * 17) % 66); g.strokeStyle = '#5a8ae0'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x, y); g.lineTo(x - 2, y + 6); g.stroke(); }
+    label(g, '넓은 지역에 이슬비', fx + 90, B + 18, {size: 11, color: C.cold}); }
+  // 전선 기호
+  g.strokeStyle = cold ? '#3a6ad8' : '#d8483a'; g.lineWidth = 3; g.beginPath(); g.moveTo(fx, B); g.lineTo(fx, B + 4); g.stroke();
+  arrow(g, fx - 30, B - 20, fx + 10, B - 20, cold ? '#3a6ad8' : '#d8483a', 2.5); label(g, cold ? '한랭 전선 ▲ 이동' : '온난 전선 ● 이동', fx, B - 40, {weight: 700, size: 12, color: cold ? '#3a6ad8' : '#d8483a'});
+  // 마을
+  g.fillStyle = '#6a5040'; g.fillRect(town - 12, B - 16, 24, 16); g.fillStyle = '#b04a3a'; g.beginPath(); g.moveTo(town - 16, B - 16); g.lineTo(town, B - 30); g.lineTo(town + 16, B - 16); g.fill(); label(g, '관측 지점', town, B + 34, {size: 11});
+  g.fillStyle = '#7a9a5a'; g.fillRect(0, B, S.w, 6);
+  const passed = fx > town, wx = S.w - 120;
+  g.fillStyle = C.surface; g.strokeStyle = C.line; g.fillRect(wx - 10, 14, 120, 70); g.strokeRect(wx - 10, 14, 120, 70);
+  label(g, passed ? '전선 통과 후' : '전선 통과 전', wx + 50, 28, {size: 11, weight: 700}); label(g, `기온 ${townT().toFixed(1)} ℃`, wx + 50, 50, {size: 12, color: C.hot}); label(g, cold ? (passed ? '기온 하강 · 맑아짐' : '따뜻함') : (passed ? '기온 상승 · 맑음' : '비 · 서늘함'), wx + 50, 70, {size: 11});
+}
+function townT(){ const fx = .25 + st.fx * .5, passed = fx > .62, cold = st.f === 'cold'; const d = (fx - .62) * 30; return cold ? 24 - 8 / (1 + Math.exp(-d)) : 14 + 8 / (1 + Math.exp(-d)); }
+
+/* ===== 그래프 ===== */
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'layer') { const m = axes(G, {x: [0, 1000, 200, '기압 (hPa)'], y: [0, 50, 10, '높이 (km)']}); const p = []; for (let z = 0; z <= 50; z += .5) p.push([1013 * Math.exp(-z / 7.4), z]); line(G, p, m, C.earth, 2.5); g.fillStyle = C.ink; if (st.alt <= 50) { g.beginPath(); g.arc(m.X(1013 * Math.exp(-st.alt / 7.4)), m.Y(st.alt), 5, 0, TAU); g.fill(); } label(g, '높이 올라갈수록 기압이 낮아진다', m.X(600), m.Y(40), {size: 11, color: C.muted}); }
+  else if (st.mode === 'green') { const m = axes(G, {x: [0, 100, 25, '온실 기체 양 (상대값)'], y: [-20, 30, 10, '평균 기온 (℃)']}); const p = []; for (let x = 0; x <= 100; x += 2) p.push([x, 255 * Math.pow(1 / (1 - (.6 + .3 * x / 100) / 2), .25) - 273]); line(G, p, m, C.hot, 2.5); line(G, [[0, -18], [100, -18]], m, C.cold, 1.2, [4, 4]); label(g, '대기가 없을 때 약 −18 ℃', m.X(70), m.Y(-18) - 10, {size: 11, color: C.cold}); g.fillStyle = C.ink; if (!st.noAir) { g.beginPath(); g.arc(m.X(st.gh), m.Y(TsEq()), 5, 0, TAU); g.fill(); } }
+  else if (st.mode === 'humid') { const m = axes(G, {x: [0, 24, 6, '시각 (시)'], y: [0, 100, 20, '기온 (℃) · 상대 습도 (%)']}); const Tp = [], Rp = []; for (let h = 0; h <= 24; h += .5) { const T = 18 + 8 * Math.cos((h - 14) / 24 * TAU); Tp.push([h, T]); Rp.push([h, Math.min(100, 12 / sat(T) * 100)]); } line(G, Tp, m, C.hot, 2.5); line(G, Rp, m, C.phy, 2.5); label(g, '기온', m.X(14), m.Y(26) - 10, {size: 11, color: C.hot}); label(g, '상대 습도', m.X(5), m.Y(Math.min(100, 12 / sat(10.5) * 100)) - 10, {size: 11, color: C.phy}); }
+  else if (st.mode === 'cloud') { const m = axes(G, {x: [-10, 35, 5, '온도 (℃)'], y: [0, 4, 1, '높이 (km)']}); const a = [], b = []; for (let z = 0; z <= 4; z += .05) { a.push([parcelT(z), z]); b.push([parcelD(z), z]); } line(G, a, m, C.hot, 2.5); line(G, b, m, C.cold, 2.5, [5, 3]); label(g, '공기 덩어리 기온', m.X(parcelT(.5)) + 6, m.Y(.5), {size: 11, color: C.hot, align: 'left'}); label(g, '이슬점', m.X(parcelD(.3)) - 6, m.Y(.3), {size: 11, color: C.cold, align: 'right'}); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(parcelT(st.h)), m.Y(st.h), 5, 0, TAU); g.fill(); }
+  else if (st.mode === 'wind') { if (st.w === 'map') { const m = axes(G, {x: [0, 40, 10, '기압 차 (hPa)'], y: [0, 20, 5, '바람의 세기 (상대값)']}); line(G, [[0, 0], [40, 20]], m, C.phy, 2.5); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.dp), m.Y(st.dp / 2), 5, 0, TAU); g.fill(); }
+    else { const m = axes(G, {x: [0, 24, 6, '시각 (시)'], y: [10, 35, 5, '기온 (℃)']}); const Lp = [], Sp = []; for (let h = 0; h <= 24; h += .5) { Lp.push([h, 22 + 8 * Math.cos((h - 14) / 24 * TAU)]); Sp.push([h, 22 + 1.5 * Math.cos((h - 16) / 24 * TAU)]); } line(G, Lp, m, '#c9a66b', 2.5); line(G, Sp, m, '#3f7fc0', 2.5); label(g, '육지', m.X(14), m.Y(30) - 10, {size: 11}); label(g, '바다', m.X(3), m.Y(22.5) - 10, {size: 11}); g.strokeStyle = C.ink; g.beginPath(); g.moveTo(m.X(st.hour), m.T); g.lineTo(m.X(st.hour), m.T + m.h); g.stroke(); } }
+  else { if (st.f === 'mass') { const m = axes(G, {x: [0, 4, 1, ''], y: [0, 30, 10, '기단의 성질 (기온 ℃, 대략)']}); MASS.forEach(([n, p, s, uv, col], i) => { const v = [-15, 10, 28, 15][i] + 15; g.fillStyle = col; g.fillRect(m.X(i + .2), m.Y(v - 15 < 0 ? 0 : v - 15), m.X(.6) - m.X(0), m.Y(0) - m.Y(Math.max(0, v - 15))); label(g, n.replace(' 기단', ''), m.X(i + .5), m.T + m.h + 12, {size: 10}); }); }
+    else { const m = axes(G, {x: [0, 1, .25, '시간 (전선 이동)'], y: [10, 30, 5, '관측 지점 기온 (℃)']}); if (st.fh.length > 1) line(G, st.fh, m, st.f === 'cold' ? C.cold : C.hot, 2.5); } }
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>'; $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
+function table(){
+  if (st.mode === 'layer') setTable('기권의 층상 구조', ['층', '높이', '기온 변화', '특징'], [['대류권', '0~약 11 km', '높이 올라갈수록 낮아짐', '대류, 기상 현상'], ['성층권', '약 11~50 km', '높아짐', '오존층, 대류 없음(안정)'], ['중간권', '약 50~80 km', '낮아짐', '대류 있음, 기상 현상 없음, 유성'], ['열권', '약 80 km 이상', '높아짐', '공기 희박, 오로라, 낮과 밤 기온 차 큼']]);
+  else if (st.mode === 'green') setTable('대기 중 이산화 탄소 농도 (하와이 마우나로아)', ['연도', '1960', '1980', '2000', '2020'], [['농도 (ppm)', '약 317', '약 339', '약 370', '약 414']]);
+  else if (st.mode === 'humid') setTable('포화 수증기량 (g/kg)', ['기온 (℃)', '0', '10', '15', '20', '25', '30'], [['포화 수증기량', '3.8', '7.6', '10.6', '14.7', '20.0', '27.2']]);
+  else if (st.mode === 'cloud') setTable('구름이 생기는 경우', ['경우', '예'], [['지표면이 부분적으로 가열될 때', '여름철 소나기구름'], ['공기가 산을 타고 오를 때', '산 중턱의 구름'], ['찬 공기와 따뜻한 공기가 만날 때', '전선 주변의 구름'], ['저기압 중심으로 공기가 모여들 때', '저기압의 흐린 날씨']]);
+  else if (st.mode === 'wind') setTable('고기압과 저기압', ['구분', '고기압', '저기압'], [['중심 기압', '주위보다 높음', '주위보다 낮음'], ['바람 (북반구)', '시계 방향으로 불어 나감', '시계 반대 방향으로 불어 들어옴'], ['기류', '하강 기류', '상승 기류'], ['날씨', '맑음', '흐리거나 비']]);
+  else if (st.f === 'mass') setTable('우리나라 주변 기단', ['기단', '성질', '영향 계절', '날씨'], [['시베리아', '한랭 건조', '겨울', '춥고 건조, 한파'], ['오호츠크해', '한랭 다습', '초여름', '높새바람, 장마 전선'], ['북태평양', '고온 다습', '여름', '무더위, 열대야'], ['양쯔강', '온난 건조', '봄·가을', '건조, 황사(봄)']]);
+  else setTable('한랭 전선과 온난 전선', ['구분', '한랭 전선', '온난 전선'], [['전선면 기울기', '급함', '완만함'], ['구름', '적운형 (적란운)', '층운형'], ['강수', '좁은 지역, 소나기', '넓은 지역, 지속적인 비'], ['이동 속도', '빠름', '느림'], ['통과 후 기온', '낮아짐', '높아짐']]);
+}
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'layer') { const ly = LAYERS.find(l => st.alt >= l[0] && st.alt < l[1]) || LAYERS[3]; s = stat('높이', st.alt, ' km') + stat('층', ly[2]);
+    e = '<b>기권</b>은 지표에서 높이 약 1000 km까지의 대기층입니다. 높이에 따른 <b>기온 변화</b>를 기준으로 대류권, 성층권, 중간권, 열권으로 나눕니다. 높이 올라갈수록 기온이 낮아지는 층에서는 <b>대류</b>가 일어납니다.';
+    t = '높이를 바꾸며 기온이 높아지는 층과 낮아지는 층을 찾아보세요.'; }
+  else if (st.mode === 'green') { s = stat('평균 기온', st.Ts.toFixed(1), ' ℃') + stat('대기의 흡수율', Math.round(fOf() * 100), ' %');
+    e = '<b>복사 평형</b>: 물체가 흡수하는 복사 에너지양과 방출하는 복사 에너지양이 같아 온도가 일정하게 유지되는 상태. <b>온실 효과</b>: 대기 중의 온실 기체(수증기, 이산화 탄소 등)가 지표가 방출하는 복사 에너지를 흡수했다가 다시 지표로 방출하여 지구의 평균 기온이 높게 유지되는 현상. 온실 기체가 늘어나면 <b>지구 온난화</b>가 일어납니다.';
+    t = '온실 기체 양을 늘리면 기온이 오르다가 새로운 복사 평형에 도달합니다.'; }
+  else if (st.mode === 'humid') { const v = Math.min(st.hv, sat(st.ht)); s = stat('상대 습도', Math.round(v / sat(st.ht) * 100), ' %') + stat('이슬점', dewOf(st.hv).toFixed(1), ' ℃');
+    e = '<b>포화 수증기량</b>: 포화 상태의 공기 1 kg 속 수증기량(g). 기온이 높을수록 많아집니다. <b>상대 습도</b>(%) = 현재 공기 중 수증기량 ÷ 현재 기온의 포화 수증기량 × 100. <b>이슬점</b>: 공기가 냉각되어 포화 상태가 될 때의 온도로, 실제 수증기량이 많을수록 높습니다.';
+    t = '[공기 냉각하기]로 기온을 내리면 이슬점에서 응결이 시작됩니다.'; }
+  else if (st.mode === 'cloud') { s = stat('응결 고도', Math.round(cloudBase() * 1000), ' m') + stat('공기 덩어리', st.h >= cloudBase() ? '포화 (구름)' : '불포화');
+    e = '공기가 상승하면 주위 기압이 낮아져 <b>단열 팽창</b>하고 기온이 낮아집니다. 기온이 <b>이슬점</b>에 도달하면 수증기가 응결하여 <b>구름</b>이 생깁니다. 지표의 기온과 이슬점 차이가 클수록 구름 밑면이 높습니다.';
+    t = '지표 기온과 이슬점을 바꾸어 구름 밑면의 높이 변화를 비교하세요. (모형: 불포화 공기 10 ℃/km, 이슬점 2 ℃/km 하강)'; }
+  else if (st.mode === 'wind') { if (st.w === 'map') { s = stat('기압 차', st.dp, ' hPa') + stat('바람', st.dp > 28 ? '강함' : st.dp > 12 ? '보통' : '약함');
+      e = '<b>기압</b>은 공기가 누르는 힘으로, 1기압은 약 1013 hPa입니다. 두 지점의 기압 차가 생기면 공기는 기압이 높은 곳에서 낮은 곳으로 이동하는데, 이것이 <b>바람</b>입니다. 기압 차가 클수록 바람이 강합니다.';
+      t = '기압 차를 바꾸며 바람의 세기를 비교하세요.'; }
+    else { const day = st.hour >= 9 && st.hour <= 18; s = stat('시각', st.hour, '시') + stat('바람', day ? '해풍' : '육풍');
+      e = '<b>해륙풍</b>: 해안 지역에서 하루를 주기로 풍향이 바뀌는 바람. 낮에는 육지가 빨리 가열되어 육지에 저기압이 생기므로 바다에서 육지로 <b>해풍</b>이, 밤에는 육지가 빨리 냉각되어 육지에서 바다로 <b>육풍</b>이 붑니다.';
+      t = '시각을 바꾸며 바람의 방향이 바뀌는 때를 찾아보세요.'; } }
+  else { if (st.f === 'mass') { s = stat('기단 수', 4) + stat('기준', '발원지');
+      e = '<b>기단</b>: 기온과 습도 등의 성질이 비슷한 큰 공기 덩어리. 발원지의 성질을 닮아 대륙에서 생기면 건조하고, 바다에서 생기면 다습하며, 고위도에서 생기면 한랭하고 저위도에서 생기면 고온입니다.';
+      t = '계절마다 우리나라에 영향을 주는 기단을 확인하세요.'; }
+    else { s = stat('관측 지점 기온', townT().toFixed(1), ' ℃') + stat('전선', st.f === 'cold' ? '한랭 전선' : '온난 전선');
+      e = st.f === 'cold' ? '<b>한랭 전선</b>: 찬 공기가 따뜻한 공기 밑으로 파고들며 생기는 전선. 전선면의 기울기가 급해 적운형 구름이 생기고 좁은 지역에 소나기가 내립니다. 통과 후 기온이 낮아집니다.' : '<b>온난 전선</b>: 따뜻한 공기가 찬 공기 위로 올라가며 생기는 전선. 전선면의 기울기가 완만해 층운형 구름이 넓게 생기고 넓은 지역에 지속적인 비가 내립니다. 통과 후 기온이 높아집니다.';
+      t = '[전선 이동]을 누르고 관측 지점의 기온 그래프를 확인하세요.'; } }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 조작 ===== */
+$('alt').oninput = e => { st.alt = +e.target.value; $('altOut').textContent = st.alt + ' km'; };
+$('gh').oninput = e => { st.gh = +e.target.value; $('ghOut').textContent = st.gh === 60 ? '현재' : st.gh > 60 ? '증가' : '감소'; };
+$('noAir').onchange = e => st.noAir = e.target.checked;
+$('ht').oninput = e => { st.ht = +e.target.value; st.cooling = false; drops = []; $('htOut').textContent = st.ht + ' ℃'; };
+$('hv').oninput = e => { st.hv = +e.target.value; drops = []; $('hvOut').textContent = st.hv + ' g/kg'; };
+$('cool').onclick = () => { st.cooling = !st.cooling; };
+$('t0').oninput = e => { st.t0 = +e.target.value; if (st.d0 > st.t0) { st.d0 = st.t0; $('d0').value = st.d0; $('d0Out').textContent = st.d0 + ' ℃'; } $('t0Out').textContent = st.t0 + ' ℃'; st.h = 0; };
+$('d0').oninput = e => { st.d0 = Math.min(+e.target.value, st.t0); e.target.value = st.d0; $('d0Out').textContent = st.d0 + ' ℃'; st.h = 0; };
+$('rise').onclick = () => { if (st.h >= 3.9) st.h = 0; st.rising = true; };
+function syncW(){ const m = st.w === 'map', on = st.mode === 'wind'; $('dpF').hidden = !m || !on; $('hourF').hidden = m || !on; if (on) $('gTitle').textContent = m ? '기압 차와 바람의 세기' : '육지와 바다의 하루 기온'; table(); }
+Kit.seg($('wSeg'), 'w', v => { st.w = v; syncW(); })('map');
+$('dp').oninput = e => { st.dp = +e.target.value; $('dpOut').textContent = st.dp + ' hPa'; };
+$('hour').oninput = e => { st.hour = +e.target.value; $('hourOut').textContent = st.hour + '시'; };
+function syncF(){ const on = st.mode === 'front'; $('move').hidden = !on || st.f === 'mass'; if (on) $('gTitle').textContent = st.f === 'mass' ? '기단의 기온 비교' : '전선 통과와 기온 변화'; table(); }
+Kit.seg($('fSeg'), 'f', v => { st.f = v; st.fx = 0; st.moving = false; st.fh = []; syncF(); })('cold');
+$('move').onclick = () => { st.fx = 0; st.fh = []; st.moving = true; };
+Kit.tabs(m => { st.mode = m; table();
+  $('gTitle').textContent = {layer: '높이에 따른 기압', green: '온실 기체 양과 지구 평균 기온', humid: '맑은 날 하루 동안의 기온과 상대 습도', cloud: '높이에 따른 기온과 이슬점', wind: '', front: ''}[m];
+  $('gSub').textContent = {layer: '', green: '단순한 한 층 대기 모형', humid: '수증기량이 일정할 때', cloud: '두 선이 만나는 높이 = 구름 밑면', wind: '', front: ''}[m]; syncW(); syncF(); }, ['layer', 'green', 'humid', 'cloud', 'wind', 'front']);
+st.Ts = TsEq();
+Kit.loop(dt => { st.t += dt;
+    st.Ts += (TsEq() - st.Ts) * Math.min(1, dt * .8);
+    if (st.cooling && st.mode === 'humid') { st.ht = Math.max(0, st.ht - dt * 2); $('ht').value = Math.round(st.ht); $('htOut').textContent = st.ht.toFixed(0) + ' ℃'; if (st.hv > sat(st.ht) && drops.length < 40 && Math.random() < .3) drops.push([S.w * .66 + 10 + Math.random() * (S.w * .3 - 20), S.h * .12 + S.h * .5 - 6 - Math.random() * 10]); if (st.ht <= 0) st.cooling = false; }
+    if (st.rising) { st.h = Math.min(4, st.h + dt * .5); if (st.h >= 4) st.rising = false; }
+    if (st.moving) { st.fx = Math.min(1, st.fx + dt * .12); st.fh.push([st.fx, townT()]); if (st.fx >= 1) st.moving = false; } },
+  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({layer: drawLayer, green: drawGreen, humid: drawHumid, cloud: drawCloud, wind: drawWind, front: drawFront})[st.mode](); drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>
