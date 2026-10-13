@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>반응 속도 아케이드 · 중3 자극과 반응</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<style>.log{font-size:13.5px;line-height:1.7}.log b{color:var(--yellow)}</style>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'reaction', title: '반응 속도 아케이드', unit: '중3 · 20 자극과 반응', back: '../../index.html#g3', sim: 'sim.html#react', dark: true,
+  lead: '눈으로 보고, 귀로 듣고, 판단해서 반응하기까지 얼마나 걸릴까요? <b>신호에 맞춰 화면(또는 스페이스바)을 눌러</b> 반응 시간을 재고, 모둠끼리 겨뤄 보세요!',
+  howto: ['화면이 <b>초록색</b>으로 바뀌거나 <b>소리</b>가 나면 바로 누르세요. 먼저 누르면 부정 출발!', '<b>자 잡기</b>: 떨어지는 자를 최대한 빨리 잡으세요. 떨어진 거리로 반응 시간을 계산해요.', '<b>판단 반응</b>: 🔴만 누르고 🔵는 참으세요. 판단이 들어가면 얼마나 느려질까요?'],
+  options: [{key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 2}, {key: 'sound', label: '소리 자극', choices: [[1, '포함'], [0, '빼기']], def: 1}],
+  recap: '자극을 받아 반응하기까지는 <b>감각기 → 감각 신경 → 중추 신경(대뇌) → 운동 신경 → 근육(반응기)</b>의 경로를 거쳐요. 보통 시각 자극에는 0.2~0.3초, 청각 자극에는 조금 더 빠르게 반응해요. 🔴/🔵를 구별하는 <b>판단</b>이 들어가면 대뇌에서 처리할 일이 늘어 반응이 더 느려집니다. 뜨거운 것에 손이 닿아 즉시 손을 떼는 <b>무조건 반사</b>는 대뇌를 거치지 않고 척수가 중추가 되어 훨씬 빨라요.',
+  startLabel: '도전!', bestLower: true
+});
+const {S, sfx, toast} = app, D = Draw;
+let seq, si, st, tGo, wait, results, ui = {}, ruler, ng, flash = 0, allRes = [];
+const KIND = {vis: ['👁️ 시각', '화면이 초록색이 되면!'], snd: ['👂 청각', '삐 소리가 나면! (화면은 그대로)'], rul: ['📏 자 잡기', '자가 떨어지면 잡아요!'], ng: ['🧠 판단', '🔴만 누르기, 🔵는 참기!']};
+app.onStart = o => { allRes = app.state.players.map(() => []); ui.l = app.panel('기록'); ui.l.className = 'log'; ui.i = app.panel('신경 경로', '<p class="note-c">눈·귀(감각기) → 감각 신경 → <b>대뇌</b> → 운동 신경 → 손가락 근육</p>'); startPlayer(); };
+function startPlayer(){ seq = ['vis', 'vis', ...(app.opts.sound ? ['snd'] : []), 'rul', 'rul', 'ng', 'ng', 'ng']; si = -1; results = allRes[app.state.turn]; app.setLevel(0, seq.length); nextTrial(); render(); }
+function nextTrial(){ si++; if (si >= seq.length) return playerDone(); app.setLevel(si, seq.length); st = 'ready'; tGo = 0; wait = 1.2 + Math.random() * 2.6; ruler = 0; ng = seq[si] === 'ng' ? (Math.random() < .65 ? 'red' : 'blue') : null; }
+function render(){ ui.l.innerHTML = app.state.players.map((p, i) => { const r = allRes[i].filter(x => x.ms), v = r.filter(x => x.k !== 'ng'), n = r.filter(x => x.k === 'ng'); const avg = a => a.length ? Math.round(a.reduce((s, x) => s + x.ms, 0) / a.length) + ' ms' : '–';
+  return `<p>${p.name}: 단순 <b>${avg(v)}</b> · 판단 <b>${avg(n)}</b>${allRes[i].filter(x => x.foul).length ? ` · 부정 ${allRes[i].filter(x => x.foul).length}` : ''}</p>`; }).join(''); }
+function press(){ if (!seq || st === 'done') return; const now = performance.now();
+  if (st === 'ready' || st === 'wait') { if (st === 'wait') { sfx.bad(); toast('부정 출발! 🚫', 'bad'); results.push({k: seq[si], foul: 1}); app.addScore(-50); st = 'show'; tGo = now; setTimeout(nextTrial, 900); render(); } else { st = 'wait'; tGo = now + wait * 1000; } return; }
+  if (st === 'go') { const ms = Math.round(now - tGo); if (seq[si] === 'ng' && ng === 'blue') { sfx.bad(); toast('🔵는 참아야 해요!', 'bad'); results.push({k: 'ng', foul: 1}); app.addScore(-50); }
+    else { let shown = ms; if (seq[si] === 'rul') { const cm = Math.min(30, 490 * Math.pow(ms / 1000, 2)); shown = Math.round(Math.sqrt(2 * cm / 100 / 9.8) * 1000); ruler = cm; } results.push({k: seq[si], ms: shown, cm: ruler}); app.addScore(Math.max(0, 600 - shown)); sfx.pop(); toast(seq[si] === 'rul' ? `${ruler.toFixed(1)} cm에서 잡음 → ${shown} ms` : `${shown} ms`, shown < 300 ? 'good' : ''); }
+    st = 'show'; flash = now; render(); setTimeout(nextTrial, 1300); } }
+app.pointer({down(){ press(); }}); addEventListener('keydown', e => { if (e.code === 'Space' && !app.stage.closest('[hidden]')) { e.preventDefault(); if (!e.repeat) press(); } });
+app.step = () => { if (!seq) return; const now = performance.now();
+  if (st === 'wait' && now >= tGo) { st = 'go'; tGo = now; if (seq[si] === 'snd') sfx.ok(); if (seq[si] === 'ng' && ng === 'blue') setTimeout(() => { if (st === 'go' && seq[si] === 'ng') { st = 'show'; results.push({k: 'ng', ok: 1}); app.addScore(100); toast('잘 참았어요! +100', 'good'); sfx.ok(); render(); setTimeout(nextTrial, 900); } }, 1100); }
+  if (st === 'go' && seq[si] === 'rul') { const t = (now - tGo) / 1000, cm = 490 * t * t; if (cm >= 30) { st = 'show'; results.push({k: 'rul', miss: 1}); sfx.bad(); toast('놓쳤어요! (30 cm 넘음)', 'bad'); setTimeout(nextTrial, 1000); } }
+  if (st === 'go' && seq[si] === 'ng' && ng === 'red' && now - tGo > 1500) { st = 'show'; toast('🔴는 눌러야 해요!', 'bad'); results.push({k: 'ng', miss: 1}); sfx.bad(); setTimeout(nextTrial, 900); }
+  if (st === 'go' && seq[si] !== 'rul' && seq[si] !== 'ng' && now - tGo > 2000) { st = 'show'; toast('너무 느려요!', 'bad'); results.push({k: seq[si], ms: 2000}); render(); setTimeout(nextTrial, 900); } };
+function playerDone(){ st = 'done'; render(); if (app.multi && app.state.turn < app.state.players.length - 1) { setTimeout(() => { app.nextTurn(); startPlayer(); }, 1200); return; }
+  const me = allRes[0].filter(x => x.ms && x.k !== 'ng'), best = me.length ? Math.min(...me.map(x => x.ms)) : 0;
+  setTimeout(() => app.finish({stars: app.multi ? 3 : best && best < 250 ? 3 : best && best < 350 ? 2 : 1, summary: app.multi ? '모둠별 점수입니다. 판단 반응이 단순 반응보다 느렸나요?' : `가장 빠른 반응 <b>${best} ms</b> · 점수 <b>${app.player.score}</b><br>판단 반응(🔴/🔵)이 단순 반응보다 느렸나요? 대뇌에서 판단하는 시간이 더해졌기 때문이에요.`, best: best ? best + ' ms' : null, bestValue: best || 9999}), 900); }
+app.draw = (g, W, H) => { if (!seq) return; const now = performance.now(), k = seq[Math.min(si, seq.length - 1)], go = st === 'go';
+  g.fillStyle = k === 'vis' && go ? '#2fbf6a' : st === 'wait' ? '#20262f' : '#151a22'; g.fillRect(0, 0, W, H);
+  D.text(g, `${app.player.name} · ${si + 1}/${seq.length} · ${KIND[k][0]}`, W / 2, 28, {size: 16, color: '#9fb0d0', weight: 700});
+  if (st === 'ready') { D.text(g, KIND[k][1], W / 2, H * .42, {size: 26, display: true, color: '#f2efe4'}); D.text(g, '준비되면 화면을 누르세요 (스페이스바)', W / 2, H * .55, {size: 16, color: '#9fb0d0'}); }
+  if (st === 'wait') D.text(g, k === 'snd' ? '귀를 기울이고…' : '기다리세요…', W / 2, H * .45, {size: 30, display: true, color: '#f28c7a'});
+  if (go && k === 'vis') D.text(g, '지금!', W / 2, H * .45, {size: 70, display: true, color: '#fff'});
+  if (go && k === 'snd') D.text(g, '🔊', W / 2, H * .45, {size: 20, color: 'rgba(255,255,255,.15)'});
+  if (go && k === 'ng') D.text(g, ng === 'red' ? '🔴' : '🔵', W / 2, H * .45, {size: 120});
+  if (k === 'rul') { const t = go ? (now - tGo) / 1000 : 0, cm = st === 'show' ? ruler : Math.min(30, 490 * t * t), pxcm = H * .55 / 30, hy = H * .74, x = W / 2 - 25, bot = hy + cm * pxcm;
+    g.fillStyle = '#f2d36b'; g.fillRect(x, bot - 30 * pxcm, 50, 30 * pxcm); g.strokeStyle = '#a0822a'; g.strokeRect(x, bot - 30 * pxcm, 50, 30 * pxcm);
+    for (let c = 0; c <= 30; c++) { const y = bot - c * pxcm; g.strokeStyle = '#333'; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (c % 5 ? 10 : 20), y); g.stroke(); if (c % 5 === 0) D.text(g, c, x + 34, y, {size: 11, color: '#333'}); }
+    D.text(g, '🤏', W / 2 + 56, hy, {size: 34}); D.text(g, '잡는 손', W / 2 + 100, hy, {size: 12, color: '#9fb0d0', align: 'left'}); g.strokeStyle = '#f28c7a'; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(W / 2 - 90, hy); g.lineTo(W / 2 + 40, hy); g.stroke(); g.setLineDash([]);
+    if (st === 'show' && ruler) D.text(g, `${ruler.toFixed(1)} cm → t = √(2d ÷ g) = ${Math.round(Math.sqrt(2 * ruler / 100 / 9.8) * 1000)} ms`, W / 2, H * .14, {size: 16, color: '#f6d365', weight: 700}); }
+  if (st === 'show' && results.length && k !== 'rul') { const r = results[results.length - 1]; if (r.ms) D.text(g, r.ms + ' ms', W / 2, H * .72, {size: 40, display: true, color: '#f6d365'}); }
+  // 신경 경로 애니메이션
+  if (st === 'show' && now - flash < 900) { const p = (now - flash) / 900, P = [[.1, .9, '감각기'], [.24, .9, '감각 신경'], [.38, .9, '대뇌'], [.62, .9, '운동 신경'], [.88, .9, '근육']]; P.forEach(([x, y, n], i) => { D.text(g, n, x * W, y * H + 18, {size: 11, color: '#9fb0d0'}); g.fillStyle = p * 4 >= i ? '#f6d365' : '#334'; g.beginPath(); g.arc(x * W, y * H, 7, 0, 7); g.fill(); }); }
+};
+</script>
+</body>
+</html>
