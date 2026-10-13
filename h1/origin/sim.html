@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>자연의 구성 원소 실험실 · 통합과학1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-earth">
+<div class="wrap">
+  <nav class="topbar" data-topbar="통합과학1|02 자연의 구성 원소" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학1 · 02 자연의 구성 원소 <span class="code">통과1 Ⅱ</span></div>
+      <h1>우주와 원소의 기원 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="spec">1. 스펙트럼</button>
+      <button type="button" data-mode="bigbang">2. 빅뱅과 원소 생성</button>
+      <button type="button" data-mode="star">3. 별과 무거운 원소</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="스펙트럼과 우주"></canvas></div>
+      <div class="controls">
+        <div class="field" data-only="spec"><div class="seg" id="kSeg"><button type="button" data-k="cont">연속 스펙트럼</button><button type="button" data-k="emit">방출 스펙트럼</button><button type="button" data-k="abs">흡수 스펙트럼</button><button type="button" data-k="star">별빛 분석</button></div></div>
+        <div class="field" data-only="spec" id="elF"><div class="seg" id="eSeg"><button type="button" data-e="H">수소</button><button type="button" data-e="He">헬륨</button><button type="button" data-e="Na">나트륨</button><button type="button" data-e="Ca">칼슘</button><button type="button" data-e="Fe">철</button></div></div>
+        <button class="btn" type="button" id="newStar" data-only="spec">다른 별</button>
+        <label class="field" data-only="bigbang" for="tt">빅뱅 후 시간 <input type="range" id="tt" min="0" max="100" step="1" value="0"><output id="ttOut"></output></label>
+        <button class="btn primary" type="button" id="play" data-only="bigbang star">재생</button>
+        <div class="field" data-only="star"><div class="seg" id="mSeg"><button type="button" data-m="1">태양 정도 질량</button><button type="button" data-m="20">태양 질량의 20배</button></div></div>
+        <label class="field" data-only="star" for="age">진화 단계 <input type="range" id="age" min="0" max="5" step="1" value="0"><output id="ageOut"></output></label>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>멀리 있는 별에 가 보지 않고도 별을 이루는 원소를 알 수 있는 까닭은?</summary><p>원소마다 고유한 위치에 선 스펙트럼이 나타납니다(원소의 지문). 별빛의 흡수 스펙트럼에 나타난 검은 선의 위치를 실험실에서 얻은 원소의 선 스펙트럼과 비교하면 별 대기에 어떤 원소가 있는지 알 수 있습니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>빅뱅 우주에서 수소와 헬륨의 질량비가 약 3 : 1이 된 까닭은?</summary><p>빅뱅 후 약 3분 무렵 양성자와 중성자의 개수비가 약 7 : 1이었습니다. 양성자 14개와 중성자 2개를 예로 들면, 중성자 2개가 양성자 2개와 결합해 헬륨 원자핵 1개(질량 4)를 만들고 양성자 12개(질량 12)가 남으므로 질량비가 12 : 4 = 3 : 1이 됩니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>우리 몸을 이루는 탄소, 산소, 철은 어디에서 왔을까?</summary><p>빅뱅 때는 주로 수소와 헬륨만 만들어졌습니다. 탄소·산소 등은 별 내부의 핵융합으로, 철보다 무거운 원소는 초신성 폭발 등으로 만들어져 우주 공간으로 퍼졌고, 이 물질이 모여 태양계와 지구, 그리고 우리 몸이 되었습니다. 우리는 "별의 먼지"인 셈이에요.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="스펙트럼선 파장은 대표적인 선만 나타낸 값입니다."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+const LINES = {H: [410.2, 434.0, 486.1, 656.3], He: [447.1, 471.3, 492.2, 501.6, 587.6, 667.8], Na: [589.0, 589.6], Ca: [396.8, 422.7, 443.5, 445.5], Fe: [430.8, 438.4, 440.5, 495.7, 527.0, 532.8]};
+const NAME = {H: '수소', He: '헬륨', Na: '나트륨', Ca: '칼슘', Fe: '철'};
+const st = {mode: 'spec', k: 'emit', e: 'H', starEl: ['H', 'Na'], picks: new Set(), tt: 0, run: false, m: '1', age: 0};
+function wl2rgb(w){ let r = 0, g = 0, b = 0; if (w < 440) { r = -(w - 440) / 60; b = 1; } else if (w < 490) { g = (w - 440) / 50; b = 1; } else if (w < 510) { g = 1; b = -(w - 510) / 20; } else if (w < 580) { r = (w - 510) / 70; g = 1; } else if (w < 645) { r = 1; g = -(w - 645) / 65; } else r = 1; const f = w < 420 ? .3 + .7 * (w - 380) / 40 : w > 700 ? .3 + .7 * (780 - w) / 80 : 1; return `rgb(${Math.round(255 * r * f)},${Math.round(255 * g * f)},${Math.round(255 * b * f)})`; }
+function strip(g, x0, y, w, h, kind, els, lbl){ const X = l => x0 + (l - 380) / (720 - 380) * w;
+  if (kind === 'emit') { g.fillStyle = '#000'; g.fillRect(x0, y, w, h); els.forEach(e => LINES[e].forEach(l => { g.fillStyle = wl2rgb(l); g.fillRect(X(l) - 1.5, y, 3, h); })); }
+  else { for (let l = 380; l <= 720; l += 1) { g.fillStyle = wl2rgb(l); g.fillRect(X(l), y, w / 340 + 1, h); } if (kind === 'abs') els.forEach(e => LINES[e].forEach(l => { g.fillStyle = '#000'; g.fillRect(X(l) - 1.2, y, 2.4, h); })); }
+  g.strokeStyle = C.line; g.strokeRect(x0, y, w, h); if (lbl) label(g, lbl, x0 - 8, y + h / 2, {size: 11, align: 'right', weight: 600}); return X; }
+function drawSpec(){ const g = S.g, x0 = 110, w = S.w - 140;
+  if (st.k === 'star') { label(g, '별빛의 흡수 스펙트럼 — 어떤 원소의 선과 일치할까? 아래에서 원소를 눌러 비교해 보세요', S.w / 2, 20, {size: 13, weight: 600});
+    const X = strip(g, x0, 44, w, 56, 'abs', st.starEl, '별 ★'); let y = 120;
+    Object.keys(LINES).forEach(e => { strip(g, x0, y, w, 26, 'emit', [e], NAME[e]); if (st.picks.has(e)) { g.strokeStyle = st.starEl.includes(e) ? C.bio : C.hot; g.lineWidth = 3; g.strokeRect(x0 - 2, y - 2, w + 4, 30); LINES[e].forEach(l => { g.strokeStyle = st.starEl.includes(e) ? 'rgba(40,160,90,.6)' : 'rgba(220,80,60,.5)'; g.setLineDash([3, 3]); g.lineWidth = 1; g.beginPath(); g.moveTo(X(l), 44); g.lineTo(X(l), y); g.stroke(); g.setLineDash([]); }); } y += 36; });
+    for (let l = 400; l <= 700; l += 50) label(g, l + ' nm', X(l), y + 6, {size: 10, color: C.muted}); return; }
+  const cx = S.w * .2, cy = S.h * .36;
+  // 광원
+  if (st.k === 'cont') { Kit.label(g, '', 0, 0); const gr = g.createRadialGradient(cx, cy, 2, cx, cy, 40); gr.addColorStop(0, '#fff'); gr.addColorStop(1, 'rgba(255,220,150,0)'); g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, 40, 0, TAU); g.fill(); label(g, '고온의 백열 광원', cx, cy + 56, {size: 12}); }
+  else if (st.k === 'emit') { g.fillStyle = 'rgba(200,200,255,.25)'; g.fillRect(cx - 40, cy - 18, 80, 36); g.strokeStyle = C.line; g.strokeRect(cx - 40, cy - 18, 80, 36); g.fillStyle = wl2rgb(LINES[st.e][LINES[st.e].length - 1]); g.globalAlpha = .5; g.fillRect(cx - 36, cy - 14, 72, 28); g.globalAlpha = 1; label(g, `뜨거운 ${NAME[st.e]} 기체`, cx, cy + 34, {size: 12}); }
+  else { const gr = g.createRadialGradient(cx - 70, cy, 2, cx - 70, cy, 30); gr.addColorStop(0, '#fff'); gr.addColorStop(1, 'rgba(255,220,150,0)'); g.fillStyle = gr; g.beginPath(); g.arc(cx - 70, cy, 30, 0, TAU); g.fill(); g.fillStyle = 'rgba(150,170,220,.25)'; g.fillRect(cx - 25, cy - 18, 60, 36); g.strokeStyle = C.line; g.strokeRect(cx - 25, cy - 18, 60, 36); label(g, `차가운 ${NAME[st.e]} 기체`, cx + 5, cy + 34, {size: 12}); label(g, '백열 광원', cx - 70, cy + 34, {size: 11, color: C.muted}); }
+  // 프리즘
+  const px = S.w * .45; g.fillStyle = 'rgba(180,210,240,.5)'; g.beginPath(); g.moveTo(px, cy - 40); g.lineTo(px - 34, cy + 30); g.lineTo(px + 34, cy + 30); g.closePath(); g.fill(); g.strokeStyle = C.ink; g.stroke(); label(g, '프리즘(분광기)', px, cy + 46, {size: 11, color: C.muted});
+  g.strokeStyle = 'rgba(255,240,200,.9)'; g.lineWidth = 3; g.beginPath(); g.moveTo(cx + 44, cy); g.lineTo(px - 14, cy); g.stroke();
+  for (let i = 0; i < 7; i++) { g.strokeStyle = wl2rgb(400 + i * 50); g.lineWidth = 2; g.beginPath(); g.moveTo(px + 14, cy); g.lineTo(S.w - 40, cy - 40 + i * 13); g.stroke(); }
+  const X = strip(g, 110, S.h * .66, S.w - 140, 50, st.k, [st.e], {cont: '연속', emit: '방출', abs: '흡수'}[st.k]); for (let l = 400; l <= 700; l += 50) label(g, l + ' nm', X(l), S.h * .66 + 64, {size: 10, color: C.muted});
+  if (st.k !== 'cont') LINES[st.e].forEach(l => label(g, l.toFixed(0), X(l), S.h * .66 - 8, {size: 9, color: C.muted}));
+}
+/* ===== 빅뱅 ===== */
+const STAGES = [[0, '빅뱅 직후', '1조 ℃ 이상', '에너지와 기본 입자(쿼크, 전자)가 뒤섞인 상태'], [20, '10⁻⁶초 무렵', '약 1조 ℃', '쿼크가 결합해 양성자와 중성자 생성'], [45, '약 3분', '약 10억 ℃', '양성자와 중성자가 결합해 헬륨 원자핵 생성 (수소 원자핵 = 양성자)'], [75, '약 38만 년', '약 3000 ℃', '원자핵이 전자와 결합해 수소·헬륨 원자 생성 → 빛이 자유롭게 진행 (우주 배경 복사)'], [92, '약 138억 년', '약 −270 ℃ (2.7 K)', '은하, 별, 행성이 있는 현재의 우주']];
+function stageIdx(){ let k = 0; STAGES.forEach((s, i) => { if (st.tt >= s[0]) k = i; }); return k; }
+function drawBigbang(){ const g = S.g, k = stageIdx(), f = st.tt / 100, R = Math.min(S.w, S.h) * (.12 + .3 * f), cx = S.w * .34, cy = S.h * .52, rnd = Kit.C;
+  const hot = 1 - f, bg = g.createRadialGradient(cx, cy, 0, cx, cy, R); bg.addColorStop(0, `rgba(255,${200 - hot * 80},${120 - hot * 100},${.55 - f * .4})`); bg.addColorStop(1, 'rgba(20,20,60,.15)'); g.fillStyle = bg; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill();
+  let seed = 7; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647; const t = performance.now() / 1000;
+  const N = 46; for (let i = 0; i < N; i++) { const a = r() * TAU, d = Math.sqrt(r()) * R * .9, x = cx + Math.cos(a + t * .1 * hot) * d, y = cy + Math.sin(a + t * .1 * hot) * d, ty = r();
+    if (k === 0) { g.fillStyle = ['#e04a3c', '#2f6fd0', '#3aa45a'][i % 3]; g.beginPath(); g.arc(x, y, 2.5, 0, TAU); g.fill(); }
+    else if (k === 1) { g.fillStyle = ty < .875 ? '#e04a3c' : '#888'; g.beginPath(); g.arc(x, y, 4, 0, TAU); g.fill(); if (i % 3 === 0) { g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(x + 9, y + 3, 1.5, 0, TAU); g.fill(); } }
+    else if (k >= 2) { if (i % 8 === 0) { // 헬륨 핵
+        [[0, 0, '#e04a3c'], [5, 0, '#888'], [0, 5, '#888'], [5, 5, '#e04a3c']].forEach(([dx, dy, c]) => { g.fillStyle = c; g.beginPath(); g.arc(x + dx, y + dy, 3, 0, TAU); g.fill(); }); if (k >= 3) { g.strokeStyle = 'rgba(47,111,208,.6)'; g.beginPath(); g.arc(x + 2.5, y + 2.5, 11, 0, TAU); g.stroke(); } }
+      else { g.fillStyle = '#e04a3c'; g.beginPath(); g.arc(x, y, 3, 0, TAU); g.fill(); if (k >= 3) { g.strokeStyle = 'rgba(47,111,208,.6)'; g.beginPath(); g.arc(x, y, 8, 0, TAU); g.stroke(); } } } }
+  if (k === 4) for (let i = 0; i < 6; i++) { const a = i * 1.1, x = cx + Math.cos(a) * R * .55, y = cy + Math.sin(a) * R * .55; g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.ellipse(x, y, 14, 5, a, 0, TAU); g.fill(); }
+  const s = STAGES[k]; const rx = S.w * .72; label(g, s[1], rx, S.h * .25, {size: 22, weight: 700}); label(g, '온도 ' + s[2], rx, S.h * .25 + 30, {size: 14, color: C.hot});
+  const words = s[3]; label(g, words.length > 26 ? words.slice(0, 26) : words, rx, S.h * .25 + 60, {size: 12}); if (words.length > 26) label(g, words.slice(26), rx, S.h * .25 + 78, {size: 12});
+  [['#e04a3c', '양성자'], ['#888', '중성자'], ['#2f6fd0', '전자']].forEach(([c, n], i) => { g.fillStyle = c; g.beginPath(); g.arc(rx - 70 + i * 60, S.h * .7, 5, 0, TAU); g.fill(); label(g, n, rx - 70 + i * 60, S.h * .7 + 16, {size: 10}); });
+  label(g, '우주는 팽창하며 식어 간다 →', cx, S.h - 16, {size: 11, color: C.muted}); }
+/* ===== 별의 진화 ===== */
+const EV = {1: [['원시별', '성운이 중력으로 수축', 30, '#c86a3a', []], ['주계열성', '중심핵: 수소 핵융합 → 헬륨', 40, '#ffd34d', [['He', '#f2c94c']]], ['적색 거성', '중심핵: 헬륨 핵융합 → 탄소·산소', 90, '#e86a3a', [['C, O', '#888'], ['He', '#f2c94c']]], ['행성상 성운', '바깥층이 우주로 방출', 110, '#7ab8ff', [['C, O', '#888']]], ['백색 왜성', '탄소·산소로 된 작고 뜨거운 핵', 14, '#e8f0ff', [['C, O', '#ccc']]], ['백색 왜성', '서서히 식어 감', 14, '#cfd8e8', [['C, O', '#bbb']]]],
+  20: [['원시별', '거대한 성운이 수축', 50, '#c86a3a', []], ['주계열성', '중심핵: 수소 핵융합 (매우 빠르게)', 60, '#9bb8ff', [['He', '#f2c94c']]], ['초거성', '양파 껍질 구조: 핵융합으로 철까지 생성', 120, '#e8603a', [['Fe', '#7a5a4a'], ['Si', '#9a7ad0'], ['O, Ne', '#5aa0d0'], ['C', '#666'], ['He', '#f2c94c'], ['H', '#e88']]], ['초신성 폭발', '철보다 무거운 원소(금, 우라늄 등) 생성·방출', 150, '#fff6d0', []], ['중성자별·블랙홀', '중심핵이 붕괴해 매우 밀집된 천체', 10, '#9aa6c0', []], ['새로운 별의 재료', '방출된 원소가 다음 세대 별·행성의 재료', 60, '#a8c0ff', []]]};
+function drawStar(){ const g = S.g, ev = EV[st.m][st.age], cx = S.w * .36, cy = S.h * .5, t = performance.now() / 1000, sc = Math.min(S.w, S.h) / 360, R = ev[2] * sc;
+  if (ev[0].includes('성운') || ev[0].includes('재료')) { for (let i = 0; i < 40; i++) { const a = i * 2.4, d = R * (.5 + (i % 5) / 8); g.fillStyle = `rgba(${st.age > 2 ? '150,190,255' : '220,140,90'},.18)`; g.beginPath(); g.arc(cx + Math.cos(a) * d, cy + Math.sin(a) * d, 18 * sc + 10, 0, TAU); g.fill(); } }
+  if (ev[0] === '초신성 폭발') { for (let i = 0; i < 24; i++) { const a = i / 24 * TAU, L = R * (1 + .15 * Math.sin(t * 6 + i)); Kit.arrow(g, cx + Math.cos(a) * 20, cy + Math.sin(a) * 20, cx + Math.cos(a) * L, cy + Math.sin(a) * L, 'rgba(255,200,120,.8)', 2); } ['Au', 'Ag', 'U', 'Pt'].forEach((e, i) => label(g, e, cx + Math.cos(i * 1.6 + t) * R * .8, cy + Math.sin(i * 1.6 + t) * R * .8, {size: 13, weight: 700, color: C.hot})); }
+  if (!ev[0].includes('성운') && ev[0] !== '초신성 폭발' && !ev[0].includes('재료')) { Kit.C; const gr = g.createRadialGradient(cx, cy, R * .1, cx, cy, R * 1.25); gr.addColorStop(0, ev[3]); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, R * 1.25, 0, TAU); g.fill(); g.fillStyle = ev[3]; g.beginPath(); g.arc(cx, cy, R, -Math.PI / 2, Math.PI / 2, true); g.fill();
+    // 단면(오른쪽 반)
+    const layers = ev[4]; g.fillStyle = ev[3]; g.beginPath(); g.arc(cx, cy, R, -Math.PI / 2, Math.PI / 2); g.fill(); layers.slice().reverse().forEach(([n, c], i) => { const rr = R * (layers.length - i) / (layers.length + 1.3); g.fillStyle = c; g.beginPath(); g.moveTo(cx, cy - rr); g.arc(cx, cy, rr, -Math.PI / 2, Math.PI / 2); g.closePath(); g.fill(); });
+    layers.forEach(([n, c], i) => { const rr = R * (i + 1) / (layers.length + 1.3); label(g, n, cx + rr - 8, cy + (i % 2 ? 10 : -10), {size: 11, weight: 700, color: '#222', align: 'right'}); });
+    if (layers.length) label(g, '단면', cx + R * .5, cy - R - 12, {size: 10, color: C.muted}); }
+  const rx = S.w * .74; label(g, `${st.age + 1}. ${ev[0]}`, rx, S.h * .3, {size: 20, weight: 700}); label(g, ev[1], rx, S.h * .3 + 30, {size: 12});
+  label(g, st.m === '1' ? '태양 정도 질량의 별' : '태양 질량의 20배인 별', rx, S.h * .3 - 34, {size: 12, color: C.muted});
+  if (st.age === 1) label(g, '4 ¹H → ⁴He + 에너지 (질량 결손)', rx, S.h * .3 + 60, {size: 13, color: C.hot, weight: 700}); if (st.age === 2 && st.m === '1') label(g, '3 ⁴He → ¹²C + 에너지', rx, S.h * .3 + 60, {size: 13, color: C.hot, weight: 700}); if (st.age === 2 && st.m === '20') label(g, '철(Fe)은 가장 안정 → 더 이상 에너지를 내지 못함', rx, S.h * .3 + 60, {size: 12, color: C.hot}); }
+/* ===== 그래프·표·설명 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'spec') { const m = axes(G, {x: [380, 720, 40, '파장 (nm)'], y: [0, 1, .25, '밝기']}); const els = st.k === 'star' ? st.starEl : [st.e]; const P = []; for (let l = 380; l <= 720; l += .5) { let v = st.k === 'emit' ? 0 : .5 + .4 * Math.exp(-(((l - 520) / 160) ** 2)); els.forEach(e => LINES[e].forEach(c => { const d = Math.exp(-(((l - c) / 1.2) ** 2)); v = st.k === 'emit' ? Math.max(v, d) : st.k === 'cont' ? v : v * (1 - .9 * d); })); P.push([l, v]); } line(G, P, m, C.accent, 2); }
+  else if (st.mode === 'bigbang') { const m = axes(G, {x: [0, 100, 20, '시간 (로그 눈금 개념)'], y: [0, 100, 25, '질량비 (%)']}); const he = st.tt >= 45 ? 25 : 0; g.fillStyle = C.phy; g.fillRect(m.X(20), m.Y(100 - he), 24, m.Y(0) - m.Y(100 - he)); g.fillStyle = C.hot; g.fillRect(m.X(50), m.Y(he), 24, m.Y(0) - m.Y(he)); label(g, `수소 ${100 - he}%`, m.X(20) + 12, m.Y(100 - he) - 10, {size: 11, weight: 700}); label(g, `헬륨 ${he}%`, m.X(50) + 12, m.Y(he) - 10, {size: 11, weight: 700}); label(g, he ? '수소 : 헬륨 ≈ 3 : 1 (질량비)' : '아직 원자핵이 만들어지기 전', m.X(80), m.Y(60), {size: 11, color: C.muted}); }
+  else { const m = axes(G, {x: [0, 240, 40, '질량수'], y: [0, 9, 3, '핵자당 결합 에너지 (MeV)']}); const P = [], BE = A => { const Z = A / (2 + .0155 * Math.pow(A, 2 / 3)); return (15.8 * A - 18.3 * Math.pow(A, 2 / 3) - .714 * Z * Z / Math.pow(A, 1 / 3) - 23.2 * (A - 2 * Z) ** 2 / A) / A; }; for (let A = 6; A <= 240; A++) P.push([A, BE(A)]); line(G, P, m, C.accent, 2.2);
+    [['H', 1, 0], ['He', 4, 7.07], ['C', 12, 7.68], ['O', 16, 7.98], ['Fe', 56, 8.79], ['U', 238, 7.57]].forEach(([n, A, B]) => { g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(A), m.Y(B), 4, 0, TAU); g.fill(); label(g, n, m.X(A), m.Y(B) - 12, {size: 11, weight: 700}); }); label(g, '철(Fe) 부근이 가장 안정 → 가벼운 원소는 핵융합, 무거운 원소는 핵분열로 에너지 방출', m.X(120), m.Y(3), {size: 11, color: C.muted}); } }
+function render(){ const s = $('stats');
+  if (st.mode === 'spec') { s.innerHTML = st.k === 'star' ? `<div><b>${[...st.picks].filter(e => st.starEl.includes(e)).length} / ${st.starEl.length}</b><span>찾은 원소</span></div>` : `<div><b>${st.k === 'cont' ? '–' : NAME[st.e]}</b><span>원소</span></div><div><b>${st.k === 'cont' ? '모든 색' : LINES[st.e].length + '개'}</b><span>${st.k === 'cont' ? '' : '선의 수'}</span></div>`;
+    $('explain').innerHTML = {cont: '<b>연속 스펙트럼</b>: 고온의 고체나 밀도가 큰 기체가 내는 빛. 모든 파장의 색이 연속적으로 나타나요.', emit: '<b>방출 스펙트럼</b>: 고온의 기체가 내는 빛. 원소마다 <b>고유한 위치</b>에 밝은 선이 나타나요(원소의 지문).', abs: '<b>흡수 스펙트럼</b>: 연속 스펙트럼의 빛이 차가운 기체를 지날 때, 그 기체가 방출하던 것과 <b>같은 위치</b>의 빛이 흡수되어 검은 선이 생겨요.', star: '별빛의 흡수선과 원소의 방출선 위치를 비교해 별 대기의 원소를 찾아보세요. 맞는 원소는 초록, 아닌 원소는 빨강으로 표시돼요.'}[st.k];
+    $('tip').textContent = '우주를 관측하면 수소와 헬륨의 스펙트럼선이 가장 강하게 나타나요. 우주를 이루는 원소의 대부분이 수소와 헬륨이에요.'; }
+  else if (st.mode === 'bigbang') { const k = stageIdx(); s.innerHTML = `<div><b>${STAGES[k][1]}</b><span>빅뱅 후</span></div><div><b>${STAGES[k][2]}</b><span>온도</span></div>`; $('explain').innerHTML = STAGES[k][3] + '. 우주는 <b>팽창하며 온도가 낮아져</b> 기본 입자 → 양성자·중성자 → 원자핵 → 원자 순으로 만들어졌어요.'; $('tip').textContent = '빅뱅 우주론의 증거: 우주 배경 복사, 수소와 헬륨의 질량비(약 3 : 1), 은하의 후퇴(우주 팽창).'; $('ttOut').textContent = STAGES[k][1]; }
+  else { const ev = EV[st.m][st.age]; s.innerHTML = `<div><b>${ev[0]}</b><span>단계</span></div>`; $('explain').innerHTML = '별은 중심부의 <b>핵융합</b>으로 에너지를 내요. 질량이 클수록 더 무거운 원소까지 만들고 빨리 진화해요. 질량이 매우 큰 별은 <b>철</b>까지 만든 뒤 <b>초신성</b>으로 폭발하며 철보다 무거운 원소를 만들어 우주로 퍼뜨려요.'; $('tip').textContent = '태양은 약 100억 년, 태양 질량 20배인 별은 약 1000만 년 정도 살아요.'; $('ageOut').textContent = ev[0]; }
+  const th = $('thead'), tb = $('tbody');
+  if (st.mode === 'spec') { th.innerHTML = '<tr><th>원소</th><th>대표 선 (nm)</th></tr>'; tb.innerHTML = Object.keys(LINES).map(e => `<tr><td>${NAME[e]}</td><td>${LINES[e].map(l => l.toFixed(0)).join(', ')}</td></tr>`).join(''); $('tTitle').textContent = '원소별 선 스펙트럼'; $('gTitle').textContent = '파장에 따른 빛의 세기'; }
+  else if (st.mode === 'bigbang') { th.innerHTML = '<tr><th>시기</th><th>온도</th><th>사건</th></tr>'; tb.innerHTML = STAGES.map(s => `<tr><td>${s[1]}</td><td>${s[2]}</td><td>${s[3]}</td></tr>`).join(''); $('tTitle').textContent = '빅뱅 우주의 연대표'; $('gTitle').textContent = '수소와 헬륨의 질량비'; }
+  else { th.innerHTML = '<tr><th>핵융합 반응</th><th>일어나는 곳</th></tr>'; tb.innerHTML = [['수소 → 헬륨', '주계열성 중심핵'], ['헬륨 → 탄소, 산소', '적색 거성 중심핵'], ['탄소 → 네온, 산소, 마그네슘', '초거성'], ['규소 → 철', '초거성 중심 (질량 큰 별)'], ['철보다 무거운 원소', '초신성 폭발, 중성자별 충돌']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = '별에서 만들어지는 원소'; $('gTitle').textContent = '원자핵의 안정성 (핵자당 결합 에너지)'; } }
+function newStar(){ const ks = Object.keys(LINES).sort(() => Math.random() - .5); st.starEl = ['H', ...ks.filter(k => k !== 'H').slice(0, 1 + Math.floor(Math.random() * 2))]; st.picks = new Set(); render(); }
+Kit.seg($('kSeg'), 'k', v => { st.k = v; $('elF').style.display = v === 'star' || v === 'cont' ? 'none' : ''; $('newStar').style.display = v === 'star' ? '' : 'none'; render(); })('emit');
+Kit.seg($('eSeg'), 'e', v => { st.e = v; render(); })('H');
+$('newStar').onclick = newStar;
+S.cv.addEventListener('click', e => { if (st.mode !== 'spec' || st.k !== 'star') return; const r = S.cv.getBoundingClientRect(), y = e.clientY - r.top, i = Math.floor((y - 120) / 36); const el = Object.keys(LINES)[i]; if (el && y > 120) { st.picks.has(el) ? st.picks.delete(el) : st.picks.add(el); render(); } });
+$('tt').oninput = e => { st.tt = +e.target.value; render(); };
+Kit.seg($('mSeg'), 'm', v => { st.m = v; render(); })('1');
+$('age').oninput = e => { st.age = +e.target.value; render(); };
+$('play').onclick = () => { st.run = !st.run; $('play').textContent = st.run ? '일시정지' : '재생'; if (st.run && st.mode === 'bigbang' && st.tt >= 100) st.tt = 0; if (st.run && st.mode === 'star' && st.age >= 5) st.age = 0; };
+let acc = 0;
+Kit.tabs(m => { st.mode = m; st.run = false; $('play').textContent = '재생'; render(); }, ['spec', 'bigbang', 'star']);
+Kit.loop(dt => { if (!st.run) return; if (st.mode === 'bigbang') { st.tt = Math.min(100, st.tt + dt * 12); $('tt').value = st.tt; if (st.tt >= 100) { st.run = false; $('play').textContent = '재생'; } render(); } else if (st.mode === 'star') { acc += dt; if (acc > 1.6) { acc = 0; st.age = Math.min(5, st.age + 1); $('age').value = st.age; if (st.age >= 5) { st.run = false; $('play').textContent = '재생'; } render(); } } },
+  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({spec: drawSpec, bigbang: drawBigbang, star: drawStar})[st.mode](); drawGraph(); });
+})();
+</script>
+</body>
+</html>
