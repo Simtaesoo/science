@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>화학 변화 실험실 · 통합과학2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-chem">
+<div class="wrap">
+  <nav class="topbar" data-topbar="통합과학2|02 화학 변화" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학2 · 02 화학 변화 <span class="code">통과2 Ⅰ</span></div>
+      <h1>산화 환원과 중화 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="redox">1. 산화와 환원</button>
+      <button type="button" data-mode="acid">2. 산·염기와 중화 반응</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="화학 반응 실험"></canvas></div>
+      <div class="controls">
+        <div class="field" data-only="redox"><span style="font-size:13px">금속판</span> <div class="seg" id="metSeg"><button type="button" data-met="Mg">마그네슘</button><button type="button" data-met="Zn">아연</button><button type="button" data-met="Fe">철</button><button type="button" data-met="Cu">구리</button><button type="button" data-met="Ag">은</button></div></div>
+        <div class="field" data-only="redox"><span style="font-size:13px">수용액</span> <div class="seg" id="solSeg"><button type="button" data-sol="Cu">황산 구리(Ⅱ)</button><button type="button" data-sol="Ag">질산 은</button><button type="button" data-sol="Zn">황산 아연</button><button type="button" data-sol="H">묽은 염산</button></div></div>
+        <label class="field" data-only="acid" for="vol">넣은 NaOH 수용액 <input type="range" id="vol" min="0" max="20" step="1" value="0"><output id="volOut">0 mL</output></label>
+        <div class="field" data-only="acid"><div class="seg" id="indSeg"><button type="button" data-ind="btb">BTB 용액</button><button type="button" data-ind="php">페놀프탈레인</button></div></div>
+        <button class="btn primary" type="button" id="go">반응 시작</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>산화와 환원은 왜 항상 동시에 일어날까?</summary><p>한 물질이 잃은 전자를 다른 물질이 얻어야 하기 때문입니다. 전자는 저절로 사라지거나 생기지 않으므로, 전자를 잃는 산화와 전자를 얻는 환원은 반드시 함께 일어납니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>구리판을 황산 아연 수용액에 넣으면 아무 변화가 없는 까닭은?</summary><p>구리는 아연보다 반응성이 작아 전자를 잃기 어렵습니다. 반응성이 큰 금속이 반응성이 작은 금속의 이온에 전자를 주는 반응만 일어납니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>중화점에서 온도가 가장 높은 까닭은?</summary><p>중화 반응(H⁺ + OH⁻ → H₂O)은 열을 방출하는 발열 반응입니다. 중화점까지는 반응하는 이온 수가 계속 늘어 열이 계속 발생하고, 그 뒤로는 반응할 H⁺가 없어 더 넣는 용액이 오히려 혼합 용액을 식히기 때문입니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="입자 수와 온도 변화는 원리를 보여 주는 모형입니다."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+const SERIES = ['K', 'Ca', 'Na', 'Mg', 'Al', 'Zn', 'Fe', 'Ni', 'Sn', 'Pb', 'H', 'Cu', 'Hg', 'Ag', 'Au'];
+const NM = {Mg: '마그네슘', Zn: '아연', Fe: '철', Cu: '구리', Ag: '은', H: '수소'}, CH = {Mg: 2, Zn: 2, Fe: 2, Cu: 2, Ag: 1, H: 1};
+const MCOL = {Mg: '#c8ccd4', Zn: '#a9b4c0', Fe: '#7a7f88', Cu: '#c87a42', Ag: '#e4e6ea'};
+const SCOL = {Cu: 'rgba(60,140,230,', Ag: 'rgba(230,230,240,', Zn: 'rgba(230,240,245,', H: 'rgba(230,240,245,'};
+const st = {mode: 'redox', met: 'Zn', sol: 'Cu', t: -1, vol: 0, ind: 'btb'};
+const reacts = () => st.met !== st.sol && SERIES.indexOf(st.met) < SERIES.indexOf(st.sol);
+function eq(){ const m = st.met, s = st.sol; if (!reacts()) return '반응하지 않음'; if (s === 'H') return `${m} + 2H⁺ → ${m}²⁺ + H₂↑`; const a = CH[m], b = CH[s]; if (a === b) return `${m} + ${s}${a > 1 ? '²' : ''}⁺ → ${m}${a > 1 ? '²' : ''}⁺ + ${s}`; return `${m} + 2${s}⁺ → ${m}²⁺ + 2${s}`; }
+function drawRedox(){ const g = S.g, W = S.w, H = S.h, cx = W * .3, bw = W * .3, bh = H * .62, by = H * .26, f = st.t < 0 ? 0 : Math.min(1, st.t / 6), go = reacts();
+  const solA = st.sol === 'Cu' ? .55 * (1 - (go ? f * .7 : 0)) : .25; g.fillStyle = SCOL[st.sol] + solA + ')'; g.fillRect(cx - bw / 2, by + bh * .2, bw, bh * .8); g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - bw / 2, by); g.lineTo(cx - bw / 2, by + bh); g.lineTo(cx + bw / 2, by + bh); g.lineTo(cx + bw / 2, by); g.stroke();
+  // 금속판
+  const pw = 30, px = cx - pw / 2, py = by - 30, ph = bh * .9; g.fillStyle = MCOL[st.met]; g.fillRect(px, py, pw, ph);
+  if (go && st.sol !== 'H') { const n = Math.floor(f * 40); let seed = 5; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647; for (let i = 0; i < n; i++) { const yy = by + bh * .25 + r() * bh * .65, side = r() < .5 ? -1 : 1; g.fillStyle = st.sol === 'Cu' ? '#b8642c' : '#d8dce4'; if (st.sol === 'Ag') { g.strokeStyle = '#c8ccd8'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(px + (side > 0 ? pw : 0), yy); g.lineTo(px + (side > 0 ? pw + 10 + r() * 14 : -10 - r() * 14), yy - 6 + r() * 12); g.stroke(); } else { g.beginPath(); g.arc(px + (side > 0 ? pw + 3 : -3), yy, 3 + r() * 2, 0, TAU); g.fill(); } } }
+  if (go && st.sol === 'H') { const t = performance.now() / 1000; for (let i = 0; i < 14 * f; i++) { const yy = by + bh - ((t * 60 + i * 37) % (bh * .8)); g.strokeStyle = 'rgba(80,80,80,.6)'; g.beginPath(); g.arc(px + (i % 2 ? pw + 6 : -6), yy, 3, 0, TAU); g.stroke(); } }
+  label(g, `${NM[st.met]}판 + ${{Cu: '황산 구리(Ⅱ)', Ag: '질산 은', Zn: '황산 아연', H: '묽은 염산'}[st.sol]} 수용액`, cx, by - 44, {size: 13, weight: 700});
+  // 전자 이동 모식도
+  const rx = W * .72, ry = H * .45; g.fillStyle = MCOL[st.met]; g.beginPath(); g.arc(rx - 90, ry, 26, 0, TAU); g.fill(); label(g, st.met, rx - 90, ry, {size: 15, weight: 700}); g.fillStyle = st.sol === 'Cu' ? '#5a9ae0' : '#d0d4dc'; g.beginPath(); g.arc(rx + 90, ry, 22, 0, TAU); g.fill(); label(g, st.sol + (CH[st.sol] > 1 ? '²⁺' : '⁺'), rx + 90, ry, {size: 14, weight: 700});
+  if (go) { const t = performance.now() / 1000; for (let k = 0; k < CH[st.met]; k++) { const u = (t * .6 + k * .5) % 1; g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(rx - 60 + u * 130, ry - 10 - Math.sin(u * Math.PI) * 40 - k * 8, 6, 0, TAU); g.fill(); label(g, 'e⁻', rx - 60 + u * 130, ry - 26 - Math.sin(u * Math.PI) * 40 - k * 8, {size: 10, color: '#2f6fd0'}); }
+    label(g, '산화 (전자를 잃음)', rx - 90, ry + 46, {size: 12, weight: 700, color: C.hot}); label(g, '환원 (전자를 얻음)', rx + 90, ry + 46, {size: 12, weight: 700, color: C.phy}); }
+  else label(g, '전자 이동 없음', rx, ry + 46, {size: 13, weight: 700, color: C.muted});
+  label(g, eq(), rx, ry + 90, {size: 15, weight: 700, color: C.accent});
+  // 반응성 계열
+  const sx = W * .52, sw = W * .45; SERIES.forEach((e, i) => { const x = sx + i * sw / SERIES.length, on = e === st.met || e === st.sol; g.fillStyle = on ? (e === st.met ? C.hot : C.phy) : C.soft; g.fillRect(x, 16, sw / SERIES.length - 3, 22); label(g, e, x + (sw / SERIES.length - 3) / 2, 27, {size: 11, weight: 700, color: on ? '#fff' : C.ink}); }); label(g, '← 반응성 큼 (전자를 잘 잃음)', sx, 50, {size: 10, color: C.muted, align: 'left'}); }
+/* ===== 중화 ===== */
+const HCl = 10; // mL, 같은 농도
+function ions(v){ const h = Math.max(0, HCl - v), oh = Math.max(0, v - HCl); return {H: h, Cl: HCl, Na: v, OH: oh, W: Math.min(v, HCl)}; }
+const pH = v => { const d = v - HCl; if (Math.abs(d) < .01) return 7; return d < 0 ? 1 + Math.log10(HCl / Math.max(.05, -d)) * .9 + (HCl + v) / 40 : 13 - Math.log10(HCl / d) * .9 - .3; };
+const temp = v => 20 + 6 * Math.min(v, HCl) / HCl * (2 * HCl / (HCl + Math.max(v, HCl)) ) ;
+function indColor(p){ if (st.ind === 'btb') return p < 6 ? '#e8d23a' : p > 7.6 ? '#3a6ad0' : '#4ab06a'; return p > 8.2 ? '#e05aa0' : 'rgba(230,240,245,1)'; }
+function drawAcid(){ const g = S.g, W = S.w, H = S.h, v = st.vol, I = ions(v), p = pH(v), cx = W * .3, bw = W * .3, bh = H * .55, by = H * .36;
+  g.fillStyle = indColor(p); g.globalAlpha = .55; g.fillRect(cx - bw / 2, by + bh * (1 - .3 - v / 40), bw, bh * (.3 + v / 40)); g.globalAlpha = 1; g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - bw / 2, by); g.lineTo(cx - bw / 2, by + bh); g.lineTo(cx + bw / 2, by + bh); g.lineTo(cx + bw / 2, by); g.stroke();
+  // 뷰렛
+  g.fillStyle = 'rgba(230,240,245,.8)'; g.fillRect(cx - 8, 10, 16, by - 20); g.strokeStyle = C.line; g.strokeRect(cx - 8, 10, 16, by - 20); g.fillStyle = 'rgba(90,130,220,.4)'; g.fillRect(cx - 7, 10 + (by - 20) * v / 20, 14, (by - 20) * (1 - v / 20)); label(g, 'NaOH', cx + 14, 24, {size: 11, align: 'left'});
+  // 입자 모형
+  const list = []; const add = (k, n) => { for (let i = 0; i < n; i++) list.push(k); }; add('H', I.H); add('Cl', I.Cl); add('Na', I.Na); add('OH', I.OH); add('W', I.W);
+  const top = by + bh * (1 - .3 - v / 40) + 8; let seed = 11; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647; const COL = {H: '#e04a3c', Cl: '#4fbf5a', Na: '#a77be0', OH: '#2f6fd0', W: '#9aa6b8'}, LB = {H: 'H⁺', Cl: 'Cl⁻', Na: 'Na⁺', OH: 'OH⁻', W: 'H₂O'};
+  list.forEach(k => { const x = cx - bw / 2 + 14 + r() * (bw - 28), y = top + r() * (by + bh - top - 14); g.fillStyle = COL[k]; g.beginPath(); g.arc(x, y, k === 'W' ? 7 : 8, 0, TAU); g.fill(); label(g, LB[k], x, y, {size: 8, color: '#fff', weight: 700}); });
+  const rx = W * .73; label(g, `pH ≈ ${p.toFixed(1)} · ${p < 6.9 ? '산성' : p > 7.1 ? '염기성' : '중성 (중화점!)'}`, rx, H * .2, {size: 18, weight: 700, color: p < 6.9 ? C.hot : p > 7.1 ? C.phy : C.bio}); label(g, `온도 ${temp(v).toFixed(1)} ℃`, rx, H * .2 + 30, {size: 14});
+  [['H', 'H⁺'], ['Cl', 'Cl⁻'], ['Na', 'Na⁺'], ['OH', 'OH⁻'], ['W', '생성된 H₂O']].forEach(([k, n], i) => { const y = H * .36 + i * 30; g.fillStyle = COL[k]; g.fillRect(rx - 60, y - 8, I[k] * 10, 16); label(g, `${n} ${I[k]}`, rx - 66, y, {size: 12, align: 'right'}); });
+  label(g, 'HCl 10 mL에 같은 농도의 NaOH를 넣음', rx, H * .9, {size: 11, color: C.muted}); }
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'redox') { const m = axes(G, {x: [0, 6, 1, '시간'], y: [0, 1, .25, '수용액의 푸른색 (상대값)']}); if (st.sol === 'Cu') { const P = []; for (let t = 0; t <= 6; t += .1) P.push([t, reacts() ? 1 - .7 * Math.min(1, t / 6) : 1]); line(G, P, m, '#3a8ce6', 2.5); label(G.g, reacts() ? 'Cu²⁺가 Cu로 환원되며 푸른색이 옅어짐' : 'Cu²⁺가 그대로 → 색 변화 없음', m.X(3), m.Y(.15), {size: 11, color: C.muted}); } else label(G.g, '황산 구리(Ⅱ) 수용액을 고르면 색 변화를 볼 수 있어요', m.X(3), m.Y(.5), {size: 11, color: C.muted}); }
+  else { const half = G.w / 2; const m1 = axes(G, {x: [0, 20, 5, 'NaOH (mL)'], y: [0, 14, 2, 'pH']}, {R: half + 8}); const P = []; for (let v = 0; v <= 20; v += .1) P.push([v, pH(v)]); line(G, P, m1, C.accent, 2.4); g.fillStyle = C.hot; g.beginPath(); g.arc(m1.X(st.vol), m1.Y(pH(st.vol)), 5, 0, TAU); g.fill();
+    const m2 = axes(G, {x: [0, 20, 5, 'NaOH (mL)'], y: [18, 28, 2, '온도 (℃)']}, {L: half + 48, keep: true}); const Q = []; for (let v = 0; v <= 20; v += .2) Q.push([v, temp(v)]); line(G, Q, m2, C.hot, 2.4); g.fillStyle = C.hot; g.beginPath(); g.arc(m2.X(st.vol), m2.Y(temp(st.vol)), 5, 0, TAU); g.fill(); label(g, '중화점에서 최고', m2.X(10), m2.Y(27.3), {size: 10, color: C.muted}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
+  if (st.mode === 'redox') { s.innerHTML = `<div><b>${reacts() ? '반응함' : '반응 안 함'}</b><span>결과</span></div><div><b>${reacts() ? st.met : '–'}</b><span>산화되는 것</span></div><div><b>${reacts() ? (st.sol === 'H' ? 'H⁺' : st.sol + (CH[st.sol] > 1 ? '²⁺' : '⁺')) : '–'}</b><span>환원되는 것</span></div>`;
+    $('explain').innerHTML = '<b>산화</b>: 물질이 전자를 잃는 반응(산소를 얻는 반응). <b>환원</b>: 전자를 얻는 반응(산소를 잃는 반응). 반응성이 큰 금속은 전자를 잃고 이온이 되며, 반응성이 작은 금속의 이온은 전자를 얻어 금속으로 석출돼요.'; $('tip').textContent = '산화 환원의 예: 연소, 철의 부식, 철광석 제련, 광합성과 세포 호흡, 건전지의 원리.';
+    th.innerHTML = '<tr><th>예</th><th>산화</th><th>환원</th></tr>'; tb.innerHTML = [['메테인의 연소', 'CH₄ → CO₂ (산소 얻음)', 'O₂ → H₂O'], ['철의 제련', 'CO → CO₂', 'Fe₂O₃ → Fe (산소 잃음)'], ['광합성', 'H₂O → O₂', 'CO₂ → 포도당'], ['세포 호흡', '포도당 → CO₂', 'O₂ → H₂O']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); $('tTitle').textContent = '생활 속 산화 환원'; $('gTitle').textContent = '수용액 색의 변화'; $('gSub').textContent = ''; }
+  else { const I = ions(st.vol); s.innerHTML = `<div><b>${st.vol} mL</b><span>넣은 NaOH</span></div><div><b>${pH(st.vol).toFixed(1)}</b><span>pH</span></div><div><b>${I.W}</b><span>생성된 물 분자(모형)</span></div>`;
+    $('explain').innerHTML = '<b>산</b>은 수용액에서 H⁺를, <b>염기</b>는 OH⁻를 내놓아요. 산과 염기가 반응하면 <b>H⁺ + OH⁻ → H₂O</b>로 물이 생기는 <b>중화 반응</b>이 일어나며 열이 발생해요. 남은 Na⁺, Cl⁻는 염(NaCl)을 이뤄요. 구경꾼 이온(Na⁺, Cl⁻)은 반응에 참여하지 않아요.'; $('tip').textContent = '생활 속 중화: 벌레 물린 곳에 암모니아수, 위산 과다 시 제산제, 산성 토양에 석회 뿌리기, 생선 비린내에 레몬즙.';
+    th.innerHTML = '<tr><th>NaOH (mL)</th><th>H⁺</th><th>OH⁻</th><th>Na⁺</th><th>Cl⁻</th><th>액성</th></tr>'; tb.innerHTML = [0, 5, 10, 15, 20].map(v => { const I = ions(v); return `<tr><td>${v}</td><td>${I.H}</td><td>${I.OH}</td><td>${I.Na}</td><td>${I.Cl}</td><td>${v < 10 ? '산성' : v > 10 ? '염기성' : '중성'}</td></tr>`; }).join(''); $('tTitle').textContent = '이온 수 변화 (모형)'; $('gTitle').textContent = 'pH와 온도 변화'; $('gSub').textContent = ''; } }
+Kit.seg($('metSeg'), 'met', v => { st.met = v; st.t = -1; render(); })('Zn'); Kit.seg($('solSeg'), 'sol', v => { st.sol = v; st.t = -1; render(); })('Cu');
+$('vol').oninput = e => { st.vol = +e.target.value; $('volOut').textContent = st.vol + ' mL'; render(); }; Kit.seg($('indSeg'), 'ind', v => { st.ind = v; render(); })('btb');
+$('go').onclick = () => { if (st.mode === 'redox') st.t = 0; else { st.vol = Math.min(20, st.vol + 1); $('vol').value = st.vol; $('volOut').textContent = st.vol + ' mL'; render(); } };
+Kit.tabs(m => { st.mode = m; $('go').textContent = m === 'redox' ? '반응 시작' : 'NaOH 1 mL 넣기'; render(); }, ['redox', 'acid']);
+Kit.loop(dt => { if (st.t >= 0) st.t += dt; }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); (st.mode === 'redox' ? drawRedox : drawAcid)(); drawGraph(); });
+})();
+</script>
+</body>
+</html>

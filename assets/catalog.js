@@ -78,7 +78,7 @@ window.CATALOG = [
  ]},
  { id:'hi2', level:'고', grade:'고1', book:'통합과학2', units:[
   { no:31, disp:1, area:'earth', title:'지질 시대와 생물 다양성', code:'통과2 Ⅰ', dir:'h2/geo', items:[{kind:'sim', title:'1차시 지질 시대와 대멸종', href:'h2/geo/sim.html#era'}, {kind:'sim', title:'2차시 변이와 자연선택', href:'h2/geo/sim.html#select'}, {kind:'ws', title:'학습지', href:'h2/geo/worksheet.html'}]},
-  { no:32, disp:2, area:'chem', title:'화학 변화', code:'통과2 Ⅰ', dir:'h2/redox', items:[{kind:'sim', title:'1차시 산화와 환원', href:''}, {kind:'sim', title:'2차시 산·염기와 중화 반응', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:32, disp:2, area:'chem', title:'화학 변화', code:'통과2 Ⅰ', dir:'h2/redox', items:[{kind:'sim', title:'1차시 산화와 환원', href:'h2/redox/sim.html#redox'}, {kind:'sim', title:'2차시 산·염기와 중화 반응', href:'h2/redox/sim.html#acid'}, {kind:'ws', title:'학습지', href:'h2/redox/worksheet.html'}]},
   { no:33, disp:3, area:'bio', title:'생태계와 환경', code:'통과2 Ⅱ', dir:'h2/eco', items:[{kind:'sim', title:'1차시 생태계 구성 요소와 먹이 그물', href:''}, {kind:'sim', title:'2차시 생태 피라미드와 생태계 평형', href:''}, {kind:'ws', title:'학습지', href:''}]},
   { no:34, disp:4, area:'earth', title:'지구 환경 변화', code:'통과2 Ⅱ', dir:'h2/climate', items:[{kind:'sim', title:'1차시 대기 대순환과 해류', href:''}, {kind:'sim', title:'2차시 엘니뇨와 라니냐', href:''}, {kind:'sim', title:'3차시 지구 온난화와 기후 변화', href:''}, {kind:'ws', title:'학습지', href:''}]},
   { no:35, disp:5, area:'phy', title:'에너지와 발전', code:'통과2 Ⅱ', dir:'h2/power', items:[{kind:'sim', title:'1차시 에너지 전환과 효율', href:''}, {kind:'sim', title:'2차시 발전기와 전자기 유도', href:''}, {kind:'sim', title:'3차시 전력 수송과 손실', href:''}, {kind:'sim', title:'4차시 태양 에너지와 핵융합', href:''}, {kind:'ws', title:'학습지', href:''}]},
