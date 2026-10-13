@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>에너지와 발전 실험실 · 통합과학2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="통합과학2|05 에너지와 발전" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학2 · 05 에너지와 발전 <span class="code">통과2 Ⅱ</span></div>
+      <h1>에너지와 발전 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="convert">1. 에너지 전환과 효율</button>
+      <button type="button" data-mode="gen">2. 발전기</button>
+      <button type="button" data-mode="grid">3. 전력 수송</button>
+      <button type="button" data-mode="sun">4. 태양 에너지</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="에너지 실험 장치"></canvas></div>
+      <div class="controls">
+        <div class="field" data-only="convert"><div class="seg" id="devSeg"><button type="button" data-dev="bulb">백열전구</button><button type="button" data-dev="led">LED 전구</button><button type="button" data-dev="thermal">화력 발전소</button><button type="button" data-dev="car">휘발유 자동차</button><button type="button" data-dev="ev">전기 자동차</button><button type="button" data-dev="solar">태양 전지</button></div></div>
+        <label class="field" data-only="gen" for="rpm">회전 속도 <input type="range" id="rpm" min="0" max="3" step="0.1" value="1"><output id="rpmOut">1 회/s</output></label>
+        <label class="field" data-only="gen" for="turns">코일 감은 수 <input type="range" id="turns" min="50" max="400" step="50" value="200"><output id="turnsOut">200회</output></label>
+        <div class="field" data-only="gen"><div class="seg" id="magSeg"><button type="button" data-mag="1">약한 자석</button><button type="button" data-mag="2">강한 자석</button></div></div>
+        <label class="field" data-only="grid" for="kv">송전 전압 <input type="range" id="kv" min="0" max="5" step="1" value="2"><output id="kvOut">154 kV</output></label>
+        <label class="field" data-only="grid" for="res">송전선 저항 <input type="range" id="res" min="2" max="20" step="1" value="10"><output id="resOut">10 Ω</output></label>
+        <button class="btn primary" type="button" id="fuse" data-only="sun">핵융합 일으키기</button>
+        <button class="btn" type="button" id="play">일시정지</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>에너지는 보존되는데 왜 에너지를 절약해야 할까?</summary><p>에너지의 총량은 보존되지만, 전환될 때마다 일부가 다시 쓰기 어려운 열에너지로 흩어집니다. 쓸모 있는 형태의 에너지는 계속 줄어들고, 화석 연료처럼 에너지원 자체가 고갈되거나 환경 오염을 일으키기 때문에 절약해야 합니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>발전소에서 아주 높은 전압으로 전기를 보내는 까닭은?</summary><p>같은 전력을 보낼 때 전압을 높이면 전류가 작아집니다. 송전선에서 열로 손실되는 전력은 전류의 제곱에 비례(P손실 = I²R)하므로 전압을 높이면 손실이 크게 줄어듭니다. 가정 근처에서는 변압기로 전압을 낮춰 안전하게 사용해요.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>지구의 에너지원 대부분이 결국 태양에서 왔다고 할 수 있는 까닭은?</summary><p>화석 연료는 옛 생물이 광합성으로 저장한 태양 에너지이고, 바람과 물의 순환(수력)도 태양 에너지가 지표를 불균등하게 가열해 생깁니다. 태양 에너지는 태양 중심부의 수소 핵융합에서 만들어집니다. (지열·원자력·조력은 예외)</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="효율과 손실 값은 대표값을 단순화한 것입니다."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+// 장치: 이름, 입력, 유용한 출력, 효율, 손실 내역
+const DEV = {bulb: ['백열전구', '전기', '빛', 5, [['열', 95]]], led: ['LED 전구', '전기', '빛', 40, [['열', 60]]], thermal: ['화력 발전소', '화학(석탄)', '전기', 38, [['굴뚝·냉각수 열', 52], ['기타 손실', 10]]], car: ['휘발유 자동차', '화학(휘발유)', '운동', 25, [['배기·냉각 열', 65], ['마찰 열', 10]]], ev: ['전기 자동차', '전기', '운동', 85, [['전동기·배터리 열', 15]]], solar: ['태양 전지', '빛', '전기', 22, [['반사·열', 78]]]};
+const KV = [22.9, 66, 154, 345, 765, 1000];
+const st = {mode: 'convert', dev: 'bulb', rpm: 1, turns: 200, mag: 1, kv: 2, R: 10, t: 0, ang: 0, emf: [], fus: -1, fusions: 0};
+function drawConvert(){ const g = S.g, W = S.w, H = S.h, d = DEV[st.dev], x0 = W * .08, x1 = W * .62, scale = (H * .56) / 100, y0 = H * .16;
+  // 생키 다이어그램
+  g.fillStyle = '#e0a400'; g.fillRect(x0, y0, 30, 100 * scale); label(g, `${d[1]} 에너지 100`, x0 + 15, y0 - 12, {size: 12, weight: 700});
+  let y = y0; const parts = [[d[2] + ' 에너지 (유용)', d[3], C.bio], ...d[4].map(([n, v]) => [n, v, C.hot])];
+  parts.forEach(([n, v, col], i) => { const h = v * scale, yo = y0 + (i === 0 ? 0 : 0) + parts.slice(0, i).reduce((s, p) => s + p[1] * scale, 0), ty = y0 - 10 + parts.slice(0, i).reduce((s, p) => s + p[1] * scale, 0) + i * 28; g.fillStyle = col; g.globalAlpha = .55; g.beginPath(); g.moveTo(x0 + 30, yo); g.bezierCurveTo((x0 + x1) / 2, yo, (x0 + x1) / 2, ty, x1, ty); g.lineTo(x1, ty + h); g.bezierCurveTo((x0 + x1) / 2, ty + h, (x0 + x1) / 2, yo + h, x0 + 30, yo + h); g.closePath(); g.fill(); g.globalAlpha = 1; g.fillStyle = col; g.fillRect(x1, ty, 12, Math.max(2, h)); label(g, `${n} ${v}`, x1 + 18, ty + h / 2, {size: 12, weight: 700, align: 'left', color: col}); });
+  label(g, `${d[0]} · 에너지 효율 ${d[3]} %`, W / 2, 18, {size: 15, weight: 700, color: C.accent}); label(g, '입력 에너지 = 유용한 에너지 + 손실 에너지 (에너지 보존)', W / 2, H - 12, {size: 11, color: C.muted}); }
+/* ===== 발전기 ===== */
+const emfPeak = () => st.turns / 200 * st.mag * st.rpm * 2;
+function drawGen(){ const g = S.g, W = S.w, H = S.h, cx = W * .3, cy = H * .5, a = st.ang, e = emfPeak() * Math.sin(a);
+  // 코일
+  g.strokeStyle = '#c87a42'; g.lineWidth = 3; for (let k = 0; k < Math.min(12, st.turns / 30); k++) { g.beginPath(); g.ellipse(cx, cy, 70, 90, 0, -Math.PI / 2, Math.PI / 2); g.stroke(); g.save(); g.translate(k * 4 - 20, 0); g.restore(); } for (let k = 0; k < Math.min(14, st.turns / 28); k++) { g.beginPath(); g.ellipse(cx + 76 + k * 5, cy, 12, 90, 0, 0, TAU); g.stroke(); }
+  // 자석
+  g.save(); g.translate(cx, cy); g.rotate(a); g.fillStyle = '#d0453a'; g.fillRect(-55, -16, 55, 32); g.fillStyle = '#3a6ad0'; g.fillRect(0, -16, 55, 32); g.fillStyle = '#fff'; g.font = '700 16px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('N', -28, 0); g.fillText('S', 28, 0); g.restore();
+  for (let k = 0; k < 6; k++) { const aa = a + k * TAU / 6; g.strokeStyle = 'rgba(80,80,80,.15)'; g.beginPath(); g.ellipse(cx, cy, 100, 40, a, 0, TAU); g.stroke(); }
+  // 전구
+  const lx = W * .58, ly = H * .4, br = Math.min(1, Math.abs(e) / 4); Kit.C; const gr = g.createRadialGradient(lx, ly, 2, lx, ly, 60); gr.addColorStop(0, `rgba(255,220,120,${br})`); gr.addColorStop(1, 'rgba(255,220,120,0)'); g.fillStyle = gr; g.beginPath(); g.arc(lx, ly, 60, 0, TAU); g.fill(); g.fillStyle = `rgba(255,${230 - br * 30},${150 - br * 100},1)`; g.strokeStyle = '#555'; g.beginPath(); g.arc(lx, ly, 18, 0, TAU); g.fill(); g.stroke();
+  g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath(); g.moveTo(cx + 120, cy - 40); g.lineTo(lx - 10, cy - 40); g.lineTo(lx - 10, ly + 16); g.moveTo(cx + 120, cy + 40); g.lineTo(lx + 10, cy + 40); g.lineTo(lx + 10, ly + 16); g.stroke();
+  // 검류계
+  const mx = W * .82, my = H * .5; g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.arc(mx, my, 50, Math.PI, 0); g.stroke(); const na = -Math.PI / 2 + Math.max(-1.3, Math.min(1.3, e / 8 * 1.3)); g.strokeStyle = C.hot; g.lineWidth = 3; g.beginPath(); g.moveTo(mx, my); g.lineTo(mx + Math.cos(na) * 44, my + Math.sin(na) * 44); g.stroke(); label(g, '0', mx, my - 58, {size: 10}); label(g, '+', mx + 50, my + 8, {size: 12}); label(g, '−', mx - 50, my + 8, {size: 12}); label(g, `유도 전압 ${e.toFixed(1)} (상대값)`, mx, my + 26, {size: 12, weight: 700});
+  label(g, '자석이 회전 → 코일을 지나는 자기장 변화 → 유도 전류 (전자기 유도)', W / 2, 18, {size: 13, weight: 600}); }
+/* ===== 송전 ===== */
+const P = 100e6; const grid = () => { const V = KV[st.kv] * 1000, I = P / V, loss = I * I * st.R * 2, pct = Math.min(100, loss / P * 100); return {V, I, loss, pct}; };
+function drawGrid(){ const g = S.g, W = S.w, H = S.h, R = grid(), t = st.t; const y = H * .4;
+  label(g, '🏭', W * .07, y, {size: 40}); label(g, '발전소', W * .07, y + 34, {size: 11}); label(g, '⚡', W * .2, y, {size: 26}); label(g, '변압기 ↑', W * .2, y + 30, {size: 11, weight: 700}); label(g, '⚡', W * .8, y, {size: 26}); label(g, '변압기 ↓', W * .8, y + 30, {size: 11, weight: 700}); label(g, '🏙️', W * .93, y, {size: 40}); label(g, '도시', W * .93, y + 34, {size: 11});
+  for (let k = 0; k < 4; k++) { const x = W * (.3 + k * .15); g.strokeStyle = '#555'; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y + 60); g.lineTo(x - 18, H * .85); g.moveTo(x, y + 60); g.lineTo(x + 18, H * .85); g.moveTo(x - 24, y - 20); g.lineTo(x + 24, y - 20); g.moveTo(x, y - 30); g.lineTo(x, y + 60); g.stroke(); }
+  const heat = Math.min(1, R.pct / 20); [y - 20, y - 6].forEach(yy => { g.strokeStyle = `rgb(${80 + heat * 175},${80 - heat * 40},${80 - heat * 40})`; g.lineWidth = 2 + heat * 3; g.beginPath(); g.moveTo(W * .22, yy); for (let x = W * .22; x <= W * .78; x += 10) g.lineTo(x, yy + Math.sin((x - W * .22) / (W * .15) * Math.PI) * 10); g.stroke(); });
+  if (heat > .2) for (let k = 0; k < 10; k++) { const x = W * (.25 + k * .055), u = (t * .8 + k * .1) % 1; label(g, '〰', x, y - 40 - u * 40, {size: 14, color: `rgba(220,80,60,${(1 - u) * heat})`}); }
+  for (let k = 0; k < 8; k++) { const u = (t * .3 * (1 + R.I / 1000) + k / 8) % 1; g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(W * (.22 + u * .56), y - 20 + Math.sin(u * 3.73 * Math.PI) * 10, 3, 0, TAU); g.fill(); }
+  label(g, `송전 전력 100 MW · 전압 ${KV[st.kv]} kV → 전류 ${R.I.toFixed(0)} A`, W / 2, H * .1, {size: 14, weight: 700}); label(g, `송전선 손실 = I²R = ${(R.loss / 1e6).toFixed(2)} MW (${R.pct.toFixed(2)} %)`, W / 2, H * .1 + 24, {size: 14, weight: 700, color: R.pct > 5 ? C.hot : C.bio}); }
+/* ===== 태양 ===== */
+function drawSun(){ const g = S.g, W = S.w, H = S.h, cx = W * .3, cy = H * .5, R = Math.min(W, H) * .36, t = st.t;
+  const gr = g.createRadialGradient(cx, cy, R * .1, cx, cy, R); gr.addColorStop(0, '#fff6c0'); gr.addColorStop(.25, '#ffd24a'); gr.addColorStop(1, '#e8732a'); g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill(); g.strokeStyle = 'rgba(255,255,255,.5)'; g.setLineDash([4, 4]); g.beginPath(); g.arc(cx, cy, R * .25, 0, TAU); g.stroke(); g.setLineDash([]); label(g, '중심핵 (약 1500만 K)', cx, cy + R * .25 + 14, {size: 11, weight: 700});
+  const f = st.fus < 0 ? -1 : Math.min(1, (performance.now() - st.fus) / 1600); const px = (k, u) => [cx - 60 + (k % 2) * 120 + (cx - (cx - 60 + (k % 2) * 120)) * u, cy - 50 + Math.floor(k / 2) * 100 + (cy - (cy - 50 + Math.floor(k / 2) * 100)) * u];
+  if (f < 1) for (let k = 0; k < 4; k++) { const [x, y] = px(k, Math.max(0, f)); g.fillStyle = '#e04a3c'; g.beginPath(); g.arc(x, y, 10, 0, TAU); g.fill(); label(g, 'p', x, y, {size: 11, color: '#fff', weight: 700}); }
+  else { [[-6, -6, '#e04a3c'], [6, -6, '#888'], [-6, 6, '#888'], [6, 6, '#e04a3c']].forEach(([dx, dy, c]) => { g.fillStyle = c; g.beginPath(); g.arc(cx + dx, cy + dy, 8, 0, TAU); g.fill(); }); label(g, '⁴He', cx, cy - 26, {size: 13, weight: 700}); const u = ((performance.now() - st.fus) / 1000 - 1.6) % 2; for (let k = 0; k < 8; k++) { const a = k * TAU / 8, r = 20 + u * R * .7; g.strokeStyle = '#e0a400'; g.lineWidth = 2; g.beginPath(); for (let s = 0; s < 20; s++) { const rr = r + s * 2; g.lineTo(cx + Math.cos(a) * rr + Math.sin(s) * 3, cy + Math.sin(a) * rr + Math.cos(s) * 3); } g.stroke(); } }
+  const rx = W * .76; label(g, '수소 핵융합', rx, H * .16, {size: 18, weight: 700}); label(g, '4 ¹H → ⁴He + 에너지', rx, H * .16 + 28, {size: 15, weight: 700, color: C.hot}); label(g, '반응 전 질량: 1.00783 × 4 = 4.0313 u', rx, H * .16 + 60, {size: 12}); label(g, '반응 후 질량: 4.0026 u', rx, H * .16 + 80, {size: 12}); label(g, '질량 결손 0.0287 u (약 0.7 %)', rx, H * .16 + 104, {size: 13, weight: 700, color: C.accent}); label(g, 'E = Δm c² → 빛과 열로 방출', rx, H * .16 + 128, {size: 13, weight: 700});
+  label(g, `일으킨 핵융합: ${st.fusions}번`, rx, H * .82, {size: 12, color: C.muted}); }
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'convert') { const m = axes(G, {x: [0, 6, 1, ''], y: [0, 100, 20, '에너지 효율 (%)']}); Object.entries(DEV).forEach(([k, d], i) => { const x = m.X(i + .5); g.fillStyle = k === st.dev ? C.hot : C.accent; g.fillRect(x - 20, m.Y(d[3]), 40, m.Y(0) - m.Y(d[3])); label(g, d[0], x, m.Y(0) + 12, {size: 9}); label(g, d[3] + '%', x, m.Y(d[3]) - 9, {size: 10, weight: 700}); }); }
+  else if (st.mode === 'gen') { const m = axes(G, {x: [0, 4, 1, '시간 (s)'], y: [-12, 12, 4, '유도 전압 (상대값)']}); line(G, st.emf, m, C.hot, 2.2); line(G, [[0, 0], [4, 0]], m, C.line, 1); label(g, '교류: 방향과 크기가 주기적으로 바뀜', m.X(2), m.Y(10.5), {size: 10, color: C.muted}); }
+  else if (st.mode === 'grid') { const m = axes(G, {x: [0, 1000, 200, '송전 전압 (kV)'], y: [0, 100, 20, '손실 비율 (%)']}); const Q = []; for (let v = 20; v <= 1000; v += 5) { const I = P / (v * 1000); Q.push([v, Math.min(100, I * I * st.R * 2 / P * 100)]); } line(G, Q, m, C.hot, 2.4); const R = grid(); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(KV[st.kv]), m.Y(R.pct), 5, 0, TAU); g.fill(); label(g, '전압 2배 → 전류 ½ → 손실 ¼', m.X(600), m.Y(80), {size: 11, color: C.muted}); }
+  else { const m = axes(G, {x: [0, 5, 1, ''], y: [0, 100, 20, '비율 (%)']}); [['수소(태양 질량)', 73], ['헬륨', 25], ['기타', 2]].forEach(([n, v], i) => { const x = m.X(i * 1.5 + .8); g.fillStyle = [C.hot, '#e0a400', C.muted][i]; g.fillRect(x - 22, m.Y(v), 44, m.Y(0) - m.Y(v)); label(g, n, x, m.Y(0) + 12, {size: 10}); label(g, v + '%', x, m.Y(v) - 9, {size: 10, weight: 700}); }); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
+  if (st.mode === 'convert') { const d = DEV[st.dev]; s.innerHTML = `<div><b>${d[3]} %</b><span>에너지 효율</span></div><div><b>${100 - d[3]}</b><span>손실 에너지 (입력 100 기준)</span></div>`; $('explain').innerHTML = '에너지는 한 형태에서 다른 형태로 <b>전환</b>될 수 있고, 전환 전후 에너지의 총량은 보존돼요. <b>에너지 효율</b> = 유용하게 쓰인 에너지 ÷ 공급한 에너지 × 100. 전환 과정에서 일부는 다시 쓰기 어려운 열에너지로 흩어져요.'; $('tip').textContent = '효율을 높이는 기술: LED 조명, 하이브리드·전기 자동차, 열병합 발전(버려지는 열을 난방에 활용), 단열 건축.';
+    th.innerHTML = '<tr><th>장치</th><th>에너지 전환</th><th>효율</th></tr>'; tb.innerHTML = Object.values(DEV).map(d => `<tr><td>${d[0]}</td><td>${d[1]} → ${d[2]}</td><td>${d[3]} %</td></tr>`).join(''); $('tTitle').textContent = '장치별 에너지 효율 (대표값)'; $('gTitle').textContent = '에너지 효율 비교'; $('gSub').textContent = ''; }
+  else if (st.mode === 'gen') { s.innerHTML = `<div><b>${emfPeak().toFixed(1)}</b><span>최대 유도 전압 (상대값)</span></div><div><b>${st.rpm} Hz</b><span>교류 진동수</span></div>`; $('explain').innerHTML = '<b>발전기</b>: 코일 근처에서 자석을 회전시키면 코일을 지나는 자기장이 변해 유도 전류가 흘러요(<b>전자기 유도</b>). 유도 전압은 자석이 셀수록, 코일을 많이 감을수록, 빨리 회전할수록 커져요. 운동 에너지 → 전기 에너지.'; $('tip').textContent = '화력·원자력 발전은 증기로, 수력 발전은 물로, 풍력 발전은 바람으로 터빈을 돌려 발전기를 회전시켜요. 태양광 발전은 발전기 없이 빛을 직접 전기로 바꿔요.';
+    th.innerHTML = '<tr><th>발전 방식</th><th>에너지 전환</th></tr>'; tb.innerHTML = [['화력', '화학 → 열 → 운동 → 전기'], ['원자력', '핵 → 열 → 운동 → 전기'], ['수력', '위치 → 운동 → 전기'], ['풍력', '운동(바람) → 전기'], ['태양광', '빛 → 전기']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = '발전 방식과 에너지 전환'; $('gTitle').textContent = '유도 전압 그래프'; $('gSub').textContent = ''; }
+  else if (st.mode === 'grid') { const R = grid(); $('kvOut').textContent = KV[st.kv] + ' kV'; s.innerHTML = `<div><b>${R.I.toFixed(0)} A</b><span>송전 전류</span></div><div><b>${(R.loss / 1e6).toFixed(2)} MW</b><span>손실 전력</span></div><div><b>${R.pct.toFixed(2)} %</b><span>손실 비율</span></div>`; $('explain').innerHTML = '같은 전력 P = VI를 보낼 때 <b>전압을 높이면 전류가 작아져</b> 송전선에서 열로 잃는 전력(P손실 = I²R)이 크게 줄어요. 그래서 발전소에서 변압기로 전압을 높여 보내고, 도시 근처에서 다시 낮춰요.'; $('tip').textContent = '우리나라 송전 전압: 154 kV, 345 kV, 765 kV. 가정에는 220 V로 낮춰 공급돼요.';
+    th.innerHTML = '<tr><th>송전 전압</th><th>전류</th><th>손실 비율</th></tr>'; tb.innerHTML = KV.map(v => { const I = P / (v * 1000), pct = Math.min(100, I * I * st.R * 2 / P * 100); return `<tr><td>${v} kV</td><td>${I.toFixed(0)} A</td><td>${pct.toFixed(2)} %</td></tr>`; }).join(''); $('tTitle').textContent = '전압에 따른 손실 (100 MW 송전)'; $('gTitle').textContent = '송전 전압과 손실'; $('gSub').textContent = ''; }
+  else { s.innerHTML = '<div><b>약 0.7 %</b><span>질량 결손</span></div><div><b>약 1500만 K</b><span>중심 온도</span></div>'; $('explain').innerHTML = '태양 중심부에서는 높은 온도와 압력 때문에 <b>수소 원자핵 4개가 융합해 헬륨 원자핵 1개</b>가 돼요. 이때 줄어든 질량이 <b>E = mc²</b>에 따라 막대한 에너지로 바뀌어 빛과 열로 방출돼요.'; $('tip').textContent = '태양 에너지 → 광합성(화석 연료), 물의 순환(수력), 바람(풍력), 태양광 발전으로 전환되어 지구의 대부분 에너지원이 돼요.';
+    th.innerHTML = '<tr><th>에너지원</th><th>근원</th></tr>'; tb.innerHTML = [['화석 연료', '태양 (옛 생물의 광합성)'], ['수력', '태양 (물의 순환)'], ['풍력', '태양 (불균등 가열 → 바람)'], ['태양광·태양열', '태양'], ['원자력', '우라늄 핵분열'], ['지열', '지구 내부 에너지'], ['조력', '달·태양의 인력']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = '에너지원의 근원'; $('gTitle').textContent = '태양의 구성 원소 (질량비)'; $('gSub').textContent = ''; } }
+Kit.seg($('devSeg'), 'dev', v => { st.dev = v; render(); })('bulb');
+$('rpm').oninput = e => { st.rpm = +e.target.value; $('rpmOut').textContent = st.rpm + ' 회/s'; render(); }; $('turns').oninput = e => { st.turns = +e.target.value; $('turnsOut').textContent = st.turns + '회'; render(); }; Kit.seg($('magSeg'), 'mag', v => { st.mag = +v; render(); })('1');
+$('kv').oninput = e => { st.kv = +e.target.value; render(); }; $('res').oninput = e => { st.R = +e.target.value; $('resOut').textContent = st.R + ' Ω'; render(); };
+$('fuse').onclick = () => { st.fus = performance.now(); st.fusions++; render(); };
+Kit.tabs(m => { st.mode = m; render(); }, ['convert', 'gen', 'grid', 'sun']);
+Kit.loop(dt => { st.t += dt; st.ang += st.rpm * TAU * dt; if (st.mode === 'gen') { st.emf.push([st.t % 4, emfPeak() * Math.sin(st.ang)]); if (st.emf.length > 1 && st.emf[st.emf.length - 1][0] < st.emf[st.emf.length - 2][0]) st.emf = [st.emf[st.emf.length - 1]]; } }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({convert: drawConvert, gen: drawGen, grid: drawGrid, sun: drawSun})[st.mode](); drawGraph(); }, $('play'));
+})();
+</script>
+</body>
+</html>
