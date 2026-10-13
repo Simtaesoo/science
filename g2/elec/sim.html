@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>전기 실험실 · 중2 전기와 자기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="2학년|14 전기와 자기" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 2 · 14 전기와 자기 <span class="code">9과14-01</span><span class="code">9과14-02</span><span class="code">9과14-03</span><span class="code">9과14-04</span></div>
+      <h1>전기 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="static">1. 정전기</button>
+      <button type="button" data-mode="ohm">2. 전압·전류·저항</button>
+      <button type="button" data-mode="circuit">3. 직렬·병렬과 전력</button>
+      <button type="button" data-mode="field">4. 전류와 자기장</button>
+      <button type="button" data-mode="motor">4. 전동기</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="전기 실험 장치"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <div class="field" data-only="static"><div class="seg" id="stSeg"><button type="button" data-st="rub">마찰 전기</button><button type="button" data-st="scope">정전기 유도 (검전기)</button></div></div>
+        <button class="btn" type="button" id="rub" data-only="static">문지르기</button>
+        <button class="btn" type="button" id="reset" data-only="static">처음으로</button>
+        <div class="field" data-only="static" id="signF">막대 전하 <div class="seg" id="signSeg"><button type="button" data-sign="-">(−) 대전체</button><button type="button" data-sign="+">(+) 대전체</button></div></div>
+        <label class="field" data-only="static" id="nearF" for="near">가까이 <input type="range" id="near" min="0" max="100" step="5" value="0"><output id="nearOut">멀리</output></label>
+        <label class="field" data-only="ohm" for="volt">전압 <input type="range" id="volt" min="0" max="6" step="0.5" value="3"><output id="voltOut">3.0 V</output></label>
+        <div class="field" data-only="ohm">저항 <div class="seg" id="rSeg"><button type="button" data-r="10">10 Ω</button><button type="button" data-r="20">20 Ω</button><button type="button" data-r="30">30 Ω</button></div></div>
+        <button class="btn" type="button" id="rec" data-only="ohm">측정값 기록</button>
+        <button class="btn" type="button" id="clr" data-only="ohm">기록 지우기</button>
+        <div class="field" data-only="circuit"><div class="seg" id="cSeg"><button type="button" data-c="series">직렬연결</button><button type="button" data-c="parallel">병렬연결</button><button type="button" data-c="home">가정의 전기 기구</button></div></div>
+        <div class="field" data-only="circuit" id="outF"><label for="outB"><input type="checkbox" id="outB"> 전구 B 빼기</label></div>
+        <div class="field" data-only="circuit" id="apF"></div>
+        <div class="field" data-only="field"><div class="seg" id="fSeg"><button type="button" data-f="wire">직선 도선</button><button type="button" data-f="coil">코일</button></div></div>
+        <div class="field" data-only="motor"><div class="seg" id="mSeg"><button type="button" data-m="force">자기장 속 도선</button><button type="button" data-m="motor">전동기 모형</button></div></div>
+        <label class="field" data-only="field motor" for="amp">전류 세기 <input type="range" id="amp" min="0" max="5" step="0.5" value="2"><output id="ampOut">2.0</output></label>
+        <button class="btn" type="button" id="dir" data-only="field motor">전류 방향 바꾸기</button>
+        <button class="btn" type="button" id="flip" data-only="motor">자석 극 바꾸기</button>
+        <div class="field" data-only="motor" id="commF"><label for="comm"><input type="checkbox" id="comm" checked> 정류자 사용</label></div>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">정리</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>겨울철 스웨터를 벗을 때 ‘지지직’ 소리가 나는 까닭은?</summary>
+        <p>옷과 옷이 마찰하면서 전자가 한쪽으로 이동하여 각각 대전되고, 쌓인 전하가 공기 중으로 순간적으로 이동(방전)하면서 소리와 작은 불꽃이 생기기 때문입니다. 건조할수록 전하가 잘 빠져나가지 않아 더 잘 일어납니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>가정의 전기 기구는 왜 병렬로 연결할까?</summary>
+        <p>병렬연결하면 각 기구에 같은 전압(220 V)이 걸리고, 하나를 끄거나 고장 나도 다른 기구는 계속 쓸 수 있기 때문입니다. 대신 많이 켤수록 전체 전류가 커지므로 멀티탭에 한꺼번에 많이 꽂으면 위험합니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>전동기가 한 방향으로 계속 돌 수 있는 까닭은?</summary>
+        <p>코일이 반 바퀴 돌 때마다 정류자가 코일에 흐르는 전류의 방향을 바꾸어 주어, 코일이 받는 힘이 계속 같은 방향으로 돌리게 하기 때문입니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="전자와 원자핵은 개수와 이동을 보여 주기 위한 모형이며, 실제 크기와 개수가 아닙니다. 그래프의 값은 이상적인 조건을 가정했습니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+const st = {mode:'static', t:0, sub:'rub', rubT:0, moved:0, sign:'-', near:0,
+  V:3, R:10, recs:[], c:'series', outB:false, aps:{lamp:true, fan:false, tv:false, kettle:false, dryer:false},
+  f:'wire', m:'force', amp:2, dir:1, flip:1, comm:true, th:0.3, om:0, wy:0};
+
+function charge(g, x, y, s, r){ r = r || 7; g.fillStyle = s > 0 ? 'rgba(210,65,47,.9)' : 'rgba(40,100,210,.9)'; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
+  g.strokeStyle = '#fff'; g.lineWidth = 1.8; g.beginPath(); g.moveTo(x - r * .55, y); g.lineTo(x + r * .55, y); if (s > 0) { g.moveTo(x, y - r * .55); g.lineTo(x, y + r * .55); } g.stroke(); }
+function rrect(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+
+/* ===== 1. 정전기 ===== */
+let E = [];
+function resetRub(){ st.moved = 0; E = []; for (let i = 0; i < 8; i++) { E.push({own: 'fur', slot: i}); E.push({own: 'rod', slot: i}); } E.forEach(e => { const p = slotPos(e); e.x = p[0]; e.y = p[1]; }); }
+function objRect(own){ const furX = S.w * .08 + (st.rubT > 0 ? S.w * .12 + Math.sin(st.t * 28) * 8 : 0);
+  return own === 'fur' ? [furX, S.h * .42, S.w * .3, S.h * .26] : [S.w * .5, S.h * .42, S.w * .42, S.h * .26]; }
+function slotPos(e){ const [x, y, w, h] = objRect(e.own), cols = e.own === 'fur' ? 4 : 6, i = e.slot, c = i % cols, r = Math.floor(i / cols);
+  return [x + w * (c + .5) / cols + 9, y + h * (r + .5) / (e.own === 'fur' ? 2 : 2) + 9]; }
+function plusPos(own, i){ const [x, y, w, h] = objRect(own), cols = own === 'fur' ? 4 : 6, c = i % cols, r = Math.floor(i / cols); return [x + w * (c + .5) / cols - 9, y + h * (r + .5) / 2 - 7]; }
+function doRub(){ st.rubT = .9; setTimeout(() => { if (st.moved < 4) { const e = E.filter(e => e.own === 'fur').pop(); const used = new Set(E.filter(e => e.own === 'rod').map(e => e.slot)); let s = 0; while (used.has(s)) s++; e.own = 'rod'; e.slot = s; st.moved++; } }, 400); }
+function drawAtom(g, x, y, n, title, net){
+  g.strokeStyle = C.line; g.lineWidth = 1; g.beginPath(); g.arc(x, y, 30, 0, TAU); g.stroke();
+  charge(g, x, y, 1, 9); label(g, '+3', x, y + 18, {size: 9, color: C.hot});
+  for (let i = 0; i < n; i++) { const a = st.t * 1.5 + i * TAU / n; charge(g, x + Math.cos(a) * 30, y + Math.sin(a) * 30, -1, 5); }
+  label(g, title, x, y - 44, {size: 11, weight: 700}); label(g, net, x, y + 46, {size: 11, color: net.includes('+') ? C.hot : net.includes('−') ? C.phy : C.muted, weight: 600});
+}
+function drawRub(){
+  const g = S.g;
+  ['fur', 'rod'].forEach(own => { const [x, y, w, h] = objRect(own);
+    g.fillStyle = own === 'fur' ? '#c9a77a' : '#d8dde6'; rrect(g, x, y, w, h, own === 'fur' ? 18 : 10); g.fill(); g.strokeStyle = C.line; g.stroke();
+    label(g, own === 'fur' ? '털가죽' : '플라스틱 막대', x + w / 2, y + h + 18, {weight: 700});
+    const n = own === 'fur' ? 8 : 12; for (let i = 0; i < 8; i++) { const p = plusPos(own, i); charge(g, p[0], p[1], 1, 7); } });
+  E.forEach(e => { const p = slotPos(e); e.x += (p[0] - e.x) * .12; e.y += (p[1] - e.y) * .12; charge(g, e.x, e.y, -1, 6); });
+  const fe = E.filter(e => e.own === 'fur').length, re = 16 - fe;
+  drawAtom(g, S.w * .25, S.h * .16, st.moved ? 2 : 3, '털가죽의 원자 (모형)', st.moved ? '전자를 잃음 → (+)' : '중성');
+  drawAtom(g, S.w * .72, S.h * .16, st.moved ? 4 : 3, '플라스틱의 원자 (모형)', st.moved ? '전자를 얻음 → (−)' : '중성');
+  label(g, `털가죽: (+) ${8}개, (−) ${fe}개  →  ${fe < 8 ? '(+)전하 ' + (8 - fe) : '중성'}`, S.w * .25, S.h * .86, {size: 12});
+  label(g, `막대: (+) 8개, (−) ${re}개  →  ${re > 8 ? '(−)전하 ' + (re - 8) : '중성'}`, S.w * .72, S.h * .86, {size: 12});
+  if (st.rubT > 0) label(g, '문지르는 중… 전자(−)가 털가죽에서 막대로 이동', S.w / 2, S.h * .35, {weight: 700, color: C.phy});
+}
+function scopeState(){ const s = st.sign === '-' ? 1 : -1, n = Math.round(4 * Math.pow(st.near / 100, 1.3)); return {s, n, leaf: -s * n, plate: s * n, ang: (6 + n * 8) * Math.PI / 180}; }
+function drawScope(){
+  const g = S.g, cx = S.w * .4, py = S.h * .36, ly = S.h * .7, ss = scopeState();
+  // 유리병
+  g.strokeStyle = C.line; g.lineWidth = 2; rrect(g, cx - 90, S.h * .46, 180, S.h * .46, 16); g.stroke(); g.fillStyle = 'rgba(160,200,230,.12)'; g.fill();
+  g.fillStyle = '#9a7b55'; g.fillRect(cx - 24, S.h * .44, 48, 16);
+  // 금속판·막대
+  g.fillStyle = '#c9ccd2'; g.beginPath(); g.ellipse(cx, py, 52, 9, 0, 0, TAU); g.fill(); g.strokeStyle = '#8a8f99'; g.stroke();
+  g.strokeStyle = '#a9adb5'; g.lineWidth = 6; g.beginPath(); g.moveTo(cx, py); g.lineTo(cx, ly); g.stroke();
+  // 금속박
+  g.fillStyle = '#e2b94a'; [-1, 1].forEach(k => { g.save(); g.translate(cx, ly); g.rotate(k * ss.ang); g.fillRect(-4, 0, 8, 70); g.restore(); });
+  label(g, '금속판', cx + 62, py, {align: 'left', size: 12}); label(g, '금속박', cx + 50, ly + 70, {align: 'left', size: 12});
+  // 전하 (금속판: + 3개, 금속박: + 3개 + 각 박)
+  const pT = 3, eT = 3 - ss.plate, pL = 3, eL = 3 - ss.leaf;
+  for (let i = 0; i < pT; i++) charge(g, cx - 30 + i * 30, py - 2, 1, 6);
+  for (let i = 0; i < Math.max(0, eT); i++) charge(g, cx - 38 + i * (76 / Math.max(1, eT - 1 || 1)), py + 12, -1, 5);
+  const leafPos = (i, tot) => { const k = i % 2 ? 1 : -1, d = 18 + Math.floor(i / 2) * 14; return [cx + Math.sin(ss.ang) * d * k + k * 8, ly + Math.cos(ss.ang) * d]; };
+  for (let i = 0; i < pL; i++) { const p = leafPos(i); charge(g, p[0], p[1], 1, 5); }
+  for (let i = 0; i < Math.max(0, eL); i++) { const p = leafPos(i + 1); charge(g, p[0] + (i % 2 ? 9 : -9), p[1] + 7, -1, 5); }
+  // 대전체
+  const rodY = py - 26 - (1 - st.near / 100) * S.h * .14;
+  g.fillStyle = st.sign === '-' ? '#d8dde6' : '#e8e2d0'; g.fillRect(cx - 14, rodY - 110, 28, 110); g.strokeStyle = C.line; g.lineWidth = 1; g.strokeRect(cx - 14, rodY - 110, 28, 110);
+  for (let i = 0; i < 4; i++) charge(g, cx, rodY - 14 - i * 22, st.sign === '-' ? -1 : 1, 6);
+  label(g, st.sign === '-' ? '(−) 대전체' : '(+) 대전체', cx + 24, rodY - 40, {align: 'left', size: 12, weight: 700});
+  const r = S.w * .78;
+  label(g, `금속판: ${ss.plate === 0 ? '중성' : ss.plate > 0 ? '(+)' : '(−)'}`, r, S.h * .4, {weight: 700, color: ss.plate > 0 ? C.hot : ss.plate < 0 ? C.phy : C.muted});
+  label(g, `금속박: ${ss.leaf === 0 ? '중성' : ss.leaf > 0 ? '(+)' : '(−)'}`, r, S.h * .48, {weight: 700, color: ss.leaf > 0 ? C.hot : ss.leaf < 0 ? C.phy : C.muted});
+  label(g, ss.n ? '같은 전하끼리 밀어내 금속박이 벌어짐' : '대전체를 가까이 가져가 보세요', r, S.h * .58, {size: 12});
+  if (ss.n) label(g, st.sign === '-' ? '전자가 금속판 → 금속박으로 이동' : '전자가 금속박 → 금속판으로 이동', r, S.h * .65, {size: 12, color: C.phy});
+}
+
+/* ===== 2. 옴의 관계 ===== */
+const LOOP = () => { const L = S.w * .12, R = S.w * .78, T = S.h * .2, B = S.h * .8; return {L, R, T, B, pts: [[L, B], [L, T], [R, T], [R, B], [L, B]]}; };
+function along(pts, d){ const L = []; for (let i = 0; i < pts.length - 1; i++) L.push(Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1])); const tot = L.reduce((a, b) => a + b); d = ((d % tot) + tot) % tot; let i = 0; while (d > L[i]) { d -= L[i]; i++; } const f = d / L[i]; return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * f, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f, tot]; }
+function battery(g, x, y, vert, txt){ g.fillStyle = C.surface; if (vert) { g.fillRect(x - 16, y - 18, 32, 36); g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.moveTo(x - 16, y - 6); g.lineTo(x + 16, y - 6); g.stroke(); g.lineWidth = 6; g.beginPath(); g.moveTo(x - 8, y + 6); g.lineTo(x + 8, y + 6); g.stroke(); label(g, '+', x + 24, y - 10, {color: C.hot, weight: 700}); label(g, '−', x + 24, y + 10, {color: C.phy, weight: 700}); label(g, txt, x - 24, y, {align: 'right', size: 12, weight: 700}); } }
+function meter(g, x, y, ch, val){ g.fillStyle = C.surface; g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 18, 0, TAU); g.fill(); g.stroke(); label(g, ch, x, y, {weight: 700}); if (val) label(g, val, x, y + 32, {weight: 700, size: 13, color: C.accent}); }
+function drawOhm(){
+  const g = S.g, P = LOOP(), I = st.V / st.R, mx = (P.L + P.R) / 2;
+  g.strokeStyle = C.ink; g.lineWidth = 2.5; g.beginPath(); P.pts.forEach((p, i) => i ? g.lineTo(...p) : g.moveTo(...p)); g.stroke();
+  // 저항 (니크롬선)
+  g.fillStyle = C.surface; g.fillRect(mx - 60, P.T - 14, 120, 28); g.strokeStyle = `rgb(${150 + I * 160 | 0},${90 - I * 60 | 0},60)`; g.lineWidth = 3; g.beginPath();
+  for (let i = 0; i <= 12; i++) g.lineTo(mx - 54 + i * 9, P.T + (i % 2 ? -9 : 9)); g.stroke(); label(g, `니크롬선 ${st.R} Ω`, mx, P.T - 28, {weight: 700, size: 12});
+  // 전압계 (저항 양 끝에 병렬)
+  const vy = P.T + 78; g.strokeStyle = C.muted; g.lineWidth = 1.5; g.beginPath(); g.moveTo(mx - 70, P.T); g.lineTo(mx - 70, vy); g.lineTo(mx - 18, vy); g.moveTo(mx + 18, vy); g.lineTo(mx + 70, vy); g.lineTo(mx + 70, P.T); g.stroke();
+  meter(g, mx, vy, 'V', st.V.toFixed(1) + ' V');
+  battery(g, P.L, (P.T + P.B) / 2, true, `전원 ${st.V.toFixed(1)} V`);
+  g.fillStyle = C.surface; g.fillRect(mx - 22, P.B - 22, 44, 44); meter(g, mx, P.B, 'A', (I * 1000).toFixed(0) + ' mA');
+  // 전자 이동 (전류 반대 방향)
+  const tot = along(P.pts, 0)[2];
+  for (let n = 0; n < 34; n++) { const d = n * tot / 34 - st.t * I * 260, [x, y] = along(P.pts, d); if (Math.abs(x - P.L) < 18 && Math.abs(y - (P.T + P.B) / 2) < 20) continue; charge(g, x, y, -1, 4.5); }
+  arrow(g, P.R + 26, P.T + 30, P.R + 26, P.T + 110, C.hot, 2.5); label(g, '전류', P.R + 34, P.T + 70, {align: 'left', color: C.hot, weight: 700, size: 12});
+  arrow(g, P.R + 26, P.B - 30, P.R + 26, P.B - 110, C.phy, 2.5); label(g, '전자', P.R + 34, P.B - 70, {align: 'left', color: C.phy, weight: 700, size: 12});
+  label(g, '전류: 전원의 (+)극 → 저항 → (−)극   /   전자: (−)극 → (+)극', S.w / 2, S.h - 14, {size: 12, color: C.muted});
+}
+
+/* ===== 3. 직렬·병렬, 소비 전력 ===== */
+const APS = {lamp:['전등', 20, '빛'], fan:['선풍기', 50, '운동(바람)'], tv:['텔레비전', 120, '빛, 소리'], kettle:['전기 주전자', 1800, '열'], dryer:['헤어드라이어', 1500, '열, 운동']};
+function circuitVals(){ const V = 3, R = 10, P0 = V * V / R;
+  if (st.c === 'series') { if (st.outB) return {IA: 0, IB: 0, VA: 0, VB: 0, I: 0, bA: 0, bB: 0};
+    const I = V / (2 * R); return {IA: I, IB: I, VA: V / 2, VB: V / 2, I, bA: .25, bB: .25}; }
+  const IA = V / R, IB = st.outB ? 0 : V / R; return {IA, IB, VA: V, VB: st.outB ? 0 : V, I: IA + IB, bA: 1, bB: st.outB ? 0 : 1}; }
+function bulb(g, x, y, b, name, out){
+  if (out) { g.setLineDash([3, 3]); g.strokeStyle = C.muted; g.lineWidth = 1.5; g.beginPath(); g.arc(x, y, 16, 0, TAU); g.stroke(); g.setLineDash([]); label(g, name + ' (뺌)', x, y - 28, {size: 12, color: C.muted}); return; }
+  if (b > 0) { const r = 18 + b * 42, gr = g.createRadialGradient(x, y, 4, x, y, r); gr.addColorStop(0, `rgba(255,220,80,${.4 + b * .5})`); gr.addColorStop(1, 'rgba(255,220,80,0)'); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill(); }
+  g.fillStyle = b > 0 ? `rgb(255,${200 + b * 40 | 0},${80 + (1 - b) * 80 | 0})` : '#e7e9ee'; g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath(); g.arc(x, y, 16, 0, TAU); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(x - 8, y + 6); g.lineTo(x - 3, y - 6); g.lineTo(x + 3, y + 6); g.lineTo(x + 8, y - 6); g.stroke(); label(g, name, x, y - 28, {size: 12, weight: 700});
+}
+function drawCircuit(){
+  const g = S.g;
+  if (st.c === 'home') return drawHome();
+  const v = circuitVals(), L = S.w * .14, R = S.w * .8, T = S.h * .22, B = S.h * .8, M = (T + B) / 2;
+  g.strokeStyle = C.ink; g.lineWidth = 2.5; g.beginPath();
+  if (st.c === 'series') { g.moveTo(L, B); g.lineTo(L, T); g.lineTo(R, T); g.lineTo(R, B); g.lineTo(L, B);
+    if (st.outB) { g.stroke(); g.fillStyle = C.surface; g.fillRect(L + (R - L) * .66 - 20, T - 20, 40, 40); }
+    else g.stroke();
+    bulb(g, L + (R - L) * .36, T, v.bA, '전구 A'); bulb(g, L + (R - L) * .66, T, v.bB, '전구 B', st.outB);
+    label(g, `${v.VA.toFixed(1)} V · ${(v.IA * 1000).toFixed(0)} mA`, L + (R - L) * .36, T + 34, {size: 12, color: C.accent, weight: 600});
+    if (!st.outB) label(g, `${v.VB.toFixed(1)} V · ${(v.IB * 1000).toFixed(0)} mA`, L + (R - L) * .66, T + 34, {size: 12, color: C.accent, weight: 600});
+    label(g, '전류가 흐르는 길이 하나 → 어디서나 전류의 세기가 같고, 전압은 나누어 걸린다', S.w / 2, S.h - 14, {size: 12, color: C.muted}); }
+  else { g.moveTo(L, B); g.lineTo(L, T); g.lineTo(R, T); g.lineTo(R, B); g.lineTo(L, B); g.moveTo(L + 40, T); g.lineTo(L + 40, M); g.lineTo(R - 40, M); g.lineTo(R - 40, T); g.stroke();
+    if (st.outB) { g.fillStyle = C.surface; g.fillRect((L + R) / 2 - 20, M - 20, 40, 40); }
+    bulb(g, (L + R) / 2, T, v.bA, '전구 A'); bulb(g, (L + R) / 2, M, v.bB, '전구 B', st.outB);
+    label(g, `${v.VA.toFixed(1)} V · ${(v.IA * 1000).toFixed(0)} mA`, (L + R) / 2 + 60, T + 4, {size: 12, color: C.accent, weight: 600, align: 'left'});
+    if (!st.outB) label(g, `${v.VB.toFixed(1)} V · ${(v.IB * 1000).toFixed(0)} mA`, (L + R) / 2 + 60, M + 4, {size: 12, color: C.accent, weight: 600, align: 'left'});
+    label(g, '전류가 흐르는 길이 여러 개 → 각 전구에 전원 전압이 그대로 걸리고, 전체 전류는 나뉘어 흐른다', S.w / 2, S.h - 14, {size: 12, color: C.muted}); }
+  battery(g, L, (M + B) / 2, true, '3.0 V');
+  g.fillStyle = C.surface; g.fillRect((L + R) / 2 - 22, B - 22, 44, 44); meter(g, (L + R) / 2, B, 'A', '전체 ' + (v.I * 1000).toFixed(0) + ' mA');
+  if (v.I > 0) for (let n = 0; n < 6; n++) { const f = (st.t * v.I * 1.4 + n / 6) % 1; g.fillStyle = C.hot; g.beginPath(); g.arc(R, T + (B - T) * f, 3.5, 0, TAU); g.fill(); }
+}
+function drawHome(){
+  const g = S.g, keys = Object.keys(APS), n = keys.length, cw = (S.w - 40) / n, ty = S.h * .12, ch = S.h * .42;
+  let tot = 0;
+  keys.forEach((k, i) => { const [nm, w, out] = APS[k], on = st.aps[k], x = 20 + i * cw + 6, ww = cw - 12; if (on) tot += w;
+    g.fillStyle = on ? 'rgba(255,214,90,.25)' : C.soft; g.strokeStyle = on ? C.warn : C.line; g.lineWidth = on ? 2 : 1; rrect(g, x, ty, ww, ch, 10); g.fill(); g.stroke();
+    const ix = x + ww / 2, iy = ty + ch * .36; drawIcon(g, k, ix, iy, on);
+    label(g, nm, ix, ty + ch * .68, {weight: 700, size: 12}); label(g, w + ' W', ix, ty + ch * .8, {size: 12, color: C.accent, weight: 700}); label(g, '전기 → ' + out, ix, ty + ch * .92, {size: 10, color: on ? C.hot : C.muted});
+    g.strokeStyle = C.muted; g.lineWidth = 1.5; g.beginPath(); g.moveTo(ix, ty + ch); g.quadraticCurveTo(ix, S.h * .66, S.w * .2 + i * (S.w * .6 / (n - 1)), S.h * .74); g.stroke(); });
+  g.fillStyle = '#f4f5f7'; g.strokeStyle = C.ink; g.lineWidth = 1.5; rrect(g, S.w * .15, S.h * .72, S.w * .7, 34, 8); g.fill(); g.stroke();
+  keys.forEach((k, i) => { const x = S.w * .2 + i * (S.w * .6 / (n - 1)); g.fillStyle = st.aps[k] ? C.warn : '#bbb'; g.beginPath(); g.arc(x, S.h * .72 + 17, 9, 0, TAU); g.fill(); });
+  label(g, '멀티탭 (각 콘센트는 병렬연결 · 220 V)', S.w / 2, S.h * .72 + 50, {size: 12});
+  const over = tot > 2500;
+  label(g, `켜진 기구의 소비 전력 합: ${tot} W   (1시간 사용하면 ${tot} Wh의 전기 에너지 사용)`, S.w / 2, S.h - 30, {weight: 700, color: over ? C.hot : C.ink, size: 13});
+  label(g, over ? '⚠ 멀티탭의 허용 전력(예: 2500 W)을 넘었어요! 전선이 뜨거워져 화재 위험' : '전력이 큰 기구는 같은 시간 동안 더 많은 전기 에너지를 다른 에너지로 바꾼다', S.w / 2, S.h - 10, {size: 12, color: over ? C.hot : C.muted});
+}
+function drawIcon(g, k, x, y, on){
+  g.strokeStyle = C.ink; g.lineWidth = 2; g.fillStyle = on ? '#ffe28a' : '#e5e7eb';
+  if (k === 'lamp') { if (on) { g.fillStyle = 'rgba(255,220,80,.45)'; g.beginPath(); g.arc(x, y - 4, 30, 0, TAU); g.fill(); g.fillStyle = '#ffe28a'; } g.beginPath(); g.arc(x, y - 6, 16, 0, TAU); g.fill(); g.stroke(); g.strokeRect(x - 7, y + 10, 14, 10); }
+  else if (k === 'fan') { g.beginPath(); g.arc(x, y - 4, 22, 0, TAU); g.stroke(); const a0 = on ? st.t * 12 : 0; for (let i = 0; i < 3; i++) { const a = a0 + i * TAU / 3; g.beginPath(); g.ellipse(x + Math.cos(a) * 11, y - 4 + Math.sin(a) * 11, 10, 5, a, 0, TAU); g.fill(); g.stroke(); } g.beginPath(); g.moveTo(x, y + 18); g.lineTo(x, y + 26); g.stroke(); }
+  else if (k === 'tv') { g.fillStyle = on ? '#9fd0ff' : '#e5e7eb'; g.fillRect(x - 26, y - 22, 52, 34); g.strokeRect(x - 26, y - 22, 52, 34); g.beginPath(); g.moveTo(x - 10, y + 22); g.lineTo(x, y + 12); g.lineTo(x + 10, y + 22); g.stroke(); if (on) label(g, '♪', x + 32, y - 18, {size: 14, color: C.phy}); }
+  else if (k === 'kettle') { g.beginPath(); g.moveTo(x - 18, y + 20); g.lineTo(x - 14, y - 16); g.lineTo(x + 14, y - 16); g.lineTo(x + 18, y + 20); g.closePath(); g.fill(); g.stroke(); if (on) for (let i = 0; i < 3; i++) { const yy = y - 22 - ((st.t * 20 + i * 8) % 22); g.strokeStyle = 'rgba(150,150,150,.7)'; g.beginPath(); g.arc(x - 8 + i * 8, yy, 3, 0, TAU); g.stroke(); } }
+  else { g.beginPath(); g.ellipse(x - 4, y - 8, 22, 12, 0, 0, TAU); g.fill(); g.stroke(); g.strokeRect(x - 2, y + 2, 9, 20); if (on) { g.strokeStyle = C.hot; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(x + 22, y - 14 + i * 6); g.lineTo(x + 34 + Math.sin(st.t * 10 + i) * 3, y - 14 + i * 6); g.stroke(); } } }
+}
+
+/* ===== 4. 전류와 자기장 ===== */
+function needle(g, x, y, bx, by, len){ const m = Math.hypot(bx, by) || 1, ux = bx / m, uy = by / m; len = len || 13;
+  g.fillStyle = C.surface; g.strokeStyle = C.line; g.lineWidth = 1; g.beginPath(); g.arc(x, y, len + 3, 0, TAU); g.fill(); g.stroke();
+  g.fillStyle = '#d2412f'; g.beginPath(); g.moveTo(x + ux * len, y + uy * len); g.lineTo(x - uy * 3.5, y + ux * 3.5); g.lineTo(x + uy * 3.5, y - ux * 3.5); g.fill();
+  g.fillStyle = '#8a8f99'; g.beginPath(); g.moveTo(x - ux * len, y - uy * len); g.lineTo(x - uy * 3.5, y + ux * 3.5); g.lineTo(x + uy * 3.5, y - ux * 3.5); g.fill(); }
+function drawField(){
+  const g = S.g, I = st.amp * st.dir;
+  if (st.f === 'wire') {
+    const cx = S.w * .42, cy = S.h * .5;
+    if (st.amp > 0) { g.strokeStyle = 'rgba(40,100,210,.35)'; g.lineWidth = 1.5; [50, 95, 145, 200].forEach(r => { g.beginPath(); g.arc(cx, cy, r, 0, TAU); g.stroke();
+      const a = -Math.PI / 4, px = cx + Math.cos(a) * r, py = cy + Math.sin(a) * r, tx = st.dir > 0 ? Math.sin(a) : -Math.sin(a), ty = st.dir > 0 ? -Math.cos(a) : Math.cos(a);
+      arrow(g, px - tx * 8, py - ty * 8, px + tx * 8, py + ty * 8, 'rgba(40,100,210,.7)', 2); }); }
+    for (let i = -3; i <= 3; i++) for (let j = -2; j <= 2; j++) { const x = cx + i * 66, y = cy + j * 70, dx = x - cx, dy = y - cy, r = Math.hypot(dx, dy); if (r < 40 || x < 20 || x > S.w * .82) continue;
+      const k = st.amp * 90 / r, tx = st.dir > 0 ? dy / r : -dy / r, ty = st.dir > 0 ? -dx / r : dx / r; needle(g, x, y, tx * k, ty * k - 1); }
+    g.fillStyle = '#c9ccd2'; g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, 14, 0, TAU); g.fill(); g.stroke();
+    if (st.dir > 0) { g.fillStyle = C.ink; g.beginPath(); g.arc(cx, cy, 4, 0, TAU); g.fill(); } else { g.beginPath(); g.moveTo(cx - 8, cy - 8); g.lineTo(cx + 8, cy + 8); g.moveTo(cx + 8, cy - 8); g.lineTo(cx - 8, cy + 8); g.stroke(); }
+    const rx = S.w * .86;
+    label(g, '위에서 내려다본 모습', rx, 24, {weight: 700, size: 12});
+    label(g, st.dir > 0 ? '⊙ 전류: 종이 면에서 나오는 방향' : '⊗ 전류: 종이 면으로 들어가는 방향', rx, 46, {size: 11});
+    label(g, '오른손 엄지 = 전류 방향', rx, S.h * .4, {size: 12}); label(g, '네 손가락이 감아쥐는', rx, S.h * .4 + 20, {size: 12}); label(g, '방향 = 자기장 방향', rx, S.h * .4 + 40, {size: 12});
+    label(g, st.amp ? (st.dir > 0 ? '자기장: 시계 반대 방향' : '자기장: 시계 방향') : '전류가 없으면 나침반은 북쪽(위)을 가리킴', rx, S.h * .4 + 70, {size: 12, weight: 700, color: C.phy});
+    label(g, '나침반 빨간 쪽 = N극', rx, S.h - 20, {size: 11, color: C.muted});
+    return;
+  }
+  // 코일
+  const cx = S.w * .42, cy = S.h * .5, L = 210, H = 90, s = st.dir;
+  const Bc = (x, y) => { if (Math.abs(x - cx) < L / 2 && Math.abs(y - cy) < H / 2) return [s * st.amp * 3, 0];
+    const qN = s * st.amp * 26000, N = [cx + s * L / 2, cy], Sx = [cx - s * L / 2, cy], d1 = [x - N[0], y - N[1]], d2 = [x - Sx[0], y - Sx[1]], r1 = Math.hypot(...d1), r2 = Math.hypot(...d2);
+    const q = st.amp * 26000; return [q * (d1[0] / r1 ** 3 - d2[0] / r2 ** 3), q * (d1[1] / r1 ** 3 - d2[1] / r2 ** 3)]; };
+  // 뒤쪽 감긴 선
+  const turns = 9; g.lineWidth = 3;
+  for (let i = 0; i < turns; i++) { const x = cx - L / 2 + (i + .5) * L / turns; g.strokeStyle = 'rgba(184,115,51,.45)'; g.beginPath(); g.moveTo(x - 6, cy - H / 2); g.lineTo(x + 6, cy + H / 2); g.stroke(); }
+  if (st.amp > 0) { g.strokeStyle = 'rgba(40,100,210,.3)'; g.lineWidth = 1.5; [-.25, 0, .25].forEach(k => { g.beginPath(); g.moveTo(cx - L / 2 - 30, cy + k * H); g.lineTo(cx + L / 2 + 30, cy + k * H); g.stroke(); });
+    arrow(g, cx - 20 * s, cy, cx + 20 * s, cy, 'rgba(40,100,210,.8)', 2.5); }
+  for (let i = -3; i <= 3; i++) for (let j = -2; j <= 2; j++) { const x = cx + i * 72, y = cy + j * 74; if (Math.abs(j) < 1 && Math.abs(i) <= 1) continue; if (x < 24 || x > S.w * .8) continue; const b = Bc(x, y); needle(g, x, y, b[0], b[1] - 1); }
+  for (let i = 0; i < turns; i++) { const x = cx - L / 2 + (i + .5) * L / turns; g.strokeStyle = '#b87333'; g.lineWidth = 3.5; g.beginPath(); g.moveTo(x + 6, cy - H / 2); g.lineTo(x - 6, cy + H / 2); g.stroke();
+    if (st.amp > 0 && i % 2 === 0) arrow(g, x + 3, cy - 8 * s, x - 3, cy + 10 * s, C.hot, 1.6); }
+  g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - L / 2, cy + H / 2); g.lineTo(cx - L / 2, S.h - 40); g.lineTo(cx - 30, S.h - 40); g.moveTo(cx + 30, S.h - 40); g.lineTo(cx + L / 2, S.h - 40); g.lineTo(cx + L / 2, cy + H / 2); g.stroke();
+  g.fillStyle = C.surface; g.fillRect(cx - 30, S.h - 56, 60, 32); g.strokeRect(cx - 30, S.h - 56, 60, 32); label(g, '전원', cx, S.h - 40, {size: 12, weight: 700});
+  if (st.amp > 0) { label(g, 'N', cx + s * (L / 2 + 22), cy - H / 2 - 14, {weight: 700, size: 16, color: '#d2412f'}); label(g, 'S', cx - s * (L / 2 + 22), cy - H / 2 - 14, {weight: 700, size: 16, color: '#4a6fd0'}); }
+  const rx = S.w * .87;
+  label(g, '코일 = 막대자석과 비슷한', rx, S.h * .3, {size: 12}); label(g, '자기장', rx, S.h * .3 + 20, {size: 12});
+  label(g, '오른손 네 손가락 = 전류', rx, S.h * .48, {size: 12}); label(g, '엄지 = 코일 속 자기장', rx, S.h * .48 + 20, {size: 12}); label(g, '방향 (N극 쪽)', rx, S.h * .48 + 40, {size: 12});
+  label(g, '빨간 화살표: 앞쪽 도선의 전류', rx, S.h - 20, {size: 11, color: C.hot});
+}
+
+/* ===== 4. 전동기 ===== */
+function magnets(g, cx, cy, gap, hh){ const nLeft = st.flip > 0;
+  [[-1, nLeft ? 'N' : 'S'], [1, nLeft ? 'S' : 'N']].forEach(([k, p]) => { g.fillStyle = p === 'N' ? '#e06a5a' : '#6a8ee0'; const x = k < 0 ? cx - gap - 70 : cx + gap; g.fillRect(x, cy - hh, 70, hh * 2); label(g, p, x + 35, cy, {weight: 700, size: 22, color: '#fff'}); });
+  g.strokeStyle = 'rgba(40,100,210,.3)'; g.lineWidth = 1.5; for (let k = -2; k <= 2; k++) { const y = cy + k * hh * .38; g.beginPath(); g.moveTo(cx - gap, y); g.lineTo(cx + gap, y); g.stroke(); arrow(g, cx - gap + 30 - st.flip * 8, y, cx - gap + 30 + st.flip * 8, y, 'rgba(40,100,210,.7)', 1.5); } }
+function curSym(g, x, y, out){ g.fillStyle = '#e8c27a'; g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 12, 0, TAU); g.fill(); g.stroke();
+  if (out) { g.fillStyle = C.ink; g.beginPath(); g.arc(x, y, 3.5, 0, TAU); g.fill(); } else { g.beginPath(); g.moveTo(x - 7, y - 7); g.lineTo(x + 7, y + 7); g.moveTo(x + 7, y - 7); g.lineTo(x - 7, y + 7); g.stroke(); } }
+function drawMotor(){
+  const g = S.g, cx = S.w * .42, cy = S.h * .48;
+  if (st.m === 'force') { magnets(g, cx, cy, 150, S.h * .3);
+    const F = st.dir * st.flip * st.amp, y = cy - st.wy;
+    curSym(g, cx, y, st.dir > 0);
+    if (st.amp > 0) { arrow(g, cx + 30, y, cx + 30, y - Math.sign(F) * (20 + st.amp * 14), C.hot, 3); label(g, '힘', cx + 44, y - Math.sign(F) * 30, {align: 'left', color: C.hot, weight: 700}); }
+    label(g, st.dir > 0 ? '⊙ 전류: 화면에서 나오는 방향' : '⊗ 전류: 화면으로 들어가는 방향', cx, S.h - 40, {size: 12});
+    label(g, '자기장 방향: N극 → S극', cx, S.h - 18, {size: 12, color: C.phy});
+    const rx = S.w * .87; label(g, '오른손 네 손가락 = 자기장', rx, S.h * .36, {size: 12}); label(g, '엄지 = 전류', rx, S.h * .36 + 20, {size: 12}); label(g, '손바닥이 미는 쪽 = 힘', rx, S.h * .36 + 40, {size: 12});
+    label(g, st.amp ? (F > 0 ? '힘의 방향: 위쪽' : '힘의 방향: 아래쪽') : '전류가 없으면 힘도 없음', rx, S.h * .36 + 72, {weight: 700, color: C.hot, size: 12});
+    return; }
+  magnets(g, cx, cy, 130, S.h * .32);
+  const r = 90, th = st.th, x1 = cx + Math.cos(th) * r, y1 = cy - Math.sin(th) * r, x2 = cx - Math.cos(th) * r, y2 = cy + Math.sin(th) * r;
+  g.strokeStyle = '#b87333'; g.lineWidth = 4; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
+  // 정류자 (가운데)
+  const cr = 16; g.lineWidth = 6; ['#c98a3a', '#e0b060'].forEach((col, i) => { g.strokeStyle = col; g.beginPath(); g.arc(cx, cy, cr, th + .2 + i * Math.PI, th + Math.PI - .2 + i * Math.PI); g.stroke(); });
+  g.fillStyle = '#555'; g.fillRect(cx - cr - 12, cy - 4, 8, 8); g.fillRect(cx + cr + 4, cy - 4, 8, 8);
+  // 각 변의 전류 방향
+  let out1 = true; if (st.comm) out1 = Math.cos(th) >= 0; out1 = st.dir > 0 ? out1 : !out1;
+  curSym(g, x1, y1, out1); curSym(g, x2, y2, !out1);
+  if (st.amp > 0) { const f = st.flip * st.amp * 7 + 8; arrow(g, x1, y1 - 14 * Math.sign(st.flip * (out1 ? 1 : -1)), x1, y1 - (f + 14) * Math.sign(st.flip * (out1 ? 1 : -1)), C.hot, 2.5); arrow(g, x2, y2 + 14 * Math.sign(st.flip * (out1 ? 1 : -1)), x2, y2 + (f + 14) * Math.sign(st.flip * (out1 ? 1 : -1)), C.hot, 2.5); }
+  label(g, '코일을 옆에서 본 단면 · 가운데: 정류자와 브러시', cx, S.h - 18, {size: 12, color: C.muted});
+  const rx = S.w * .87; label(g, `회전 속도 ${Math.abs(st.om * 60 / TAU).toFixed(0)} rpm(모형)`, rx, S.h * .3, {weight: 700, size: 12});
+  label(g, st.comm ? '반 바퀴마다 정류자가' : '정류자가 없으면', rx, S.h * .42, {size: 12}); label(g, st.comm ? '전류 방향을 바꿔 줌' : '반 바퀴 뒤 힘이 반대가 되어', rx, S.h * .42 + 20, {size: 12}); label(g, st.comm ? '→ 한 방향으로 계속 회전' : '→ 흔들리다 멈춤', rx, S.h * .42 + 40, {size: 12, weight: 700, color: st.comm ? C.bio : C.hot});
+}
+function stepMotor(dt){
+  if (st.m === 'force') { const F = st.dir * st.flip * st.amp; st.wy += (F * 12 - st.wy) * Math.min(1, dt * 4); return; }
+  const c = Math.cos(st.th), torque = st.amp * st.dir * st.flip * (st.comm ? Math.abs(c) : c) * 3;
+  st.om += (torque - st.om * .9) * dt; st.th += st.om * dt;
+}
+
+/* ===== 그래프 ===== */
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'static') {
+    if (st.sub === 'rub') { const m = axes(G, {x: [0, 2, 1, ''], y: [-4, 4, 2, '전하 (모형 개수)']}); const fe = E.filter(e => e.own === 'fur').length;
+      [[8 - fe, '털가죽'], [-(8 - fe), '플라스틱 막대']].forEach(([v, n], i) => { g.fillStyle = v >= 0 ? C.hot : C.phy; const y0 = m.Y(0), y1 = m.Y(v); g.fillRect(m.X(i + .3), Math.min(y0, y1), m.X(.4) - m.X(0), Math.abs(y1 - y0)); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 11}); }); }
+    else { const m = axes(G, {x: [0, 100, 25, '대전체가 가까운 정도'], y: [0, 45, 15, '금속박이 벌어진 각 (°)']}); const p = []; for (let x = 0; x <= 100; x += 5) p.push([x, 6 + Math.round(4 * Math.pow(x / 100, 1.3)) * 8]); line(G, p, m, C.phy, 2);
+      g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.near), m.Y(scopeState().ang * 180 / Math.PI), 5, 0, TAU); g.fill(); }
+  } else if (st.mode === 'ohm') { const m = axes(G, {x: [0, 6, 1, '전압 (V)'], y: [0, 600, 100, '전류 (mA)']});
+    [10, 20, 30].forEach(R => { line(G, [[0, 0], [6, 6000 / R]], m, R === st.R ? C.hot : C.line, R === st.R ? 2.5 : 1.2, R === st.R ? null : [4, 4]); label(g, R + ' Ω', m.X(6) - 4, m.Y(6000 / R) - 10, {size: 11, align: 'right', color: R === st.R ? C.hot : C.muted}); });
+    st.recs.forEach(r => { g.fillStyle = r.R === 10 ? C.phy : r.R === 20 ? C.bio : C.chem; g.beginPath(); g.arc(m.X(r.V), m.Y(r.I), 4.5, 0, TAU); g.fill(); });
+    g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.arc(m.X(st.V), m.Y(st.V / st.R * 1000), 6, 0, TAU); g.stroke();
+  } else if (st.mode === 'circuit') {
+    if (st.c === 'home') { const keys = Object.keys(APS), m = axes(G, {x: [0, keys.length, 1, ''], y: [0, 2000, 500, '소비 전력 (W)']});
+      keys.forEach((k, i) => { const w = APS[k][1]; g.fillStyle = st.aps[k] ? C.warn : C.line; g.fillRect(m.X(i + .2), m.Y(w), m.X(.6) - m.X(0), m.Y(0) - m.Y(w)); label(g, APS[k][0], m.X(i + .5), m.T + m.h + 12, {size: 10}); }); }
+    else { const v = circuitVals(), m = axes(G, {x: [0, 3, 1, ''], y: [0, 1, .25, '밝기 (전구 1개 연결 = 1)']});
+      [[1, '전구 1개만'], [v.bA, '전구 A'], [v.bB, '전구 B']].forEach(([b, n], i) => { g.fillStyle = i ? C.warn : C.line; g.fillRect(m.X(i + .25), m.Y(b), m.X(.5) - m.X(0), m.Y(0) - m.Y(b)); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 11}); }); }
+  } else if (st.mode === 'field') {
+    if (st.f === 'wire') { const m = axes(G, {x: [1, 5, 1, '도선으로부터의 거리 (칸)'], y: [0, 5, 1, '자기장 세기 (상대값)']}); const p = []; for (let r = 1; r <= 5; r += .1) p.push([r, st.amp / r]); line(G, p, m, C.phy, 2.5); label(g, '거리가 멀수록 약해짐', m.X(3.5), m.Y(3), {size: 11, color: C.muted}); }
+    else { const m = axes(G, {x: [0, 5, 1, '전류 세기'], y: [0, 5, 1, '코일 속 자기장 세기 (상대값)']}); line(G, [[0, 0], [5, 5]], m, C.phy, 2.5); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.amp), m.Y(st.amp), 5, 0, TAU); g.fill(); label(g, '감은 수가 많을수록 더 세짐', m.X(1.6), m.Y(4.2), {size: 11, color: C.muted}); }
+  } else {
+    if (st.m === 'force') { const m = axes(G, {x: [0, 5, 1, '전류 세기'], y: [0, 5, 1, '도선이 받는 힘 (상대값)']}); line(G, [[0, 0], [5, 5]], m, C.hot, 2.5); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.amp), m.Y(st.amp), 5, 0, TAU); g.fill(); label(g, '자석이 셀수록 힘도 커짐', m.X(1.6), m.Y(4.2), {size: 11, color: C.muted}); }
+    else { const m = axes(G, {x: [0, 360, 90, '코일의 회전 각 (°)'], y: [-1, 1, .5, '돌리는 효과 (상대값)']}); const p = []; for (let a = 0; a <= 360; a += 5) { const c = Math.cos(a * Math.PI / 180); p.push([a, st.comm ? Math.abs(c) : c]); } line(G, p, m, C.hot, 2.5);
+      const a = ((st.th * 180 / Math.PI) % 360 + 360) % 360, c = Math.cos(a * Math.PI / 180); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(a), m.Y(st.comm ? Math.abs(c) : c), 5, 0, TAU); g.fill(); }
+  }
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>'; $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
+function table(){
+  if (st.mode === 'static') { if (st.sub === 'rub') setTable('대전열 (전자를 잃기 쉬운 순서)', ['(+)쪽', '', '', '', '', '(−)쪽'], [['털가죽', '유리', '명주', '나무', '고무', '플라스틱']]);
+    else setTable('정전기 유도와 검전기', ['대전체', '금속판', '금속박', '금속박 모양'], [['(−) 대전체 가까이', '(+)', '(−)', '벌어짐'], ['(+) 대전체 가까이', '(−)', '(+)', '벌어짐'], ['대전체를 멀리', '중성', '중성', '오므라듦']]); }
+  else if (st.mode === 'ohm') { if (!st.recs.length) setTable('측정 기록', ['전압 (V)', '저항 (Ω)', '전류 (mA)'], [['[측정값 기록]을 눌러 보세요', '', '']]);
+    else setTable('측정 기록', ['전압 (V)', '저항 (Ω)', '전류 (mA)', '전압 ÷ 전류'], st.recs.map(r => [r.V.toFixed(1), r.R, r.I.toFixed(0), r.I ? (r.V / (r.I / 1000)).toFixed(0) + ' Ω' : '-'])); }
+  else if (st.mode === 'circuit') { if (st.c === 'home') setTable('전기 기구의 에너지 전환', ['기구', '소비 전력', '전기 에너지 →'], Object.values(APS).map(a => [a[0], a[1] + ' W', a[2] + ' 에너지']));
+    else setTable('직렬연결과 병렬연결', ['구분', '직렬연결', '병렬연결'], [['전구에 걸리는 전압', '나누어 걸림', '전원 전압과 같음'], ['전구에 흐르는 전류', '모두 같음', '나뉘어 흐름'], ['전구를 더 연결하면', '각 전구가 어두워짐', '밝기 그대로'], ['전구 하나를 빼면', '모두 꺼짐', '나머지는 켜짐'], ['예', '퓨즈, 장식 전구 일부', '가정의 전기 기구, 멀티탭']]); }
+  else if (st.mode === 'field') setTable('전류가 만드는 자기장', ['구분', '자기장 모양', '방향 찾기', '세기를 크게 하려면'], [['직선 도선', '도선을 중심으로 한 동심원', '엄지 = 전류, 네 손가락 = 자기장', '전류를 세게, 도선 가까이'], ['코일', '막대자석과 비슷 (내부는 나란함)', '네 손가락 = 전류, 엄지 = N극 쪽', '전류를 세게, 감은 수를 많이']]);
+  else setTable('자기장 속에서 전류가 받는 힘', ['구분', '내용'], [['힘의 방향', '전류 방향과 자기장 방향에 모두 수직'], ['방향이 반대가 될 때', '전류 방향 또는 자석의 극을 바꿀 때'], ['힘이 커질 때', '전류가 셀수록, 자석이 셀수록'], ['이용', '전동기 (선풍기, 세탁기, 전기 자동차, 드론), 스피커']]);
+}
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'static') { if (st.sub === 'rub') { s = stat('이동한 전자', st.moved, '개') + stat('막대의 전하', st.moved ? '(−)' : '중성');
+      e = '<b>마찰 전기</b>: 서로 다른 두 물체를 마찰하면 <b>전자</b>가 한 물체에서 다른 물체로 이동합니다. 전자를 잃은 물체는 (+)전하, 전자를 얻은 물체는 (−)전하를 띱니다. 원자핵의 (+)전하는 이동하지 않습니다.';
+      t = '[문지르기]를 여러 번 눌러 보세요. 이동하는 것은 전자뿐이고, 전체 전하의 양은 변하지 않습니다.'; }
+    else { const ss = scopeState(); s = stat('금속박이 벌어진 각', Math.round(ss.ang * 180 / Math.PI), '°') + stat('금속박 전하', ss.leaf === 0 ? '중성' : ss.leaf > 0 ? '(+)' : '(−)');
+      e = '<b>정전기 유도</b>: 대전체를 금속에 가까이 하면 금속 속 전자가 끌려오거나 밀려나, 대전체와 가까운 쪽은 대전체와 <b>다른</b> 종류, 먼 쪽은 <b>같은</b> 종류의 전하를 띱니다. 검전기는 이를 이용해 물체가 대전되었는지 알아봅니다.';
+      t = '대전체의 전하 종류를 바꿔도 금속박은 벌어집니다. 금속판과 금속박의 전하 종류를 비교해 보세요.'; } }
+  else if (st.mode === 'ohm') { const I = st.V / st.R; s = stat('전류', (I * 1000).toFixed(0), 'mA') + stat('전압 ÷ 전류', st.V ? st.R : '-', ' Ω');
+    e = '<b>전류</b>는 전하의 흐름, <b>전압</b>은 전류를 흐르게 하는 능력, <b>저항</b>은 전류의 흐름을 방해하는 정도입니다. 저항이 일정할 때 전류는 전압에 비례하고(<b>옴의 법칙</b>), 전압이 일정할 때 저항이 클수록 전류는 작아집니다.';
+    t = '저항을 고정하고 전압을 바꿔 가며 [측정값 기록]을 눌러 그래프의 점을 찍어 보세요. 직선이 될까요?'; }
+  else if (st.mode === 'circuit') { if (st.c === 'home') { const tot = Object.keys(APS).reduce((a, k) => a + (st.aps[k] ? APS[k][1] : 0), 0); s = stat('소비 전력 합', tot, ' W') + stat('1시간 사용', tot, ' Wh');
+      e = '<b>소비 전력</b>: 전기 기구가 1초 동안 사용하는 전기 에너지의 양(단위 W). 전기 기구는 전기 에너지를 빛, 열, 운동, 소리 에너지 등으로 바꿉니다. 소비 전력이 클수록 같은 시간에 더 많은 전기 에너지를 씁니다.';
+      t = '열을 내는 기구(전기 주전자, 헤어드라이어)의 소비 전력이 특히 큰 것을 확인하세요.'; }
+    else { const v = circuitVals(); s = stat('전체 전류', (v.I * 1000).toFixed(0), 'mA') + stat('전구 A 밝기', v.bA === 1 ? '밝음' : v.bA > 0 ? '어두움' : '꺼짐');
+      e = st.c === 'series' ? '<b>직렬연결</b>: 전기 기구를 한 줄로 연결. 각 전구에 흐르는 전류의 세기가 같고, 전원의 전압이 나누어 걸립니다. 하나를 빼면 회로가 끊겨 모두 꺼집니다.' : '<b>병렬연결</b>: 전기 기구를 여러 갈래로 나누어 연결. 각 전구에 전원 전압이 그대로 걸리고, 전체 전류는 각 전구에 나뉘어 흐릅니다. 하나를 빼도 나머지는 켜져 있습니다.';
+      t = '[전구 B 빼기]를 켜고 끄며 전구 A의 밝기 변화를 직렬과 병렬에서 비교하세요.'; } }
+  else if (st.mode === 'field') { s = stat('전류 세기', st.amp.toFixed(1)) + stat('전류 방향', st.f === 'wire' ? (st.dir > 0 ? '⊙ 나옴' : '⊗ 들어감') : (st.dir > 0 ? '앞쪽 ↓' : '앞쪽 ↑'));
+    e = st.f === 'wire' ? '전류가 흐르는 <b>직선 도선</b> 주위에는 도선을 중심으로 한 동심원 모양의 <b>자기장</b>이 생깁니다. 자기장의 방향은 오른손 엄지를 전류 방향으로 할 때 네 손가락이 감아쥐는 방향입니다.' : '전류가 흐르는 <b>코일</b> 주위에는 막대자석과 비슷한 자기장이 생깁니다. 오른손 네 손가락을 전류 방향으로 감아쥐면 엄지가 가리키는 쪽이 코일의 N극 쪽입니다.';
+    t = '전류 방향을 바꾸면 나침반 바늘의 방향이 모두 반대가 됩니다. 전류를 0으로 하면 지구 자기장에 의해 북쪽을 가리킵니다.'; }
+  else { s = stat('전류 세기', st.amp.toFixed(1)) + stat(st.m === 'force' ? '힘의 방향' : '회전', st.m === 'force' ? (st.amp ? (st.dir * st.flip > 0 ? '위' : '아래') : '없음') : (Math.abs(st.om) < .05 ? '멈춤' : st.om > 0 ? '시계 반대' : '시계'));
+    e = st.m === 'force' ? '자기장 속에서 전류가 흐르는 도선은 <b>힘</b>을 받습니다. 힘의 방향은 전류와 자기장의 방향에 모두 수직이며, 전류나 자기장의 방향을 바꾸면 힘의 방향도 반대가 됩니다.' : '<b>전동기</b>는 자기장 속 코일이 받는 힘으로 코일을 회전시키는 장치입니다. 코일 양쪽 변에 반대 방향의 힘이 작용하여 코일이 돌고, <b>정류자</b>가 반 바퀴마다 전류 방향을 바꿔 계속 같은 방향으로 회전합니다.';
+    t = st.m === 'force' ? '전류 방향과 자석의 극을 동시에 바꾸면 힘의 방향은 어떻게 될까요?' : '[정류자 사용]을 끄면 어떻게 되는지 관찰해 보세요.'; }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 조작 ===== */
+function syncStatic(){ const r = st.sub === 'rub'; $('rub').hidden = !r || st.mode !== 'static'; $('reset').hidden = !r || st.mode !== 'static'; $('signF').hidden = r || st.mode !== 'static'; $('nearF').hidden = r || st.mode !== 'static'; }
+Kit.seg($('stSeg'), 'st', v => { st.sub = v; syncStatic(); table(); })('rub');
+$('rub').onclick = doRub; $('reset').onclick = resetRub;
+Kit.seg($('signSeg'), 'sign', v => { st.sign = v; })('-');
+$('near').oninput = e => { st.near = +e.target.value; $('nearOut').textContent = st.near < 20 ? '멀리' : st.near < 70 ? '가까이' : '아주 가까이'; };
+$('volt').oninput = e => { st.V = +e.target.value; $('voltOut').textContent = st.V.toFixed(1) + ' V'; };
+Kit.seg($('rSeg'), 'r', v => { st.R = +v; })('10');
+$('rec').onclick = () => { st.recs.push({V: st.V, R: st.R, I: st.V / st.R * 1000}); if (st.recs.length > 12) st.recs.shift(); table(); };
+$('clr').onclick = () => { st.recs = []; table(); };
+function syncCirc(){ const h = st.c === 'home'; if (st.mode === 'circuit') $('gTitle').textContent = h ? '전기 기구의 소비 전력' : '전구의 밝기 비교'; $('outF').hidden = h || st.mode !== 'circuit'; $('apF').hidden = !h || st.mode !== 'circuit'; }
+Kit.seg($('cSeg'), 'c', v => { st.c = v; syncCirc(); table(); })('series');
+$('outB').onchange = e => st.outB = e.target.checked;
+$('apF').innerHTML = Object.keys(APS).map(k => `<label for="ap-${k}" style="white-space:nowrap"><input type="checkbox" id="ap-${k}" ${st.aps[k] ? 'checked' : ''}> ${APS[k][0]}</label>`).join(' ');
+Object.keys(APS).forEach(k => $('ap-' + k).onchange = e => st.aps[k] = e.target.checked);
+Kit.seg($('fSeg'), 'f', v => { st.f = v; })('wire');
+function syncMot(){ if (st.mode === 'motor') $('gTitle').textContent = st.m === 'motor' ? '회전 각에 따라 코일을 돌리는 효과' : '전류의 세기와 힘'; }
+Kit.seg($('mSeg'), 'm', v => { st.m = v; $('commF').hidden = v !== 'motor' || st.mode !== 'motor'; syncMot(); })('force');
+$('amp').oninput = e => { st.amp = +e.target.value; $('ampOut').textContent = st.amp.toFixed(1); };
+$('dir').onclick = () => st.dir *= -1; $('flip').onclick = () => st.flip *= -1;
+$('comm').onchange = e => { st.comm = e.target.checked; if (!st.comm) st.th = 1.2; };
+Kit.tabs(m => { st.mode = m; syncStatic(); $('commF').hidden = !(m === 'motor' && st.m === 'motor'); table();
+  $('gTitle').textContent = {static: '전하의 이동', ohm: '전압과 전류의 관계', circuit: '전구의 밝기 비교', field: '자기장의 세기', motor: '전류가 받는 힘'}[m]; syncCirc(); syncMot();
+  $('gSub').textContent = {static: '', ohm: '선: 각 저항의 이론값 · 점: 내가 기록한 값', circuit: '', field: '', motor: ''}[m]; }, ['static', 'ohm', 'circuit', 'field', 'motor']);
+resetRub();
+Kit.loop(dt => { st.t += dt; if (st.rubT > 0) st.rubT = Math.max(0, st.rubT - dt); if (st.mode === 'motor') stepMotor(dt); },
+  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h);
+    if (st.mode === 'static') (st.sub === 'rub' ? drawRub : drawScope)(); else ({ohm: drawOhm, circuit: drawCircuit, field: drawField, motor: drawMotor})[st.mode]();
+    drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>
