@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>미래 설계 연구소 · 중3 과학과 나의 미래</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-gen">
+<div class="wrap">
+  <nav class="topbar" data-topbar="3학년|23 과학과 나의 미래" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 3 · 23 과학과 나의 미래 <span class="code">9과23</span></div>
+      <h1>미래 설계 연구소</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="tech">1. 과학기술과 미래 사회</button>
+      <button type="button" data-mode="jobs">2. 과학 관련 직업</button>
+      <button type="button" data-mode="plan">3. 나의 진로 설계</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="모형">
+      <div class="canvas-box"><canvas id="scene" aria-label="과학기술과 직업 연결 지도"></canvas></div>
+      <div class="controls">
+        <div class="field" data-only="tech">기술 <select id="tec"></select></div>
+        <div class="field" data-only="jobs" id="intF"></div>
+        <div class="field" data-only="plan" id="trF" style="flex-wrap:wrap"></div>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">정리</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>과학자가 되지 않을 사람도 과학을 배워야 할까?</summary>
+        <p>과학기술은 건강, 환경, 에너지, 안전 등 모든 사람의 생활과 사회의 결정에 영향을 줍니다. 과학적으로 생각하는 힘은 정보를 판단하고 합리적으로 선택하는 데 꼭 필요한 시민의 소양입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>미래에 사라질 직업과 새로 생길 직업은 무엇일까?</summary>
+        <p>반복적인 일은 자동화로 줄어들 수 있지만, 새로운 기술을 만들고 관리하는 일, 사람과 소통하며 창의적으로 문제를 해결하는 일은 늘어날 것으로 예상됩니다. 정확한 예측보다 변화에 적응하는 힘이 중요합니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>과학기술에는 책임이 따를까?</summary>
+        <p>유전자 가위, 인공지능처럼 강력한 기술은 큰 이익과 함께 개인 정보, 생명 윤리, 일자리, 환경 문제를 일으킬 수 있습니다. 그래서 기술을 개발하고 사용할 때 안전과 윤리, 사회적 합의를 함께 고려해야 합니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="직업과 기술의 연결은 탐색을 돕기 위한 예시이며, 실제 진로는 다양한 경로로 열려 있습니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+const st = {mode:'tech', t:0, tec:'ai', ints:new Set(['phy', 'info']), tr:{inq: 70, cre: 60, team: 50, grit: 60, math: 50, comm: 40}};
+
+/* 중학교 단원 */
+const UNITS = {u_force: '중1 힘의 작용', u_heat: '중1 열', u_life: '중1 생물의 다양성', u_sustain: '중1 과학과 지속가능한 삶', u_atom: '중2 물질의 구성', u_light: '중2 빛과 파동', u_elec: '중2 전기와 자기', u_space: '중2 별과 우주', u_body: '중2 동물과 에너지', u_react: '중3 화학 반응', u_weather: '중3 날씨와 기후변화', u_motion: '중3 운동과 에너지', u_stim: '중3 자극과 반응', u_gene: '중3 생식과 유전', u_safe: '중3 재해·재난과 안전'};
+const TECH = {
+  ai: ['인공지능', '데이터로 학습하여 판단·예측하는 기술', ['u_stim', 'u_light', 'u_safe'], '의료 영상 판독, 번역, 재난 예측', '일자리 변화, 개인 정보, 편향된 판단'],
+  ev: ['전기 자동차와 배터리', '전동기와 화학 전지로 움직이는 자동차', ['u_elec', 'u_react', 'u_motion'], '배출 가스 감소, 에너지 효율 향상', '배터리 자원 채굴, 폐배터리 처리'],
+  renew: ['신재생 에너지', '태양광·풍력 등으로 전기 생산', ['u_light', 'u_elec', 'u_motion', 'u_weather'], '온실 기체 감축, 에너지 자립', '날씨에 따른 발전량 변동, 설치 부지'],
+  crispr: ['유전자 가위', 'DNA의 특정 부위를 잘라 고치는 기술', ['u_gene', 'u_life'], '유전병 치료, 병충해에 강한 작물', '생명 윤리, 생태계 영향'],
+  ccus: ['탄소 포집·활용', '이산화 탄소를 모아 저장하거나 자원으로 활용', ['u_react', 'u_weather', 'u_sustain'], '지구 온난화 완화', '비용, 저장 장소의 안전성'],
+  space: ['우주 탐사·위성', '로켓, 인공위성, 우주 망원경', ['u_space', 'u_motion', 'u_force', 'u_weather'], 'GPS, 기상 관측, 통신', '우주 쓰레기, 막대한 비용'],
+  bio: ['맞춤형 의료·백신', '개인의 유전 정보와 면역 원리를 이용한 치료', ['u_body', 'u_gene', 'u_safe', 'u_stim'], '감염병 대응, 부작용 감소', '유전 정보 보호, 의료 격차'],
+  smart: ['스마트 농업', '센서와 자동 제어로 작물 재배', ['u_life', 'u_heat', 'u_weather', 'u_elec'], '식량 생산 증가, 물·비료 절약', '초기 비용, 기술 격차'],
+  semi: ['반도체', '전기적 성질을 조절하는 물질로 만든 칩', ['u_atom', 'u_elec', 'u_heat'], '컴퓨터, 스마트폰, 인공지능의 기반', '많은 물·전력 사용, 화학 물질 관리']};
+function drawTech(){
+  const g = S.g, keys = Object.keys(UNITS), T = TECH[st.tec], cx = S.w / 2, cy = S.h / 2, half = Math.ceil(keys.length / 2), gap = (S.h - 30) / half;
+  keys.forEach((k, i) => { const left = i < half, x = left ? S.w * .15 : S.w * .85, y = 22 + gap * ((left ? i : i - half) + .5), on = T[2].includes(k);
+    if (on) { g.strokeStyle = C.accent; g.lineWidth = 2.5; g.globalAlpha = .55 + .3 * Math.sin(st.t * 3 + i); g.beginPath(); g.moveTo(cx + (left ? -62 : 62), cy); g.lineTo(x + (left ? 66 : -66), y); g.stroke(); g.globalAlpha = 1; }
+    g.fillStyle = on ? C.accent : C.soft; g.fillRect(x - 66, y - 12, 132, 24); label(g, UNITS[k], x, y, {size: 11, weight: on ? 700 : 400, color: on ? '#fff' : C.muted}); });
+  g.fillStyle = C.surface; g.strokeStyle = C.accent; g.lineWidth = 3; g.beginPath(); g.arc(cx, cy, 62, 0, TAU); g.fill(); g.stroke();
+  label(g, T[0], cx, cy - 6, {weight: 700, size: 14}); label(g, '에 쓰인 과학', cx, cy + 14, {size: 11, color: C.muted});
+}
+
+/* 직업 */
+const FIELDS = {phy: '물리', chem: '화학', bio: '생명', earth: '지구·우주', info: '정보·수학', env: '환경·안전'};
+const JOBS = [['로봇 공학자', ['phy', 'info']], ['반도체 엔지니어', ['phy', 'chem']], ['신재생 에너지 연구원', ['phy', 'env']], ['배터리 연구원', ['chem', 'phy']], ['신약 개발 연구원', ['chem', 'bio']], ['화장품 연구원', ['chem']], ['생명 공학 연구원', ['bio', 'chem']], ['유전 상담사', ['bio']], ['수의사', ['bio']], ['의료 영상 전문가', ['bio', 'phy']], ['기상 예보관', ['earth', 'info']], ['해양 연구원', ['earth', 'bio']], ['천문학자', ['earth', 'phy']], ['지질·지진 연구원', ['earth', 'env']], ['데이터 과학자', ['info']], ['인공지능 개발자', ['info']], ['기후 변화 전문가', ['env', 'earth']], ['환경 컨설턴트', ['env', 'chem']], ['재난 안전 전문가', ['env', 'earth']], ['과학 교사·커뮤니케이터', ['phy', 'chem', 'bio', 'earth']]];
+const FCOL = {phy: '#3a6ad8', chem: '#8a4ad0', bio: '#3a9a5a', earth: '#c07a2a', info: '#d04a7a', env: '#2a9aa0'};
+function hubPos(k){ const keys = Object.keys(FIELDS), i = keys.indexOf(k), gap = (S.h - 20) / keys.length; return [S.w * .1, 10 + gap * (i + .5)]; }
+function jobPos(i){ const per = Math.ceil(JOBS.length / 2), gap = (S.h - 10) / per; return [i < per ? S.w * .47 : S.w * .8, 5 + gap * ((i < per ? i : i - per) + .5)]; }
+function score(j){ return j[1].filter(f => st.ints.has(f)).length / j[1].length; }
+function drawJobs(){
+  const g = S.g;
+  JOBS.forEach((j, i) => { const [x, y] = jobPos(i); j[1].forEach(f => { if (!st.ints.has(f)) return; const [hx, hy] = hubPos(f); g.strokeStyle = FCOL[f]; g.globalAlpha = .35; g.lineWidth = 1.5; g.beginPath(); g.moveTo(hx + 30, hy); g.bezierCurveTo(hx + 120, hy, x - 140, y, x - 70, y); g.stroke(); g.globalAlpha = 1; }); });
+  Object.keys(FIELDS).forEach(k => { const [x, y] = hubPos(k), on = st.ints.has(k); g.fillStyle = on ? FCOL[k] : C.soft; g.beginPath(); g.arc(x, y, 28, 0, TAU); g.fill(); label(g, FIELDS[k], x, y, {weight: 700, size: 11, color: on ? '#fff' : C.muted}); });
+  JOBS.forEach((j, i) => { const [x, y] = jobPos(i), sc = score(j), w = 140; g.fillStyle = sc >= 1 ? C.accent : sc > 0 ? 'rgba(60,110,220,.18)' : C.surface; g.strokeStyle = C.line; g.fillRect(x - w / 2, y - 10, w, 20); g.strokeRect(x - w / 2, y - 10, w, 20);
+    label(g, j[0], x, y, {size: 11, weight: sc > 0 ? 700 : 400, color: sc >= 1 ? '#fff' : sc > 0 ? C.ink : C.muted}); });
+}
+
+/* 진로 설계 */
+const TR = {inq: '탐구심', cre: '창의성', team: '협업', grit: '끈기', math: '수리·논리', comm: '소통'};
+const TR_SUG = {inq: '실험·관찰 동아리, 과학 탐구 대회', cre: '발명 대회, 메이커 활동', team: '공동 연구 프로젝트, 과학 축제 운영', grit: '장기 관찰 일지, 자격증 도전', math: '수학·코딩 동아리, 데이터 분석', comm: '과학 글쓰기, 과학 해설·발표'};
+function drawPlan(){
+  const g = S.g, cx = S.w * .4, cy = S.h * .52, R = Math.min(S.w, S.h) * .36, keys = Object.keys(TR), n = keys.length, P = (i, v) => { const a = -Math.PI / 2 + i * TAU / n; return [cx + Math.cos(a) * R * v, cy + Math.sin(a) * R * v]; };
+  for (let k = 1; k <= 4; k++) { g.strokeStyle = C.line; g.beginPath(); keys.forEach((_, i) => { const p = P(i, k / 4); i ? g.lineTo(...p) : g.moveTo(...p); }); g.closePath(); g.stroke(); }
+  keys.forEach((k, i) => { g.beginPath(); g.moveTo(cx, cy); g.lineTo(...P(i, 1)); g.stroke(); const p = P(i, 1.14); label(g, TR[k], p[0], p[1], {weight: 700, size: 12}); });
+  g.fillStyle = 'rgba(60,110,220,.25)'; g.strokeStyle = C.accent; g.lineWidth = 2.5; g.beginPath(); keys.forEach((k, i) => { const p = P(i, st.tr[k] / 100); i ? g.lineTo(...p) : g.moveTo(...p); }); g.closePath(); g.fill(); g.stroke();
+  keys.forEach((k, i) => { const p = P(i, st.tr[k] / 100); g.fillStyle = C.accent; g.beginPath(); g.arc(p[0], p[1], 4, 0, TAU); g.fill(); });
+  const top = keys.slice().sort((a, b) => st.tr[b] - st.tr[a]).slice(0, 2), rx = S.w * .82;
+  label(g, '나의 강점', rx, S.h * .25, {weight: 700, size: 14}); top.forEach((k, i) => { label(g, TR[k], rx, S.h * .25 + 28 + i * 54, {weight: 700, color: C.accent}); label(g, TR_SUG[k], rx, S.h * .25 + 48 + i * 54, {size: 10.5, color: C.muted}); });
+}
+
+/* 그래프·표 */
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'tech') { const keys = Object.keys(TECH), m = axes(G, {x: [0, keys.length, 1, ''], y: [0, 5, 1, '연결된 중학교 단원 수']}); keys.forEach((k, i) => { const v = TECH[k][2].length; g.fillStyle = k === st.tec ? C.accent : C.line; g.fillRect(m.X(i + .2), m.Y(v), m.X(.6) - m.X(0), m.Y(0) - m.Y(v)); label(g, TECH[k][0].slice(0, 5), m.X(i + .5), m.T + m.h + 12, {size: 9}); }); }
+  else if (st.mode === 'jobs') { const keys = Object.keys(FIELDS), m = axes(G, {x: [0, keys.length, 1, ''], y: [0, 8, 2, '관련 직업 수 (예시)']}); keys.forEach((k, i) => { const v = JOBS.filter(j => j[1].includes(k)).length; g.fillStyle = st.ints.has(k) ? FCOL[k] : C.line; g.fillRect(m.X(i + .2), m.Y(v), m.X(.6) - m.X(0), m.Y(0) - m.Y(v)); label(g, FIELDS[k], m.X(i + .5), m.T + m.h + 12, {size: 10}); }); }
+  else { const keys = Object.keys(TR), m = axes(G, {x: [0, keys.length, 1, ''], y: [0, 100, 25, '스스로 평가한 점수']}); keys.forEach((k, i) => { g.fillStyle = C.accent; g.fillRect(m.X(i + .2), m.Y(st.tr[k]), m.X(.6) - m.X(0), m.Y(0) - m.Y(st.tr[k])); label(g, TR[k], m.X(i + .5), m.T + m.h + 12, {size: 10}); }); }
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>'; $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
+function table(){
+  if (st.mode === 'tech') { const T = TECH[st.tec]; setTable(T[0], ['구분', '내용'], [['원리', T[1]], ['관련 단원', T[2].map(k => UNITS[k]).join(', ')], ['좋은 점', T[3]], ['생각해 볼 문제', T[4]]]); }
+  else if (st.mode === 'jobs') { const list = JOBS.filter(j => score(j) > 0).sort((a, b) => score(b) - score(a)); setTable('관심 분야와 관련된 직업', ['직업', '관련 분야'], list.length ? list.map(j => [j[0], j[1].map(f => FIELDS[f]).join(', ')]) : [['관심 분야를 골라 보세요', '']]); }
+  else setTable('강점을 키우는 활동', ['역량', '활동 예시'], Object.keys(TR).map(k => [TR[k], TR_SUG[k]]));
+}
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'tech') { const T = TECH[st.tec]; s = stat('기술', T[0]) + stat('관련 단원', T[2].length, '개');
+    e = '과학기술은 중학교에서 배운 여러 과학 개념이 <b>융합</b>되어 만들어집니다. 새로운 기술은 생활을 편리하게 하지만, 사회·윤리·환경 문제를 함께 가져올 수 있어 <b>과학기술의 영향</b>을 균형 있게 판단해야 합니다.';
+    t = '기술을 바꾸어 보며 어떤 단원과 연결되는지 확인하세요.'; }
+  else if (st.mode === 'jobs') { const n = JOBS.filter(j => score(j) > 0).length; s = stat('관심 분야', st.ints.size, '개') + stat('관련 직업', n, '개');
+    e = '과학과 관련된 직업은 연구소뿐 아니라 의료, 환경, 정보, 교육, 안전 등 다양한 분야에 있습니다. 많은 직업이 <b>두 가지 이상의 분야</b>를 함께 필요로 합니다.';
+    t = '관심 분야를 여러 개 고르면 진하게 표시된 직업이 두 분야 모두와 관련된 직업입니다.'; }
+  else { const top = Object.keys(TR).sort((a, b) => st.tr[b] - st.tr[a]); s = stat('가장 높은 역량', TR[top[0]]) + stat('키우고 싶은 역량', TR[top[top.length - 1]]);
+    e = '진로를 설계할 때는 <b>흥미</b>(좋아하는 것), <b>적성</b>(잘하는 것), <b>가치관</b>(중요하게 여기는 것)을 함께 살펴봅니다. 강점은 살리고, 부족한 역량은 활동을 통해 키울 수 있습니다.';
+    t = '막대를 움직여 나의 역량을 표시하고, 강점을 키우는 활동을 계획해 보세요.'; }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* 조작 */
+$('tec').innerHTML = Object.entries(TECH).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join('');
+$('tec').onchange = e => { st.tec = e.target.value; table(); };
+$('intF').innerHTML = '관심 분야 ' + Object.entries(FIELDS).map(([k, v]) => `<label for="i-${k}" style="white-space:nowrap"><input type="checkbox" id="i-${k}" ${st.ints.has(k) ? 'checked' : ''}> ${v}</label>`).join(' ');
+Object.keys(FIELDS).forEach(k => $('i-' + k).onchange = e => { e.target.checked ? st.ints.add(k) : st.ints.delete(k); table(); });
+$('trF').innerHTML = Object.entries(TR).map(([k, v]) => `<label for="t-${k}" style="white-space:nowrap">${v} <input type="range" id="t-${k}" min="0" max="100" step="10" value="${st.tr[k]}" style="width:80px"></label>`).join(' ');
+Object.keys(TR).forEach(k => $('t-' + k).oninput = e => { st.tr[k] = +e.target.value; });
+Kit.tabs(m => { st.mode = m; table(); $('gTitle').textContent = {tech: '기술별 연결된 중학교 단원 수', jobs: '분야별 관련 직업 수 (이 지도 기준)', plan: '나의 역량'}[m]; $('gSub').textContent = ''; }, ['tech', 'jobs', 'plan']);
+Kit.loop(dt => { st.t += dt; }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({tech: drawTech, jobs: drawJobs, plan: drawPlan})[st.mode](); drawGraph(); ledger(); });
+})();
+</script>
+</body>
+</html>
