@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>지구시스템 실험실 · 통합과학1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-earth">
+<div class="wrap">
+  <nav class="topbar" data-topbar="통합과학1|05 지구시스템" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학1 · 05 지구시스템 <span class="code">통과1 Ⅲ</span></div>
+      <h1>지구시스템 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="sphere">1. 권역의 상호작용</button>
+      <button type="button" data-mode="cycle">2. 물과 탄소의 순환</button>
+      <button type="button" data-mode="plate">3. 판 구조론</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="지구시스템 모형"></canvas></div>
+      <div class="controls">
+        <div class="field" data-only="sphere"><div class="seg" id="evSeg"><button type="button" data-ev="volcano">화산 폭발</button><button type="button" data-ev="typhoon">태풍</button><button type="button" data-ev="photo">광합성</button><button type="button" data-ev="weather">풍화·침식</button><button type="button" data-ev="meteor">운석 충돌</button><button type="button" data-ev="coral">산호초 형성</button></div></div>
+        <div class="field" data-only="cycle"><div class="seg" id="cySeg"><button type="button" data-cy="water">물의 순환</button><button type="button" data-cy="carbon">탄소의 순환</button></div></div>
+        <label class="field" data-only="cycle" id="fosF" for="fos">화석 연료 사용 <input type="range" id="fos" min="0" max="20" step="1" value="10"><output id="fosOut">10</output></label>
+        <label class="field" data-only="cycle" id="forF" for="forest">삼림 파괴 <input type="range" id="forest" min="0" max="5" step="0.5" value="1.5"><output id="forOut">1.5</output></label>
+        <div class="field" data-only="plate"><div class="seg" id="plSeg"><button type="button" data-pl="div">발산형 (해령)</button><button type="button" data-pl="sub">수렴형 (섭입)</button><button type="button" data-pl="col">수렴형 (충돌)</button><button type="button" data-pl="tr">보존형 (변환 단층)</button></div></div>
+        <button class="btn primary" type="button" id="play">일시정지</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>지구시스템의 에너지원 세 가지는?</summary><p>태양 에너지(가장 큼, 기상 현상과 물의 순환·광합성의 원동력), 지구 내부 에너지(맨틀 대류, 판의 운동, 화산·지진), 조력 에너지(달과 태양의 인력에 의한 밀물·썰물)입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>바다는 대기 중 이산화 탄소 증가를 어떻게 완화할까? 그 부작용은?</summary><p>해수에 이산화 탄소가 녹아 들어가고, 생물이 탄산염 껍데기를 만들어 탄소를 저장합니다. 하지만 녹아든 이산화 탄소가 많아지면 바다가 산성화되어 산호나 조개처럼 탄산 칼슘 껍데기를 만드는 생물이 피해를 입습니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>히말라야산맥 꼭대기에서 바다 생물 화석이 발견되는 까닭은?</summary><p>인도판과 유라시아판이 충돌하면서 두 대륙 사이 바다에 쌓였던 퇴적층이 밀려 올라가 습곡 산맥이 되었기 때문입니다. 대륙판끼리는 밀도가 비슷해 섭입하지 않고 충돌하여 높은 산맥을 만듭니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="물의 순환량은 대표값(천 km³/년), 탄소 순환은 단순화한 모형입니다."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+const SP = [['geo', '지권', '#a0805a'], ['hydro', '수권', '#4a8fd0'], ['atmo', '기권', '#8ecdf2'], ['bio', '생물권', '#5fb37a'], ['space', '외권', '#7a6ab0']];
+const EV = {volcano: ['화산 폭발', [['geo', 'atmo', '화산재·화산 기체 방출 → 기온 변화'], ['geo', 'bio', '용암·화산재로 생물 서식지 파괴'], ['geo', 'hydro', '화산 기체의 수증기 → 바다 형성 (지구 초기)']]], typhoon: ['태풍', [['hydro', 'atmo', '따뜻한 해수의 증발 → 수증기가 응결하며 열 방출 (태풍의 에너지)'], ['atmo', 'geo', '강풍·폭우로 산사태, 해안 침식'], ['atmo', 'hydro', '바닷물을 뒤섞어 적조 해소, 영양염 공급']]], photo: ['광합성', [['atmo', 'bio', '대기의 이산화 탄소 흡수'], ['bio', 'atmo', '산소 방출'], ['space', 'bio', '태양 빛에너지 이용']]], weather: ['풍화·침식', [['atmo', 'geo', '바람·기온 변화로 암석 풍화'], ['hydro', 'geo', '빗물·하천이 지형 침식, 석회 동굴 형성'], ['bio', 'geo', '식물 뿌리가 암석을 쪼갬']]], meteor: ['운석 충돌', [['space', 'geo', '운석 구덩이 형성'], ['space', 'atmo', '먼지가 햇빛 차단 → 기온 하강'], ['space', 'bio', '대멸종의 원인 (예: 공룡 멸종)']]], coral: ['산호초 형성', [['hydro', 'bio', '해수의 칼슘·탄산 이온 이용'], ['bio', 'geo', '탄산 칼슘이 쌓여 석회암 형성'], ['atmo', 'hydro', '대기의 이산화 탄소가 바다에 녹음']]]};
+const st = {mode: 'sphere', ev: 'volcano', cy: 'water', fos: 10, forest: 1.5, pl: 'div', run: true, t: 0, co2: []};
+function spherePos(i){ const cx = S.w * .36, cy = S.h * .52, R = Math.min(S.w * .27, S.h * .38), a = -Math.PI / 2 + i * TAU / 5; return [cx + Math.cos(a) * R, cy + Math.sin(a) * R]; }
+function drawSphere(){ const g = S.g, cx = S.w * .36, cy = S.h * .52, t = st.t;
+  g.fillStyle = '#4a8fd0'; g.beginPath(); g.arc(cx, cy, 40, 0, TAU); g.fill(); g.fillStyle = '#7fb06a'; g.beginPath(); g.ellipse(cx - 8, cy - 6, 16, 22, .4, 0, TAU); g.fill(); label(g, '지구시스템', cx, cy + 56, {size: 11, color: C.muted});
+  const links = EV[st.ev][1];
+  links.forEach(([a, b], k) => { const ia = SP.findIndex(s => s[0] === a), ib = SP.findIndex(s => s[0] === b), [x0, y0] = spherePos(ia), [x1, y1] = spherePos(ib), mx = (x0 + x1) / 2 + (cy - (y0 + y1) / 2) * .25, my = (y0 + y1) / 2 + ((x0 + x1) / 2 - cx) * .25;
+    g.strokeStyle = C.hot; g.lineWidth = 3; g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo(mx, my, x1, y1); g.stroke(); const u = (t * .5 + k * .3) % 1, px = (1 - u) ** 2 * x0 + 2 * u * (1 - u) * mx + u * u * x1, py = (1 - u) ** 2 * y0 + 2 * u * (1 - u) * my + u * u * y1; g.fillStyle = C.hot; g.beginPath(); g.arc(px, py, 6, 0, TAU); g.fill();
+    const ex = .15 * x0 + .5 * mx + .35 * x1 + 0, ey = .15 * y0 + .5 * my + .35 * y1; label(g, String(k + 1), ex, ey, {size: 12, weight: 700, color: '#fff'}); g.fillStyle = C.hot; g.beginPath(); g.arc(ex, ey, 10, 0, TAU); g.fill(); label(g, String(k + 1), ex, ey, {size: 12, weight: 700, color: '#fff'}); });
+  SP.forEach((s, i) => { const [x, y] = spherePos(i), on = links.some(l => l[0] === s[0] || l[1] === s[0]); g.fillStyle = s[2]; g.globalAlpha = on ? 1 : .35; g.beginPath(); g.arc(x, y, 38, 0, TAU); g.fill(); g.globalAlpha = 1; label(g, s[1], x, y, {size: 15, weight: 700, color: '#fff'}); });
+  const rx = S.w * .78; label(g, EV[st.ev][0], rx, S.h * .16, {size: 20, weight: 700}); links.forEach(([a, b, d], k) => { const n = c => SP.find(s => s[0] === c)[1]; label(g, `${k + 1}. ${n(a)} → ${n(b)}`, rx, S.h * .28 + k * 62, {size: 13, weight: 700, color: C.hot}); const ws = d.length > 20 ? [d.slice(0, 20), d.slice(20)] : [d]; ws.forEach((w, j) => label(g, w, rx, S.h * .28 + k * 62 + 20 + j * 16, {size: 11})); }); }
+/* ===== 순환 ===== */
+const WFLOW = [['바다 증발', 425, 'ocean', 'air'], ['바다 강수', 385, 'air', 'ocean'], ['육지 증발산', 71, 'land', 'air2'], ['육지 강수', 111, 'air2', 'land'], ['수증기 이동', 40, 'air', 'air2'], ['하천·지하수 유출', 40, 'land', 'ocean']];
+function drawWater(){ const g = S.g, W = S.w, H = S.h, sea = H * .7, t = st.t;
+  const sky = g.createLinearGradient(0, 0, 0, sea); sky.addColorStop(0, '#cfe8f8'); sky.addColorStop(1, '#eef7fc'); g.fillStyle = sky; g.fillRect(0, 0, W, sea); g.fillStyle = '#4a8fd0'; g.fillRect(0, sea, W * .5, H - sea); g.fillStyle = '#a0805a'; g.beginPath(); g.moveTo(W * .48, H); g.lineTo(W * .5, sea); g.lineTo(W * .7, sea - 40); g.lineTo(W * .85, sea - 90); g.lineTo(W, sea - 60); g.lineTo(W, H); g.fill();
+  g.fillStyle = '#ffd34d'; g.beginPath(); g.arc(W * .08, H * .12, 22, 0, TAU); g.fill(); [[W * .25, H * .14], [W * .72, H * .12]].forEach(([x, y]) => { g.fillStyle = '#fff'; [0, 22, 44].forEach(d => { g.beginPath(); g.arc(x + d - 22, y + (d === 22 ? -8 : 0), 22, 0, TAU); g.fill(); }); });
+  const A = (x0, y0, x1, y1, v, n, col) => { arrow(g, x0, y0, x1, y1, col, 2 + v / 60); for (let k = 0; k < 3; k++) { const u = (t * .4 + k / 3) % 1; g.fillStyle = col; g.beginPath(); g.arc(x0 + (x1 - x0) * u, y0 + (y1 - y0) * u, 3, 0, TAU); g.fill(); } label(g, `${n} ${v}`, (x0 + x1) / 2 + 8, (y0 + y1) / 2, {size: 11, weight: 700, align: 'left', color: '#1d3a58'}); };
+  A(W * .18, sea - 10, W * .18, H * .22, 425, '증발', '#4a8fd0'); A(W * .32, H * .22, W * .32, sea - 10, 385, '강수', '#2f6fd0'); A(W * .36, H * .13, W * .62, H * .13, 40, '수증기 이동', '#7a9ab8'); A(W * .82, H * .2, W * .82, sea - 100, 111, '강수', '#2f6fd0'); A(W * .66, sea - 50, W * .66, H * .24, 71, '증발산', '#4a8fd0'); A(W * .78, sea - 60, W * .52, sea + 10, 40, '유출', '#3a6aa0');
+  label(g, '단위: 천 km³/년', W - 10, H - 12, {size: 11, color: '#fff', align: 'right'}); label(g, '바다: 증발 425 − 강수 385 = 40 → 육지로 이동한 만큼 하천으로 돌아옴', W * .25, H - 14, {size: 11, color: '#fff'}); }
+function carbonRun(){ // 100년 모형: 대기 탄소(GtC), 바다 흡수 25%, 육지 흡수 25%
+  const out = []; let atm = 870; for (let y = 0; y <= 100; y++) { out.push([y, atm / 2.13]); const emit = st.fos * .55 + st.forest; atm += emit * .5; } return out; }
+function drawCarbon(){ const g = S.g, W = S.w, H = S.h, t = st.t;
+  const box = (x, y, w, h, n, v, col) => { g.fillStyle = col; g.globalAlpha = .2; g.fillRect(x, y, w, h); g.globalAlpha = 1; g.strokeStyle = col; g.lineWidth = 2; g.strokeRect(x, y, w, h); label(g, n, x + w / 2, y + h / 2 - 9, {size: 14, weight: 700}); label(g, v, x + w / 2, y + h / 2 + 11, {size: 11, color: C.muted}); return [x, y, w, h]; };
+  const atm = box(W * .3, H * .06, W * .4, H * .16, '기권 (대기)', '이산화 탄소 · 약 870 GtC', '#8ecdf2'), bio = box(W * .04, H * .42, W * .26, H * .18, '생물권', '생물 · 토양 약 2,000 GtC', '#5fb37a'), oc = box(W * .7, H * .42, W * .26, H * .18, '수권 (바다)', '탄산 이온 등 약 38,000 GtC', '#4a8fd0'), geo = box(W * .3, H * .76, W * .4, H * .17, '지권', '석회암·화석 연료 수천만 GtC', '#a0805a');
+  const F = (x0, y0, x1, y1, n, col, w) => { arrow(g, x0, y0, x1, y1, col, w); const u = (t * .5) % 1; g.fillStyle = col; g.beginPath(); g.arc(x0 + (x1 - x0) * u, y0 + (y1 - y0) * u, 4, 0, TAU); g.fill(); label(g, n, (x0 + x1) / 2, (y0 + y1) / 2 - 10, {size: 11, weight: 700, color: col}); };
+  F(W * .2, H * .42, W * .33, H * .22, '호흡·분해', '#5fb37a', 2); F(W * .38, H * .22, W * .26, H * .42, '광합성', '#2e7d4f', 2); F(W * .62, H * .22, W * .76, H * .42, '용해', '#2f6fd0', 2); F(W * .82, H * .42, W * .66, H * .22, '방출', '#4a8fd0', 2);
+  F(W * .45, H * .76, W * .45, H * .22, `화석 연료 연소 (${st.fos})`, '#d0533f', 1 + st.fos / 4); F(W * .56, H * .76, W * .56, H * .22, '화산 활동', '#8a5a3a', 1.5); F(W * .82, H * .6, W * .66, H * .8, '탄산염 퇴적', '#3a6aa0', 1.5); if (st.forest > 0) F(W * .25, H * .42, W * .3, H * .3, `삼림 파괴 (${st.forest})`, '#b0602a', 1 + st.forest);
+  label(g, '사람의 활동 → 지권(화석 연료)의 탄소가 기권으로 빠르게 이동', W / 2, H - 6, {size: 11, color: C.hot}); }
+/* ===== 판 구조론 ===== */
+function drawPlate(){ const g = S.g, W = S.w, H = S.h, t = st.t, sl = H * .38, k = st.pl, sh = (t * 8) % 40;
+  g.fillStyle = '#e8f3fb'; g.fillRect(0, 0, W, sl); g.fillStyle = '#e8a060'; g.fillRect(0, H * .72, W, H * .28); label(g, '맨틀 (연약권)', W * .1, H * .9, {size: 11, color: '#7a3a1a', align: 'left'});
+  // 맨틀 대류 화살표
+  const conv = (cx, dir) => { for (let i = 0; i < 2; i++) { g.strokeStyle = 'rgba(160,60,20,.5)'; g.lineWidth = 2.5; g.beginPath(); g.ellipse(cx + (i ? 1 : -1) * W * .18 * dir, H * .86, W * .14, H * .07, 0, 0, TAU); g.stroke(); } };
+  if (k === 'div') { conv(W / 2, 1); g.fillStyle = '#4a8fd0'; g.fillRect(0, sl - 30, W, 30); [[-1, '#8a8f99'], [1, '#8a8f99']].forEach(([s]) => { const x0 = W / 2 + s * 6; g.fillStyle = '#7a7f8c'; g.beginPath(); g.moveTo(x0, sl - 18); g.lineTo(x0 + s * W * .5, sl + 10); g.lineTo(x0 + s * W * .5, H * .72); g.lineTo(x0, H * .72); g.closePath(); g.fill(); for (let x = 30 - sh; x < W * .5; x += 40) arrow(g, W / 2 + s * x, sl + 30, W / 2 + s * (x + 22), sl + 30, '#fff', 2); }); g.fillStyle = '#e04a3c'; for (let i = 0; i < 6; i++) { const y = H * .72 - ((t * 30 + i * 25) % (H * .34)); g.globalAlpha = .7; g.beginPath(); g.arc(W / 2 + Math.sin(i + t) * 4, y, 6, 0, TAU); g.fill(); } g.globalAlpha = 1; label(g, '해령 (마그마 상승 → 새로운 해양 지각 생성)', W / 2, sl - 46, {size: 13, weight: 700}); label(g, '예: 대서양 중앙 해령, 동아프리카 열곡대', W / 2, 18, {size: 12, color: C.muted}); }
+  else if (k === 'sub') { conv(W * .55, 1); g.fillStyle = '#4a8fd0'; g.fillRect(0, sl - 30, W * .55, 30); g.fillStyle = '#7a7f8c'; g.beginPath(); g.moveTo(0, sl); g.lineTo(W * .52, sl); g.lineTo(W * .78, H * .9); g.lineTo(W * .7, H * .95); g.lineTo(W * .46, sl + 40); g.lineTo(0, sl + 40); g.fill(); g.fillStyle = '#b0906a'; g.beginPath(); g.moveTo(W * .53, sl); g.lineTo(W * .6, sl - 20); g.lineTo(W * .72, sl - 60); g.lineTo(W * .78, sl - 40); g.lineTo(W, sl - 30); g.lineTo(W, H * .72); g.lineTo(W * .74, H * .72); g.closePath(); g.fill();
+    for (let x = 20 - sh; x < W * .45; x += 40) arrow(g, x, sl + 20, x + 22, sl + 20, '#fff', 2); label(g, '해구', W * .52, sl + 14, {size: 12, weight: 700}); g.fillStyle = '#e04a3c'; g.beginPath(); g.moveTo(W * .7, sl - 58); g.lineTo(W * .72, sl - 60); g.lineTo(W * .74, sl - 58); g.fill(); for (let i = 0; i < 4; i++) { const y = H * .7 - ((t * 25 + i * 30) % (H * .3)); g.globalAlpha = .7; g.beginPath(); g.arc(W * .72 + Math.sin(i) * 6, y, 5, 0, TAU); g.fill(); } g.globalAlpha = 1; label(g, '화산', W * .72, sl - 76, {size: 12, weight: 700});
+    for (let i = 0; i < 7; i++) { const u = i / 6, x = W * (.52 + u * .24), y = sl + (H * .9 - sl) * u; g.fillStyle = C.hot; g.beginPath(); g.arc(x + 10, y, 4, 0, TAU); g.fill(); } label(g, '빨간 점: 지진 (깊어지는 진원)', W * .2, H * .6, {size: 11, color: C.hot}); label(g, '밀도가 큰 해양판이 대륙판 아래로 섭입 → 해구, 화산호, 깊은 지진', W / 2, 18, {size: 12, color: C.muted}); }
+  else if (k === 'col') { const lift = Math.min(60, 20 + t * 2) ; g.fillStyle = '#b0906a'; g.fillRect(0, sl - 10, W * .48, H * .72 - sl + 10); g.fillRect(W * .52, sl - 10, W * .48, H * .72 - sl + 10); g.fillStyle = '#9a7a54'; g.beginPath(); g.moveTo(W * .3, sl - 10); g.quadraticCurveTo(W * .5, sl - 10 - lift * 2.2, W * .7, sl - 10); g.fill();
+    for (let i = 0; i < 5; i++) { g.strokeStyle = 'rgba(80,60,40,.6)'; g.lineWidth = 2; g.beginPath(); for (let x = W * .32; x <= W * .68; x += 4) g.lineTo(x, sl + i * 18 - Math.sin((x - W * .32) / (W * .36) * Math.PI) * lift * (1.6 - i * .2) + Math.sin(x / 12) * 6); g.stroke(); }
+    arrow(g, W * .12, sl + 40, W * .3, sl + 40, '#fff', 3); arrow(g, W * .88, sl + 40, W * .7, sl + 40, '#fff', 3); label(g, '습곡 산맥 (예: 히말라야산맥)', W / 2, sl - 20 - lift * 2.2, {size: 13, weight: 700}); label(g, '대륙판과 대륙판이 충돌 → 지층이 휘어지며 솟아오름 (화산 거의 없음)', W / 2, 18, {size: 12, color: C.muted}); }
+  else { g.fillStyle = '#7a7f8c'; g.fillRect(0, sl, W, H * .72 - sl); const off = (t * 10) % 60; g.fillStyle = '#e8f3fb'; g.fillRect(0, 0, W, sl); // 평면도
+    const y0 = H * .05, h = sl - H * .1; g.fillStyle = '#9aa6b8'; g.fillRect(W * .1, y0, W * .8, h); g.strokeStyle = C.hot; g.lineWidth = 3; g.beginPath(); g.moveTo(W * .1, y0 + h / 2); g.lineTo(W * .9, y0 + h / 2); g.stroke();
+    for (let x = W * .12 + off; x < W * .88; x += 60) arrow(g, x, y0 + h * .25, x + 26, y0 + h * .25, '#fff', 2); for (let x = W * .88 - off; x > W * .12; x -= 60) arrow(g, x, y0 + h * .75, x - 26, y0 + h * .75, '#fff', 2);
+    for (let i = 0; i < 8; i++) { g.fillStyle = C.hot; g.beginPath(); g.arc(W * (.15 + i * .1), y0 + h / 2, 4, 0, TAU); g.fill(); } label(g, '변환 단층 (위에서 본 모습) · 예: 미국 산안드레아스 단층', W / 2, y0 + h + 14, {size: 12, weight: 700}); label(g, '판이 서로 어긋나며 이동 → 지각 생성·소멸 없음, 얕은 지진 빈발', W / 2, H * .55, {size: 12, color: '#fff'}); } }
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'sphere') { const m = axes(G, {x: [0, 5, 1, ''], y: [0, 100, 20, '태양계 에너지 비율 (%)']}); [['태양 에너지', 99.98], ['지구 내부', .013], ['조력', .002]].forEach(([n, v], i) => { const x = m.X(i * 1.6 + .8); g.fillStyle = [C.hot, '#a0805a', C.phy][i]; g.fillRect(x - 24, m.Y(Math.max(v, 1)), 48, m.Y(0) - m.Y(Math.max(v, 1))); label(g, n, x, m.Y(0) + 12, {size: 11}); label(g, v + ' %', x, m.Y(Math.max(v, 1)) - 10, {size: 11, weight: 700}); }); label(g, '지구시스템 에너지원의 상대적 크기', m.X(3.4), m.Y(70), {size: 11, color: C.muted}); }
+  else if (st.mode === 'cycle') { if (st.cy === 'water') { const m = axes(G, {x: [0, 6, 1, ''], y: [0, 450, 100, '천 km³/년']}); WFLOW.forEach(([n, v], i) => { const x = m.X(i + .5); g.fillStyle = i < 2 ? C.phy : i < 4 ? '#a0805a' : C.muted; g.fillRect(x - 18, m.Y(v), 36, m.Y(0) - m.Y(v)); label(g, n.split(' ')[0], x, m.Y(0) + 12, {size: 9}); label(g, n.split(' ').slice(1).join(' '), x, m.Y(0) + 24, {size: 9}); label(g, v, x, m.Y(v) - 9, {size: 10, weight: 700}); }); }
+    else { const m = axes(G, {x: [0, 100, 20, '경과 시간 (년)'], y: [400, 1000, 100, '대기 CO₂ (ppm, 모형)']}); line(G, carbonRun().map(([y, v]) => [y, v]), m, C.hot, 2.5); label(g, '바다·숲이 배출량의 약 절반을 흡수한다고 가정', m.X(40), m.Y(950), {size: 10, color: C.muted}); } }
+  else { const m = axes(G, {x: [0, 700, 100, '진원 깊이 (km)'], y: [0, 10, 2, '지진 발생 (상대 빈도)']}); const prof = {div: d => d < 30 ? 9 : 0, sub: d => 6 * Math.exp(-d / 150) + 1.2 * (d < 680), col: d => d < 80 ? 7 : d < 200 ? 2 : 0, tr: d => d < 25 ? 9 : 0}[st.pl]; const P = []; for (let d = 0; d <= 700; d += 5) P.push([d, prof(d)]); line(G, P, m, C.hot, 2.5); label(g, {div: '얕은 지진만', sub: '얕은 곳~깊은 곳(약 700 km)까지', col: '얕은~중간 깊이', tr: '얕은 지진만'}[st.pl], m.X(400), m.Y(8), {size: 11, color: C.muted}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
+  if (st.mode === 'sphere') { s.innerHTML = `<div><b>${EV[st.ev][0]}</b><span>사건</span></div><div><b>${new Set(EV[st.ev][1].flatMap(l => [l[0], l[1]])).size}개</b><span>관련 권역</span></div>`; $('explain').innerHTML = '<b>지구시스템</b>은 지권, 수권, 기권, 생물권, 외권이 서로 영향을 주고받는 하나의 시스템이에요. 한 권역의 변화는 <b>물질 순환과 에너지 흐름</b>을 통해 다른 권역에 영향을 줘요.'; $('tip').textContent = '권역 사이의 상호작용으로 물질은 순환하고, 에너지는 흐르며(태양 → 지구 → 우주) 형태가 바뀌어요.';
+    th.innerHTML = '<tr><th>권역</th><th>구성</th></tr>'; tb.innerHTML = [['지권', '지각·맨틀·핵 (암석, 토양)'], ['수권', '해수(약 97 %), 빙하, 지하수, 강·호수'], ['기권', '지표~약 1000 km의 대기 (대류권·성층권·중간권·열권)'], ['생물권', '지구에 사는 모든 생물'], ['외권', '기권 바깥의 우주 공간']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = '지구시스템의 구성 요소'; $('gTitle').textContent = '지구시스템의 에너지원'; $('gSub').textContent = ''; }
+  else if (st.mode === 'cycle') { const run = carbonRun(); s.innerHTML = st.cy === 'water' ? '<div><b>425 = 385 + 40</b><span>바다의 물 수지</span></div><div><b>111 = 71 + 40</b><span>육지의 물 수지</span></div>' : `<div><b>${Math.round(run[0][1])} → ${Math.round(run[100][1])} ppm</b><span>100년 뒤 대기 CO₂ (모형)</span></div>`;
+    $('explain').innerHTML = st.cy === 'water' ? '<b>물의 순환</b>: 태양 에너지로 증발한 물이 비·눈으로 내리고 하천과 지하수로 흐르며 권역 사이를 순환해요. 각 권역에 들어오는 양과 나가는 양이 같아 <b>물의 총량은 일정</b>해요.' : '<b>탄소의 순환</b>: 탄소는 기권(CO₂), 생물권(유기물), 수권(탄산 이온), 지권(석회암·화석 연료) 사이를 순환해요. 화석 연료 사용은 수백만 년 동안 지권에 저장된 탄소를 짧은 시간에 기권으로 옮겨요.'; $('tip').textContent = st.cy === 'water' ? '물의 순환은 지표의 에너지를 재분배하고(증발열·응결열), 지형을 변화시켜요.' : '화석 연료 사용과 삼림 파괴를 0으로 줄여 보세요. 기권의 탄소가 어떻게 달라지나요?';
+    th.innerHTML = st.cy === 'water' ? '<tr><th>흐름</th><th>양 (천 km³/년)</th></tr>' : '<tr><th>저장소</th><th>탄소의 형태</th></tr>'; tb.innerHTML = st.cy === 'water' ? WFLOW.map(f => `<tr><td>${f[0]}</td><td>${f[1]}</td></tr>`).join('') : [['기권', '이산화 탄소, 메테인'], ['수권', '탄산 이온, 탄산수소 이온'], ['생물권', '유기물 (탄수화물, 단백질 등)'], ['지권', '석회암(탄산 칼슘), 화석 연료']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = st.cy === 'water' ? '물의 순환량' : '탄소의 저장 형태'; $('gTitle').textContent = st.cy === 'water' ? '물의 이동량 비교' : '대기 CO₂ 농도 변화 (모형)'; $('gSub').textContent = ''; }
+  else { const D = {div: ['발산형', '해령, 열곡대', '천발 지진, 화산'], sub: ['수렴형(섭입)', '해구, 호상 열도, 습곡 산맥', '천발~심발 지진, 화산'], col: ['수렴형(충돌)', '습곡 산맥', '천발~중발 지진'], tr: ['보존형', '변환 단층', '천발 지진']}[st.pl]; s.innerHTML = `<div><b>${D[0]}</b><span>경계</span></div><div><b>${D[1]}</b><span>지형</span></div><div><b>${D[2]}</b><span>지각 변동</span></div>`;
+    $('explain').innerHTML = '<b>판 구조론</b>: 지구 표면은 10여 개의 <b>판</b>(암석권)으로 나뉘어 있고, 판은 아래의 <b>맨틀 대류</b>에 의해 1년에 수 cm씩 움직여요. 판의 경계에서 지진·화산 활동이 활발하고 다양한 지형이 만들어져요.'; $('tip').textContent = '우리나라 주변에서는 태평양판이 유라시아판 아래로 섭입해 일본에 해구와 화산호가 발달했어요.';
+    th.innerHTML = '<tr><th>경계</th><th>지형</th><th>예</th></tr>'; tb.innerHTML = [['발산형', '해령, 열곡대', '대서양 중앙 해령, 동아프리카 열곡대'], ['수렴형(섭입)', '해구, 화산호', '일본 해구, 안데스산맥'], ['수렴형(충돌)', '습곡 산맥', '히말라야산맥'], ['보존형', '변환 단층', '산안드레아스 단층']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); $('tTitle').textContent = '판 경계와 지형'; $('gTitle').textContent = '진원 깊이에 따른 지진 분포 (모형)'; $('gSub').textContent = ''; } }
+Kit.seg($('evSeg'), 'ev', v => { st.ev = v; render(); })('volcano');
+Kit.seg($('cySeg'), 'cy', v => { st.cy = v; $('fosF').style.display = $('forF').style.display = v === 'carbon' ? '' : 'none'; render(); })('water');
+$('fos').oninput = e => { st.fos = +e.target.value; $('fosOut').textContent = st.fos; render(); }; $('forest').oninput = e => { st.forest = +e.target.value; $('forOut').textContent = st.forest; render(); };
+Kit.seg($('plSeg'), 'pl', v => { st.pl = v; st.t = 0; render(); })('div');
+Kit.tabs(m => { st.mode = m; if (m === 'cycle') $('cySeg').querySelector(`[data-cy="${st.cy}"]`).click(); render(); }, ['sphere', 'cycle', 'plate']);
+Kit.loop(dt => { st.t += dt; }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); if (st.mode === 'sphere') drawSphere(); else if (st.mode === 'cycle') (st.cy === 'water' ? drawWater : drawCarbon)(); else drawPlate(); drawGraph(); }, $('play'));
+})();
+</script>
+</body>
+</html>
