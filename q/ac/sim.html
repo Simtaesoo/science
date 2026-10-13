@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>자기장과 교류 실험실 · 전자기와 양자</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="전자기와 양자|03 자기장과 교류" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>전자기와 양자 · 03 자기장과 교류 <span class="code">전자기와 양자 Ⅰ</span></div>
+      <h1>자기장과 교류 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="lorentz">1. 자기장 속 전하 (질량 분석기)</button>
+      <button type="button" data-mode="rlc">2. 교류와 RLC 공명 (라디오 맞추기)</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="실험 장치"></canvas></div>
+      <div class="controls">
+        <label class="field" data-only="lorentz" for="pt">입자 <select id="pt"><option value="p">양성자 (1u, +e)</option><option value="d">중수소 핵 (2u, +e)</option><option value="a">알파 입자 (4u, +2e)</option><option value="ap">반양성자 (1u, −e)</option></select></label>
+        <label class="field" data-only="lorentz" for="lv">속력 <input type="range" id="lv" min="1" max="5" step="0.5" value="2"><output id="lvOut">2.0×10⁶ m/s</output></label>
+        <label class="field" data-only="lorentz" for="lb">자기장 <input type="range" id="lb" min="50" max="500" step="5" value="200"><output id="lbOut">200 mT</output></label>
+        <button class="btn primary" type="button" id="shoot" data-only="lorentz">입자 발사</button>
+        <button class="btn" type="button" id="newDet" data-only="lorentz">검출기 옮기기</button>
+        <label class="field" data-only="rlc" for="ff">진동수 <input type="range" id="ff" min="1" max="3" step="0.01" value="2"><output id="ffOut">100 Hz</output></label>
+        <label class="field" data-only="rlc" for="rR">저항 <input type="range" id="rR" min="5" max="100" step="5" value="20"><output id="rROut">20 Ω</output></label>
+        <label class="field" data-only="rlc" for="rL">코일 <input type="range" id="rL" min="10" max="200" step="10" value="100"><output id="rLOut">100 mH</output></label>
+        <label class="field" data-only="rlc" for="rC">축전기 <input type="range" id="rC" min="1" max="50" step="0.1" value="10"><output id="rCOut">10.0 μF</output></label>
+        <button class="btn" type="button" id="station" data-only="rlc">새 방송국</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>자기장 속에서 원운동하는 전하의 속력은 왜 변하지 않을까?</summary><p>로런츠 힘 F = qvB는 항상 속도에 수직이라 일을 하지 않아요. 그래서 운동 에너지(속력)는 그대로이고 방향만 바뀌어 등속 원운동을 해요.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>질량 분석기로 동위 원소를 구별할 수 있는 까닭은?</summary><p>같은 속력·전하라면 궤도 반지름 r = mv/qB가 질량에 비례해요. 질량이 조금만 달라도 떨어지는 위치가 달라져서 동위 원소를 구별할 수 있어요.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>라디오 다이얼을 돌리면 무엇이 바뀌는 걸까?</summary><p>수신 회로의 가변 축전기 전기 용량(또는 코일)이 바뀌어 공명 진동수 f₀ = 1/(2π√LC)가 달라져요. 공명 진동수와 같은 방송 전파만 큰 전류를 만들어 그 방송이 들려요.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="u = 1.66×10⁻²⁷ kg, e = 1.6×10⁻¹⁹ C. 교류 전원은 실횻값 10 V. 라디오 맞추기는 실제 방송 주파수 대신 낮은 진동수로 나타낸 모형."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2, U = 1.66e-27, E = 1.6e-19;
+const PT = {p: [1, 1, '양성자'], d: [2, 1, '중수소 핵'], a: [4, 2, '알파 입자'], ap: [1, -1, '반양성자']};
+const st = {mode: 'lorentz', pt: 'p', v: 2, B: 200, det: .2, shots: [], fly: null, hits: 0, tries: 0, msg: '', f: 100, R: 20, L: 100, C: 10, stn: 300, t: 0};
+/* ===== 1. 로런츠 힘 ===== */
+const rad = () => { const [m, q] = PT[st.pt]; return m * U * st.v * 1e6 / (Math.abs(q) * E * st.B * 1e-3); };
+function newDet(){ st.det = Math.round((.08 + Math.random() * .3) * 100) / 100; st.msg = ''; }
+function shoot(){ const [m, q] = PT[st.pt]; st.fly = {r: rad(), s: Math.sign(q), th: 0, pts: []}; }
+function stepL(dt){ const f = st.fly; if (!f) return; f.th += dt * 2.2; if (f.th >= Math.PI || f.th > 0 && f.r * 2 > .62) { const done = Math.min(f.th, Math.PI); st.tries++; const land = 2 * f.r * f.s, ok = f.s > 0 && Math.abs(land - st.det) <= .005; if (ok) st.hits++; st.msg = f.s < 0 ? '음전하는 반대 방향(아래)으로 휘어요!' : ok ? `명중! 궤도 지름 ${(land * 100).toFixed(1)} cm` : `빗나감: ${(land * 100).toFixed(1)} cm 지점 (검출기 ${(st.det * 100).toFixed(0)} cm)`; st.shots.push({...f, th: done}); if (st.shots.length > 5) st.shots.shift(); st.fly = null; render(); } }
+function drawL(){ const g = S.g, W = S.w, H = S.h, wx = W * .2, y0 = H * .82, sc = (H * .75) / .45, X = x => wx + x * sc, Y = y => y0 - y * sc;
+  g.fillStyle = 'rgba(47,111,208,.06)'; g.fillRect(wx, 0, W - wx, H); for (let x = wx + 20; x < W; x += 34) for (let y = 16; y < H; y += 34) label(g, '⊗', x, y, {size: 12, color: 'rgba(47,111,208,.28)'}); label(g, `자기장 B = ${st.B} mT (종이면에 수직으로 들어감)`, W - 12, H - 10, {size: 11, color: C.phy, align: 'right', weight: 700});
+  g.fillStyle = C.ink; g.fillRect(wx - 6, 0, 6, H); g.fillStyle = C.surface; g.fillRect(wx - 7, y0 - 5, 8, 10);
+  // 검출기
+  g.fillStyle = C.bio; g.fillRect(wx - 16, Y(st.det) - 4, 12, 8); label(g, `검출기 ${(st.det * 100).toFixed(0)} cm`, wx - 20, Y(st.det), {size: 11, weight: 700, color: C.bio, align: 'right'});
+  for (let c = 5; c <= 45; c += 5) { g.strokeStyle = C.grid; g.beginPath(); g.moveTo(wx - 6, Y(c / 100)); g.lineTo(wx - 12, Y(c / 100)); g.stroke(); }
+  // 가속기
+  g.fillStyle = '#777'; g.fillRect(8, y0 - 10, wx - 30, 20); label(g, '이온 발사기', (wx - 22) / 2 + 4, y0 + 22, {size: 10, color: C.muted}); arrow(g, wx - 40, y0, wx - 6, y0, C.hot, 2);
+  const path = (f, th, col, w) => { g.strokeStyle = col; g.lineWidth = w; g.beginPath(); for (let a = 0; a <= th + 1e-9; a += .02) { const x = f.r * Math.sin(a), y = f.s * f.r * (1 - Math.cos(a)); a ? g.lineTo(X(x), Y(y)) : g.moveTo(X(x), Y(y)); } g.stroke(); };
+  st.shots.forEach(f => path(f, f.th, 'rgba(120,130,150,.45)', 1.5));
+  if (st.fly) { const f = st.fly; path(f, f.th, C.hot, 2.5); const x = f.r * Math.sin(f.th), y = f.s * f.r * (1 - Math.cos(f.th)); g.fillStyle = C.hot; g.beginPath(); g.arc(X(x), Y(y), 5, 0, TAU); g.fill(); const vx = Math.cos(f.th), vy = f.s * Math.sin(f.th); arrow(g, X(x), Y(y), X(x) + vx * 30, Y(y) - vy * 30, C.ink, 2); arrow(g, X(x), Y(y), X(x) - Math.sin(f.th) * 26 * 1, Y(y) - f.s * Math.cos(f.th) * 26, C.accent, 2); }
+  label(g, `🎯 ${st.hits} / ${st.tries}`, W - 12, 18, {size: 13, weight: 700, align: 'right'}); if (st.msg) label(g, st.msg, (wx + W) / 2, 40, {size: 14, weight: 700, color: st.msg.startsWith('명중') ? C.bio : C.hot});
+  label(g, '검정 화살표: 속도 · 주황: 로런츠 힘 (항상 중심 방향)', (wx + W) / 2, 18, {size: 10, color: C.muted}); }
+/* ===== 2. RLC ===== */
+const Vrms = 10, XL = f => TAU * f * st.L * 1e-3, XC = f => 1 / (TAU * f * st.C * 1e-6), Z = f => Math.hypot(st.R, XL(f) - XC(f)), Irms = f => Vrms / Z(f), f0 = () => 1 / (TAU * Math.sqrt(st.L * 1e-3 * st.C * 1e-6)), phi = f => Math.atan2(XL(f) - XC(f), st.R);
+function newStation(){ st.stn = Math.round(60 + Math.random() * 500); }
+function drawR(){ const g = S.g, W = S.w, H = S.h, f = st.f, I = Irms(f), ph = phi(f), t = st.t, w = TAU * .6, sig = Math.min(1, Irms(st.stn) / (Vrms / st.R)), tuned = Math.abs(f0() - st.stn) / st.stn < .02;
+  // 라디오
+  const rx = W * .03, ry = H * .05, rw = W * .44, rh = H * .36; g.fillStyle = '#3b3f46'; g.beginPath(); g.roundRect ? g.roundRect(rx, ry, rw, rh, 12) : g.rect(rx, ry, rw, rh); g.fill(); g.fillStyle = '#d9c9a3'; g.fillRect(rx + 14, ry + 14, rw - 28, 44); for (let k = 0; k <= 10; k++) { const fx = rx + 20 + k * (rw - 40) / 10; g.fillStyle = '#5a4b32'; g.fillRect(fx, ry + 44, 1, 10); label(g, String(Math.round(60 + k * 50)), fx, ry + 24, {size: 8, color: '#5a4b32'}); }
+  const nx = rx + 20 + Math.max(0, Math.min(1, (f0() - 60) / 500)) * (rw - 40); g.fillStyle = C.hot; g.fillRect(nx - 1.5, ry + 16, 3, 40); const sx = rx + 20 + (st.stn - 60) / 500 * (rw - 40); label(g, '▼', sx, ry + 66, {size: 12, color: '#f2b636'});
+  label(g, `방송국 ${st.stn} Hz`, rx + rw / 2, ry + 82, {size: 12, weight: 700, color: '#fff'}); g.fillStyle = '#222'; g.fillRect(rx + 14, ry + 96, rw - 28, rh - 110); g.fillStyle = tuned ? '#5be08a' : '#f2b636'; g.fillRect(rx + 16, ry + 98, (rw - 32) * sig, rh - 114); label(g, tuned ? '♪ 깨끗하게 들려요! 공명' : sig > .3 ? '지지직… 조금 들려요' : '잡음뿐… C나 L을 바꿔 공명 진동수를 맞추세요', rx + rw / 2, ry + rh + 14, {size: 11, weight: 700, color: tuned ? C.bio : C.muted});
+  // 위상자
+  const px = W * .76, py = H * .25, sc = Math.min(W * .11, H * .17) / Vrms * 1.4; g.strokeStyle = C.grid; g.beginPath(); g.arc(px, py, Vrms * sc, 0, TAU); g.stroke(); const a = w * t; arrow(g, px, py, px + Math.cos(a) * Vrms * sc, py - Math.sin(a) * Vrms * sc, C.accent, 2.5); const Il = Math.min(1, I / (Vrms / st.R)) * Vrms * sc; arrow(g, px, py, px + Math.cos(a - ph) * Il, py - Math.sin(a - ph) * Il, C.hot, 2.5); label(g, '위상자: 파랑 전압 · 빨강 전류', px, py + Vrms * sc + 14, {size: 10, color: C.muted}); label(g, ph > .05 ? '전류가 전압보다 늦다 (유도성)' : ph < -.05 ? '전류가 전압보다 앞선다 (용량성)' : '전압과 전류의 위상이 같다', px, py + Vrms * sc + 30, {size: 11, weight: 700});
+  // 시간 파형
+  const gx = W * .05, gw = W * .9, gy = H * .76, gh = H * .14; g.strokeStyle = C.grid; g.beginPath(); g.moveTo(gx, gy); g.lineTo(gx + gw, gy); g.stroke(); [[0, C.accent, 1], [ph, C.hot, Math.min(1, I / (Vrms / st.R))]].forEach(([p, c, amp]) => { g.strokeStyle = c; g.lineWidth = 2; g.beginPath(); for (let i = 0; i <= 200; i++) { const x = gx + gw * i / 200, y = gy - Math.sin(w * t - i / 200 * TAU * 2 - p) * gh * amp; i ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); }); label(g, '시간 파형 (모양만 나타냄)', gx, gy - gh - 8, {size: 10, color: C.muted, align: 'left'}); }
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'lorentz') { const m = axes(G, {x: [50, 500, 50, '자기장 (mT)'], y: [0, 50, 10, '궤도 지름 2r (cm)']}); Object.entries(PT).filter(([k]) => k !== 'ap').forEach(([k, [mm, q]], i) => { const P = []; for (let B = 50; B <= 500; B += 5) P.push([B, Math.min(50, 2 * mm * U * st.v * 1e6 / (Math.abs(q) * E * B * 1e-3) * 100)]); line(G, P, m, [C.accent, C.bio, C.hot][i], k === st.pt ? 3 : 1.5); label(g, k === 'a' ? '알파 입자 (중수소와 겹침)' : PT[k][2], m.X(480), m.Y(P[P.length - 1][1]) - 8 - (k === 'a' ? 12 : 0), {size: 10, color: [C.accent, C.bio, C.hot][i], align: 'right'}); }); g.strokeStyle = C.muted; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(m.X(50), m.Y(st.det * 100)); g.lineTo(m.X(500), m.Y(st.det * 100)); g.stroke(); g.setLineDash([]); label(g, '검출기 위치', m.X(60), m.Y(st.det * 100) - 8, {size: 10, color: C.muted, align: 'left'}); }
+  else { const m = axes(G, {x: [1, 3, .5, 'log₁₀ 진동수 (10 Hz ~ 1000 Hz)'], y: [0, .5, .1, '전류 실횻값 (A)']}); const P = []; for (let x = 1; x <= 3; x += .005) P.push([x, Math.min(.5, Irms(Math.pow(10, x)))]); line(G, P, m, C.accent, 2.5); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(Math.log10(st.f)), m.Y(Math.min(.5, Irms(st.f))), 5, 0, TAU); g.fill(); g.strokeStyle = '#f2b636'; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(m.X(Math.log10(st.stn)), m.Y(0)); g.lineTo(m.X(Math.log10(st.stn)), m.Y(.5)); g.stroke(); g.setLineDash([]); label(g, `방송국 ${st.stn} Hz`, m.X(Math.log10(st.stn)) + 4, m.Y(.46), {size: 10, color: '#c98a00', align: 'left'}); label(g, `공명 f₀ = ${f0().toFixed(0)} Hz`, m.X(Math.log10(Math.min(990, Math.max(11, f0())))) + 8, m.Y(Math.min(.45, Irms(f0()) * .9)), {size: 10, weight: 700, align: 'left'}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody'), set = (gt, gs, tt) => { $('gTitle').textContent = gt; $('gSub').textContent = gs; $('tTitle').textContent = tt; };
+  if (st.mode === 'lorentz') { const r = rad(), [m, q] = PT[st.pt]; s.innerHTML = `<div><b>${(r * 100).toFixed(2)} cm</b><span>궤도 반지름 r = mv/qB</span></div><div><b>${(2 * r * 100).toFixed(1)} cm</b><span>도착 지점 (지름 2r)</span></div><div><b>${(Math.abs(q) * E * st.v * 1e6 * st.B * 1e-3).toExponential(2).replace(/e([-+])(\d+)/, (a, sg, d) => '×10' + (sg === '-' ? '⁻' : '') + [...d].map(c => '⁰¹²³⁴⁵⁶⁷⁸⁹'[c]).join(''))} N</b><span>로런츠 힘 qvB</span></div><div><b>${(TAU * m * U / (Math.abs(q) * E * st.B * 1e-3) * 1e9).toFixed(0)} ns</b><span>한 바퀴 주기 2πm/qB</span></div>`;
+    $('explain').innerHTML = '<b>로런츠 힘</b>: 자기장 속에서 움직이는 전하는 F = qvB의 힘을 속도와 자기장에 모두 수직인 방향으로 받아요. 이 힘이 구심력이 되어 등속 원운동: qvB = mv²/r → <b>r = mv/qB</b>. 주기 T = 2πm/qB는 속력과 무관해요(사이클로트론의 원리).'; $('tip').textContent = `🎯 게임: 검출기(${(st.det * 100).toFixed(0)} cm)에 입자를 넣어라! 지름 2r이 검출기 위치와 ±0.5 cm 안에 들어오면 명중. 계산: B = 2mv/(q·d). 중수소 핵과 알파 입자는 m/q가 같아 같은 궤도를 그려요.`;
+    th.innerHTML = '<tr><th>입자</th><th>질량</th><th>전하</th><th>지름 2r (cm)</th></tr>'; tb.innerHTML = Object.entries(PT).map(([k, [mm, q, n]]) => `<tr><td>${n}</td><td>${mm}u</td><td>${q > 0 ? '+' : '−'}${Math.abs(q)}e</td><td>${(2 * mm * U * st.v * 1e6 / (Math.abs(q) * E * st.B * 1e-3) * 100).toFixed(1)}${q < 0 ? ' (반대쪽)' : ''}</td></tr>`).join(''); set('자기장과 궤도 지름', `속력 ${st.v.toFixed(1)}×10⁶ m/s`, `입자별 궤도 (B = ${st.B} mT)`); }
+  else { const f = st.f; s.innerHTML = `<div><b>${XL(f).toFixed(1)} Ω</b><span>유도 리액턴스 X_L = 2πfL</span></div><div><b>${XC(f).toFixed(1)} Ω</b><span>용량 리액턴스 X_C = 1/2πfC</span></div><div><b>${Z(f).toFixed(1)} Ω</b><span>임피던스 Z</span></div><div><b>${(Irms(f) * 1000).toFixed(0)} mA</b><span>전류 실횻값</span></div><div><b>${f0().toFixed(1)} Hz</b><span>공명 진동수 1/2π√LC</span></div><div><b>${(phi(f) * 180 / Math.PI).toFixed(0)}°</b><span>전압에 대한 전류의 위상 지연</span></div>`;
+    $('explain').innerHTML = '<b>RLC 직렬 회로</b>: 코일은 진동수가 높을수록(X_L = 2πfL), 축전기는 진동수가 낮을수록(X_C = 1/2πfC) 전류를 방해해요. 임피던스 Z = √(R² + (X_L − X_C)²). X_L = X_C가 되는 <b>공명 진동수</b> f₀ = 1/(2π√LC)에서 Z = R로 최소가 되어 전류가 가장 커요.'; $('tip').textContent = `📻 게임: 방송국(${st.stn} Hz)을 깨끗하게 들으려면 C나 L을 조절해 공명 진동수를 ±2 % 안으로 맞추세요. 진동수 막대는 회로에 걸어 주는 교류의 진동수예요.`;
+    th.innerHTML = '<tr><th>진동수 (Hz)</th><th>X_L (Ω)</th><th>X_C (Ω)</th><th>전류 (mA)</th></tr>'; tb.innerHTML = [20, 50, Math.round(f0()), 300, 800].map(f => `<tr><td>${f}${f === Math.round(f0()) ? ' (≈f₀)' : ''}</td><td>${XL(f).toFixed(1)}</td><td>${XC(f).toFixed(1)}</td><td>${(Irms(f) * 1000).toFixed(0)}</td></tr>`).join(''); set('진동수와 전류 (공명 곡선)', `R = ${st.R} Ω, L = ${st.L} mH, C = ${st.C} μF`, '진동수에 따른 리액턴스와 전류'); } }
+const bind = (id, k, f, after) => { $(id).oninput = e => { st[k] = +e.target.value; $(id + 'Out').textContent = f(st[k]); if (after) after(); render(); }; };
+bind('lv', 'v', v => v.toFixed(1) + '×10⁶ m/s'); bind('lb', 'B', v => v + ' mT'); $('pt').onchange = e => { st.pt = e.target.value; render(); };
+$('shoot').onclick = () => { if (!st.fly) shoot(); }; $('newDet').onclick = () => { newDet(); render(); };
+$('ff').oninput = e => { st.f = Math.round(Math.pow(10, +e.target.value)); $('ffOut').textContent = st.f + ' Hz'; render(); };
+bind('rR', 'R', v => v + ' Ω'); bind('rL', 'L', v => v + ' mH'); bind('rC', 'C', v => v.toFixed(1) + ' μF'); $('station').onclick = () => { newStation(); render(); };
+newDet(); newStation(); Kit.tabs(m => { st.mode = m; render(); }, ['lorentz', 'rlc']);
+let k = 0; Kit.loop(dt => { st.t += dt; stepL(dt); }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); (st.mode === 'lorentz' ? drawL : drawR)(); drawGraph(); });
+})();
+</script>
+</body>
+</html>
