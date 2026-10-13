@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>분자 공방 · 중2 물질의 구성</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'molecule', title: '분자 공방', unit: '중2 · 11 물질의 구성', back: '../../index.html#g2', sim: 'sim.html#comp',
+  lead: '주문이 밀려드는 <b>분자 공방</b>! 주문표의 화학식·이름·모형을 보고 원자를 골라 분자를 조립하세요. 이온 주문이 오면 <b>전자를 더하거나 빼서</b> 이온을 만들어야 해요.',
+  howto: ['아래 <b>원자 상자</b>를 누르면 작업대에 원자가 올라가요. 작업대의 원자를 누르면 빠져요.', '이온 주문은 <b>e⁻ 얻기 / e⁻ 잃기</b> 버튼으로 전자 수를 조절하세요.', '<b>[완성]</b>을 누르면 가장 왼쪽(노란 테두리) 주문에 납품돼요. 주문표를 눌러 고를 수도 있어요.'],
+  options: [{key: 'time', label: '시간', choices: [[60, '60초'], [90, '90초'], [120, '120초']], def: 90}, {key: 'lv', label: '주문', choices: [['mol', '분자만'], ['all', '분자+이온']], def: 'all'}, {key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '<b>원소</b>는 물질을 이루는 기본 성분, <b>원자</b>는 물질을 이루는 기본 입자, <b>분자</b>는 원자가 결합해 물질의 성질을 나타내는 입자입니다. <b>화학식</b>은 원소 기호와 숫자로 분자를 구성하는 원자의 종류와 개수를 나타내요(H₂O: 수소 원자 2개 + 산소 원자 1개). 원자가 전자를 <b>잃으면 양이온</b>(Na⁺), <b>얻으면 음이온</b>(Cl⁻)이 됩니다.',
+  startLabel: '공방 열기'
+});
+const {S, sfx, toast} = app, D = Draw;
+const EL = {H: ['수소', '#f4f4f4', 1], C: ['탄소', '#3a3a3a', 6], N: ['질소', '#4d7fe0', 7], O: ['산소', '#e04a3c', 8], Cl: ['염소', '#4fbf5a', 17], Na: ['나트륨', '#a77be0', 11], Mg: ['마그네슘', '#6bd0a8', 12], K: ['칼륨', '#d08ee0', 19], Ca: ['칼슘', '#c0c0c0', 20]};
+const BINS = ['H', 'C', 'N', 'O', 'Cl', 'Na', 'Mg', 'K', 'Ca'];
+// 화학식, 이름, 구성, 전하
+const MOL = [['H₂', '수소', {H: 2}], ['O₂', '산소', {O: 2}], ['N₂', '질소', {N: 2}], ['H₂O', '물', {H: 2, O: 1}], ['CO₂', '이산화 탄소', {C: 1, O: 2}], ['CO', '일산화 탄소', {C: 1, O: 1}], ['NH₃', '암모니아', {N: 1, H: 3}], ['CH₄', '메테인', {C: 1, H: 4}], ['HCl', '염화 수소', {H: 1, Cl: 1}], ['H₂O₂', '과산화 수소', {H: 2, O: 2}], ['O₃', '오존', {O: 3}], ['Cl₂', '염소', {Cl: 2}]];
+const ION = [['Na⁺', '나트륨 이온', {Na: 1}, 1], ['K⁺', '칼륨 이온', {K: 1}, 1], ['Mg²⁺', '마그네슘 이온', {Mg: 1}, 2], ['Ca²⁺', '칼슘 이온', {Ca: 1}, 2], ['Cl⁻', '염화 이온', {Cl: 1}, -1], ['O²⁻', '산화 이온', {O: 1}, -2], ['H⁺', '수소 이온', {H: 1}, 1]];
+let orders, tray, dE, tLeft, spawnT, sel, ended, fly = [], ui = {}, served, missed, roundIdx = 0;
+const key = c => Object.keys(c).sort().map(k => k + c[k]).join('');
+app.onStart = o => { orders = []; tray = []; dE = 0; tLeft = o.time; spawnT = 0; sel = 0; ended = false; served = 0; missed = 0; fly = [];
+  ui.s = app.panel('공방 현황'); app.panel('도움말', '<p class="note-c">화학식 아래 작은 숫자 = 원자 개수 (1은 생략)<br>양이온: 전자를 <b>잃음</b> · 음이온: 전자를 <b>얻음</b><br>원자 번호 = 양성자 수 = (원자일 때) 전자 수</p>'); spawn(); spawn(); };
+function spawn(){ const ion = app.opts.lv === 'all' && Math.random() < .3, src = ion ? ION : MOL, it = src[Math.floor(Math.random() * src.length)], show = ['formula', 'name', 'model'][Math.floor(Math.random() * (ion ? 2 : 3))];
+  orders.push({f: it[0], n: it[1], c: it[2], q: it[3] || 0, show, life: 30, max: 30, born: performance.now()}); }
+function trayCount(){ const c = {}; tray.forEach(a => c[a.e] = (c[a.e] || 0) + 1); return c; }
+function deliver(){ if (ended || !orders.length) return; const o = orders[Math.min(sel, orders.length - 1)], c = trayCount();
+  if (!tray.length) { toast('작업대가 비었어요', 'bad'); return; }
+  if (key(c) === key(o.c) && -dE === o.q) { const pts = 50 + Math.round(o.life * 2) + (o.q ? 20 : 0); app.addScore(pts); served++; sfx.ok(); toast(`${o.f} 납품! +${pts}`, 'good'); fly.push({t0: performance.now(), f: o.f}); orders.splice(orders.indexOf(o), 1); tray = []; dE = 0; sel = 0; if (orders.length < 2) spawn(); }
+  else { sfx.bad(); app.addScore(-10); const want = Object.entries(o.c).map(([e, n]) => e + (n > 1 ? n : '')).join(''); toast(-dE !== o.q && key(c) === key(o.c) ? '원자는 맞아요! 전자 수를 확인하세요' : '원자의 종류나 개수가 달라요', 'bad'); } }
+app.step = dt => { if (ended || !orders) return; tLeft -= dt; spawnT += dt; orders.forEach(o => o.life -= dt);
+  const gone = orders.filter(o => o.life <= 0); if (gone.length) { missed += gone.length; app.addScore(-20 * gone.length); sfx.bad(); toast('주문 시간 초과 -20', 'bad'); orders = orders.filter(o => o.life > 0); }
+  if ((spawnT > 7 && orders.length < 3) || !orders.length) { spawnT = 0; spawn(); }
+  ui.s.innerHTML = `<p style="font-size:15px">⏱ 남은 시간 <b style="font-size:22px;color:var(--yellow)">${Math.max(0, Math.ceil(tLeft))}</b>초</p><p>납품 ✔ <b>${served}</b> · 놓침 ✖ <b>${missed}</b></p>`;
+  if (tLeft <= 0) { ended = true; const sc = app.player.score; sfx.win(); setTimeout(() => { if (app.multi && app.state.turn < app.state.players.length - 1) { app.nextTurn(); app.onStart(app.opts); } else app.finish({stars: app.multi ? 3 : served >= app.opts.time / 9 ? 3 : served >= app.opts.time / 18 ? 2 : 1, summary: app.multi ? '모둠별 점수입니다.' : `납품 <b>${served}</b>개 · 놓친 주문 ${missed}개 · 점수 <b>${sc}</b>`, best: sc + '점', bestValue: sc}); }, 1000); } };
+function layout(){ const W = S.w, H = S.h, n = BINS.length, bw = Math.min(70, (W - 20) / (n + 3) - 6), by = H - bw - 14;
+  const bins = BINS.map((e, i) => ({e, x: 10 + i * (bw + 6), y: by, w: bw, h: bw}));
+  const bx = 10 + n * (bw + 6); const btn = [{k: 'e+', x: bx, y: by, w: bw * 1.1, h: bw * .47, l: 'e⁻ 얻기'}, {k: 'e-', x: bx, y: by + bw * .53, w: bw * 1.1, h: bw * .47, l: 'e⁻ 잃기'}, {k: 'go', x: bx + bw * 1.1 + 6, y: by, w: W - (bx + bw * 1.1 + 6) - 10, h: bw, l: '완성!'}];
+  const tw = Math.min(170, (W - 40) / 3), tickets = orders.map((o, i) => ({o, x: 10 + i * (tw + 10), y: 10, w: tw, h: H * .3}));
+  return {bins, btn, tickets, bench: {x: W * .5, y: H * .38 + H * .16, r: Math.min(W, H) * .17}}; }
+app.pointer({tap(x, y){ if (ended) return; const L = layout(), inR = r => x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h;
+  const b = L.bins.find(inR); if (b) { if (tray.length >= 8) { toast('작업대가 꽉 찼어요'); return; } tray.push({e: b.e, a: Math.random() * 6}); sfx.pop(); return; }
+  const k = L.btn.find(inR); if (k) { if (k.k === 'go') deliver(); else { dE += k.k === 'e+' ? 1 : -1; dE = D.clamp(dE, -3, 3); sfx.zap(); } return; }
+  const t = L.tickets.findIndex(inR); if (t >= 0) { sel = t; sfx.click(); return; }
+  // 작업대 원자 빼기
+  const P = positions(L.bench); const i = P.findIndex(p => Math.hypot(p.x - x, p.y - y) < p.r + 4); if (i >= 0) { tray.splice(i, 1); sfx.click(); if (!tray.length) dE = 0; } }});
+addEventListener('keydown', e => { if (e.key === 'Enter') deliver(); });
+function positions(B){ const n = tray.length, rr = (e) => e === 'H' ? B.r * .2 : B.r * .3; if (!n) return [];
+  // 가장 많이 결합하는 원자를 가운데
+  const order = tray.map((a, i) => i).sort((a, b) => (tray[b].e === 'H') - (tray[a].e === 'H')), P = new Array(n);
+  order.forEach((idx, k) => { const e = tray[idx].e; if (k === 0) P[idx] = {x: B.x, y: B.y, r: rr(e), e}; else { const a = (k - 1) / Math.max(1, n - 1) * Math.PI * 2 - Math.PI / 2, d = B.r * .55; P[idx] = {x: B.x + Math.cos(a) * d, y: B.y + Math.sin(a) * d * .8, r: rr(e), e}; } });
+  if (n === 2) { P[order[0]].x -= B.r * .22; P[order[1]] = {x: B.x + B.r * .3, y: B.y, r: rr(tray[order[1]].e), e: tray[order[1]].e}; }
+  return P; }
+function atom(g, x, y, r, e){ const gr = g.createRadialGradient(x - r * .35, y - r * .35, r * .1, x, y, r); gr.addColorStop(0, '#fff'); gr.addColorStop(.25, EL[e][1]); gr.addColorStop(1, shade(EL[e][1])); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+  D.text(g, e, x, y + 1, {size: Math.max(11, r * .7), weight: 700, color: ['H', 'Ca', 'Mg'].includes(e) ? '#333' : '#fff'}); }
+function shade(h){ const n = parseInt(h.slice(1), 16), f = .55; return `rgb(${(n >> 16) * f | 0},${(n >> 8 & 255) * f | 0},${(n & 255) * f | 0})`; }
+function miniModel(g, c, x, y, s){ const list = []; Object.entries(c).forEach(([e, n]) => { for (let i = 0; i < n; i++) list.push(e); }); list.sort((a, b) => (a === 'H') - (b === 'H'));
+  list.forEach((e, i) => { const a = i ? (i - 1) / Math.max(1, list.length - 1) * Math.PI * 2 - Math.PI / 2 : 0, d = i ? s * (list.length === 2 ? .5 : .7) : 0; atom(g, x + (list.length === 2 && !i ? -s * .3 : 0) + Math.cos(a) * d, y + Math.sin(a) * d, e === 'H' ? s * .3 : s * .42, e); }); }
+app.draw = (g, W, H) => { if (!orders) return; const t = performance.now() / 1000, L = layout();
+  g.fillStyle = '#e8e2d4'; g.fillRect(0, 0, W, H); g.fillStyle = '#d8cfbd'; g.fillRect(0, H * .34, W, H * .66);
+  // 주문표
+  L.tickets.forEach((T, i) => { const o = T.o, act = i === Math.min(sel, orders.length - 1); g.save(); g.translate(T.x + T.w / 2, T.y); g.rotate(Math.sin(t * 2 + i) * .01); g.translate(-T.w / 2, 0);
+    g.fillStyle = '#fffdf6'; g.shadowColor = 'rgba(0,0,0,.15)'; g.shadowBlur = 8; g.fillRect(0, 0, T.w, T.h); g.shadowBlur = 0; if (act) { g.strokeStyle = '#e0a400'; g.lineWidth = 4; g.strokeRect(0, 0, T.w, T.h); }
+    D.text(g, `주문 #${i + 1}${o.q ? ' · 이온' : ''}`, T.w / 2, 14, {size: 11, color: '#888'});
+    if (o.show === 'formula') D.text(g, o.f, T.w / 2, T.h * .48, {size: 30, weight: 700, color: '#2b2a26'});
+    else if (o.show === 'name') D.text(g, o.n, T.w / 2, T.h * .48, {size: o.n.length > 5 ? 17 : 22, display: true, color: '#2b2a26'});
+    else miniModel(g, o.c, T.w / 2, T.h * .5, T.h * .2);
+    const f = o.life / o.max; g.fillStyle = '#eee'; g.fillRect(8, T.h - 14, T.w - 16, 6); g.fillStyle = f > .5 ? '#5fb37a' : f > .25 ? '#e0a400' : '#d0533f'; g.fillRect(8, T.h - 14, (T.w - 16) * f, 6); g.restore(); });
+  // 작업대
+  const B = L.bench; g.fillStyle = '#b9ab92'; g.beginPath(); g.ellipse(B.x, B.y + B.r * .9, B.r * 1.5, B.r * .3, 0, 0, 7); g.fill(); g.strokeStyle = 'rgba(0,0,0,.08)'; g.lineWidth = 2; g.setLineDash([6, 6]); g.beginPath(); g.arc(B.x, B.y, B.r, 0, 7); g.stroke(); g.setLineDash([]);
+  if (!tray.length) D.text(g, '작업대', B.x, B.y, {size: 14, color: '#8a7d63'});
+  const P = positions(B); if (P.length > 1) { const c0 = P[tray.map((a, i) => i).sort((a, b) => (tray[b].e === 'H') - (tray[a].e === 'H'))[0]]; g.strokeStyle = '#8a7d63'; g.lineWidth = 6; P.forEach(p => { if (p !== c0) { g.beginPath(); g.moveTo(c0.x, c0.y); g.lineTo(p.x, p.y); g.stroke(); } }); }
+  P.forEach(p => atom(g, p.x, p.y, p.r, p.e));
+  // 이온 전하 + 전자 고리
+  if (tray.length === 1 && P[0]) { const e = tray[0].e, z = EL[e][2], ne = z + dE; D.text(g, `양성자 +${z}  ·  전자 ${ne}개`, B.x, B.y - B.r * 1.05, {size: 13, color: '#4a4232', weight: 700}); }
+  if (dE) { const q = -dE; D.text(g, (Math.abs(q) > 1 ? Math.abs(q) : '') + (q > 0 ? '+' : '−'), B.x + B.r * .75, B.y - B.r * .6, {size: 26, weight: 700, color: q > 0 ? '#d0533f' : '#3d6fd6'}); for (let i = 0; i < Math.abs(dE); i++) { const a = t * 2 + i * 2; D.text(g, 'e⁻', B.x + Math.cos(a) * B.r * 1.15, B.y + Math.sin(a) * B.r * .5, {size: 13, color: dE > 0 ? '#3d6fd6' : 'rgba(61,111,214,.35)', weight: 700}); } }
+  const formula = (() => { const c = trayCount(), order = ['C', 'H', 'N', 'O', 'Cl', 'Na', 'Mg', 'K', 'Ca']; return Object.keys(c).sort((a, b) => order.indexOf(a) - order.indexOf(b)).map(e => e + (c[e] > 1 ? String(c[e]).replace(/\d/g, d => '₀₁₂₃₄₅₆₇₈₉'[d]) : '')).join(''); })();
+  if (tray.length) D.text(g, formula + (dE ? (Math.abs(dE) > 1 ? '²³'[Math.abs(dE) - 2] || '' : '') + (dE < 0 ? '⁺' : '⁻') : ''), W - 20, H * .42, {size: 22, align: 'right', weight: 700, color: '#4a4232'});
+  // 원자 상자 + 버튼
+  L.bins.forEach(b => { g.fillStyle = '#fffdf6'; D.rr(g, b.x, b.y, b.w, b.h, 10); g.fill(); g.strokeStyle = '#c9bea8'; g.lineWidth = 2; g.stroke(); atom(g, b.x + b.w / 2, b.y + b.h * .42, b.w * .26, b.e); D.text(g, EL[b.e][0], b.x + b.w / 2, b.y + b.h * .86, {size: 10, color: '#555'}); });
+  L.btn.forEach(b => { g.fillStyle = b.k === 'go' ? '#5fb37a' : '#7f9fd6'; D.rr(g, b.x, b.y, b.w, b.h, 10); g.fill(); D.text(g, b.l, b.x + b.w / 2, b.y + b.h / 2, {size: b.k === 'go' ? 22 : 12, display: b.k === 'go', weight: 700, color: '#fff'}); });
+  fly = fly.filter(f => performance.now() - f.t0 < 900); fly.forEach(f => { const p = (performance.now() - f.t0) / 900; D.text(g, f.f + ' ✔', B.x, B.y - p * H * .3, {size: 30, weight: 700, color: `rgba(46,125,79,${1 - p})`}); });
+  if (ended) D.text(g, '영업 종료!', W / 2, H * .45, {size: 46, display: true, color: '#e0a400', stroke: '#fff', strokeW: 8});
+};
+</script>
+</body>
+</html>

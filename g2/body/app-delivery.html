@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>인체 택배 · 중2 동물과 에너지</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<style>.trail{font-size:13px;line-height:1.7}.trail b{color:var(--yellow)}</style>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'delivery', title: '인체 택배', unit: '중2 · 13 동물과 에너지', back: '../../index.html#g2', sim: 'sim.html#all',
+  lead: '여러분은 몸속 <b>택배 기사</b>! 산소·포도당·이산화 탄소·요소를 목적지까지 배달하세요. 단, 몸속 길은 <b>한 방향</b>인 곳이 많아요. 심장 판막은 거꾸로 열리지 않아요!',
+  howto: ['지금 위치(반짝이는 곳)에서 <b>다음으로 갈 기관</b>을 누르세요.', '없는 길(판막 반대 방향, 연결 안 된 기관)을 누르면 -15점.', '가장 짧은 길로 배달할수록 점수가 높아요. 지나는 기관의 역할도 읽어 보세요.'],
+  options: [{key: 'n', label: '배달 수', choices: [[5, '5건'], [7, '7건'], [9, '9건']], def: 7}, {key: 'hint', label: '도움', choices: [[1, '갈 수 있는 길 표시'], [0, '표시 안 함']], def: 0}, {key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '<b>소화계</b>(입→식도→위→소장→대장)는 영양소를 분해·흡수하고, <b>순환계</b>는 혈액으로 물질을 운반합니다. <b>폐순환</b>: 우심실→폐동맥→폐→폐정맥→좌심방, <b>온몸 순환</b>: 좌심실→대동맥→온몸→대정맥→우심방. <b>호흡계</b>는 산소를 받아들이고 이산화 탄소를 내보내며, <b>배설계</b>(콩팥→방광)는 요소 같은 노폐물을 오줌으로 내보내요. 네 기관계가 함께 일해 세포가 <b>세포 호흡</b>으로 에너지를 얻을 수 있어요.',
+  startLabel: '배달 출발'
+});
+const {S, sfx, toast} = app, D = Draw;
+// 이름: [x, y, 설명, 종류색]
+const N = {
+  '코': [.40, .06, '공기가 들어오고 나가는 곳', 'air'], '입': [.47, .12, '이로 씹고 침 속 아밀레이스가 녹말을 분해', 'dig'], '기관': [.36, .2, '공기가 지나가는 관', 'air'], '식도': [.5, .21, '음식물을 위로 내려보냄', 'dig'],
+  '폐': [.22, .33, '폐포에서 산소↔이산화 탄소 교환 (확산)', 'air'], '폐동맥': [.3, .33, '우심실 → 폐 (산소 적은 혈액)', 'vein'], '폐정맥': [.5, .31, '폐 → 좌심방 (산소 많은 혈액)', 'art'],
+  '우심방': [.33, .42, '대정맥에서 온 혈액이 들어오는 방', 'vein'], '우심실': [.36, .5, '혈액을 폐로 내보내는 방', 'vein'], '좌심방': [.47, .41, '폐에서 온 혈액이 들어오는 방', 'art'], '좌심실': [.45, .5, '가장 두꺼운 근육! 온몸으로 혈액을 보냄', 'art'],
+  '대동맥': [.58, .44, '좌심실 → 온몸 (가장 굵은 동맥)', 'art'], '대정맥': [.24, .52, '온몸 → 우심방 (가장 굵은 정맥)', 'vein'],
+  '간': [.28, .62, '흡수된 영양소 저장, 암모니아를 요소로 바꿈', 'dig'], '위': [.55, .6, '위액(펩신·염산)으로 단백질 분해 시작', 'dig'], '소장': [.42, .72, '라이페이스·트립신 등으로 최종 분해, 융털로 흡수', 'dig'], '대장': [.58, .76, '물을 흡수하고 찌꺼기를 내보냄', 'dig'],
+  '항문': [.5, .9, '소화되지 않은 찌꺼기 배출', 'dig'], '콩팥': [.68, .6, '혈액을 걸러 요소 등 노폐물로 오줌 생성', 'exc'], '방광': [.38, .86, '오줌을 모아 두었다가 내보냄', 'exc'], '몸 밖(오줌)': [.3, .95, '요도를 통해 오줌 배출', 'exc'],
+  '뇌 세포': [.68, .08, '세포 호흡으로 에너지를 얻음 (포도당 + 산소)', 'cell'], '다리 근육': [.72, .9, '세포 호흡: 포도당 + 산소 → 이산화 탄소 + 물 + 에너지', 'cell']};
+const E = [['코', '기관'], ['기관', '폐'], ['폐', '기관'], ['기관', '코'], ['입', '식도'], ['식도', '위'], ['위', '소장'], ['소장', '대장'], ['대장', '항문'], ['소장', '간'], ['간', '대정맥'],
+  ['폐', '폐정맥'], ['폐정맥', '좌심방'], ['좌심방', '좌심실'], ['좌심실', '대동맥'], ['대동맥', '뇌 세포'], ['대동맥', '다리 근육'], ['대동맥', '콩팥'], ['뇌 세포', '대정맥'], ['다리 근육', '대정맥'], ['콩팥', '대정맥'], ['콩팥', '방광'], ['방광', '몸 밖(오줌)'],
+  ['대정맥', '우심방'], ['우심방', '우심실'], ['우심실', '폐동맥'], ['폐동맥', '폐']];
+const MIS = [['🍚', '녹말', '입', '소장', '녹말은 입에서 엿당으로, 소장에서 포도당으로 최종 분해돼요.'], ['🥩', '단백질', '입', '소장', '단백질은 위(펩신)에서 분해되기 시작해 소장에서 아미노산이 돼요.'],
+  ['🫧', '산소', '코', '다리 근육', '산소는 폐포에서 혈액으로 확산 → 심장 왼쪽 → 대동맥 → 온몸 세포!'], ['🫧', '산소', '코', '뇌 세포', '뇌는 산소를 아주 많이 쓰는 기관이에요.'], ['🫧', '산소', '코', '콩팥', '콩팥 세포도 일하려면 산소가 필요해요.'],
+  ['💨', '이산화 탄소', '다리 근육', '코', '세포 호흡으로 생긴 이산화 탄소는 대정맥 → 심장 오른쪽 → 폐동맥 → 폐 → 날숨으로!'], ['💨', '이산화 탄소', '뇌 세포', '코', '심장 오른쪽을 거쳐 폐로 가요.'],
+  ['🍬', '포도당', '소장', '뇌 세포', '흡수된 포도당은 간 → 대정맥 → 심장 → 폐 → 심장 → 대동맥을 거쳐야 뇌에 도착해요. 생각보다 멀죠?'], ['🍬', '포도당', '소장', '다리 근육', '혈액은 반드시 폐를 한 번 거쳐 다시 심장으로 돌아와야 온몸으로 가요.'],
+  ['🧪', '요소', '간', '몸 밖(오줌)', '간에서 만든 요소는 혈액을 타고 콩팥까지 가서 걸러져요.'], ['🟤', '음식 찌꺼기', '소장', '항문', '대장에서 물이 흡수되고 남은 찌꺼기가 배출돼요.']];
+let list, mi, cur, at, path, prev, moveT, wrong, ui = {}, locked, flash = {};
+const adj = a => E.filter(e => e[0] === a).map(e => e[1]);
+function bfs(a, b){ const q = [[a, 0]], seen = new Set([a]); while (q.length) { const [x, d] = q.shift(); if (x === b) return d; adj(x).forEach(y => { if (!seen.has(y)) { seen.add(y); q.push([y, d + 1]); } }); } return 99; }
+app.onStart = o => { const pool = MIS.slice().sort(() => Math.random() - .5); list = pool.slice(0, o.n); mi = -1; ui.m = app.panel('배달 정보'); ui.tr = app.panel('지나온 길'); ui.tr.className = 'trail'; app.startTimer(); next(); };
+function next(){ mi++; if (mi >= list.length) return end(); cur = list[mi]; at = cur[2]; path = [at]; prev = at; moveT = 1; wrong = 0; locked = false; app.setLevel(mi, list.length);
+  ui.m.innerHTML = `<p class="mission" style="font-size:17px">${cur[0]} <b>${cur[1]}</b>을(를)<br><b style="color:var(--coral)">${cur[2]}</b> → <b style="color:var(--mint)">${cur[3]}</b>까지 배달!</p><p class="note-c" style="margin-top:6px">최단 경로: ${bfs(cur[2], cur[3])}칸</p>`; trail(); }
+function trail(){ ui.tr.innerHTML = path.map((p, i) => i === path.length - 1 ? `<b>${p}</b>` : p).join(' → ') + `<p class="note-c" style="margin-top:6px">📍 ${at}: ${N[at][2]}</p>`; }
+const pos = k => { const W = S.w, H = S.h, sx = Math.min(W, H * 1.6); return [W / 2 - sx / 2 + X(N[k][0]) * sx, H * .04 + N[k][1] * H * .9]; };
+app.pointer({tap(x, y){ if (locked || moveT < 1) return; const k = Object.keys(N).find(k => { const [px, py] = pos(k); return Math.abs(px - x) < 46 && Math.abs(py - y) < 16; }); if (!k || k === at) return;
+  if (!adj(at).includes(k)) { wrong++; app.addScore(-15); sfx.bad(); flash[k] = performance.now(); const back = E.some(e => e[0] === k && e[1] === at); toast(back ? '거꾸로는 못 가요! (한 방향 흐름)' : `${at}에서 ${k}(으)로 가는 길은 없어요`, 'bad'); return; }
+  prev = at; at = k; path.push(k); moveT = 0; sfx.whoosh(); trail();
+  if (at === cur[3]) { locked = true; const extra = path.length - 1 - bfs(cur[2], cur[3]), pts = Math.max(20, 120 - extra * 10); app.addScore(pts); setTimeout(() => { sfx.ok(); app.confetti(50); toast(extra ? `배달 완료! (${extra}칸 돌아옴)` : '최단 경로 배달! 🎉', 'good');
+    ui.m.innerHTML += `<p class="note-c" style="margin-top:8px">💡 ${cur[4]}</p><button class="big" type="button" style="width:100%;margin-top:10px">다음 배달 ▶</button>`; ui.m.querySelector('button').onclick = () => { app.nextTurn(); next(); }; }, 500); } }});
+function end(){ const sc = app.player.score, max = list.length * 120; app.finish({stars: app.multi ? 3 : sc >= max * .85 ? 3 : sc >= max * .6 ? 2 : 1, summary: app.multi ? '모둠별 점수입니다.' : `배달 점수 <b>${sc}</b> / ${max}`, best: sc + '점', bestValue: sc}); }
+const X = x => (x - .47) * 1.45 + .47;
+const COL = {air: '#8ecdf2', dig: '#e2b56a', art: '#e0533f', vein: '#4a6fd6', exc: '#e2d24a', cell: '#9be3b5'};
+app.step = dt => { if (moveT < 1) moveT = Math.min(1, moveT + dt * 2.2); };
+app.draw = (g, W, H) => { if (!cur) return; const t = performance.now() / 1000, sx = Math.min(W, H * 1.6), ox = W / 2 - sx / 2;
+  g.fillStyle = '#16232b'; g.fillRect(0, 0, W, H);
+  // 몸 실루엣
+  const bx = x => ox + X(x) * sx, K = 1.45;
+  g.fillStyle = 'rgba(242,214,190,.10)'; g.beginPath(); g.ellipse(bx(.44), H * .1, sx * .07 * K, H * .08, 0, 0, 7); g.fill(); D.rr(g, bx(.3), H * .2, sx * .3 * K, H * .62, 60); g.fill(); g.fillRect(bx(.33), H * .75, sx * .1 * K, H * .25); g.fillRect(bx(.5), H * .75, sx * .1 * K, H * .25);
+  [[.22, .33], [.62, .3]].forEach(([x, y]) => { g.fillStyle = 'rgba(242,140,160,.18)'; g.beginPath(); g.ellipse(bx(x), H * .04 + y * H * .9, sx * .06 * K, H * .11, 0, 0, 7); g.fill(); });
+  g.fillStyle = 'rgba(224,83,63,.16)'; g.beginPath(); g.ellipse(bx(.41), H * .04 + .46 * H * .9, sx * .1 * K, H * .1, -.3, 0, 7); g.fill();
+  // 길
+  const legal = app.opts.hint ? adj(at) : [];
+  E.forEach(([a, b]) => { const [x0, y0] = pos(a), [x1, y1] = pos(b), two = E.some(e => e[0] === b && e[1] === a); if (two && a > b) return; const col = COL[N[b][3] === 'cell' ? N[a][3] : N[b][3]], hl = a === at && legal.includes(b);
+    g.globalAlpha = hl ? 1 : .55; const L = Math.hypot(x1 - x0, y1 - y0);
+    if (L > sx * .28 && !two) { const mx = (x0 + x1) / 2 - (y1 - y0) * .18, my = (y0 + y1) / 2 + (x1 - x0) * .18; g.strokeStyle = col; g.lineWidth = hl ? 4 : 2.5; g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo(mx, my, x1, y1); g.stroke(); u = .8, ex = (1 - u) * (1 - u) * x0 + 2 * u * (1 - u) * mx + u * u * x1, ey = (1 - u) * (1 - u) * y0 + 2 * u * (1 - u) * my + u * u * y1, v = .7, fx = (1 - v) * (1 - v) * x0 + 2 * v * (1 - v) * mx + v * v * x1, fy = (1 - v) * (1 - v) * y0 + 2 * v * (1 - v) * my + v * v * y1; D.arrow(g, fx, fy, ex, ey, col, hl ? 4 : 2.5); }
+    else { D.arrow(g, x0 + (x1 - x0) * .18, y0 + (y1 - y0) * .18, x0 + (x1 - x0) * .82, y0 + (y1 - y0) * .82, col, hl ? 4 : 2.5); if (two) D.arrow(g, x0 + (x1 - x0) * .82, y0 + (y1 - y0) * .82, x0 + (x1 - x0) * .18, y0 + (y1 - y0) * .18, col, 2.5); } g.globalAlpha = 1; });
+  // 마디
+  Object.keys(N).forEach(k => { const [x, y] = pos(k), c = COL[N[k][3]], isAt = k === at, goal = k === cur[3], fl = performance.now() - (flash[k] || 0) < 400; g.font = "700 12px 'IBM Plex Sans KR',sans-serif"; const w = g.measureText(k).width + 16;
+    g.fillStyle = fl ? '#f28c7a' : isAt ? '#f6d365' : goal ? '#2b5a44' : '#22323c'; D.rr(g, x - w / 2 + (fl ? Math.sin(t * 60) * 3 : 0), y - 12, w, 24, 12); g.fill(); g.strokeStyle = goal ? '#9be3b5' : c; g.lineWidth = goal ? 3 : 2; g.stroke();
+    D.text(g, k, x, y + 1, {size: 12, weight: 700, color: isAt ? '#2b2a26' : '#f2efe4'}); if (goal) D.text(g, '🏁', x + w / 2 + 10, y, {size: 16}); });
+  // 택배(입자)
+  const [ax, ay] = pos(prev), [cx2, cy2] = pos(at), f = D.ease(moveT), px = D.lerp(ax, cx2, f), py = D.lerp(ay, cy2, f) - 22 - Math.sin(t * 6) * 3;
+  D.glow(g, px, py, 26, '246,211,101', .5); D.text(g, cur[0], px, py, {size: 24});
+};
+</script>
+</body>
+</html>
