@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>회로 퍼즐 · 중2 전기와 자기</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/circuit.js"></script>
+<style>
+.pal{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pal .tool{justify-content:center;font-size:14px}
+.pal .tool small{opacity:.8}
+.goal{font-size:15px;line-height:1.55}
+.goal .ok{color:var(--mint);font-weight:700}
+.goal .no{color:var(--coral)}
+</style>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'circuit', title: '회로 퍼즐', unit: '중2 · 14 전기와 자기', back: '../../index.html#g2', sim: 'sim.html#circuit',
+  lead: '전선·전구·저항을 격자에 놓아 <b>미션 회로</b>를 완성하세요. 회로는 실제 물리 법칙(<b>옴의 법칙</b>)으로 계산돼서, 전류의 흐름과 전구 밝기가 그대로 보여요.',
+  howto: ['오른쪽 <b>부품 상자</b>에서 부품을 고른 뒤, 무대의 <b>점선</b>(격자 칸 사이)을 누르면 놓여요. 같은 부품을 다시 누르면 빠져요.', '움직이는 점은 <b>전류의 방향</b>(+극 → −극)이에요. 빠를수록 전류가 세요.', '전선만으로 +극과 −극을 이으면 <b>합선</b>! 미션을 만족하면 자동으로 통과해요.'],
+  options: [],
+  recap: '<b>직렬연결</b>: 전류가 흐르는 길이 하나라 각 저항에 흐르는 전류가 같고, 전압은 저항에 비례해 나뉩니다(전체 저항 = 각 저항의 합). <b>병렬연결</b>: 길이 여러 갈래라 각 저항에 걸리는 전압이 전원 전압과 같고, 전체 저항은 작아져 전체 전류가 커져요. <b>옴의 법칙</b>: I = V / R. 전구의 밝기는 전력 P = V × I 가 클수록 밝아요.',
+  startLabel: '퍼즐 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const COLS = 6, ROWS = 4, RB = 10; // 전구 저항 10 Ω
+const TYPES = {w: ['〰️ 전선', 0.001], b: ['💡 전구', RB], r5: ['▭ 저항 5 Ω', 5], r10: ['▭ 저항 10 Ω', 10], r20: ['▭ 저항 20 Ω', 20], x: ['🧽 지우개', 0]};
+const LV = [
+  {E: 3, inv: {b: 1}, t: '전구 <b>1개</b>를 켜세요.', why: '전류가 흐르려면 전지 +극 → 전구 → −극으로 이어지는 <b>닫힌 회로</b>가 필요해요.', ok: s => s.bulbs.length === 1 && s.bulbs[0].lit},
+  {E: 3, inv: {b: 2}, t: '전구 2개를 <b>직렬</b>로 연결해 켜세요.', why: '직렬연결에서는 두 전구에 <b>같은 전류</b>가 흐르고 전압이 1.5 V씩 나뉘어 하나일 때보다 어두워요.', ok: s => s.bulbs.length === 2 && s.bulbs.every(b => b.lit && Math.abs(b.V - s.E / 2) < .1)},
+  {E: 3, inv: {b: 2}, t: '전구 2개를 <b>병렬</b>로 연결해 두 전구 모두 <b>전구 1개일 때만큼</b> 밝게 하세요.', why: '병렬연결에서는 각 전구에 <b>전원 전압(3 V)이 그대로</b> 걸려요. 대신 전지에서 나오는 전체 전류는 2배가 돼요.', ok: s => s.bulbs.length === 2 && s.bulbs.every(b => Math.abs(b.V - s.E) < .15)},
+  {E: 3, inv: {b: 3}, t: '전구 3개 중 <b>하나만 가장 밝게</b>, 나머지 둘은 어둡지만 켜지게 하세요.', why: '두 전구를 직렬로 묶고, 그 묶음과 나머지 한 전구를 병렬로 연결하면 혼자인 전구에 3 V, 묶인 전구에 1.5 V씩 걸려요.', ok: s => { if (s.bulbs.length !== 3 || !s.bulbs.every(b => b.lit)) return false; const v = s.bulbs.map(b => b.V).sort((a, b) => a - b); return Math.abs(v[2] - s.E) < .15 && Math.abs(v[0] - s.E / 2) < .1 && Math.abs(v[1] - s.E / 2) < .1; }},
+  {E: 3, inv: {r10: 3}, t: '전지에서 나오는 전류를 <b>0.1 A</b>로 만드세요.', why: '3 V ÷ 0.1 A = 30 Ω. 10 Ω 세 개를 <b>직렬</b>로 연결하면 전체 저항이 30 Ω이 돼요.', ok: s => Math.abs(s.Ib - .1) < .006},
+  {E: 3, inv: {r20: 2}, t: '20 Ω 저항 2개만으로 전지 전류를 <b>0.3 A</b>로 만드세요.', why: '3 V ÷ 0.3 A = 10 Ω. 20 Ω 두 개를 <b>병렬</b>로 연결하면 전체 저항이 10 Ω으로 작아져요.', ok: s => Math.abs(s.Ib - .3) < .012},
+  {E: 6, inv: {b: 1, r10: 1, r20: 1}, t: '6 V 전지로 전구에 정확히 <b>2 V</b>만 걸리게 하세요.', why: '전구(10 Ω)와 20 Ω을 직렬로 연결하면 전압이 저항에 비례해 2 V : 4 V로 나뉘어요.', ok: s => s.bulbs.length === 1 && Math.abs(s.bulbs[0].V - 2) < .08},
+  {E: 3, inv: {b: 1, r10: 2}, t: '전지 전류를 <b>0.45 A</b>로 만드세요. (전구 1개, 10 Ω 2개 모두 사용)', why: '10 Ω 두 개를 직렬(20 Ω)로 묶어 전구(10 Ω)와 병렬로 연결하면 전체 저항 ≈ 6.7 Ω → 3 V ÷ 6.7 Ω ≈ 0.45 A.', ok: s => s.used === 3 && Math.abs(s.Ib - .45) < .015},
+  {E: 6, inv: {b: 4}, t: '전구 4개 모두 <b>3 V</b>씩 걸려 같은 밝기로 켜지게 하세요.', why: '전구 2개 직렬(각 3 V) 묶음 두 개를 병렬로 연결하면 돼요.', ok: s => s.bulbs.length === 4 && s.bulbs.every(b => Math.abs(b.V - 3) < .12)}];
+let lv, parts, tool = 'w', sol, ui = {}, solved, flow = 0, showE = false, solvedAt = 0, total = 0;
+const nid = (x, y) => y * COLS + x, BAT = 'v0_1';
+function edges(){ const L = []; for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) { if (x < COLS - 1) L.push({k: `h${x}_${y}`, a: nid(x, y), b: nid(x + 1, y), x0: x, y0: y, x1: x + 1, y1: y}); if (y < ROWS - 1) L.push({k: `v${x}_${y}`, a: nid(x, y), b: nid(x, y + 1), x0: x, y0: y, x1: x, y1: y + 1}); } return L; }
+const EDGES = edges();
+app.onStart = () => { lv = 0; total = 0; ui.g = app.panel('미션'); ui.g.className = 'goal'; ui.p = app.panel('부품 상자'); ui.m = app.panel('측정값'); ui.o = app.panel('', '<button class="tool" type="button" id="eflow" style="width:100%">전자의 흐름으로 보기</button><button class="tool" type="button" id="clr" style="width:100%;margin-top:6px">🗑️ 모두 지우기</button>');
+  ui.o.querySelector('#eflow').onclick = e => { showE = !showE; e.target.textContent = showE ? '전류의 방향으로 보기' : '전자의 흐름으로 보기'; sfx.click(); };
+  ui.o.querySelector('#clr').onclick = () => { parts = {}; calc(); sfx.whoosh(); }; app.startTimer(); load(); };
+function load(){ const L = LV[lv]; parts = {}; solved = false; tool = 'w'; app.setLevel(lv, LV.length); ui.g.innerHTML = `<p><b>${lv + 1}단계</b> · 전지 ${L.E} V</p><p>${L.t}</p><p id="gs" class="no" style="margin-top:6px"></p>`; calc(); }
+function left(k){ const L = LV[lv]; if (k === 'w' || k === 'x') return Infinity; return (L.inv[k] || 0) - Object.values(parts).filter(v => v === k).length; }
+function palette(){ const L = LV[lv], ks = ['w', ...Object.keys(L.inv), 'x'];
+  ui.p.innerHTML = '<div class="pal">' + ks.map(k => `<button class="tool" type="button" data-k="${k}" aria-pressed="${tool === k}">${TYPES[k][0]}${left(k) !== Infinity ? ` <small>×${left(k)}</small>` : ''}</button>`).join('') + '</div>';
+  ui.p.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { tool = b.dataset.k; sfx.click(); palette(); }); }
+function calc(){ const L = LV[lv], list = [{a: nid(0, 1), b: nid(0, 2), E: L.E, r: .002, k: BAT}];
+  Object.entries(parts).forEach(([k, t]) => { const e = EDGES.find(e => e.k === k); list.push({a: e.a, b: e.b, R: TYPES[t][1], k, t}); });
+  const r = Circuit.solve(COLS * ROWS, list); sol = {E: L.E, Ib: r.I[0], short: r.I[0] > L.E / 1, bulbs: [], items: {}, used: Object.values(parts).filter(t => t !== 'w').length};
+  list.forEach((p, i) => { if (!i) return; const I = r.I[i], V = Math.abs(r.V[p.a] - r.V[p.b]), P = V * Math.abs(I); sol.items[p.k] = {I, V, P, t: p.t}; if (p.t === 'b') sol.bulbs.push({k: p.k, V, I: Math.abs(I), P, lit: P > .05 * L.E * L.E / RB}); });
+  palette(); const ok = !sol.short && LV[lv].ok(sol);
+  ui.m.innerHTML = `<p>🔋 전지 전류: <b>${sol.short ? '매우 큼!' : Math.abs(sol.Ib).toFixed(2) + ' A'}</b></p>` + sol.bulbs.map((b, i) => `<p>💡 전구 ${i + 1}: ${b.V.toFixed(2)} V · ${b.I.toFixed(2)} A</p>`).join('') +
+    Object.values(sol.items).filter(it => it.t && it.t[0] === 'r').map(it => `<p>▭ ${TYPES[it.t][1]} Ω: ${it.V.toFixed(2)} V · ${Math.abs(it.I).toFixed(2)} A</p>`).join('');
+  const gs = ui.g.querySelector('#gs'); if (gs) gs.innerHTML = sol.short ? '⚠ 합선! 전선만으로 +극과 −극이 이어졌어요.' : ok ? '' : '아직 미션을 만족하지 않아요.';
+  if (ok && !solved) { solved = true; solvedAt = performance.now(); const sec = app.elapsed(); const pts = 100 + Math.max(0, 60 - Math.round(sec - total)) ; total = sec; app.addScore(pts); sfx.win(); app.confetti(80);
+    ui.g.innerHTML += `<p class="ok">✔ 미션 성공! +${pts}</p><p class="note-c">${LV[lv].why}</p><button class="big" type="button" style="width:100%;margin-top:8px">${lv + 1 < LV.length ? '다음 단계 ▶' : '결과 보기'}</button>`;
+    ui.g.querySelector('button').onclick = () => { lv++; if (lv >= LV.length) return app.finish({stars: 3, summary: `9단계 회로 퍼즐 완료! 점수 <b>${app.player.score}</b> · ${Math.round(app.elapsed())}초`, best: app.player.score + '점', bestValue: app.player.score}); load(); }; } }
+function geo(){ const W = S.w, H = S.h, cs = Math.min((W - 130) / (COLS - 1), (H - 60) / (ROWS - 1)), ox = (W - cs * (COLS - 1)) / 2 + 34, oy = (H - cs * (ROWS - 1)) / 2; return {cs, ox, oy, P: (x, y) => [ox + x * cs, oy + y * cs]}; }
+app.pointer({tap(x, y){ if (solved) return; const G = geo(); let best = null, bd = G.cs * .32;
+  EDGES.forEach(e => { if (e.k === BAT) return; const [x0, y0] = G.P(e.x0, e.y0), [x1, y1] = G.P(e.x1, e.y1), d = Math.hypot(x - (x0 + x1) / 2, y - (y0 + y1) / 2); if (d < bd) { bd = d; best = e; } });
+  if (!best) return; const k = best.k;
+  if (tool === 'x' || parts[k] === tool) { delete parts[k]; sfx.click(); }
+  else { if (left(tool) <= 0) { toast('그 부품이 더 없어요', 'bad'); sfx.bad(); return; } parts[k] = tool; sfx.pop(); }
+  calc(); if (sol.short) { sfx.zap(); toast('⚡ 합선!', 'bad'); } }});
+app.step = dt => { flow += dt; };
+function drawBulb(g, x, y, r, f, vert){ D.glow(g, x, y, r * 3.2, '255,220,120', Math.min(.9, f * 1.2)); g.fillStyle = `rgb(${D.lerp(235, 255, f)},${D.lerp(235, 236, f)},${D.lerp(225, 150, f)})`; g.strokeStyle = '#555'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.stroke();
+  g.strokeStyle = f > .05 ? '#e08a00' : '#888'; g.beginPath(); g.moveTo(x - r * .5, y + r * .2); for (let i = 0; i <= 4; i++) g.lineTo(x - r * .5 + i * r * .25, y + (i % 2 ? -r * .3 : r * .2)); g.stroke(); }
+app.draw = (g, W, H) => { if (!sol) return; const G = geo(), t = performance.now() / 1000;
+  g.fillStyle = '#f4f1e8'; g.fillRect(0, 0, W, H); g.fillStyle = 'rgba(0,0,0,.035)'; for (let x = 0; x < W; x += 20) g.fillRect(x, 0, 1, H); for (let y = 0; y < H; y += 20) g.fillRect(0, y, W, 1);
+  const L = LV[lv];
+  EDGES.forEach(e => { const [x0, y0] = G.P(e.x0, e.y0), [x1, y1] = G.P(e.x1, e.y1), mx = (x0 + x1) / 2, my = (y0 + y1) / 2, vert = e.x0 === e.x1, t0 = parts[e.k];
+    if (e.k === BAT) { g.strokeStyle = '#b87333'; g.lineWidth = 5; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x0, my - 8); g.moveTo(x0, my + 8); g.lineTo(x1, y1); g.stroke(); g.strokeStyle = '#222'; g.lineWidth = 4; g.beginPath(); g.moveTo(x0 - 22, my - 8); g.lineTo(x0 + 22, my - 8); g.stroke(); g.lineWidth = 8; g.beginPath(); g.moveTo(x0 - 11, my + 8); g.lineTo(x0 + 11, my + 8); g.stroke();
+      D.text(g, '+', x0 - 32, my - 14, {size: 18, weight: 700, color: '#d0533f'}); D.text(g, '−', x0 - 32, my + 14, {size: 18, weight: 700, color: '#3d6fd6'}); D.text(g, `${L.E} V`, x0 - 40, my, {size: 13, weight: 700, color: '#333', align: 'right'}); return; }
+    if (!t0) { g.strokeStyle = 'rgba(0,0,0,.18)'; g.setLineDash([4, 6]); g.lineWidth = 2; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); g.setLineDash([]); return; }
+    g.strokeStyle = '#b87333'; g.lineWidth = 5; g.lineCap = 'round';
+    if (t0 === 'w') { g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); }
+    else { const gap = G.cs * .22; g.beginPath(); g.moveTo(x0, y0); g.lineTo(vert ? x0 : mx - gap, vert ? my - gap : y0); g.moveTo(vert ? x1 : mx + gap, vert ? my + gap : y1); g.lineTo(x1, y1); g.stroke();
+      if (t0 === 'b') { const it = sol.items[e.k], f = sol.short ? 0 : D.clamp(it.P / (L.E * L.E / RB), 0, 1); drawBulb(g, mx, my, gap * .85, Math.sqrt(f)); }
+      else { g.strokeStyle = '#333'; g.lineWidth = 2.5; g.beginPath(); for (let i = 0; i <= 8; i++) { const u = -gap + i * gap / 4, w = i === 0 || i === 8 ? 0 : (i % 2 ? 9 : -9); g.lineTo(vert ? mx + w : mx + u, vert ? my + u : my + w); } g.stroke(); D.text(g, TYPES[t0][1] + 'Ω', vert ? mx + 26 : mx, vert ? my : my - 20, {size: 12, weight: 700, color: '#333'}); } }
+    // 흐름 점
+    const it = sol.items[e.k]; if (it && Math.abs(it.I) > .004 && !sol.short) { let dir = it.I > 0 ? 1 : -1; if (showE) dir = -dir; const sp = Math.min(1.6, .3 + Math.abs(it.I) * 2.4), n = 3;
+      for (let i = 0; i < n; i++) { let u = ((flow * sp + i / n) % 1); if (dir < 0) u = 1 - u; g.fillStyle = showE ? '#3d6fd6' : '#e0a400'; g.beginPath(); g.arc(D.lerp(x0, x1, u), D.lerp(y0, y1, u), 3.5, 0, 7); g.fill(); } } });
+  // 마디 점
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) { const [px, py] = G.P(x, y); g.fillStyle = '#6b5a45'; g.beginPath(); g.arc(px, py, 4, 0, 7); g.fill(); }
+  if (sol.short) { g.fillStyle = `rgba(208,83,63,${.15 + .1 * Math.sin(t * 12)})`; g.fillRect(0, 0, W, H); D.text(g, '⚡ 합선 ⚡', W / 2, 26, {size: 24, display: true, color: '#d0533f'}); }
+  D.text(g, showE ? '● 전자의 이동 방향 (−극 → +극)' : '● 전류의 방향 (+극 → −극)', 12, H - 14, {size: 12, align: 'left', color: showE ? '#3d6fd6' : '#b07f00', weight: 700});
+  if (solved && performance.now() - solvedAt < 1500) D.text(g, '회로 완성!', W / 2, H / 2, {size: 44, display: true, color: '#2e7d4f', stroke: '#fff', strokeW: 8});
+};
+</script>
+</body>
+</html>
