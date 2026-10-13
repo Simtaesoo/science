@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>구성 물질과 신소재 실험실 · 통합과학1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-gen">
+<div class="wrap">
+  <nav class="topbar" data-topbar="통합과학1|04 지각·생명체 구성 물질과 신소재" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학1 · 04 지각·생명체 구성 물질과 신소재 <span class="code">통과1 Ⅱ</span></div>
+      <h1>구성 물질과 신소재 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="silicate">1. 규산염 광물</button>
+      <button type="button" data-mode="bio">2. 단백질과 핵산</button>
+      <button type="button" data-mode="new">3. 신소재</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="물질의 구조 모형"></canvas></div>
+      <div class="controls">
+        <div class="field" data-only="silicate"><div class="seg" id="sSeg"><button type="button" data-s="iso">독립형 (감람석)</button><button type="button" data-s="chain">단사슬 (휘석)</button><button type="button" data-s="dchain">복사슬 (각섬석)</button><button type="button" data-s="sheet">판상 (흑운모)</button><button type="button" data-s="net">망상 (석영)</button></div></div>
+        <div class="field" data-only="bio"><div class="seg" id="bSeg"><button type="button" data-b="protein">단백질</button><button type="button" data-b="dna">DNA (핵산)</button></div></div>
+        <label class="field" data-only="bio" id="foldF" for="fold">접힘 정도 <input type="range" id="fold" min="0" max="1" step="0.02" value="0"><output id="foldOut">펼쳐짐</output></label>
+        <div class="field" data-only="bio" id="baseF"><span style="font-size:13px">다음 칸에 들어갈 염기:</span> <div class="seg" id="baseSeg"><button type="button" data-base="A">A</button><button type="button" data-base="T">T</button><button type="button" data-base="G">G</button><button type="button" data-base="C">C</button></div></div>
+        <button class="btn" type="button" id="newDna" data-only="bio">새 가닥</button>
+        <div class="field" data-only="new"><div class="seg" id="nSeg"><button type="button" data-n="semi">반도체</button><button type="button" data-n="super">초전도체</button><button type="button" data-n="graphene">그래핀·탄소 나노튜브</button></div></div>
+        <label class="field" data-only="new" id="tempF" for="temp">온도 <input type="range" id="temp" min="20" max="300" step="1" value="300"><output id="tempOut">300 K</output></label>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>석영이 풍화에 강하고 흑운모가 얇게 쪼개지는 까닭은?</summary><p>석영은 규산염 사면체가 모든 산소를 공유하는 망상 구조로 3차원으로 단단히 연결되어 있습니다. 흑운모는 사면체가 평면으로 연결된 판상 구조라 판과 판 사이의 결합이 약해 얇게 쪼개집니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>지각과 생명체를 이루는 주요 원소가 다른 까닭은?</summary><p>지각은 주로 산소와 규소가 결합한 규산염 광물로 이루어져 있고, 생명체는 탄소를 중심으로 수소·산소·질소가 결합한 탄소 화합물(단백질, 핵산, 탄수화물, 지질)로 이루어져 있습니다. 탄소는 원자가 전자가 4개라 다양한 모양으로 결합할 수 있어 복잡한 생명체 물질을 만들기에 알맞습니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>초전도체를 송전선에 쓰기 어려운 까닭은?</summary><p>지금까지 알려진 초전도체는 대부분 매우 낮은 온도(액체 질소 온도 77 K 또는 그 이하)에서만 초전도 상태가 되기 때문에, 긴 송전선 전체를 냉각하는 데 비용과 기술적 어려움이 큽니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="그래프는 원리를 보여 주는 모형입니다."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+const st = {mode: 'silicate', s: 'iso', b: 'protein', fold: 0, dna: [], ans: [], n: 'semi', T: 300};
+const SIL = {iso: ['독립형', '감람석', 0, '1 : 4', '사면체가 따로 떨어져 있고 Mg²⁺, Fe²⁺ 등 양이온과 결합', '풍화에 약함'], chain: ['단사슬형', '휘석', 2, '1 : 3', '사면체가 산소 2개를 공유하며 한 줄로 연결', '두 방향 쪼개짐'], dchain: ['복사슬형', '각섬석', 2.5, '4 : 11', '단사슬 두 줄이 서로 연결', '두 방향 쪼개짐'], sheet: ['판상형', '흑운모', 3, '2 : 5', '사면체가 산소 3개를 공유하며 평면으로 연결', '한 방향으로 얇게 쪼개짐'], net: ['망상형', '석영', 4, '1 : 2', '사면체가 산소 4개를 모두 공유하며 입체 그물 구조', '쪼개짐 없음, 풍화에 강함']};
+function tetra(g, x, y, r, rot, hl){ const P = [0, 1, 2].map(k => [x + Math.cos(rot + k * TAU / 3) * r, y + Math.sin(rot + k * TAU / 3) * r]); g.fillStyle = hl ? 'rgba(242,140,122,.35)' : 'rgba(142,205,242,.35)'; g.strokeStyle = '#5a7a9a'; g.lineWidth = 1.5; g.beginPath(); P.forEach(p => g.lineTo(...p)); g.closePath(); g.fill(); g.stroke();
+  P.forEach(p => { g.fillStyle = '#e04a3c'; g.beginPath(); g.arc(p[0], p[1], r * .22, 0, TAU); g.fill(); }); g.fillStyle = '#e04a3c'; g.globalAlpha = .55; g.beginPath(); g.arc(x, y, r * .26, 0, TAU); g.fill(); g.globalAlpha = 1; g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(x, y, r * .14, 0, TAU); g.fill(); }
+function tri(g, x, y, s, up, hl){ const h = s * Math.sqrt(3) / 2, P = up ? [[x, y], [x + s, y], [x + s / 2, y - h]] : [[x, y], [x + s, y], [x + s / 2, y + h]], cx = x + s / 2, cy = up ? y - h / 3 : y + h / 3;
+  g.fillStyle = hl ? 'rgba(242,140,122,.4)' : 'rgba(142,205,242,.4)'; g.strokeStyle = '#5a7a9a'; g.lineWidth = 1.5; g.beginPath(); P.forEach(p => g.lineTo(...p)); g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = 'rgba(224,74,60,.45)'; g.beginPath(); g.arc(cx, cy, s * .16, 0, TAU); g.fill(); g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(cx, cy, s * .08, 0, TAU); g.fill(); return P; }
+function odots(g, pts, s){ const seen = {}; pts.forEach(([x, y]) => { const k = Math.round(x) + ',' + Math.round(y); seen[k] = (seen[k] || 0) + 1; }); Object.entries(seen).forEach(([k, n]) => { const [x, y] = k.split(',').map(Number); g.fillStyle = n > 1 ? '#a8231a' : '#e04a3c'; g.beginPath(); g.arc(x, y, s * (n > 1 ? .13 : .11), 0, TAU); g.fill(); }); }
+function drawSilicate(){ const g = S.g, s = Math.min(S.w, S.h) * .1, cx = S.w * .4, cy = S.h * .52, k = st.s, h = s * Math.sqrt(3) / 2; let pts = [];
+  if (k === 'iso') { for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) { const x = cx - s * 2.8 + i * s * 2, y = cy - s * 1.6 + j * s * 1.7; pts = pts.concat(tri(g, x, y, s, true, i === 1 && j === 1)); if (i < 2) { g.fillStyle = '#8a6a3a'; g.beginPath(); g.arc(x + s * 1.5, y - h * .4, s * .16, 0, TAU); g.fill(); } } label(g, '갈색: Mg²⁺·Fe²⁺ 등 양이온 (사면체끼리 산소를 공유하지 않음)', cx, S.h - 20, {size: 11, color: C.muted}); }
+  else if (k === 'chain') { for (let i = -4; i <= 3; i++) pts = pts.concat(tri(g, cx + i * s, cy, s, true, i === 0)); label(g, '이웃 사면체와 산소 2개를 공유하며 한 줄로 연결', cx, S.h - 20, {size: 11, color: C.muted}); }
+  else if (k === 'dchain') { for (let i = -4; i <= 3; i++) pts = pts.concat(tri(g, cx + i * s, cy - h * .6, s, true, i === 0)); for (let i = -4; i <= 2; i++) pts = pts.concat(tri(g, cx + i * s + s / 2, cy - h * .6 + h, s, true, false)); label(g, '단사슬 두 줄이 산소를 공유하며 연결 (평균 2.5개 공유)', cx, S.h - 20, {size: 11, color: C.muted}); }
+  else { for (let j = -2; j <= 1; j++) for (let i = -5; i <= 5; i++) { const x = cx + i * 2 * s + ((j + 4) % 2) * s - s, y = cy + j * 2 * h + h * .5; if (x < 10 || x + 2 * s > S.w * .66) continue; pts = pts.concat(tri(g, x, y, s, true, i === 0 && j === 0)); pts = pts.concat(tri(g, x + s, y, s, false, false)); }
+    if (k === 'net') { for (let i = 0; i < 7; i++) { g.strokeStyle = 'rgba(90,122,154,.35)'; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(cx - S.w * .3 + i * 50, cy - S.h * .4); g.lineTo(cx - S.w * .3 + i * 50 + 40, cy + S.h * .4); g.stroke(); g.setLineDash([]); } label(g, '꼭대기 산소까지 위아래 층과 공유 → 3차원 그물 구조', cx, S.h - 20, {size: 11, color: C.muted}); }
+    else label(g, '밑면의 산소 3개를 공유하며 평면(판)으로 연결 → 판 사이가 약해 얇게 쪼개짐', cx, S.h - 20, {size: 11, color: C.muted}); }
+  odots(g, pts, s);
+  // 사면체 확대
+  const zx = S.w * .84, zy = S.h * .3, zr = Math.min(S.w, S.h) * .1; tetra(g, zx, zy, zr, -Math.PI / 2, true); label(g, 'SiO₄ 사면체', zx, zy + zr * 1.5, {size: 13, weight: 700}); label(g, '규소(파랑) 1 + 산소(빨강) 4', zx, zy + zr * 1.5 + 18, {size: 11, color: C.muted}); label(g, '(가운데 산소 1개는 위쪽)', zx, zy + zr * 1.5 + 34, {size: 10, color: C.muted});
+  const d = SIL[k]; label(g, `${d[0]} 구조 · ${d[1]}`, S.w * .4, 20, {size: 15, weight: 700}); label(g, `공유하는 산소 수 ${d[2]}개 · Si : O = ${d[3]}`, S.w * .84, S.h * .66, {size: 13, weight: 700, color: C.accent}); }
+/* ===== 단백질과 DNA ===== */
+const AA = ['#e8a33a', '#5aa0d0', '#8fca5a', '#d06a9a', '#9a7ad0', '#d0c04a', '#4ab0a0'];
+function drawProtein(){ const g = S.g, n = 28, f = st.fold, cx = S.w * .42, cy = S.h * .5, t = performance.now() / 1000; const P = [];
+  for (let i = 0; i < n; i++) { const lx = cx - S.w * .36 + i * S.w * .72 / (n - 1), ly = cy + Math.sin(i * .9) * 12; const a = i * .55, rr = Math.min(S.w, S.h) * (.08 + .22 * (1 - i / n) * .6 + (i % 7) * .012), fx = cx + Math.cos(a) * rr, fy = cy + Math.sin(a * 1.3) * rr * .8; P.push([D2(lx, fx, f), D2(ly, fy, f)]); }
+  g.strokeStyle = '#888'; g.lineWidth = 3; g.beginPath(); P.forEach(p => g.lineTo(...p)); g.stroke(); P.forEach((p, i) => { g.fillStyle = AA[(i * 3) % 7]; g.beginPath(); g.arc(p[0], p[1], 9, 0, TAU); g.fill(); });
+  label(g, f < .1 ? '아미노산이 펩타이드 결합으로 길게 연결 (1차 구조)' : f < .9 ? '접히고 꼬이는 중…' : '고유한 입체 구조 형성 → 고유한 기능', S.w / 2, 22, {size: 14, weight: 700});
+  label(g, '색깔 공 = 아미노산 (20종류)', S.w / 2, S.h - 16, {size: 11, color: C.muted}); }
+const D2 = (a, b, f) => a + (b - a) * (f * f * (3 - 2 * f));
+const PAIR = {A: 'T', T: 'A', G: 'C', C: 'G'}, BCOL = {A: '#e04a3c', T: '#e0a400', G: '#2fa36a', C: '#2f6fd0'};
+function newDna(){ st.dna = Array.from({length: 10}, () => 'ATGC'[Math.floor(Math.random() * 4)]); st.ans = []; }
+function drawDna(){ const g = S.g, n = st.dna.length, x0 = S.w * .08, dx = S.w * .84 / (n - 1), cy = S.h * .5, A = S.h * .2, t = performance.now() / 1000;
+  for (let i = 0; i < n; i++) { const x = x0 + i * dx, ph = i * .7 + t * .4, y1 = cy - Math.cos(ph) * A, y2 = cy + Math.cos(ph) * A, front = Math.sin(ph) > 0;
+    const b = st.dna[i], c = st.ans[i]; g.strokeStyle = '#ccc'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, y1); g.lineTo(x, y2); g.stroke();
+    g.fillStyle = BCOL[b]; g.fillRect(x - 12, y1 - 12, 24, 24); label(g, b, x, y1, {size: 13, weight: 700, color: '#fff'});
+    if (c) { g.fillStyle = BCOL[c]; g.fillRect(x - 12, y2 - 12, 24, 24); label(g, c, x, y2, {size: 13, weight: 700, color: '#fff'}); label(g, PAIR[b] === c ? (b === 'A' || b === 'T' ? '=' : '≡') : '', x, cy, {size: 14, color: '#888'}); }
+    else if (i === st.ans.length) { g.strokeStyle = C.hot; g.setLineDash([4, 3]); g.strokeRect(x - 13, y2 - 13, 26, 26); g.setLineDash([]); label(g, '?', x, y2, {size: 15, weight: 700, color: C.hot}); } }
+  g.strokeStyle = '#7a8aa6'; g.lineWidth = 4; [0, 1].forEach(s => { g.beginPath(); for (let i = 0; i <= (n - 1) * 8; i++) { const u = i / 8, x = x0 + u * dx, ph = u * .7 + t * .4; g.lineTo(x, cy + (s ? 1 : -1) * Math.cos(ph) * A); } g.stroke(); });
+  label(g, st.ans.length >= n ? '완성! 염기는 항상 A–T, G–C로 짝지어요 (상보적 결합)' : '아래 가닥의 빈칸에 알맞은 염기를 고르세요', S.w / 2, 22, {size: 14, weight: 700, color: st.ans.length >= n ? C.bio : C.ink}); label(g, '당–인산 골격(회색 띠) · 염기(색 사각형)', S.w / 2, S.h - 16, {size: 11, color: C.muted}); }
+/* ===== 신소재 ===== */
+const TC = 92;
+function R(kind, T){ if (kind === 'metal') return .3 + T / 300 * .7; if (kind === 'semi') return Math.min(2.2, .08 * Math.exp(1500 / T) / Math.exp(5)); return T < TC ? 0 : .25 + (T - TC) / 300 * .6; }
+function drawNew(){ const g = S.g, t = performance.now() / 1000;
+  if (st.n === 'semi') { const cx = S.w * .36, cy = S.h * .5, s = 34; for (let i = -3; i <= 3; i++) for (let j = -2; j <= 2; j++) { const x = cx + i * s * 1.4, y = cy + j * s * 1.4; g.strokeStyle = C.line; g.lineWidth = 2; if (i < 3) { g.beginPath(); g.moveTo(x, y); g.lineTo(x + s * 1.4, y); g.stroke(); } if (j < 2) { g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + s * 1.4); g.stroke(); } g.fillStyle = '#9aa6c0'; g.beginPath(); g.arc(x, y, 12, 0, TAU); g.fill(); label(g, 'Si', x, y, {size: 10, color: '#fff', weight: 700}); }
+    const free = Math.round(Math.max(0, (st.T - 150) / 150) * 8); for (let k = 0; k < free; k++) { const x = cx - s * 4 + ((t * 60 + k * 71) % (s * 8.4)), y = cy - s * 2.1 + (k * 37) % (s * 4.2); g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(x, y, 4, 0, TAU); g.fill(); }
+    label(g, `온도 ${st.T} K: 자유 전자 ${free}개 (온도가 높을수록 많아짐)`, cx, 22, {size: 13, weight: 700}); label(g, '규소(Si) 같은 반도체 → 온도가 높거나 불순물을 넣으면(도핑) 전기가 잘 통함', S.w / 2, S.h - 16, {size: 11, color: C.muted}); }
+  else if (st.n === 'super') { const cx = S.w * .36, by = S.h * .7, sc = st.T < TC; g.fillStyle = sc ? 'rgba(200,230,255,.6)' : '#c9c9c9'; g.fillRect(cx - 90, by, 180, 26); g.strokeStyle = C.line; g.strokeRect(cx - 90, by, 180, 26); label(g, '초전도체', cx, by + 13, {size: 12, weight: 700});
+    if (sc) for (let k = 0; k < 6; k++) { g.strokeStyle = 'rgba(200,230,255,.8)'; g.beginPath(); g.ellipse(cx + Math.sin(t * 3 + k) * 40, by + 20, 14, 4, 0, 0, TAU); g.stroke(); }
+    const lev = sc ? 60 + Math.sin(t * 2) * 4 : 0; g.fillStyle = '#c0504a'; g.fillRect(cx - 30, by - 22 - lev, 30, 22); g.fillStyle = '#4a70c0'; g.fillRect(cx, by - 22 - lev, 30, 22); label(g, 'N', cx - 15, by - 11 - lev, {size: 11, color: '#fff', weight: 700}); label(g, 'S', cx + 15, by - 11 - lev, {size: 11, color: '#fff', weight: 700});
+    label(g, sc ? '자석이 떠 있음! (마이스너 효과)' : `임계 온도(${TC} K)보다 높아 보통 상태`, cx, 22, {size: 14, weight: 700, color: sc ? C.accent : C.ink}); label(g, sc ? '전기 저항 0' : '전기 저항 있음', cx, 44, {size: 12, color: C.muted}); }
+  else { const cx = S.w * .36, cy = S.h * .5, a = 22; for (let i = -6; i <= 6; i++) for (let j = -4; j <= 4; j++) { const x = cx + i * a * 1.5, y = cy + j * a * Math.sqrt(3) + (i % 2 ? a * Math.sqrt(3) / 2 : 0); g.strokeStyle = '#555'; g.lineWidth = 1.5; g.beginPath(); for (let k = 0; k <= 6; k++) { const an = k * TAU / 6; g.lineTo(x + Math.cos(an) * a, y + Math.sin(an) * a); } g.stroke(); }
+    label(g, '그래핀: 탄소 원자가 벌집 모양으로 연결된 원자 한 층 두께의 막', cx, 22, {size: 13, weight: 700}); label(g, '말면 → 탄소 나노튜브', cx, S.h - 16, {size: 11, color: C.muted}); }
+  const rx = S.w * .82; const items = {semi: ['반도체', '태양 전지, LED, 컴퓨터 칩'], super: ['초전도체', '자기 공명 영상(MRI), 자기 부상 열차'], graphene: ['그래핀·나노튜브', '휘어지는 디스플레이, 고강도 소재']}[st.n]; label(g, items[0], rx, S.h * .35, {size: 18, weight: 700}); label(g, '활용 예', rx, S.h * .35 + 28, {size: 11, color: C.muted}); label(g, items[1], rx, S.h * .35 + 46, {size: 12}); }
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'silicate') { const m = axes(G, {x: [0, 6, 1, ''], y: [0, 4, 1, '공유 산소 수']}); Object.entries(SIL).forEach(([k, d], i) => { const x = m.X(i + .8); g.fillStyle = k === st.s ? C.hot : C.accent; g.fillRect(x - 20, m.Y(d[2]), 40, m.Y(0) - m.Y(d[2])); label(g, d[1], x, m.Y(0) + 12, {size: 11}); label(g, d[2], x, m.Y(d[2]) - 10, {size: 11, weight: 700}); }); label(g, '공유 산소 수가 많을수록 결합이 복잡하고 풍화에 강함', m.X(3), m.Y(3.8), {size: 11, color: C.muted}); }
+  else if (st.mode === 'bio') { const m = axes(G, {x: [0, 5, 1, ''], y: [0, 70, 10, '구성 비율 (%)']}); [['물', 65], ['단백질', 16], ['지질', 12], ['무기염류', 6], ['탄수화물·핵산', 1]].forEach(([n, v], i) => { const x = m.X(i + .5); g.fillStyle = n === '단백질' && st.b === 'protein' || n.includes('핵산') && st.b === 'dna' ? C.hot : C.accent; g.fillRect(x - 18, m.Y(v), 36, m.Y(0) - m.Y(v)); label(g, n, x, m.Y(0) + 12, {size: 10}); label(g, v + '%', x, m.Y(v) - 10, {size: 10, weight: 700}); }); }
+  else { const m = axes(G, {x: [0, 300, 50, '온도 (K)'], y: [0, 2.2, .5, '전기 저항 (상대값)']}); const P = k => { const a = []; for (let T = 20; T <= 300; T += 2) a.push([T, R(k, T)]); return a; }; line(G, P('metal'), m, C.line, 1.5, [5, 4]); line(G, P(st.n === 'super' ? 'super' : 'semi'), m, C.hot, 2.5); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.T), m.Y(R(st.n === 'super' ? 'super' : 'semi', st.T)), 5, 0, TAU); g.fill(); label(g, '점선: 금속', m.X(260), m.Y(1.05), {size: 10, color: C.muted}); if (st.n === 'super') label(g, `임계 온도 ${TC} K`, m.X(TC), m.Y(.9), {size: 10, color: C.hot}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
+  if (st.mode === 'silicate') { const d = SIL[st.s]; s.innerHTML = `<div><b>${d[0]}</b><span>${d[1]}</span></div><div><b>${d[2]}개</b><span>공유하는 산소</span></div><div><b>${d[3]}</b><span>Si : O</span></div>`; $('explain').innerHTML = `지각의 대부분은 <b>규산염 광물</b>이에요. 규소 1개와 산소 4개가 결합한 <b>SiO₄ 사면체</b>가 기본 단위이고, 사면체끼리 산소를 공유하는 방식에 따라 구조와 성질이 달라져요. ${d[4]}.`; $('tip').textContent = '지각을 이루는 원소: 산소(약 46 %) > 규소(약 28 %) > 알루미늄 > 철 > 칼슘 …';
+    th.innerHTML = '<tr><th>구조</th><th>광물</th><th>공유 산소</th><th>특징</th></tr>'; tb.innerHTML = Object.values(SIL).map(d => `<tr><td>${d[0]}</td><td>${d[1]}</td><td>${d[2]}</td><td>${d[5]}</td></tr>`).join(''); $('tTitle').textContent = '규산염 광물의 구조'; $('gTitle').textContent = '사면체가 공유하는 산소 수'; $('gSub').textContent = ''; }
+  else if (st.mode === 'bio') { s.innerHTML = st.b === 'protein' ? '<div><b>아미노산</b><span>단위체 (20종류)</span></div><div><b>펩타이드 결합</b><span>연결 방식</span></div>' : `<div><b>뉴클레오타이드</b><span>단위체</span></div><div><b>${st.ans.filter((c, i) => PAIR[st.dna[i]] === c).length}/${st.dna.length}</b><span>맞춘 염기쌍</span></div>`;
+    $('explain').innerHTML = st.b === 'protein' ? '<b>단백질</b>: 아미노산이 <b>펩타이드 결합</b>으로 길게 연결된 뒤 접히고 꼬여 고유한 입체 구조를 이뤄요. 몸의 구성 성분이자 효소·호르몬·항체로 생명 활동을 조절해요.' : '<b>핵산(DNA, RNA)</b>: 인산·당·염기로 된 <b>뉴클레오타이드</b>가 연결된 물질. DNA는 두 가닥이 염기 사이 결합(A–T, G–C)으로 이중 나선을 이루며 <b>유전 정보</b>를 저장해요.'; $('tip').textContent = '생명체 구성 물질은 탄소 화합물이 많아요. 탄소는 원자가 전자가 4개라 다른 원자와 최대 4개의 공유 결합을 하며 사슬·고리 등 다양한 구조를 만들어요.';
+    th.innerHTML = '<tr><th></th><th>단백질</th><th>핵산</th></tr>'; tb.innerHTML = [['단위체', '아미노산', '뉴클레오타이드'], ['구성 원소', 'C, H, O, N (S)', 'C, H, O, N, P'], ['기능', '몸 구성, 효소·호르몬', '유전 정보 저장·전달']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); $('tTitle').textContent = '단백질과 핵산 비교'; $('gTitle').textContent = '사람 몸의 구성 물질 비율 (대략)'; $('gSub').textContent = ''; }
+  else { const k = st.n === 'super' ? 'super' : 'semi'; s.innerHTML = st.n === 'graphene' ? '<div><b>원자 1개 두께</b><span>그래핀</span></div><div><b>강철의 약 200배</b><span>강도</span></div>' : `<div><b>${st.T} K</b><span>온도</span></div><div><b>${R(k, st.T).toFixed(2)}</b><span>전기 저항(상대값)</span></div>`;
+    $('explain').innerHTML = {semi: '<b>반도체</b>: 도체와 부도체의 중간 성질. 순수한 상태에서는 전기가 잘 통하지 않지만 온도가 높아지거나 불순물을 첨가(도핑)하면 전기 전도성이 커져요. 금속은 반대로 온도가 높을수록 저항이 커져요.', super: '<b>초전도체</b>: 임계 온도 이하에서 <b>전기 저항이 0</b>이 되고 내부의 자기장을 밀어내(마이스너 효과) 자석을 띄울 수 있어요.', graphene: '<b>그래핀</b>: 탄소 원자가 육각형 벌집 모양으로 연결된 한 층. 매우 얇고 강하며 전기와 열을 잘 전달하고 휘어져요. 말아서 만든 관이 <b>탄소 나노튜브</b>예요.'}[st.n];
+    $('tip').textContent = '신소재: 기존 물질의 구조를 바꾸거나 새롭게 합성해 뛰어난 성질을 갖게 만든 물질. 물질의 구조를 이해하면 원하는 성질을 설계할 수 있어요.'; th.innerHTML = '<tr><th>신소재</th><th>특성</th><th>활용</th></tr>'; tb.innerHTML = [['반도체', '전도성 조절 가능', '전자 기기, 태양 전지, LED'], ['초전도체', '저항 0, 마이스너 효과', 'MRI, 자기 부상 열차'], ['그래핀', '얇고 강함, 전도성', '플렉시블 디스플레이'], ['탄소 나노튜브', '가볍고 강함', '스포츠 용품, 전극'], ['형상 기억 합금', '원래 모양 복원', '안경테, 의료 기기']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); $('tTitle').textContent = '여러 가지 신소재'; $('gTitle').textContent = '온도에 따른 전기 저항'; $('gSub').textContent = st.n === 'graphene' ? '(반도체 그래프)' : ''; } }
+Kit.seg($('sSeg'), 's', v => { st.s = v; render(); })('iso');
+Kit.seg($('bSeg'), 'b', v => { st.b = v; $('foldF').style.display = v === 'protein' ? '' : 'none'; $('baseF').style.display = $('newDna').style.display = v === 'dna' ? '' : 'none'; render(); })('protein');
+$('fold').oninput = e => { st.fold = +e.target.value; $('foldOut').textContent = st.fold < .1 ? '펼쳐짐' : st.fold > .9 ? '입체 구조' : '접히는 중'; };
+Kit.seg($('baseSeg'), 'base', v => { if (st.ans.length >= st.dna.length) return; const want = PAIR[st.dna[st.ans.length]]; if (v === want) st.ans.push(v); else { $('explain').innerHTML = `<b>${st.dna[st.ans.length]}</b>와(과) 짝을 이루는 염기는 <b>${v}</b>가 아니에요. A–T, G–C를 기억하세요!`; return; } render(); });
+$('newDna').onclick = () => { newDna(); render(); }; newDna();
+Kit.seg($('nSeg'), 'n', v => { st.n = v; $('tempF').style.display = v === 'graphene' ? 'none' : ''; render(); })('semi');
+$('temp').oninput = e => { st.T = +e.target.value; $('tempOut').textContent = st.T + ' K'; render(); };
+Kit.tabs(m => { st.mode = m; if (m === 'bio') $('bSeg').querySelector(`[data-b="${st.b}"]`).click(); if (m === 'new') $('nSeg').querySelector(`[data-n="${st.n}"]`).click(); render(); }, ['silicate', 'bio', 'new']);
+Kit.loop(() => {}, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); if (st.mode === 'silicate') drawSilicate(); else if (st.mode === 'bio') (st.b === 'protein' ? drawProtein : drawDna)(); else drawNew(); drawGraph(); });
+})();
+</script>
+</body>
+</html>
