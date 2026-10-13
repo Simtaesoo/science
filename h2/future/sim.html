@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>과학과 미래 사회 실험실 · 통합과학2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-gen">
+<div class="wrap">
+  <nav class="topbar" data-topbar="통합과학2|06 과학과 미래 사회" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학2 · 06 과학과 미래 사회 <span class="code">통과2 Ⅲ</span></div>
+      <h1>감염병과 빅데이터 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="sir">1. 감염병의 확산과 예방</button>
+      <button type="button" data-mode="data">2. 빅데이터와 과학 탐구</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="감염병과 데이터 모형"></canvas></div>
+      <div class="controls">
+        <label class="field" data-only="sir" for="r0">전파력 (기초 감염 재생산 수) <input type="range" id="r0" min="1" max="6" step="0.5" value="3"><output id="r0Out">3</output></label>
+        <label class="field" data-only="sir" for="vac">백신 접종률 <input type="range" id="vac" min="0" max="90" step="10" value="0"><output id="vacOut">0 %</output></label>
+        <div class="field" data-only="sir"><label><input type="checkbox" id="mask"> 마스크·손 씻기 (접촉 감염 40 % 감소)</label></div>
+        <button class="btn primary" type="button" id="run" data-only="sir">다시 시작</button>
+        <div class="field" data-only="data"><div class="seg" id="dsSeg"><button type="button" data-ds="ice">기온 ↔ 아이스크림 판매</button><button type="button" data-ds="drown">아이스크림 판매 ↔ 물놀이 사고</button><button type="button" data-ds="power">기온 ↔ 전력 수요</button></div></div>
+        <label class="field" data-only="data" for="slope">기울기 <input type="range" id="slope" min="-2" max="4" step="0.05" value="1"><output id="slopeOut">1</output></label>
+        <label class="field" data-only="data" for="icpt">절편 <input type="range" id="icpt" min="-40" max="80" step="1" value="0"><output id="icptOut">0</output></label>
+        <button class="btn primary" type="button" id="fit" data-only="data">컴퓨터로 최적 직선 찾기</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>백신을 맞지 않은 사람도 집단 면역의 보호를 받는 까닭은?</summary><p>면역을 가진 사람이 충분히 많으면 감염자가 다른 사람을 만나도 대부분 면역자라 병원체가 퍼져 나가지 못합니다. 그래서 백신을 맞을 수 없는 어린 아기나 환자도 간접적으로 보호받습니다. 필요한 접종률은 대략 1 − 1/R₀입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>아이스크림 판매량과 물놀이 사고가 함께 늘어나면, 아이스크림이 사고의 원인일까?</summary><p>아닙니다. 두 변수 모두 '기온'이라는 제3의 요인 때문에 함께 늘어나는 것입니다. 상관관계가 있다고 해서 인과 관계가 있는 것은 아니므로, 빅데이터를 해석할 때는 숨은 변인을 찾고 과학적 근거로 검증해야 합니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>빅데이터와 인공지능을 과학 탐구에 활용할 때 주의할 점은?</summary><p>데이터의 품질과 편향(특정 집단만 포함), 개인 정보 보호, 상관관계를 인과로 오해하는 문제, 알고리즘이 왜 그런 결론을 냈는지 설명하기 어려운 문제 등을 고려해야 합니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="감염병 확산과 데이터는 교육용 모형입니다."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+const st = {mode: 'sir', r0: 3, vac: 0, mask: false, ag: [], t: 0, hist: [], ds: 'ice', a: 1, b: 0, data: []};
+/* ===== 감염병 (행위자 모형) ===== */
+const N = 220, RAD = .022, DUR = 6; // 감염 기간(초)
+function initSIR(){ st.ag = Array.from({length: N}, (_, i) => ({x: Math.random(), y: Math.random(), vx: (Math.random() - .5) * .14, vy: (Math.random() - .5) * .14, s: i < 3 ? 'I' : Math.random() < st.vac / 100 ? 'R' : 'S', v: false, ti: 0})); st.ag.forEach(a => { if (a.s === 'R') a.v = true; }); st.t = 0; st.hist = []; }
+// 전파 확률을 R0에 맞춤: R0 ≈ p × (감염 기간 동안 만나는 사람 수)
+function pInf(){ const contacts = 9.5; return st.r0 / contacts * (st.mask ? .6 : 1); }
+function stepSIR(dt){ st.t += dt; const p = pInf() * dt / DUR * 3.2;
+  st.ag.forEach(a => { a.x += a.vx * dt; a.y += a.vy * dt; if (a.x < 0 || a.x > 1) a.vx *= -1; if (a.y < 0 || a.y > 1) a.vy *= -1; a.x = Math.max(0, Math.min(1, a.x)); a.y = Math.max(0, Math.min(1, a.y)); if (a.s === 'I') { a.ti += dt; if (a.ti > DUR) a.s = 'R'; } });
+  const inf = st.ag.filter(a => a.s === 'I'); st.ag.forEach(a => { if (a.s !== 'S') return; for (const b of inf) { if (Math.abs(a.x - b.x) < RAD * 1.6 && Math.abs(a.y - b.y) < RAD * 1.6 && Math.random() < p * 4) { a.s = 'I'; a.ti = 0; break; } } }); }
+const cnt = () => ({S: st.ag.filter(a => a.s === 'S').length, I: st.ag.filter(a => a.s === 'I').length, R: st.ag.filter(a => a.s === 'R' && !a.v).length, V: st.ag.filter(a => a.v).length});
+function drawSIR(){ const g = S.g, W = S.w, H = S.h, bx = 10, by = 10, bw = W * .62, bh = H - 20; g.strokeStyle = C.line; g.strokeRect(bx, by, bw, bh);
+  st.ag.forEach(a => { g.fillStyle = a.s === 'S' ? '#8ecdf2' : a.s === 'I' ? '#e04a3c' : a.v ? '#5fb37a' : '#9aa6b8'; g.beginPath(); g.arc(bx + a.x * bw, by + a.y * bh, 5, 0, TAU); g.fill(); if (a.s === 'I') { g.strokeStyle = 'rgba(224,74,60,.25)'; g.beginPath(); g.arc(bx + a.x * bw, by + a.y * bh, RAD * 1.6 * bw, 0, TAU); g.stroke(); } });
+  const c = cnt(), rx = W * .82; [['#8ecdf2', '감염 가능', c.S], ['#e04a3c', '감염자', c.I], ['#9aa6b8', '회복(면역)', c.R], ['#5fb37a', '백신 접종', c.V]].forEach(([col, n, v], i) => { g.fillStyle = col; g.beginPath(); g.arc(rx - 70, H * .2 + i * 30, 7, 0, TAU); g.fill(); label(g, `${n} ${v}명`, rx - 56, H * .2 + i * 30, {size: 13, align: 'left', weight: 700}); });
+  const peak = Math.max(0, ...st.hist.map(h => h[2])); label(g, `최대 동시 감염자 ${peak}명`, rx, H * .2 + 140, {size: 13, weight: 700, color: C.hot}); label(g, `누적 감염 ${N - c.S - c.V}명`, rx, H * .2 + 164, {size: 13});
+  const herd = Math.max(0, 1 - 1 / st.r0) * 100; label(g, `집단 면역에 필요한 접종률 ≈ ${herd.toFixed(0)} %`, rx, H * .2 + 200, {size: 12, color: C.bio, weight: 700}); }
+/* ===== 데이터 ===== */
+function makeData(){ let seed = st.ds === 'ice' ? 4 : st.ds === 'drown' ? 7 : 12; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647, n = () => (r() + r() + r() - 1.5) * 2; st.data = [];
+  for (let i = 0; i < 120; i++) { const T = -5 + r() * 40; if (st.ds === 'ice') st.data.push([T, 20 + T * 2.2 + n() * 9]); else if (st.ds === 'drown') { const ice = 20 + T * 2.2 + n() * 9; st.data.push([ice, Math.max(0, (T - 15) * .9 + n() * 4 + 6)]); } else st.data.push([T, 60 + .22 * (T - 15) ** 2 + n() * 6]); } }
+const DS = {ice: ['기온 (℃)', '아이스크림 판매 (개)', [-5, 35, 10], [0, 120, 20]], drown: ['아이스크림 판매 (개)', '물놀이 사고 (건)', [0, 110, 20], [0, 40, 10]], power: ['기온 (℃)', '전력 수요 (GW, 모형)', [-5, 35, 10], [40, 160, 20]]};
+function stats(){ const n = st.data.length, mx = st.data.reduce((s, p) => s + p[0], 0) / n, my = st.data.reduce((s, p) => s + p[1], 0) / n; let sxy = 0, sxx = 0, syy = 0; st.data.forEach(([x, y]) => { sxy += (x - mx) * (y - my); sxx += (x - mx) ** 2; syy += (y - my) ** 2; }); const a = sxy / sxx, b = my - a * mx, r = sxy / Math.sqrt(sxx * syy), mse = st.data.reduce((s, [x, y]) => s + (y - (st.a * x + st.b)) ** 2, 0) / n; return {a, b, r, mse}; }
+function drawData(){ const g = S.g, d = DS[st.ds], m = axes(S, {x: [...d[2], d[0]], y: [...d[3], d[1]]}, {L: 56, B: 34, T: 20, R: 20});
+  st.data.forEach(([x, y]) => { g.fillStyle = 'rgba(47,111,208,.55)'; g.beginPath(); g.arc(m.X(x), m.Y(y), 3.5, 0, TAU); g.fill(); });
+  const x0 = d[2][0], x1 = d[2][1]; line(S, [[x0, st.a * x0 + st.b], [x1, st.a * x1 + st.b]], m, C.hot, 2.5);
+  const s = stats(); st.data.slice(0, 30).forEach(([x, y]) => { g.strokeStyle = 'rgba(220,80,60,.25)'; g.beginPath(); g.moveTo(m.X(x), m.Y(y)); g.lineTo(m.X(x), m.Y(st.a * x + st.b)); g.stroke(); });
+  label(g, `상관 계수 r = ${s.r.toFixed(2)}  ·  내 직선의 평균 제곱 오차 = ${s.mse.toFixed(1)}`, S.w / 2, 12, {size: 13, weight: 700}); }
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'sir') { const m = axes(G, {x: [0, 40, 5, '시간 (s)'], y: [0, N, 40, '사람 수']}); [[1, '#8ecdf2'], [2, '#e04a3c'], [3, '#9aa6b8']].forEach(([k, c]) => line(G, st.hist.map(h => [h[0], h[k]]), m, c, 2.4)); label(g, '파랑: 감염 가능 · 빨강: 감염자 · 회색: 회복', m.X(28), m.Y(N * .92), {size: 10, color: C.muted}); }
+  else { const m = axes(G, {x: [0, 1, .2, ''], y: [-1, 1, .5, '상관 계수 r']}); [['ice', '기온–아이스크림'], ['drown', '아이스크림–사고'], ['power', '기온–전력']].forEach(([k, n], i) => { const keep = st.ds; st.ds = k; makeData(); const r = stats().r; st.ds = keep; const x = m.X(.18 + i * .32); g.fillStyle = k === keep ? C.hot : C.accent; const y0 = m.Y(0), y1 = m.Y(r); g.fillRect(x - 22, Math.min(y0, y1), 44, Math.abs(y0 - y1)); label(g, n, x, m.Y(-1) - 8, {size: 10}); label(g, r.toFixed(2), x, y1 - 10, {size: 10, weight: 700}); }); makeData(); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
+  if (st.mode === 'sir') { const c = cnt(); s.innerHTML = `<div><b>${st.r0}</b><span>기초 감염 재생산 수 R₀</span></div><div><b>${(st.r0 * (st.mask ? .6 : 1) * (1 - st.vac / 100)).toFixed(2)}</b><span>실질 감염 재생산 수</span></div><div><b>${c.I}</b><span>현재 감염자</span></div>`; $('explain').innerHTML = '<b>감염병</b>은 병원체(바이러스, 세균 등)가 사람이나 동물 사이에 전파되어 생기는 질병이에요. 한 명의 감염자가 평균 몇 명을 감염시키는지를 <b>감염 재생산 수</b>라 하며, 이 값이 1보다 작아지면 감염병이 줄어들어요. 백신, 마스크·손 씻기, 거리 두기는 이 값을 낮춰요.'; $('tip').textContent = '실질 감염 재생산 수 ≈ R₀ × (감염 가능한 사람 비율) × (예방 수칙 효과). 이 모형은 원리를 보여 주는 단순화한 시뮬레이션이에요.';
+    th.innerHTML = '<tr><th>방역 수단</th><th>원리</th></tr>'; tb.innerHTML = [['백신', '면역을 미리 만들어 감염 가능한 사람 수 감소'], ['마스크·기침 예절', '비말로 전파되는 경로 차단'], ['손 씻기', '접촉으로 전파되는 경로 차단'], ['격리·거리 두기', '감염자와 접촉 횟수 감소'], ['역학 조사·빅데이터', '감염 경로 추적, 확산 예측']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = '감염병 예방 방법'; $('gTitle').textContent = '감염 곡선 (SIR 모형)'; $('gSub').textContent = '정점을 낮추고 늦추면(곡선 평탄화) 의료 체계 부담이 줄어요'; }
+  else { const st2 = stats(); s.innerHTML = `<div><b>${st2.r.toFixed(2)}</b><span>상관 계수</span></div><div><b>y = ${st2.a.toFixed(2)}x ${st2.b >= 0 ? '+' : '−'} ${Math.abs(st2.b).toFixed(1)}</b><span>최적 직선</span></div>`;
+    $('explain').innerHTML = {ice: '기온이 오를수록 아이스크림 판매가 늘어요. 두 변수 사이에 강한 <b>양의 상관관계</b>가 있어요. 빅데이터를 분석하면 이런 관계를 찾아 미래를 <b>예측</b>할 수 있어요.', drown: '아이스크림 판매와 물놀이 사고도 상관관계가 있어 보여요. 하지만 원인은 둘 다 <b>기온</b>(숨은 변인)! <b>상관관계 ≠ 인과 관계</b>임을 꼭 기억하세요.', power: '전력 수요는 너무 춥거나(난방) 너무 더울 때(냉방) 모두 늘어 <b>U자 모양</b>이에요. 직선으로는 잘 맞지 않아 상관 계수가 작게 나와요 — 관계가 없다는 뜻이 아니라 직선 관계가 아닌 거예요.'}[st.ds];
+    $('tip').textContent = '빅데이터: 양이 방대하고, 생성 속도가 빠르며, 형태가 다양한 데이터. 과학 탐구에서 패턴 발견, 예측 모델(기상·감염병·교통)에 활용돼요.';
+    th.innerHTML = '<tr><th>상관 계수 r</th><th>해석</th></tr>'; tb.innerHTML = [['+0.7 ~ +1', '강한 양의 상관관계'], ['+0.3 ~ +0.7', '약한 양의 상관관계'], ['−0.3 ~ +0.3', '직선 관계가 거의 없음'], ['−1 ~ −0.7', '강한 음의 상관관계']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = '상관 계수 읽는 법'; $('gTitle').textContent = '데이터 세트별 상관 계수'; $('gSub').textContent = ''; } }
+['r0', 'vac'].forEach(id => $(id).oninput = e => { st[id] = +e.target.value; $(id + 'Out').textContent = st[id] + (id === 'vac' ? ' %' : ''); initSIR(); render(); });
+$('mask').onchange = e => { st.mask = e.target.checked; initSIR(); render(); }; $('run').onclick = () => { initSIR(); render(); };
+Kit.seg($('dsSeg'), 'ds', v => { st.ds = v; makeData(); const s = stats(); st.a = Math.round(s.a * 2) / 2 * .6; st.b = Math.round(s.b * .5); $('slope').value = st.a; $('icpt').value = st.b; $('slopeOut').textContent = st.a; $('icptOut').textContent = st.b; render(); })('ice');
+$('slope').oninput = e => { st.a = +e.target.value; $('slopeOut').textContent = st.a; render(); }; $('icpt').oninput = e => { st.b = +e.target.value; $('icptOut').textContent = st.b; render(); };
+$('fit').onclick = () => { const s = stats(); st.a = +s.a.toFixed(2); st.b = +s.b.toFixed(1); $('slope').value = st.a; $('icpt').value = st.b; $('slopeOut').textContent = st.a; $('icptOut').textContent = st.b; render(); };
+initSIR(); window.__sim = {st, cnt};
+Kit.tabs(m => { st.mode = m; if (m === 'sir') initSIR(); render(); }, ['sir', 'data']);
+let acc = 0;
+Kit.loop(dt => { if (st.mode === 'sir' && st.t < 40) { stepSIR(dt); acc += dt; if (acc > .25) { acc = 0; const c = cnt(); st.hist.push([st.t, c.S, c.I, c.R]); render(); } } }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); (st.mode === 'sir' ? drawSIR : drawData)(); drawGraph(); });
+})();
+</script>
+</body>
+</html>
