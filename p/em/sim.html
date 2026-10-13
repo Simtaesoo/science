@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>전기와 자기 실험실 · 물리학</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="물리학|03 전기와 자기" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>물리학 · 03 전기와 자기 <span class="code">물리학 Ⅱ</span></div>
+      <h1>전기와 자기 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="coulomb">1. 전기력</button>
+      <button type="button" data-mode="level">2. 에너지 준위</button>
+      <button type="button" data-mode="band">3. 에너지띠</button>
+      <button type="button" data-mode="diode">4. 다이오드</button>
+      <button type="button" data-mode="field">5. 전류의 자기장</button>
+      <button type="button" data-mode="induct">6. 전자기 유도</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="전기와 자기 실험 장치"></canvas></div>
+      <div class="controls">
+        <label class="field" data-only="coulomb" for="q1">전하 q₁ <input type="range" id="q1" min="-5" max="5" step="1" value="3"><output id="q1Out">+3 μC</output></label>
+        <label class="field" data-only="coulomb" for="q2">전하 q₂ <input type="range" id="q2" min="-5" max="5" step="1" value="-2"><output id="q2Out">−2 μC</output></label>
+        <label class="field" data-only="coulomb" for="rr">거리 r <input type="range" id="rr" min="0.1" max="1" step="0.05" value="0.3"><output id="rrOut">0.3 m</output></label>
+        <label class="field" data-only="level" for="nu">처음 준위 <input type="range" id="nu" min="2" max="6" step="1" value="3"><output id="nuOut">n = 3</output></label>
+        <label class="field" data-only="level" for="nl">나중 준위 <input type="range" id="nl" min="1" max="5" step="1" value="2"><output id="nlOut">n = 2</output></label>
+        <div class="field" data-only="band"><div class="seg" id="matSeg"><button type="button" data-mat="metal">도체 (구리)</button><button type="button" data-mat="semi">반도체 (규소)</button><button type="button" data-mat="ins">절연체 (다이아몬드)</button></div></div>
+        <label class="field" data-only="band" for="tk">온도 <input type="range" id="tk" min="100" max="600" step="25" value="300"><output id="tkOut">300 K</output></label>
+        <div class="field" data-only="band"><div class="seg" id="dopSeg"><button type="button" data-dop="none">순수</button><button type="button" data-dop="n">n형 (인 첨가)</button><button type="button" data-dop="p">p형 (붕소 첨가)</button></div></div>
+        <label class="field" data-only="diode" for="vb">전압 <input type="range" id="vb" min="-3" max="0.8" step="0.05" value="0.7"><output id="vbOut">+0.70 V</output></label>
+        <div class="field" data-only="field"><div class="seg" id="shSeg"><button type="button" data-sh="wire">직선 도선</button><button type="button" data-sh="loop">원형 도선</button><button type="button" data-sh="sol">솔레노이드</button></div></div>
+        <label class="field" data-only="field" for="ci">전류 <input type="range" id="ci" min="-10" max="10" step="1" value="5"><output id="ciOut">5 A</output></label>
+        <label class="field" data-only="field" for="cr">거리·반지름 <input type="range" id="cr" min="0.01" max="0.1" step="0.01" value="0.05"><output id="crOut">5 cm</output></label>
+        <div class="field" data-only="induct"><div class="seg" id="poleSeg"><button type="button" data-pole="N">N극을 코일 쪽으로</button><button type="button" data-pole="S">S극을 코일 쪽으로</button></div></div>
+        <label class="field" data-only="induct" for="sp">자석 속력 <input type="range" id="sp" min="0.5" max="3" step="0.25" value="1"><output id="spOut">×1.00</output></label>
+        <label class="field" data-only="induct" for="nt">감은 수 <input type="range" id="nt" min="100" max="500" step="100" value="200"><output id="ntOut">200 회</output></label>
+        <button class="btn" type="button" id="play" data-only="induct band">일시정지</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>두 전하 사이 거리를 절반으로 줄이면 전기력은 몇 배가 될까?</summary><p>전기력은 거리의 제곱에 반비례(F = kq₁q₂/r²)하므로 4배가 됩니다. 시뮬레이션에서 r = 0.4 m → 0.2 m로 바꿔 확인해 보세요.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>수소 원자의 스펙트럼이 연속 스펙트럼이 아니라 선 스펙트럼인 까닭은?</summary><p>원자 속 전자는 특정한 에너지(에너지 준위)만 가질 수 있어서, 전이할 때 방출하는 빛의 에너지도 두 준위의 차이에 해당하는 특정한 값뿐이기 때문입니다. 에너지가 양자화되어 있다는 증거예요.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>자석을 코일 안에 넣고 가만히 두면 전류가 흐를까?</summary><p>흐르지 않습니다. 유도 전류는 코일을 지나는 자기 선속이 <b>변할 때</b>만 생깁니다. 자석이 멈추면 자기 선속이 일정하므로 유도 기전력은 0이에요.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="쿨롱 상수 k = 9.0×10⁹ N·m²/C², μ₀ = 4π×10⁻⁷ T·m/A. 수소 원자 Eₙ = −13.6/n² eV."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+const st = {mode: 'coulomb', q1: 3, q2: -2, r: .3, nu: 3, nl: 2, mat: 'semi', T: 300, dop: 'none', V: .7, sh: 'wire', I: 5, cr: .05, pole: 'N', sp: 1, N: 200, t: 0};
+const sgn = v => v > 0 ? '+' + v : v < 0 ? '−' + Math.abs(v) : '0';
+const sci = (v, d = 2) => { if (v === 0) return '0'; const e = Math.floor(Math.log10(Math.abs(v))), m = v / Math.pow(10, e); return `${m.toFixed(d)}×10${String(e).replace('-', '⁻').replace(/\d/g, c => '⁰¹²³⁴⁵⁶⁷⁸⁹'[c])}`; };
+/* 가시광선 파장 → 색 */
+function wlColor(nm){ if (nm < 380 || nm > 750) return null; let r = 0, g = 0, b = 0;
+  if (nm < 440) { r = (440 - nm) / 60; b = 1; } else if (nm < 490) { g = (nm - 440) / 50; b = 1; } else if (nm < 510) { g = 1; b = (510 - nm) / 20; } else if (nm < 580) { r = (nm - 510) / 70; g = 1; } else if (nm < 645) { r = 1; g = (645 - nm) / 65; } else r = 1;
+  return `rgb(${Math.round(r * 255)},${Math.round(g * 255)},${Math.round(b * 255)})`; }
+
+/* ===== 1. 쿨롱 법칙 ===== */
+const kC = 9e9, Fc = () => kC * st.q1 * 1e-6 * st.q2 * 1e-6 / (st.r * st.r); // 양수: 척력, 음수: 인력
+function drawCoulomb(){ const g = S.g, W = S.w, H = S.h, cy = H * .5, px = W * .7 / 1.0, x1 = W / 2 - st.r * px / 2, x2 = W / 2 + st.r * px / 2;
+  // 전기력선 느낌의 배경 (전위 등고선)
+  for (let i = 0; i < 2; i++) { const [x, q] = i ? [x2, st.q2] : [x1, st.q1]; if (!q) continue; for (let k = 1; k <= 4; k++) { g.strokeStyle = q > 0 ? 'rgba(224,83,63,.18)' : 'rgba(47,111,208,.18)'; g.lineWidth = 1; g.beginPath(); g.arc(x, cy, 26 + k * 18 * Math.sqrt(Math.abs(q)) / 1.5, 0, TAU); g.stroke(); } }
+  g.strokeStyle = C.muted; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(x1, cy + 60); g.lineTo(x2, cy + 60); g.stroke(); g.setLineDash([]); label(g, `r = ${st.r.toFixed(2)} m`, W / 2, cy + 74, {size: 12, color: C.muted});
+  const F = Fc(), mag = Math.abs(F), len = Math.min(W * .3, 14 + Math.sqrt(mag) * 16), rep = F > 0;
+  [[x1, st.q1, -1], [x2, st.q2, 1]].forEach(([x, q, side]) => { const col = q > 0 ? C.hot : q < 0 ? C.phy : C.muted, rad = 14 + Math.abs(q) * 3;
+    g.fillStyle = col; g.beginPath(); g.arc(x, cy, rad, 0, TAU); g.fill(); label(g, q > 0 ? '+' : q < 0 ? '−' : '0', x, cy, {size: 18, weight: 700, color: '#fff'}); label(g, `${sgn(q)} μC`, x, cy - rad - 14, {size: 12, weight: 700});
+    if (mag > 1e-9) { const dir = rep ? side : -side; arrow(g, x + dir * (rad + 4), cy, x + dir * (rad + 4 + len), cy, C.accent, 4); } });
+  label(g, mag < 1e-9 ? '전기력 없음 (전하가 0)' : rep ? '척력 — 같은 종류의 전하는 서로 밀어낸다' : '인력 — 다른 종류의 전하는 서로 끌어당긴다', W / 2, H * .16, {size: 15, weight: 700, color: mag < 1e-9 ? C.muted : rep ? C.hot : C.phy});
+  label(g, `F = k·q₁q₂/r² = ${mag.toFixed(2)} N`, W / 2, H * .16 + 26, {size: 14, weight: 700, color: C.accent});
+  label(g, '두 전하가 받는 힘은 크기가 같고 방향이 반대 (작용 반작용)', W / 2, H * .88, {size: 11, color: C.muted}); }
+
+/* ===== 2. 수소 원자의 에너지 준위 ===== */
+const En = n => -13.6 / (n * n), lam = (a, b) => 1240 / (En(a) - En(b));
+const series = nl => nl === 1 ? ['라이먼 계열', '자외선'] : nl === 2 ? ['발머 계열', '가시광선(일부 자외선)'] : nl === 3 ? ['파셴 계열', '적외선'] : ['브래킷·푼트 계열', '적외선'];
+function lvlFix(){ if (st.nl >= st.nu) { st.nl = st.nu - 1; $('nl').value = st.nl; $('nlOut').textContent = 'n = ' + st.nl; } }
+function drawLevel(){ const g = S.g, W = S.w, H = S.h, top = 40, bot = H - 40, lx0 = W * .1, lx1 = W * .52, Y = e => top + Math.sqrt(e / -13.6) * (bot - top) * .98; label(g, '(간격은 보기 쉽게 조정함)', lx0, bot + 22, {size: 10, color: C.muted, align: 'left'});
+  label(g, '0 eV (전자가 원자를 벗어남)', lx1 + 6, top - 12, {size: 10, color: C.muted, align: 'left'}); g.strokeStyle = C.line; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(lx0, top); g.lineTo(lx1, top); g.stroke(); g.setLineDash([]);
+  for (let n = 1; n <= 6; n++) { const y = Y(En(n)), on = n === st.nu || n === st.nl; g.strokeStyle = on ? C.accent : C.ink; g.lineWidth = on ? 3 : 1.5; g.beginPath(); g.moveTo(lx0, y); g.lineTo(lx1, y); g.stroke(); label(g, `n = ${n}`, lx0 - 6, y, {size: 11, align: 'right', weight: on ? 700 : 400}); label(g, `${En(n).toFixed(2)} eV`, lx1 + 6, y, {size: 11, align: 'left', color: C.muted}); }
+  const xa = (lx0 + lx1) / 2, ya = Y(En(st.nu)), yb = Y(En(st.nl)), L = lam(st.nu, st.nl), col = wlColor(L) || (L < 380 ? '#8e5bd6' : '#b5523b');
+  arrow(g, xa, ya, xa, yb, C.hot, 3.5);
+  // 전자
+  const u = (st.t % 2) / 2, ey = ya + (yb - ya) * Math.min(1, u * 1.6); g.fillStyle = C.phy; g.beginPath(); g.arc(xa, ey, 6, 0, TAU); g.fill();
+  // 광자 물결
+  if (u > .6) { const p = (u - .6) / .4, x0 = xa + 10, len = (W * .4) * p; g.strokeStyle = col; g.lineWidth = 2.5; g.beginPath(); for (let i = 0; i <= len; i += 2) { const yy = (ya + yb) / 2 + Math.sin(i / (L / 60)) * 7; i ? g.lineTo(x0 + i, yy) : g.moveTo(x0, yy); } g.stroke(); }
+  const rx = W * .78; label(g, `ΔE = ${(En(st.nu) - En(st.nl)).toFixed(2)} eV`, rx, H * .3, {size: 16, weight: 700, color: C.accent}); label(g, `λ = hc/ΔE ≈ ${L.toFixed(0)} nm`, rx, H * .3 + 26, {size: 15, weight: 700}); const [sn, sr] = series(st.nl); label(g, `${sn} · ${sr}`, rx, H * .3 + 52, {size: 12, color: C.muted});
+  g.fillStyle = col; g.beginPath(); g.arc(rx, H * .3 + 90, 16, 0, TAU); g.fill(); label(g, wlColor(L) ? '보이는 빛' : '눈에 보이지 않음', rx, H * .3 + 120, {size: 11, color: C.muted}); }
+
+/* ===== 3. 에너지띠 ===== */
+const MAT = {metal: {name: '도체 (구리)', gap: 0}, semi: {name: '반도체 (규소)', gap: 1.1}, ins: {name: '절연체 (다이아몬드)', gap: 5.5}};
+const kB = 8.617e-5, carriers = () => { const m = MAT[st.mat]; if (!m.gap) return 1; return Math.exp(-m.gap / (2 * kB * st.T)); };
+function drawBand(){ const g = S.g, W = S.w, H = S.h, m = MAT[st.mat], bx = W * .12, bw = W * .44, s = (H * .5) / 7, vTop = H * .62, cBot = vTop - (m.gap ? m.gap * s : -s * .8), t = st.t;
+  // 원자가 띠
+  g.fillStyle = 'rgba(47,111,208,.25)'; g.fillRect(bx, vTop, bw, H * .26); g.strokeStyle = C.phy; g.strokeRect(bx, vTop, bw, H * .26); label(g, '원자가 띠', bx + bw + 8, vTop + H * .13, {size: 12, align: 'left', weight: 700, color: C.phy});
+  g.fillStyle = 'rgba(224,83,63,.15)'; g.fillRect(bx, cBot - H * .2, bw, H * .2); g.strokeStyle = C.hot; g.strokeRect(bx, cBot - H * .2, bw, H * .2); label(g, '전도띠', bx + bw + 8, cBot - H * .1, {size: 12, align: 'left', weight: 700, color: C.hot});
+  if (m.gap) { g.fillStyle = 'rgba(0,0,0,.05)'; g.fillRect(bx, cBot, bw, vTop - cBot); label(g, `띠 간격 ${m.gap} eV`, bx + bw / 2, (vTop + cBot) / 2, {size: 13, weight: 700}); } else label(g, '띠가 겹침 (띠 간격 없음)', bx + bw / 2, cBot + 20, {size: 12, weight: 700, color: C.accent});
+  // 전자·양공 점
+  let seed = 7; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const nExc = m.gap ? Math.min(30, Math.round(carriers() * 3e9 + (st.mat === 'semi' && st.dop === 'n' ? 12 : 0))) : 30, nHole = m.gap ? Math.min(30, Math.round(carriers() * 3e9 + (st.mat === 'semi' && st.dop === 'p' ? 12 : 0))) : 0;
+  for (let i = 0; i < 60; i++) { const x = bx + 8 + r() * (bw - 16), y = vTop + 6 + r() * (H * .26 - 12); const hole = i < nHole; g.fillStyle = hole ? 'transparent' : C.phy; g.strokeStyle = C.phy; g.lineWidth = 1.5; g.beginPath(); g.arc(x + (hole ? Math.sin(t * 2 + i) * 6 : 0), y, 4, 0, TAU); hole ? g.stroke() : g.fill(); }
+  for (let i = 0; i < nExc; i++) { const x = bx + 8 + ((r() * (bw - 16) + t * 40 * (r() - .5)) % (bw - 16) + bw - 16) % (bw - 16), y = cBot - 8 - r() * (H * .2 - 16); g.fillStyle = C.hot; g.beginPath(); g.arc(x, y, 4, 0, TAU); g.fill(); }
+  if (st.mat === 'semi' && st.dop !== 'none') { const y = st.dop === 'n' ? cBot + 8 : vTop - 8; g.strokeStyle = st.dop === 'n' ? C.hot : C.phy; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(bx, y); g.lineTo(bx + bw, y); g.stroke(); g.setLineDash([]); label(g, st.dop === 'n' ? '도너 준위 (여분의 전자)' : '억셉터 준위 (양공 생성)', bx + bw / 2, y + (st.dop === 'n' ? 10 : -10), {size: 10, color: C.muted}); }
+  const rx = W * .8; label(g, m.name, rx, H * .2, {size: 15, weight: 700}); label(g, `T = ${st.T} K`, rx, H * .2 + 24, {size: 12, color: C.muted});
+  const cond = m.gap ? (st.mat === 'semi' ? (st.dop === 'none' ? '온도가 높을수록 전도도 증가' : '불순물 덕분에 전도도 크게 증가') : '거의 전류가 흐르지 않음') : '자유 전자가 많아 전류가 잘 흐름';
+  label(g, cond, rx, H * .2 + 50, {size: 12, weight: 700, color: C.accent});
+  label(g, '● 전자   ○ 양공', rx, H * .2 + 76, {size: 11, color: C.muted}); }
+
+/* ===== 4. p-n 접합 다이오드 ===== */
+const I0 = 6e-9, Vt = .02585 * 1.8, Id = V => I0 * (Math.exp(V / Vt) - 1);
+function drawDiode(){ const g = S.g, W = S.w, H = S.h, cx = W * .45, cy = H * .38, w = W * .5, h = 90, I = Id(st.V), fwd = st.V > 0, depl = Math.max(8, 40 * Math.sqrt(Math.max(.02, (.7 - st.V) / .7))), t = st.t;
+  g.fillStyle = 'rgba(47,111,208,.14)'; g.fillRect(cx - w / 2, cy - h / 2, w / 2, h); g.fillStyle = 'rgba(224,83,63,.14)'; g.fillRect(cx, cy - h / 2, w / 2, h);
+  g.fillStyle = 'rgba(120,120,120,.25)'; g.fillRect(cx - depl / 2, cy - h / 2, depl, h); g.strokeStyle = C.ink; g.lineWidth = 1.5; g.strokeRect(cx - w / 2, cy - h / 2, w, h);
+  label(g, 'p형 (양공 많음)', cx - w / 4, cy - h / 2 - 12, {size: 12, weight: 700, color: C.phy}); label(g, 'n형 (전자 많음)', cx + w / 4, cy - h / 2 - 12, {size: 12, weight: 700, color: C.hot}); label(g, '공핍층', cx, cy + h / 2 + 12, {size: 10, color: C.muted});
+  const flow = Math.min(1, Math.log10(Math.max(1e-12, Math.abs(I)) / 1e-9 + 1) / 8);
+  for (let i = 0; i < 9; i++) for (let j = 0; j < 3; j++) { const yy = cy - h / 2 + 18 + j * 27, mv = fwd ? (t * 40 * flow) : 0;
+    let xh = cx - w / 2 + 10 + ((i * 24 + mv) % (w / 2 - 20 + (fwd ? w / 2 : 0))); if (!fwd && xh > cx - depl / 2 - 6) xh = cx - depl / 2 - 6 - i; g.strokeStyle = C.phy; g.lineWidth = 1.5; g.beginPath(); g.arc(xh, yy, 4, 0, TAU); g.stroke();
+    let xe = cx + w / 2 - 10 - ((i * 24 + mv) % (w / 2 - 20 + (fwd ? w / 2 : 0))); if (!fwd && xe < cx + depl / 2 + 6) xe = cx + depl / 2 + 6 + i; g.fillStyle = C.hot; g.beginPath(); g.arc(xe, yy + 12, 4, 0, TAU); g.fill(); }
+  // 회로와 전지
+  const yb = cy + h / 2 + 70; g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - w / 2, cy); g.lineTo(cx - w / 2 - 30, cy); g.lineTo(cx - w / 2 - 30, yb); g.lineTo(cx - 14, yb); g.moveTo(cx + 14, yb); g.lineTo(cx + w / 2 + 30, yb); g.lineTo(cx + w / 2 + 30, cy); g.lineTo(cx + w / 2, cy); g.stroke();
+  const plusLeft = st.V >= 0; g.lineWidth = 3; g.beginPath(); g.moveTo(cx - 6, yb - (plusLeft ? 16 : 9)); g.lineTo(cx - 6, yb + (plusLeft ? 16 : 9)); g.moveTo(cx + 6, yb - (plusLeft ? 9 : 16)); g.lineTo(cx + 6, yb + (plusLeft ? 9 : 16)); g.stroke();
+  label(g, plusLeft ? '+   −' : '−   +', cx, yb - 26, {size: 12, weight: 700}); label(g, `${st.V >= 0 ? '+' : '−'}${Math.abs(st.V).toFixed(2)} V`, cx, yb + 30, {size: 12, weight: 700});
+  const lamp = Math.min(1, Math.max(0, I) / .02); g.fillStyle = `rgba(255,200,40,${.15 + lamp * .85})`; g.beginPath(); g.arc(cx + w / 2 + 30, (cy + yb) / 2, 14, 0, TAU); g.fill(); g.strokeStyle = C.ink; g.lineWidth = 1.5; g.stroke(); label(g, '전구', cx + w / 2 + 52, (cy + yb) / 2, {size: 11, align: 'left'});
+  label(g, fwd && st.V >= .55 ? '순방향 연결 — 공핍층이 얇아져 전류가 흐른다' : fwd ? '순방향이지만 전압이 문턱(약 0.6~0.7 V)보다 작다' : '역방향 연결 — 공핍층이 두꺼워져 전류가 거의 흐르지 않는다', W / 2, H * .9, {size: 13, weight: 700, color: fwd && st.V >= .55 ? C.bio : C.muted}); }
+
+/* ===== 5. 전류에 의한 자기장 ===== */
+const mu0 = 4e-7 * Math.PI, nSol = 1000; // 솔레노이드: 1 m당 1000회
+const Bval = () => st.sh === 'wire' ? mu0 * Math.abs(st.I) / (TAU * st.cr) : st.sh === 'loop' ? mu0 * Math.abs(st.I) / (2 * st.cr) : mu0 * nSol * Math.abs(st.I);
+function drawField(){ const g = S.g, W = S.w, H = S.h, cx = W * .45, cy = H * .5, I = st.I, dir = Math.sign(I), t = st.t;
+  if (st.sh === 'wire') { // 위에서 본 모습
+    label(g, '도선을 위에서 본 모습', cx, 22, {size: 11, color: C.muted}); const rr = st.cr / .1 * Math.min(W, H) * .38;
+    for (let k = 1; k <= 4; k++) { const R = rr * k / 2; g.strokeStyle = 'rgba(46,125,79,' + (.8 - k * .15) + ')'; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.stroke(); if (dir) for (let a = 0; a < 4; a++) { const th = a * TAU / 4 + .3, x = cx + R * Math.cos(th), y = cy + R * Math.sin(th), tx = -Math.sin(th) * -dir, ty = Math.cos(th) * -dir; arrow(g, x - tx * 6, y - ty * 6, x + tx * 6, y + ty * 6, C.bio, 2); } }
+    g.fillStyle = '#e8b04a'; g.beginPath(); g.arc(cx, cy, 14, 0, TAU); g.fill(); g.strokeStyle = C.ink; g.lineWidth = 2; g.stroke();
+    if (dir > 0) { g.fillStyle = C.ink; g.beginPath(); g.arc(cx, cy, 4, 0, TAU); g.fill(); } else if (dir < 0) { g.beginPath(); g.moveTo(cx - 7, cy - 7); g.lineTo(cx + 7, cy + 7); g.moveTo(cx + 7, cy - 7); g.lineTo(cx - 7, cy + 7); g.stroke(); }
+    // 나침반 (점 P)
+    const px = cx + rr, py = cy, ang = dir ? (dir > 0 ? -Math.PI / 2 : Math.PI / 2) : 0; g.save(); g.translate(px, py); g.fillStyle = C.surface; g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath(); g.arc(0, 0, 16, 0, TAU); g.fill(); g.stroke(); g.rotate(ang); g.fillStyle = C.hot; g.beginPath(); g.moveTo(13, 0); g.lineTo(0, -4); g.lineTo(0, 4); g.fill(); g.fillStyle = C.muted; g.beginPath(); g.moveTo(-13, 0); g.lineTo(0, -4); g.lineTo(0, 4); g.fill(); g.restore(); label(g, 'P', px + 22, py + 16, {size: 12, weight: 700});
+    label(g, dir > 0 ? '⊙ 전류가 화면 밖으로 → 시계 반대 방향 자기장' : dir < 0 ? '⊗ 전류가 화면 안으로 → 시계 방향 자기장' : '전류 0 → 자기장 없음', cx, H - 22, {size: 12, weight: 700, color: C.bio}); }
+  else if (st.sh === 'loop') { // 옆에서 본 원형 도선
+    const R = st.cr / .1 * H * .32 + 20; g.strokeStyle = '#c98a2a'; g.lineWidth = 6; g.beginPath(); g.ellipse(cx, cy, 18, R, 0, 0, TAU); g.stroke();
+    for (let k = -2; k <= 2; k++) { const y0 = cy + k * R * .3; g.strokeStyle = C.bio; g.lineWidth = 2; g.beginPath(); if (k === 0) { g.moveTo(cx - W * .32, cy); g.lineTo(cx + W * .32, cy); } else { const s = Math.abs(k); g.moveTo(cx - W * .3, y0 + k * 40); g.bezierCurveTo(cx - 60, y0 + k * 6, cx + 60, y0 + k * 6, cx + W * .3, y0 + k * 40); } g.stroke(); if (dir) { const ax = cx + (dir > 0 ? 70 : -70), ay = k === 0 ? cy : y0 + k * 9; arrow(g, ax - dir * 10, ay, ax + dir * 10, ay, C.bio, 2); } }
+    if (dir) { label(g, dir > 0 ? '⊗' : '⊙', cx, cy - R, {size: 18, weight: 700}); label(g, dir > 0 ? '⊙' : '⊗', cx, cy + R, {size: 18, weight: 700}); }
+    label(g, '원형 도선을 옆에서 본 모습 — 중심에서 자기장은 도선 면에 수직', cx, 22, {size: 11, color: C.muted}); label(g, dir ? `중심의 자기장 방향: ${dir > 0 ? '오른쪽 →' : '← 왼쪽'}` : '전류 0', cx, H - 22, {size: 12, weight: 700, color: C.bio}); }
+  else { const L = W * .5, R = 50; g.strokeStyle = C.bio; g.lineWidth = 2; for (let k = -1; k <= 1; k++) { g.beginPath(); g.moveTo(cx - L * .7, cy + k * 20); g.lineTo(cx + L * .7, cy + k * 20); g.stroke(); }
+    [-1, 1].forEach(s => { g.beginPath(); g.moveTo(cx + L * .7, cy + s * 20); g.bezierCurveTo(cx + L * .95, cy + s * 130, cx - L * .95, cy + s * 130, cx - L * .7, cy + s * 20); g.stroke(); });
+    if (dir) { for (let k = -1; k <= 1; k++) arrow(g, cx - dir * 12, cy + k * 20, cx + dir * 12, cy + k * 20, C.bio, 2); }
+    g.strokeStyle = '#c98a2a'; g.lineWidth = 4; for (let i = 0; i <= 12; i++) { const x = cx - L / 2 + i * L / 12; g.beginPath(); g.ellipse(x, cy, 8, R, 0, -Math.PI / 2, Math.PI / 2); g.stroke(); }
+    if (dir) { label(g, dir > 0 ? 'S' : 'N', cx - L / 2 - 22, cy, {size: 22, weight: 700, color: dir > 0 ? C.phy : C.hot}); label(g, dir > 0 ? 'N' : 'S', cx + L / 2 + 22, cy, {size: 22, weight: 700, color: dir > 0 ? C.hot : C.phy}); }
+    label(g, '솔레노이드 내부: 균일한 자기장 (막대자석과 같은 모양)', cx, 22, {size: 11, color: C.muted}); label(g, '단위 길이당 감은 수 n = 1000 회/m', cx, H - 22, {size: 12, weight: 700, color: C.bio}); }
+  label(g, `B = ${sci(Bval())} T`, W * .86, H * .14, {size: 15, weight: 700, color: C.accent}); }
+
+/* ===== 6. 전자기 유도 ===== */
+const PHI0 = 2e-4, A = .12; // 최대 자기 선속(Wb), 자석 이동 진폭(m)
+const magX = t => .06 + A * (1 + Math.cos(t * st.sp * 1.6)) / 2 * 1.6, flux = x => PHI0 / Math.pow(1 + (x / .04) ** 2, 1.5) * (st.pole === 'N' ? 1 : -1);
+const emf = t => { const h = 1e-4; return -st.N * (flux(magX(t + h)) - flux(magX(t - h))) / (2 * h); };
+function emfMax(){ let m = 1e-9; const per = TAU / (st.sp * 1.6); for (let t = 0; t < per; t += per / 200) m = Math.max(m, Math.abs(emf(t))); return m; }
+function drawInduct(){ const g = S.g, W = S.w, H = S.h, cy = H * .42, coilX = W * .3, sc = W * .25 / .12, x = magX(st.t), mx = coilX + x * sc + 40, e = emf(st.t), v = magX(st.t + .01) - magX(st.t - .01);
+  // 코일
+  g.strokeStyle = '#c98a2a'; g.lineWidth = 4; for (let i = 0; i < 9; i++) { const xx = coilX - 50 + i * 12; g.beginPath(); g.ellipse(xx, cy, 7, 46, 0, -Math.PI / 2, Math.PI / 2); g.stroke(); }
+  g.lineWidth = 2; g.strokeStyle = C.ink; g.beginPath(); g.moveTo(coilX - 50, cy + 46); g.lineTo(coilX - 50, H * .82); g.lineTo(coilX + 140, H * .82); g.moveTo(coilX + 46, cy + 46); g.lineTo(coilX + 46, H * .72); g.lineTo(coilX + 100, H * .72); g.stroke();
+  // 검류계
+  const gx = coilX + 140, gy = H * .77; g.fillStyle = C.surface; g.strokeStyle = C.ink; g.beginPath(); g.arc(gx, gy, 34, Math.PI, 0); g.closePath(); g.fill(); g.stroke(); const amax = emfMax(); const ang = Math.max(-1.2, Math.min(1.2, e / amax * 1.4)); g.strokeStyle = C.hot; g.lineWidth = 2.5; g.beginPath(); g.moveTo(gx, gy); g.lineTo(gx + Math.sin(ang) * 30, gy - Math.cos(ang) * 30); g.stroke(); label(g, 'G', gx, gy + 12, {size: 11, weight: 700}); label(g, '검류계', gx, gy + 28, {size: 10, color: C.muted});
+  // 자석
+  const mw = 90, mh = 30, near = st.pole; g.fillStyle = near === 'N' ? C.hot : C.phy; g.fillRect(mx, cy - mh / 2, mw / 2, mh); g.fillStyle = near === 'N' ? C.phy : C.hot; g.fillRect(mx + mw / 2, cy - mh / 2, mw / 2, mh); label(g, near, mx + mw / 4, cy, {size: 14, weight: 700, color: '#fff'}); label(g, near === 'N' ? 'S' : 'N', mx + mw * .75, cy, {size: 14, weight: 700, color: '#fff'});
+  arrow(g, mx + mw / 2, cy - mh / 2 - 12, mx + mw / 2 + (v < 0 ? -26 : 26), cy - mh / 2 - 12, C.ink, 2); label(g, v < 0 ? '다가감' : '멀어짐', mx + mw / 2, cy - mh / 2 - 28, {size: 11});
+  // 코일 오른쪽 면에 유도된 극
+  if (Math.abs(e) > amax * .03) { const approach = v < 0, face = approach ? near : (near === 'N' ? 'S' : 'N'); label(g, face, coilX + 64, cy - 60, {size: 18, weight: 700, color: face === 'N' ? C.hot : C.phy}); label(g, approach ? '같은 극 → 밀어냄' : '반대 극 → 끌어당김', coilX + 64, cy - 82, {size: 11, color: C.muted}); }
+  label(g, `유도 기전력 ${(e * 1000).toFixed(1)} mV`, W * .8, H * .14, {size: 15, weight: 700, color: C.accent}); label(g, '렌츠 법칙: 자기 선속의 변화를 방해하는 방향', W * .8, H * .14 + 24, {size: 11, color: C.muted}); }
+
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'coulomb') { const k = Math.abs(kC * st.q1 * st.q2 * 1e-12), ymax = Math.max(1, Math.ceil(k / .01 / 10) * 10); const m = axes(G, {x: [0, 1, .1, '거리 r (m)'], y: [0, ymax, ymax / 5, '전기력 크기 (N)']}); const P = []; for (let r = .1; r <= 1.0001; r += .005) P.push([r, Math.min(ymax, k / (r * r))]); line(G, P, m, C.accent, 2.5); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.r), m.Y(Math.min(ymax, Math.abs(Fc()))), 5, 0, TAU); g.fill(); label(g, 'F ∝ 1/r²', m.X(.7), m.Y(ymax * .6), {size: 12, color: C.muted}); }
+  else if (st.mode === 'level') { const m = axes(G, {x: [0, 2000, 250, '파장 (nm)'], y: [0, 1, 1, '']}); for (let x = 380; x < 750; x += 2) { g.fillStyle = wlColor(x); g.globalAlpha = .18; g.fillRect(m.X(x), m.Y(1), m.X(x + 2) - m.X(x) + .5, m.Y(0) - m.Y(1)); } g.globalAlpha = 1; label(g, '가시광선', m.X(565), m.Y(.92), {size: 10, color: C.muted});
+    for (let lo = 1; lo <= 3; lo++) for (let hi = lo + 1; hi <= 6; hi++) { const L = lam(hi, lo); if (L > 2000) continue; const sel = hi === st.nu && lo === st.nl; g.strokeStyle = wlColor(L) || (lo === 1 ? '#8e5bd6' : '#b5523b'); g.lineWidth = sel ? 4 : 2; g.beginPath(); g.moveTo(m.X(L), m.Y(0)); g.lineTo(m.X(L), m.Y(sel ? .8 : .55)); g.stroke(); if (sel) label(g, `${L.toFixed(0)} nm`, m.X(L), m.Y(.88), {size: 11, weight: 700}); }
+    label(g, '라이먼(자외선)', m.X(110), m.Y(.7), {size: 10, color: C.muted}); label(g, '파셴(적외선)', m.X(1400), m.Y(.7), {size: 10, color: C.muted}); }
+  else if (st.mode === 'band') { const m = axes(G, {x: [100, 600, 100, '온도 (K)'], y: [-12, 0, 2, 'log 상대 전도도']}); const cur = mt => { const P = []; for (let T = 100; T <= 600; T += 5) { const gap = MAT[mt].gap; P.push([T, gap ? Math.max(-12, Math.log10(Math.exp(-gap / (2 * kB * T)) * 3e9 / 3e9 * 1e-0)) : -.3 - (T - 100) / 500 * .5]); } return P; }; line(G, cur('metal'), m, C.accent, 2.2); line(G, cur('semi'), m, C.hot, 2.2); line(G, cur('ins'), m, C.phy, 2.2); label(g, '도체: 온도↑ → 전도도 약간↓', m.X(350), m.Y(-1.2), {size: 10, color: C.accent}); label(g, '반도체: 온도↑ → 전도도↑', m.X(470), m.Y(-6.5), {size: 10, color: C.hot}); label(g, '절연체', m.X(500), m.Y(-11.3), {size: 10, color: C.phy}); }
+  else if (st.mode === 'diode') { const m = axes(G, {x: [-3, 1, .5, '전압 (V)'], y: [-10, 50, 10, '전류 (mA)']}); const P = []; for (let V = -3; V <= .8001; V += .01) P.push([V, Math.min(50, Id(V) * 1000)]); line(G, P, m, C.accent, 2.5); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.V), m.Y(Math.min(50, Id(st.V) * 1000)), 5, 0, TAU); g.fill(); label(g, '역방향: 전류 ≈ 0', m.X(-1.8), m.Y(4), {size: 10, color: C.muted}); label(g, '문턱 전압 이후 급증', m.X(.2), m.Y(30), {size: 10, color: C.muted}); }
+  else if (st.mode === 'field') { const m = axes(G, {x: [0, 10, 1, '거리 r (cm)'], y: [0, 200, 50, '자기장 (μT)']}); const P = []; for (let r = .5; r <= 10; r += .1) P.push([r, Math.min(200, mu0 * Math.abs(st.I) / (TAU * r / 100) * 1e6)]); line(G, P, m, C.bio, 2.5); label(g, '직선 도선: B ∝ I/r', m.X(7), m.Y(160), {size: 11, color: C.muted}); if (st.sh === 'wire') { g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.cr * 100), m.Y(Math.min(200, Bval() * 1e6)), 5, 0, TAU); g.fill(); } }
+  else { const m = axes(G, {x: [0, 8, 1, '시간 (s)'], y: [-1, 1, .5, '상대값']}); const P = [], E = [], amax = emfMax(); for (let t = 0; t <= 8; t += .02) { P.push([t, flux(magX(t)) / PHI0]); E.push([t, Math.max(-1, Math.min(1, emf(t) / amax))]); } line(G, P, m, C.phy, 2.2); line(G, E, m, C.hot, 2.2); const tt = st.t % 8; g.strokeStyle = C.muted; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(m.X(tt), m.Y(-1)); g.lineTo(m.X(tt), m.Y(1)); g.stroke(); g.setLineDash([]); label(g, '파랑: 자기 선속 Φ · 빨강: 유도 기전력 (Φ의 기울기)', m.X(4), m.Y(.92), {size: 10, color: C.muted}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody'), set = (gt, gs, tt) => { $('gTitle').textContent = gt; $('gSub').textContent = gs; $('tTitle').textContent = tt; };
+  if (st.mode === 'coulomb') { const F = Fc(); s.innerHTML = `<div><b>${Math.abs(F).toFixed(2)} N</b><span>전기력의 크기</span></div><div><b>${Math.abs(F) < 1e-9 ? '없음' : F > 0 ? '척력' : '인력'}</b><span>힘의 종류</span></div>`;
+    $('explain').innerHTML = '<b>쿨롱 법칙</b>: 두 점전하 사이의 전기력은 전하량의 곱에 비례하고 거리의 제곱에 반비례해요. F = k·q₁q₂/r². 같은 종류의 전하는 <b>척력</b>, 다른 종류는 <b>인력</b>. 원자핵과 전자 사이의 전기력이 원자를 이루는 힘이에요.'; $('tip').textContent = '1 μC = 10⁻⁶ C. 전하량을 2배로 하면 힘도 2배, 거리를 2배로 하면 힘은 1/4배.';
+    th.innerHTML = '<tr><th>거리 (m)</th><th>전기력 크기 (N)</th></tr>'; tb.innerHTML = [.1, .2, .3, .4, .6].map(r => `<tr><td>${r}</td><td>${Math.abs(kC * st.q1 * st.q2 * 1e-12 / (r * r)).toFixed(2)}</td></tr>`).join(''); set('거리와 전기력', `q₁ = ${sgn(st.q1)} μC, q₂ = ${sgn(st.q2)} μC`, '거리에 따른 전기력'); }
+  else if (st.mode === 'level') { lvlFix(); const dE = En(st.nu) - En(st.nl), L = lam(st.nu, st.nl); s.innerHTML = `<div><b>${dE.toFixed(2)} eV</b><span>방출하는 광자 에너지</span></div><div><b>${L.toFixed(0)} nm</b><span>빛의 파장</span></div>`;
+    $('explain').innerHTML = '<b>에너지 준위</b>: 원자 속 전자는 정해진 에너지(Eₙ = −13.6/n² eV)만 가질 수 있어요. 전자가 높은 준위에서 낮은 준위로 <b>전이</b>하면 두 준위의 에너지 차이만큼 빛(광자)을 방출해요. E = hf = hc/λ. 그래서 원자마다 고유한 <b>선 스펙트럼</b>이 나타나요.'; $('tip').textContent = 'hc ≈ 1240 eV·nm이므로 λ(nm) ≈ 1240 ÷ ΔE(eV). 에너지 차가 클수록 파장이 짧아요.';
+    th.innerHTML = '<tr><th>발머 계열 전이</th><th>ΔE (eV)</th><th>파장 (nm)</th></tr>'; tb.innerHTML = [3, 4, 5, 6].map(n => `<tr><td>n = ${n} → 2</td><td>${(En(n) - En(2)).toFixed(2)}</td><td>${lam(n, 2).toFixed(0)}</td></tr>`).join(''); set('수소 원자의 선 스펙트럼', '선택한 전이를 굵게 표시', '발머 계열 (가시광선)'); }
+  else if (st.mode === 'band') { const m = MAT[st.mat]; s.innerHTML = `<div><b>${m.gap ? m.gap + ' eV' : '0 (겹침)'}</b><span>띠 간격</span></div><div><b>${m.gap ? sci(carriers(), 1) : '매우 많음'}</b><span>들뜬 전자 비율 (상대값)</span></div>`;
+    $('explain').innerHTML = '<b>에너지띠</b>: 고체에서는 수많은 원자의 에너지 준위가 겹쳐 띠를 이뤄요. 전자가 채워진 <b>원자가 띠</b>와 비어 있는 <b>전도띠</b> 사이의 간격(띠 간격)이 작을수록 전류가 잘 흘러요. 반도체에 불순물을 넣으면(도핑) n형·p형 반도체가 돼요.'; $('tip').textContent = 'n형: 15족 원소(인) 첨가 → 여분의 전자가 전하 운반. p형: 13족 원소(붕소) 첨가 → 양공이 전하 운반.';
+    th.innerHTML = '<tr><th>구분</th><th>띠 간격</th><th>전기 전도성</th></tr>'; tb.innerHTML = [['도체', '없음 (겹침)', '매우 좋음'], ['반도체', '작음 (약 1 eV)', '중간, 온도·불순물로 조절'], ['절연체', '큼 (수 eV 이상)', '거의 없음']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); set('온도와 전기 전도도', '세로축은 로그 눈금 (상대값)', '고체의 전기 전도성'); }
+  else if (st.mode === 'diode') { const I = Id(st.V); s.innerHTML = `<div><b>${I * 1000 > .01 ? (I * 1000).toFixed(2) + ' mA' : I < 0 ? '≈ 0 (역방향)' : '≈ 0'}</b><span>전류</span></div><div><b>${st.V > 0 ? '순방향' : st.V < 0 ? '역방향' : '0 V'}</b><span>연결 방향</span></div>`;
+    $('explain').innerHTML = '<b>p–n 접합 다이오드</b>: p형과 n형 반도체를 접합한 소자로, 한쪽 방향으로만 전류를 흐르게 해요(<b>정류 작용</b>). p형에 (+), n형에 (−)를 연결하면 순방향: 공핍층이 얇아지고 전자와 양공이 접합면에서 만나며 전류가 흘러요. LED는 이때 에너지를 빛으로 내보내요.'; $('tip').textContent = '교류를 직류로 바꾸는 정류 회로, LED, 태양 전지 모두 p–n 접합을 이용해요.';
+    th.innerHTML = '<tr><th>전압 (V)</th><th>전류</th></tr>'; tb.innerHTML = [-2, -1, 0, .4, .6, .7].map(V => { const I = Id(V); return `<tr><td>${V}</td><td>${Math.abs(I) < 1e-5 ? '≈ 0' : (I * 1000).toFixed(2) + ' mA'}</td></tr>`; }).join(''); set('다이오드의 전류–전압 그래프', '순방향에서만 전류가 크게 흐른다', '전압과 전류'); }
+  else if (st.mode === 'field') { s.innerHTML = `<div><b>${sci(Bval())} T</b><span>자기장의 세기</span></div><div><b>${Math.abs(st.I)} A</b><span>전류</span></div>`;
+    $('explain').innerHTML = '<b>전류의 자기 작용</b>: 전류가 흐르는 도선 주위에는 자기장이 생겨요. 방향은 <b>오른손 법칙</b>: 엄지를 전류 방향으로 할 때 나머지 네 손가락이 감아쥐는 방향. 직선 도선 B = 2×10⁻⁷·I/r, 원형 도선 중심 B = μ₀I/2r, 솔레노이드 내부 B = μ₀nI.'; $('tip').textContent = '전류를 반대로 바꾸면 자기장 방향도 반대가 돼요. 전자석·전동기·스피커·MRI가 이 원리를 이용해요.';
+    th.innerHTML = '<tr><th>모양</th><th>자기장 세기</th><th>비례 관계</th></tr>'; tb.innerHTML = [['직선 도선', 'B = μ₀I / 2πr', 'I에 비례, r에 반비례'], ['원형 도선 중심', 'B = μ₀I / 2r', 'I에 비례, r에 반비례'], ['솔레노이드 내부', 'B = μ₀nI', 'n, I에 비례']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); set('직선 도선으로부터의 거리와 자기장', `I = ${Math.abs(st.I)} A`, '전류에 의한 자기장'); }
+  else { s.innerHTML = `<div><b>${st.N} 회</b><span>코일 감은 수</span></div><div><b>×${st.sp.toFixed(2)}</b><span>자석 속력</span></div>`;
+    $('explain').innerHTML = '<b>전자기 유도</b>: 코일을 지나는 자기 선속 Φ가 변하면 코일에 유도 기전력이 생겨요. <b>패러데이 법칙</b> V = −N·ΔΦ/Δt: 감은 수가 많을수록, 자석이 빠를수록 기전력이 커요. <b>렌츠 법칙</b>: 유도 전류는 자기 선속의 변화를 방해하는 방향으로 흘러요.'; $('tip').textContent = '자석이 다가오면 코일은 같은 극을 만들어 밀어내고, 멀어지면 반대 극을 만들어 붙잡으려 해요. 발전기·교통카드·무선 충전기가 이 원리예요.';
+    th.innerHTML = '<tr><th>조건</th><th>유도 기전력</th></tr>'; tb.innerHTML = [['자석을 빠르게 움직임', '커짐'], ['감은 수를 늘림', '커짐 (비례)'], ['센 자석 사용', '커짐'], ['자석을 멈춤', '0'], ['자석 극이나 운동 방향을 반대로', '방향이 반대']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); set('자기 선속과 유도 기전력', '기전력은 자기 선속 그래프의 기울기에 비례', '유도 기전력을 키우는 방법'); } }
+const bind = (id, k, f) => { $(id).oninput = e => { st[k] = +e.target.value; $(id + 'Out').textContent = f(st[k]); if (st.mode === 'level') st.t = 0; render(); }; };
+bind('q1', 'q1', v => sgn(v) + ' μC'); bind('q2', 'q2', v => sgn(v) + ' μC'); bind('rr', 'r', v => v.toFixed(2) + ' m'); bind('nu', 'nu', v => 'n = ' + v); bind('nl', 'nl', v => 'n = ' + v);
+$('nl').addEventListener('input', () => { if (st.nl >= st.nu) { st.nu = Math.min(6, st.nl + 1); $('nu').value = st.nu; $('nuOut').textContent = 'n = ' + st.nu; render(); } });
+bind('tk', 'T', v => v + ' K'); bind('vb', 'V', v => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + ' V'); bind('ci', 'I', v => v + ' A'); bind('cr', 'cr', v => Math.round(v * 100) + ' cm'); bind('sp', 'sp', v => '×' + v.toFixed(2)); bind('nt', 'N', v => v + ' 회');
+Kit.seg($('matSeg'), 'mat', v => { st.mat = v; render(); })('semi'); Kit.seg($('dopSeg'), 'dop', v => { st.dop = v; render(); })('none'); Kit.seg($('shSeg'), 'sh', v => { st.sh = v; render(); })('wire'); Kit.seg($('poleSeg'), 'pole', v => { st.pole = v; render(); })('N');
+Kit.tabs(m => { st.mode = m; st.t = 0; render(); }, ['coulomb', 'level', 'band', 'diode', 'field', 'induct']);
+const lp = Kit.loop(dt => { st.t += dt; }, () => { if (!lp.run && st.mode !== 'induct' && st.mode !== 'band') st.t += 1 / 60; S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({coulomb: drawCoulomb, level: drawLevel, band: drawBand, diode: drawDiode, field: drawField, induct: drawInduct})[st.mode](); drawGraph(); }, $('play'));
+})();
+</script>
+</body>
+</html>
