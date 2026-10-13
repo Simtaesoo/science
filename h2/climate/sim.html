@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>지구 환경 변화 실험실 · 통합과학2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-earth">
+<div class="wrap">
+  <nav class="topbar" data-topbar="통합과학2|04 지구 환경 변화" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학2 · 04 지구 환경 변화 <span class="code">통과2 Ⅱ</span></div>
+      <h1>대기와 해양, 기후 변화 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="circ">1. 대기 대순환과 해류</button>
+      <button type="button" data-mode="enso">2. 엘니뇨와 라니냐</button>
+      <button type="button" data-mode="warm">3. 지구 온난화</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="대기와 해양 모형"></canvas></div>
+      <div class="controls">
+        <div class="field" data-only="circ"><div class="seg" id="rotSeg"><button type="button" data-rot="0">지구가 자전하지 않는다면</button><button type="button" data-rot="1">실제 지구 (자전)</button></div></div>
+        <label class="field" data-only="enso" for="trade">무역풍 세기 <input type="range" id="trade" min="0" max="2" step="0.1" value="1"><output id="tradeOut">평상시</output></label>
+        <label class="field" data-only="warm" for="co2">대기 CO₂ 농도 <input type="range" id="co2" min="280" max="800" step="10" value="420"><output id="co2Out">420 ppm</output></label>
+        <button class="btn" type="button" id="play">일시정지</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>위도에 따라 에너지가 불균형한데도 적도는 계속 뜨거워지고 극은 계속 추워지지 않는 까닭은?</summary><p>저위도는 흡수하는 태양 복사 에너지가 방출하는 에너지보다 많고 고위도는 그 반대입니다. 대기 대순환과 해류가 남는 에너지를 저위도에서 고위도로 운반하여 위도별 에너지 불균형을 해소하기 때문입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>엘니뇨가 일어나면 페루 연안 어획량이 줄어드는 까닭은?</summary><p>무역풍이 약해져 페루 연안의 용승이 약해집니다. 깊은 바다의 차갑고 영양염이 풍부한 물이 올라오지 않아 플랑크톤이 줄고, 이를 먹는 멸치 같은 물고기도 줄어듭니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>북극 해빙이 녹으면 온난화가 더 빨라지는 까닭은?</summary><p>밝은 얼음은 햇빛을 많이 반사하지만, 얼음이 녹아 어두운 바다가 드러나면 햇빛을 더 많이 흡수합니다. 그러면 기온이 더 오르고 얼음이 더 녹는 양의 되먹임이 일어납니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="CO₂ 농도와 기온 변화 관계는 기후 민감도 약 3 ℃(CO₂ 2배)를 가정한 단순 모형입니다. 관측 자료는 대표값입니다."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+const st = {mode: 'circ', rot: '1', trade: 1, co2: 420, t: 0};
+function drawCirc(){ const g = S.g, W = S.w, H = S.h, cx = W * .3, cy = H * .52, R = Math.min(W * .26, H * .44), t = st.t;
+  const sky = g.createRadialGradient(cx, cy, R * .2, cx, cy, R); sky.addColorStop(0, '#4a8fd0'); sky.addColorStop(1, '#2a5f90'); g.fillStyle = sky; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill();
+  const latY = lat => cy - Math.sin(lat * Math.PI / 180) * R; [0, 30, 60, -30, -60].forEach(l => { const y = latY(l), hw = Math.cos(l * Math.PI / 180) * R; g.strokeStyle = 'rgba(255,255,255,.35)'; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(cx - hw, y); g.lineTo(cx + hw, y); g.stroke(); g.setLineDash([]); label(g, (l === 0 ? '0°' : Math.abs(l) + '°' + (l > 0 ? 'N' : 'S')), cx - hw - 6, y, {size: 10, color: C.ink, align: 'right'}); });
+  if (st.rot === '0') { [[1, '#f28c7a'], [-1, '#f28c7a']].forEach(([s]) => { const x0 = cx + R * 1.05; g.strokeStyle = '#d0533f'; g.lineWidth = 3; g.beginPath(); g.ellipse(x0 + 30, cy - s * R * .45, 30, R * .45, 0, s > 0 ? Math.PI * .5 : -Math.PI * .5, s > 0 ? Math.PI * 2.5 : Math.PI * 1.5); g.stroke(); }); for (let k = 0; k < 4; k++) { const u = (t * .3 + k / 4) % 1, a = u * TAU; [1, -1].forEach(s => { g.fillStyle = '#d0533f'; g.beginPath(); g.arc(cx + R * 1.05 + 30 + Math.cos(a) * 30 * s, cy - s * R * .45 - Math.sin(a) * R * .45, 4, 0, TAU); g.fill(); }); } label(g, '반구마다 하나의 커다란 순환 (적도 상승 → 극 하강)', W * .72, H * .2, {size: 13, weight: 700}); }
+  else { const cells = [[0, 30, '해들리 순환', '#f28c7a', 1], [30, 60, '페렐 순환', '#e8c34a', -1], [60, 90, '극순환', '#8ecdf2', 1]];
+    [1, -1].forEach(s => cells.forEach(([a, b, n, c, d]) => { const ya = latY(s * a), yb = latY(s * b), xm = cx + R * 1.05 + 32; g.strokeStyle = c; g.lineWidth = 3; g.beginPath(); g.ellipse(xm, (ya + yb) / 2, 26, Math.abs(ya - yb) / 2 - 3, 0, 0, TAU); g.stroke(); const u = (t * .4) % 1, dir = d * s; const a2 = u * TAU * dir; g.fillStyle = c; g.beginPath(); g.arc(xm + Math.cos(a2) * 26, (ya + yb) / 2 + Math.sin(a2) * (Math.abs(ya - yb) / 2 - 3), 4, 0, TAU); g.fill(); if (s > 0) label(g, n, xm + 34, (ya + yb) / 2, {size: 11, weight: 700, align: 'left'}); }));
+    // 지상풍
+    const W2 = (lat, dx, n, c) => { const y = latY(lat), hw = Math.cos(lat * Math.PI / 180) * R * .7; for (let k = -1; k <= 1; k++) arrow(g, cx + k * hw * .55 - dx * 18, y - Math.sign(lat) * 6, cx + k * hw * .55 + dx * 18, y + Math.sign(lat) * (dx < 0 ? 8 : -8) * 0, c, 2.5); label(g, n, cx, y - 12, {size: 11, weight: 700, color: '#fff'}); };
+    W2(15, -1, '무역풍', '#fff'); W2(-15, -1, '무역풍', '#fff'); W2(45, 1, '편서풍', '#ffe08a'); W2(-45, 1, '편서풍', '#ffe08a'); W2(72, -1, '극동풍', '#cfe8ff'); W2(-72, -1, '극동풍', '#cfe8ff');
+    label(g, '자전 효과 → 위도 30°, 60°를 경계로 3개의 순환', W * .78, H * .1, {size: 13, weight: 700}); [['적도', '상승 기류 → 저압대, 비가 많음'], ['30°', '하강 기류 → 고압대, 사막'], ['60°', '상승 기류 → 저압대(한대 전선)']].forEach(([a, b], i) => label(g, `${a}: ${b}`, W * .78, H * .7 + i * 22, {size: 12})); } }
+/* ===== 엘니뇨 ===== */
+function drawEnso(){ const g = S.g, W = S.w, H = S.h, tw = st.trade, t = st.t, sea = H * .38, x0 = W * .06, x1 = W * .94, warmW = .25 + (1 - Math.min(tw, 1.6)) * .35, tilt = (tw - .2) * .5;
+  g.fillStyle = '#eaf4fb'; g.fillRect(0, 0, W, sea); g.fillStyle = '#9a7a54'; g.fillRect(0, sea - 20, x0, H); g.fillRect(x1, sea - 30, W - x1, H); label(g, '인도네시아', x0 / 2 + 6, sea - 30, {size: 11, weight: 700}); label(g, '페루', (x1 + W) / 2, sea - 40, {size: 11, weight: 700});
+  // 바다: 따뜻한 층과 수온 약층
+  const thW = sea + H * (.18 + tilt * .2), thE = sea + H * (.18 - tilt * .2) + 6; g.fillStyle = '#3a6aa0'; g.fillRect(x0, sea, x1 - x0, H - sea); g.fillStyle = '#e0533f'; g.globalAlpha = .75; g.beginPath(); g.moveTo(x0, sea); g.lineTo(x1, sea); g.lineTo(x1, Math.max(sea + 4, thE)); g.lineTo(x0, thW); g.closePath(); g.fill(); g.globalAlpha = 1;
+  const wx = x0 + (x1 - x0) * warmW; g.fillStyle = 'rgba(255,170,60,.85)'; g.beginPath(); g.ellipse(wx, sea + 10, (x1 - x0) * .2, 16, 0, 0, TAU); g.fill(); label(g, '따뜻한 해수', wx, sea + 10, {size: 11, weight: 700, color: '#fff'});
+  label(g, '수온 약층', x0 + 50, thW + 12, {size: 10, color: '#fff', align: 'left'});
+  // 무역풍
+  for (let k = 0; k < 5; k++) { const x = x1 - ((t * 60 * tw + k * (x1 - x0) / 5) % (x1 - x0)); if (tw > .15) arrow(g, x, sea - 30, x - 30 * tw, sea - 30, '#2f6fd0', 2 + tw); } label(g, `무역풍 (동 → 서) ${tw < .6 ? '약함' : tw > 1.4 ? '강함' : '보통'}`, W / 2, sea - 52, {size: 12, weight: 700, color: '#2f6fd0'});
+  // 구름·비
+  const cloudX = x0 + (x1 - x0) * warmW; for (let k = 0; k < 3; k++) { g.fillStyle = '#9aa6b8'; g.beginPath(); g.arc(cloudX - 40 + k * 40, H * .12, 22, 0, TAU); g.fill(); } for (let k = 0; k < 14; k++) { const x = cloudX - 60 + (k * 9) % 120, y = H * .16 + ((t * 120 + k * 17) % (sea - H * .2)); g.strokeStyle = '#4a7fd6'; g.beginPath(); g.moveTo(x, y); g.lineTo(x - 2, y + 8); g.stroke(); } label(g, '상승 기류 · 많은 비', cloudX, H * .05, {size: 11, weight: 700});
+  // 용승
+  const up = Math.max(0, tw - .3); if (up > 0) for (let k = 0; k < 4; k++) { const y = H - ((t * 40 * up + k * 30) % (H - sea - 20)); arrow(g, x1 - 30, y, x1 - 30, y - 18, '#9fd0f0', 2); } label(g, up > .5 ? '용승 활발 (찬물·영양염)' : '용승 약함', x1 - 40, H * .92, {size: 11, weight: 700, color: '#fff', align: 'right'}); }
+const sstE = () => (1 - st.trade) * 2.5;
+/* ===== 온난화 ===== */
+const dT = c => 3 * Math.log2(c / 280);
+function drawWarm(){ const g = S.g, W = S.w, H = S.h, c = st.co2, d = dT(c), t = st.t, gy = H * .78;
+  const sky = g.createLinearGradient(0, 0, 0, gy); sky.addColorStop(0, `rgb(${120 + d * 18},${180 - d * 10},${230 - d * 20})`); sky.addColorStop(1, '#f4f8fb'); g.fillStyle = sky; g.fillRect(0, 0, W * .62, gy); g.fillStyle = '#6aa05a'; g.fillRect(0, gy, W * .62, H - gy);
+  // 온실 기체 층
+  g.fillStyle = `rgba(150,150,150,${(c - 280) / 1000 + .1})`; g.fillRect(0, H * .2, W * .62, 26); label(g, `온실 기체 층 (CO₂ ${c} ppm)`, W * .31, H * .2 + 13, {size: 11, weight: 700});
+  for (let k = 0; k < 6; k++) { const x = 30 + k * W * .1, u = (t * .6 + k * .17) % 1; g.strokeStyle = '#e0a400'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 20, gy * u); g.stroke(); }
+  const back = Math.min(.9, .45 + (c - 280) / 1200); for (let k = 0; k < 6; k++) { const x = 60 + k * W * .1, u = (t * .5 + k * .2) % 1, y = gy - u * (gy - H * .2 - 26); g.strokeStyle = '#d0533f'; g.setLineDash([5, 4]); g.lineWidth = 2; g.beginPath(); g.moveTo(x, gy); g.lineTo(x + 6, y); g.stroke(); g.setLineDash([]); if (u > .9 && k / 6 < back) arrow(g, x + 6, H * .2 + 30, x + 18, H * .2 + 70, '#d0533f', 2); }
+  label(g, '노랑: 태양 복사 · 빨강 점선: 지구 복사(적외선) — 온실 기체가 흡수했다가 지표로 재방출', W * .31, H * .96, {size: 10, color: C.muted});
+  // 영향
+  const rx = W * .81; label(g, `산업화 이전 대비 기온 +${d.toFixed(1)} ℃ (평형)`, rx, H * .12, {size: 15, weight: 700, color: d > 2 ? C.hot : '#b07f00'});
+  [['🌊 해수면 상승', d * 0.25 * 100, 'cm (장기)'], ['🧊 북극 여름 해빙', Math.max(0, 100 - d * 30), '% 남음'], ['🔥 폭염 일수', 1 + d * 1.8, '배'], ['🪸 산호 백화', Math.min(100, d * 35), '%']].forEach(([n, v, u], i) => { const y = H * .26 + i * 46; label(g, n, rx - 90, y, {size: 13, align: 'left', weight: 700}); g.fillStyle = C.soft; g.fillRect(rx - 90, y + 10, 180, 10); g.fillStyle = C.hot; g.fillRect(rx - 90, y + 10, Math.min(180, v / (u.includes('cm') ? 300 : u === '배' ? 10 : 100) * 180), 10); label(g, `${u === '배' ? v.toFixed(1) : Math.round(v)} ${u}`, rx + 95, y + 15, {size: 11, align: 'left'}); }); }
+/* ===== 그래프·표 ===== */
+const KEELING = [[1960, 317], [1970, 326], [1980, 339], [1990, 354], [2000, 369], [2010, 389], [2020, 414], [2024, 422]];
+const TEMP = [[1880, -.17], [1900, -.08], [1920, -.27], [1940, .12], [1960, -.03], [1980, .26], [2000, .39], [2010, .72], [2020, 1.01], [2024, 1.29]];
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'circ') { const m = axes(G, {x: [-90, 90, 30, '위도 (°)'], y: [0, 400, 100, '에너지 (W/m², 연평균)']}); const P = [], Q = []; for (let l = -90; l <= 90; l += 2) { P.push([l, 340 * Math.cos(l * Math.PI / 180) * .9 + 20]); Q.push([l, 240 - 60 * Math.sin(Math.abs(l) * Math.PI / 180) ** 2]); } line(G, P, m, '#e0a400', 2.5); line(G, Q, m, C.hot, 2.5, [5, 4]); label(g, '흡수한 태양 복사', m.X(0), m.Y(345), {size: 10, color: '#b07f00'}); label(g, '방출한 지구 복사', m.X(60), m.Y(240), {size: 10, color: C.hot}); label(g, '저위도 에너지 과잉 → 고위도로 수송', m.X(0), m.Y(60), {size: 11, color: C.muted}); }
+  else if (st.mode === 'enso') { const m = axes(G, {x: [0, 2, .5, '무역풍 세기 (평상시 = 1)'], y: [-3, 3, 1, '동태평양 수온 편차 (℃)']}); line(G, [[0, 2.5], [2, -2.5]], m, C.accent, 2.4); line(G, [[0, 0], [2, 0]], m, C.line, 1); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.trade), m.Y(sstE()), 5, 0, TAU); g.fill(); label(g, '엘니뇨 (+0.5 ℃ 이상)', m.X(.35), m.Y(2.6), {size: 10, color: C.hot}); label(g, '라니냐 (−0.5 ℃ 이하)', m.X(1.65), m.Y(-2.6), {size: 10, color: C.phy}); }
+  else { const half = G.w / 2; const m1 = axes(G, {x: [1960, 2025, 20, '연도'], y: [300, 440, 40, 'CO₂ (ppm)']}, {R: half + 8}); line(G, KEELING, m1, C.hot, 2.4); label(g, '하와이 마우나로아 관측', m1.X(1985), m1.Y(425), {size: 10, color: C.muted});
+    const m2 = axes(G, {x: [1880, 2025, 40, '연도'], y: [-.5, 1.5, .5, '기온 편차 (℃)']}, {L: half + 48, keep: true}); line(G, TEMP, m2, '#b07f00', 2.4); label(g, '전 지구 평균 (1951~1980 대비)', m2.X(1940), m2.Y(1.3), {size: 10, color: C.muted}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
+  if (st.mode === 'circ') { s.innerHTML = st.rot === '1' ? '<div><b>3개</b><span>반구별 순환 세포</span></div><div><b>무역풍·편서풍·극동풍</b><span>지상풍</span></div>' : '<div><b>1개</b><span>반구별 순환</span></div>'; $('explain').innerHTML = '위도에 따른 에너지 불균형 때문에 대기는 열을 저위도에서 고위도로 운반하며 순환해요. 지구 자전 때문에 반구마다 <b>해들리 순환, 페렐 순환, 극순환</b>의 3개 순환이 만들어지고, 지상에서는 무역풍, 편서풍, 극동풍이 불어요. 이 바람이 표층 해류를 일으켜요.'; $('tip').textContent = '무역풍 → 북·남적도 해류, 편서풍 → 북태평양 해류. 우리나라 주변 쿠로시오 해류는 저위도의 열을 고위도로 운반해요.';
+    th.innerHTML = '<tr><th>순환</th><th>위도</th><th>지상풍</th></tr>'; tb.innerHTML = [['해들리 순환', '0°~30°', '무역풍'], ['페렐 순환', '30°~60°', '편서풍'], ['극순환', '60°~90°', '극동풍']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); $('tTitle').textContent = '대기 대순환'; $('gTitle').textContent = '위도별 에너지 수지'; $('gSub').textContent = ''; }
+  else if (st.mode === 'enso') { const a = sstE(), k = a > .5 ? '엘니뇨' : a < -.5 ? '라니냐' : '평상시'; $('tradeOut').textContent = k; s.innerHTML = `<div><b>${k}</b><span>상태</span></div><div><b>${a > 0 ? '+' : ''}${a.toFixed(1)} ℃</b><span>동태평양 수온 편차</span></div>`;
+    $('explain').innerHTML = '<b>엘니뇨</b>: 무역풍이 약해져 따뜻한 해수가 동쪽으로 이동 → 동태평양 수온 상승, 페루 연안 용승 약화, 페루에 홍수·인도네시아에 가뭄. <b>라니냐</b>: 무역풍이 강해져 반대 현상이 강화돼요. 대기와 해양의 <b>상호작용</b>으로 일어나는 현상이에요.'; $('tip').textContent = '엘니뇨와 라니냐는 수년 주기로 반복되며 전 세계 기상 이변과 어획량에 영향을 줘요.';
+    th.innerHTML = '<tr><th></th><th>엘니뇨</th><th>라니냐</th></tr>'; tb.innerHTML = [['무역풍', '약해짐', '강해짐'], ['동태평양 수온', '높아짐', '낮아짐'], ['페루 연안 용승', '약해짐', '강해짐'], ['동태평양 강수', '증가(홍수)', '감소(가뭄)'], ['서태평양 강수', '감소(가뭄)', '증가(홍수)']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); $('tTitle').textContent = '엘니뇨와 라니냐 비교'; $('gTitle').textContent = '무역풍 세기와 동태평양 수온'; $('gSub').textContent = ''; }
+  else { s.innerHTML = `<div><b>${st.co2} ppm</b><span>CO₂ 농도</span></div><div><b>+${dT(st.co2).toFixed(1)} ℃</b><span>평형 기온 상승(모형)</span></div>`; $('explain').innerHTML = '<b>온실 효과</b>: 대기 중 온실 기체가 지구 복사(적외선)를 흡수했다가 지표로 재방출해 지표 온도를 높이는 현상. 화석 연료 사용으로 온실 기체가 늘어 온실 효과가 강화되는 것이 <b>지구 온난화</b>예요.'; $('tip').textContent = '산업화 이전 CO₂ 약 280 ppm → 현재 약 420 ppm. 파리 협정 목표: 기온 상승을 1.5 ℃(최대 2 ℃) 이내로 억제.';
+    th.innerHTML = '<tr><th>영향</th><th>내용</th></tr>'; tb.innerHTML = [['해수면 상승', '해수 열팽창, 빙하·빙상 융해'], ['기상 이변', '폭염, 가뭄, 집중 호우 증가'], ['생태계 변화', '생물 분포 북상, 산호 백화, 멸종 위기'], ['해양 산성화', 'CO₂가 바다에 녹아 pH 감소']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = '지구 온난화의 영향'; $('gTitle').textContent = '관측 자료: CO₂ 농도와 기온 편차'; $('gSub').textContent = ''; } }
+Kit.seg($('rotSeg'), 'rot', v => { st.rot = v; render(); })('1');
+$('trade').oninput = e => { st.trade = +e.target.value; render(); }; $('co2').oninput = e => { st.co2 = +e.target.value; $('co2Out').textContent = st.co2 + ' ppm'; render(); };
+Kit.tabs(m => { st.mode = m; render(); }, ['circ', 'enso', 'warm']);
+Kit.loop(dt => { st.t += dt; }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({circ: drawCirc, enso: drawEnso, warm: drawWarm})[st.mode](); drawGraph(); }, $('play'));
+})();
+</script>
+</body>
+</html>
