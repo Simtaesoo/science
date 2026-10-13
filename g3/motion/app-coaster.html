@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>롤러코스터 설계소 · 중3 운동과 에너지</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<style>
+.ebar{display:grid;grid-template-columns:72px 1fr 64px;gap:6px;align-items:center;font-size:13px;margin:5px 0}
+.ebar i{display:block;height:12px;border-radius:6px;background:rgba(0,0,0,.3);overflow:hidden}
+.ebar i u{display:block;height:100%}
+</style>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'coaster', title: '롤러코스터 설계소', unit: '중3 · 19 운동과 에너지', back: '../../index.html#g3', sim: 'sim.html#mech',
+  lead: '언덕의 높이를 끌어 올리고 내려 <b>롤러코스터 트랙</b>을 설계하세요. 출발점의 위치 에너지가 얼마나 운동 에너지로 바뀌는지가 성공의 열쇠! 에너지는 실제 계산 그대로예요.',
+  howto: ['트랙 위 <b>동그란 손잡이</b>를 위아래로 끌어 높이를 바꾸세요. 🔒 표시는 고정이에요.', '<b>[출발]</b>을 누르면 열차(질량 500 kg)가 출발해요. 별⭐을 지나며 미션을 달성하세요.', '마찰이 있는 단계에서는 에너지 일부가 <b>열에너지</b>로 바뀌어요.'],
+  options: [],
+  recap: '<b>역학적 에너지 보존</b>: 마찰이 없으면 위치 에너지(9.8 m h)와 운동 에너지(½ m v²)의 합은 항상 일정해요. 높이가 낮아지면 위치 에너지가 운동 에너지로 전환되어 빨라지고, 출발점보다 높은 언덕은 넘을 수 없어요. 낙하 높이 h만큼 내려오면 속력 v = √(2 × 9.8 × h). 마찰이 있으면 역학적 에너지 일부가 <b>열에너지</b>로 바뀌지만, 열에너지까지 더한 전체 에너지는 보존돼요.',
+  startLabel: '설계 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const G9 = 9.8, M = 500, XS = 20, NP = 8, XMAX = XS * (NP - 1); // 140 m
+const LV = [
+  {h: [40, 30, 46, 20, 25, 12, 8, 5], lock: [0, 7], k: 0, stars: [], t: '열차가 <b>도착역</b>(오른쪽 끝)까지 가게 하세요.', why: '출발점(40 m)보다 높은 언덕은 넘을 수 없어요. 위치 에너지가 모자라기 때문이에요.'},
+  {h: [40, 30, 20, 15, 30, 20, 10, 5], lock: [0, 7], k: 0, stars: [[2, 8], [4, 36], [5, 22]], t: '별 3개를 모두 지나 도착하세요. (트랙이 별 높이를 지나야 해요)', why: '36 m 언덕에서도 출발점과의 높이 차가 4 m라 속력이 √(2×9.8×4) ≈ 8.9 m/s 남아요.'},
+  {h: [40, 20, 30, 20, 30, 20, 10, 5], lock: [0, 7], k: .35, stars: [[5, 33]], t: '<b>마찰</b>이 있어요! 33 m 높이의 별을 지나 도착하세요.', why: '마찰로 열에너지가 생기면 역학적 에너지가 줄어 출발점 근처 높이까지는 오르기 어려워요. 앞쪽 언덕을 낮추면 유리할까요?'},
+  {h: [40, 25, 10, 25, 15, 20, 15, 15], lock: [0], k: 0, stars: [], end: [14, .5], t: '도착역에서 속력이 정확히 <b>14 m/s</b>가 되게 하세요. (마지막 높이 조절)', why: '½v² = 9.8 × (40 − h) → h = 40 − 14² ÷ 19.6 = 30 m. 중간 트랙 모양과 상관없이 높이 차로만 결정돼요!'},
+  {h: [40, 25, 10, 25, 15, 20, 15, 20], lock: [0], k: .25, stars: [[3, 28]], end: [10, .6], t: '마찰 있음! 28 m 별을 지나 도착 속력 <b>10 m/s</b>로 맞추세요.', why: '마찰이 있으면 높이 차만으로 정해지지 않아요. 열에너지만큼 운동 에너지가 줄어들어요.'}];
+let lv, h, run, cart, ui = {}, drag = -1, fails = 0, result = null, trail = [];
+app.onStart = () => { lv = 0; fails = 0; ui.g = app.panel('미션'); ui.e = app.panel('에너지 (질량 500 kg)'); ui.b = app.panel(''); app.startTimer(); load(); };
+function load(){ const L = LV[lv]; h = L.h.slice(); run = false; result = null; trail = []; cart = {x: 0, s: 0, v: 0, heat: 0}; app.setLevel(lv, LV.length);
+  ui.g.innerHTML = `<p><b>${lv + 1}단계</b>${L.k ? ' · <span style="color:var(--coral)">마찰 있음</span>' : ' · 마찰 없음'}</p><p class="mission">${L.t}</p>`; buttons(); energy(); }
+function buttons(){ ui.b.innerHTML = `<button class="big" id="go" type="button" style="width:100%">${run ? '⏹ 멈추고 다시 설계' : '🚀 출발'}</button>`; ui.b.querySelector('#go').onclick = () => { if (run || result) { run = false; result = null; cart = {x: 0, s: 0, v: 0, heat: 0}; trail = []; } else { run = true; cart = {x: 0.01, s: 0, v: 0, heat: 0, passed: new Set()}; trail = []; sfx.whoosh(); } buttons(); }; }
+// 부드러운 곡선(코사인 보간) — 높이와 기울기
+function hy(x){ x = D.clamp(x, 0, XMAX); const i = Math.min(NP - 2, Math.floor(x / XS)), u = (x - i * XS) / XS, w = (1 - Math.cos(u * Math.PI)) / 2; return h[i] + (h[i + 1] - h[i]) * w; }
+const slope = x => (hy(x + .05) - hy(x - .05)) / .1;
+function energy(){ const L = LV[lv], tot = M * G9 * h[0], hh = hy(cart.x), pe = Math.round(M * G9 * hh / 100) / 10, heat = Math.round(cart.heat / 100) / 10, T = Math.round(tot / 100) / 10, ke = +(T - pe - heat).toFixed(1), v = Math.sqrt(Math.max(0, 2 * (T - pe - heat) * 1000 / M));
+  const bar = (n, val, col) => `<div class="ebar"><span>${n}</span><i><u style="width:${D.clamp(val / T * 100, 0, 100)}%;background:${col}"></u></i><b>${val.toFixed(1)} kJ</b></div>`;
+  ui.e.innerHTML = bar('위치 에너지', pe, '#8ecdf2') + bar('운동 에너지', Math.max(0, ke), '#f6d365') + (L.k ? bar('열에너지', heat, '#f28c7a') : '') + `<div class="ebar"><span><b>합계</b></span><i><u style="width:100%;background:#9be3b5"></u></i><b>${T.toFixed(1)} kJ</b></div><p class="note-c">높이 ${hh.toFixed(1)} m · 속력 <b>${v.toFixed(1)} m/s</b></p>`; }
+app.step = dt => { if (!h) return; if (run && !result) { const L = LV[lv];
+    for (let k = 0; k < 8; k++) { const d = dt * 1.6 / 8, sl = slope(cart.x), E = 2 * G9 * (h[0] - hy(cart.x)) - 2 * L.k * cart.s; // v² (단위 질량)
+      if (E <= 0 && cart.x > .5) { result = 'stop'; break; } const v = Math.sqrt(Math.max(.25, E)); const ds = v * d; cart.s += ds; cart.x += ds / Math.sqrt(1 + sl * sl); cart.v = v; cart.heat = M * L.k * cart.s;
+      L.stars.forEach(([i, y], j) => { if (!cart.passed.has(j) && Math.abs(cart.x - i * XS) < 1) { if (Math.abs(hy(i * XS) - y) < 2) { cart.passed.add(j); sfx.ok(); toast('⭐ 별 통과!', 'good'); } } });
+      if (cart.x >= XMAX) { cart.x = XMAX; result = 'end'; break; } }
+    trail.push([cart.x, hy(cart.x)]); if (trail.length > 60) trail.shift();
+    if (result) finishRun(); energy(); } };
+function finishRun(){ const L = LV[lv]; run = false; buttons();
+  if (result === 'stop') { fails++; sfx.bad(); toast('열차가 멈췄어요! 에너지가 모자라요', 'bad'); app.addScore(-10); return; }
+  const vEnd = Math.sqrt(Math.max(0, 2 * G9 * (h[0] - hy(XMAX)) - 2 * L.k * cart.s)), missS = L.stars.length - cart.passed.size, endOK = !L.end || Math.abs(vEnd - L.end[0]) <= L.end[1];
+  if (missS || !endOK) { fails++; sfx.bad(); app.addScore(-10); toast(missS ? `별 ${missS}개를 못 지났어요 (트랙 높이를 별에 맞추세요)` : `도착 속력 ${vEnd.toFixed(1)} m/s — 목표는 ${L.end[0]} m/s`, 'bad'); return; }
+  sfx.win(); app.confetti(90); const pts = 150 - Math.min(100, fails * 15); fails = 0; app.addScore(pts);
+  ui.g.innerHTML += `<p style="color:var(--mint);font-weight:700;margin-top:6px">✔ 성공! +${pts}${L.end ? ` (도착 속력 ${vEnd.toFixed(1)} m/s)` : ''}</p><p class="note-c">${L.why}</p><button class="big" type="button" style="width:100%;margin-top:8px">${lv + 1 < LV.length ? '다음 단계 ▶' : '결과 보기'}</button>`;
+  ui.g.querySelector('button').onclick = () => { lv++; if (lv >= LV.length) return app.finish({stars: app.player.score >= 650 ? 3 : app.player.score >= 450 ? 2 : 1, summary: `5단계 완주! 점수 <b>${app.player.score}</b>`, best: app.player.score + '점', bestValue: app.player.score}); load(); }; }
+function geo(){ const W = S.w, H = S.h, ox = 50, oy = H - 40, sx = (W - 120) / XMAX, sy = (H - 90) / 50; return {ox, oy, sx, sy, X: x => ox + x * sx, Y: y => oy - y * sy}; }
+app.pointer({down(x, y){ if (run) return; const G = geo(); drag = -1; for (let i = 0; i < NP; i++) if (!LV[lv].lock.includes(i) && Math.hypot(x - G.X(i * XS), y - G.Y(h[i])) < 26) drag = i; if (drag >= 0) sfx.click(); },
+  move(x, y, down){ if (drag < 0 || !down) return; const G = geo(); h[drag] = D.clamp(Math.round((G.oy - y) / G.sy * 2) / 2, 1, 49); result = null; cart = {x: 0, s: 0, v: 0, heat: 0}; trail = []; energy(); }, up(){ drag = -1; }});
+app.draw = (g, W, H) => { if (!h) return; const G = geo(), t = performance.now() / 1000, L = LV[lv];
+  const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#9fd3f5'); sky.addColorStop(1, '#e8f6ff'); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#7cc47f'; g.fillRect(0, G.oy, W, H - G.oy);
+  // 눈금
+  for (let y = 0; y <= 50; y += 10) { g.strokeStyle = 'rgba(0,0,0,.08)'; g.beginPath(); g.moveTo(G.ox, G.Y(y)); g.lineTo(W, G.Y(y)); g.stroke(); D.text(g, y + ' m', G.ox - 8, G.Y(y), {size: 11, color: '#34506a', align: 'right'}); }
+  // 출발 높이 선
+  g.strokeStyle = '#d0533f'; g.setLineDash([6, 5]); g.lineWidth = 1.5; g.beginPath(); g.moveTo(G.ox, G.Y(h[0])); g.lineTo(W, G.Y(h[0])); g.stroke(); g.setLineDash([]); D.text(g, '출발 높이', W - 10, G.Y(h[0]) - 10, {size: 11, color: '#d0533f', align: 'right'});
+  // 기둥 + 트랙
+  for (let x = 0; x <= XMAX; x += 5) { g.strokeStyle = '#b9a58a'; g.lineWidth = 2; g.beginPath(); g.moveTo(G.X(x), G.Y(hy(x))); g.lineTo(G.X(x), G.oy); g.stroke(); }
+  g.strokeStyle = '#5b4a3a'; g.lineWidth = 7; g.beginPath(); for (let x = 0; x <= XMAX; x += 1) g.lineTo(G.X(x), G.Y(hy(x))); g.stroke(); g.strokeStyle = '#d0533f'; g.lineWidth = 3; g.stroke();
+  // 역
+  g.fillStyle = '#e6d3b3'; g.fillRect(G.X(XMAX) - 10, G.Y(hy(XMAX)) + 4, 40, 12); D.text(g, '🏁 도착역', G.X(XMAX) - 4, G.Y(hy(XMAX)) - 22, {size: 12, weight: 700, color: '#333'});
+  // 별
+  L.stars.forEach(([i, y], j) => { const got = cart.passed && cart.passed.has(j); D.text(g, '⭐', G.X(i * XS), G.Y(y), {size: got ? 30 : 24 + Math.sin(t * 4 + j) * 2}); D.text(g, y + ' m', G.X(i * XS) + 20, G.Y(y) - 14, {size: 11, color: '#34506a', weight: 700}); });
+  // 손잡이
+  if (!run) for (let i = 0; i < NP; i++) { const lk = L.lock.includes(i), x = G.X(i * XS), y = G.Y(h[i]); g.fillStyle = lk ? '#888' : drag === i ? '#f6d365' : '#fff'; g.strokeStyle = '#333'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, lk ? 7 : 11, 0, 7); g.fill(); g.stroke(); if (lk) D.text(g, '🔒', x, y - 18, {size: 11}); else D.text(g, h[i] + ' m', x, y - 22, {size: 11, weight: 700, color: '#333'}); }
+  // 열차
+  trail.forEach(([x, y], i) => { g.fillStyle = `rgba(246,211,101,${i / trail.length * .6})`; g.beginPath(); g.arc(G.X(x), G.Y(y) - 8, 3, 0, 7); g.fill(); });
+  const cx = G.X(cart.x), cy = G.Y(hy(cart.x)), a = Math.atan2(-slope(cart.x) * G.sy, G.sx); g.save(); g.translate(cx, cy); g.rotate(a); g.fillStyle = '#2f5fd0'; D.rr(g, -16, -20, 32, 16, 5); g.fill(); g.fillStyle = '#fff'; g.fillRect(-10, -17, 8, 6); g.fillRect(2, -17, 8, 6); g.fillStyle = '#222'; g.beginPath(); g.arc(-9, -3, 4, 0, 7); g.arc(9, -3, 4, 0, 7); g.fill(); g.restore();
+  if (run || result) D.text(g, `${cart.v.toFixed(1)} m/s`, cx, cy - 38, {size: 13, weight: 700, color: '#1d3a58', stroke: '#fff', strokeW: 4});
+  if (result === 'stop') D.text(g, '멈춤! ↩', cx, cy - 58, {size: 18, display: true, color: '#d0533f'});
+};
+</script>
+</body>
+</html>
