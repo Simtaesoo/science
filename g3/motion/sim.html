@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>운동과 에너지 실험실 · 중3 운동과 에너지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="3학년|19 운동과 에너지" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 3 · 19 운동과 에너지 <span class="code">9과19</span></div>
+      <h1>운동과 에너지 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="uniform">1. 등속 운동</button>
+      <button type="button" data-mode="fall">2. 자유 낙하</button>
+      <button type="button" data-mode="work">3. 일</button>
+      <button type="button" data-mode="energy">4. 위치·운동 에너지</button>
+      <button type="button" data-mode="mech">5. 역학적 에너지</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="운동 실험 장치"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <label class="field" data-only="uniform" for="spd">속력 <input type="range" id="spd" min="0.5" max="3" step="0.5" value="1.5"><output id="spdOut">1.5 m/s</output></label>
+        <div class="field" data-only="fall"><div class="seg" id="objSeg"><button type="button" data-obj="ball">쇠공</button><button type="button" data-obj="feather">깃털</button></div></div>
+        <div class="field" data-only="fall"><label for="vac"><input type="checkbox" id="vac"> 진공 속</label></div>
+        <label class="field" data-only="fall energy" for="mass">질량 <input type="range" id="mass" min="1" max="5" step="1" value="2"><output id="massOut">2 kg</output></label>
+        <div class="field" data-only="work"><div class="seg" id="wkSeg"><button type="button" data-wk="push">수평으로 끌기</button><button type="button" data-wk="lift">들어 올리기</button><button type="button" data-wk="carry">들고 수평 이동</button></div></div>
+        <label class="field" data-only="work" id="fF" for="force">힘 <input type="range" id="force" min="10" max="50" step="5" value="20"><output id="forceOut">20 N</output></label>
+        <label class="field" data-only="work" for="dist">거리 <input type="range" id="dist" min="1" max="4" step="0.5" value="3"><output id="distOut">3 m</output></label>
+        <div class="field" data-only="energy"><div class="seg" id="enSeg"><button type="button" data-en="pe">추로 말뚝 박기</button><button type="button" data-en="ke">수레로 나무 도막 밀기</button></div></div>
+        <label class="field" data-only="energy" id="hF" for="hgt">높이 <input type="range" id="hgt" min="0.2" max="1" step="0.2" value="0.6"><output id="hgtOut">0.6 m</output></label>
+        <label class="field" data-only="energy" id="vF" for="vel">속력 <input type="range" id="vel" min="1" max="4" step="1" value="2"><output id="velOut">2 m/s</output></label>
+        <div class="field" data-only="mech"><div class="seg" id="mcSeg"><button type="button" data-mc="drop">떨어지는 공</button><button type="button" data-mc="pend">진자</button><button type="button" data-mc="toss">위로 던진 공</button></div></div>
+        <div class="field" data-only="mech" id="fricF"><label for="fric"><input type="checkbox" id="fric"> 공기 저항·마찰 있음</label></div>
+        <button class="btn" type="button" id="go" data-only="uniform fall work energy mech">시작</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">정리</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>무거운 물체가 더 빨리 떨어질까?</summary>
+        <p>공기 저항을 무시하면 질량에 관계없이 모든 물체는 1초마다 속력이 9.8 m/s씩 빨라지며 똑같이 떨어집니다. 실제로 깃털이 늦게 떨어지는 것은 공기 저항 때문입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>무거운 가방을 들고 가만히 서 있으면 힘든데, 왜 과학에서는 일을 하지 않았다고 할까?</summary>
+        <p>과학에서 일은 물체에 힘을 작용하여 그 힘의 방향으로 물체를 이동시켰을 때만 합니다. 가방이 이동하지 않았으므로 한 일은 0입니다. 힘든 것은 근육이 계속 수축하며 에너지를 쓰기 때문입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>그네는 왜 결국 멈출까?</summary>
+        <p>공기 저항과 마찰 때문에 역학적 에너지의 일부가 열에너지 등으로 바뀌어 역학적 에너지가 점점 줄어들기 때문입니다. 마찰이 없다면 역학적 에너지가 보존되어 같은 높이까지 계속 올라갑니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="중력 가속도는 9.8 m/s²로 계산했습니다. 공기 저항은 단순한 모형입니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2, g9 = 9.8;
+const st = {mode:'uniform', t:0, run:false, rt:0, v:1.5, obj:'ball', vac:false, m:2, wk:'push', F:20, d:3, en:'pe', h:.6, vel:2, mc:'drop', fric:false, hist:[], y:0, vy:0, th:0, om:0, heat:0, depth:0, slide:0, phase:0};
+
+function ruler(g, x0, x1, y, m0, m1, step, unit){ g.strokeStyle = C.ink; g.lineWidth = 1; g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke(); for (let v = m0; v <= m1 + 1e-9; v += step) { const x = x0 + (x1 - x0) * (v - m0) / (m1 - m0); g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 6); g.stroke(); label(g, v + unit, x, y + 16, {size: 10, color: C.muted}); } }
+function cart(g, x, y, col, ghost){ g.globalAlpha = ghost ? .25 : 1; g.fillStyle = col; g.fillRect(x - 22, y - 22, 44, 18); g.fillStyle = C.ink; g.beginPath(); g.arc(x - 12, y - 2, 5, 0, TAU); g.arc(x + 12, y - 2, 5, 0, TAU); g.fill(); g.globalAlpha = 1; }
+
+/* ===== 1. 등속 운동 ===== */
+function drawUniform(){
+  const g = S.g, x0 = 50, x1 = S.w - 40, y = S.h * .45, X = s => x0 + (x1 - x0) * s / 8;
+  g.fillStyle = C.soft; g.fillRect(x0 - 20, y, x1 - x0 + 40, 10); ruler(g, x0, x1, y + 14, 0, 8, 1, ' m');
+  const s = Math.min(8, st.v * st.rt);
+  for (let k = 0; k <= Math.floor(st.rt * 2); k++) { const sk = st.v * k * .5; if (sk > 8) break; cart(g, X(sk), y, C.phy, true); label(g, (k * .5).toFixed(1) + 's', X(sk), y - 34, {size: 10, color: C.muted}); }
+  cart(g, X(s), y, C.phy, false);
+  label(g, '다중 섬광 사진처럼 0.5초마다 위치를 표시 · 간격이 일정 → 속력 일정', S.w / 2, 24, {size: 12, weight: 600});
+  label(g, `시간 ${st.rt.toFixed(1)} s · 이동 거리 ${s.toFixed(2)} m`, S.w / 2, S.h * .75, {weight: 700, size: 15});
+  label(g, `속력 = 이동 거리 ÷ 걸린 시간 = ${st.v} m/s`, S.w / 2, S.h * .75 + 24, {size: 12, color: C.accent});
+}
+
+/* ===== 2. 자유 낙하 ===== */
+function fallAcc(vy){ const drag = st.vac ? 0 : st.obj === 'feather' ? 6 : .004; return g9 - drag * vy * Math.abs(vy) / (st.obj === 'feather' ? .9 : st.m); }
+function drawFall(){
+  const g = S.g, top = 30, H = S.h - 70, Y = d => top + H * d / 20, cx = S.w * .35;
+  g.fillStyle = st.vac ? 'rgba(200,210,230,.25)' : 'rgba(200,230,250,.25)'; g.fillRect(cx - 60, top - 10, 120, H + 20); g.strokeStyle = C.line; g.strokeRect(cx - 60, top - 10, 120, H + 20);
+  label(g, st.vac ? '진공 관' : '공기 중', cx, top - 18, {size: 11, color: C.muted});
+  for (let d = 0; d <= 20; d += 5) { g.strokeStyle = C.line; g.beginPath(); g.moveTo(cx + 60, Y(d)); g.lineTo(cx + 70, Y(d)); g.stroke(); label(g, d + ' m', cx + 74, Y(d), {size: 10, color: C.muted, align: 'left'}); }
+  // 0.2초 간격 잔상
+  st.hist.filter((p, i, a) => i > 0 && Math.floor(p[0] / .2) !== Math.floor(a[i - 1][0] / .2)).forEach(([t, d], i) => { if (d > 20) return; g.globalAlpha = .3; draw1(g, cx, Y(d)); g.globalAlpha = 1; label(g, t.toFixed(1) + 's', cx - 66, Y(d), {size: 9, color: C.muted, align: 'right'}); });
+  draw1(g, cx, Y(Math.min(20, st.y)));
+  const rx = S.w * .78; label(g, `시간 ${st.rt.toFixed(2)} s`, rx, S.h * .25, {weight: 700, size: 14}); label(g, `속력 ${st.vy.toFixed(1)} m/s`, rx, S.h * .25 + 26, {size: 13, color: C.hot}); label(g, `낙하 거리 ${Math.min(20, st.y).toFixed(1)} m`, rx, S.h * .25 + 50, {size: 13});
+  label(g, '간격이 점점 넓어짐 → 속력 증가', rx, S.h * .25 + 86, {size: 12, color: C.muted});
+  if (st.obj === 'feather' && !st.vac) label(g, '공기 저항이 커서 천천히 떨어짐', rx, S.h * .25 + 108, {size: 12, color: C.hot});
+}
+function draw1(g, x, y){ if (st.obj === 'ball') { g.fillStyle = '#6a7380'; g.beginPath(); g.arc(x, y, 7 + st.m, 0, TAU); g.fill(); } else { g.strokeStyle = '#a07a40'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x - 14, y + 6); g.lineTo(x + 14, y - 6); g.stroke(); g.fillStyle = 'rgba(230,220,200,.95)'; g.beginPath(); g.ellipse(x, y, 16, 6, -.4, 0, TAU); g.fill(); } }
+
+/* ===== 3. 일 ===== */
+const workVal = () => st.wk === 'push' ? st.F * st.d : st.wk === 'lift' ? g9 * st.m * Math.min(st.d, 2) : 0;
+function drawWork(){
+  const g = S.g, fy = S.h * .72, x0 = 70, x1 = S.w - 50, X = s => x0 + (x1 - x0) * s / 4.5, prog = Math.min(1, st.rt / 2.5);
+  g.fillStyle = '#d9cbb0'; g.fillRect(0, fy, S.w, S.h - fy);
+  if (st.wk === 'push') { const s = st.d * prog, bx = X(s); g.fillStyle = '#b07a40'; g.fillRect(bx - 30, fy - 46, 60, 46); label(g, '상자', bx, fy - 23, {color: '#fff', weight: 700});
+    arrow(g, bx + 30, fy - 23, bx + 30 + st.F * 2.2, fy - 23, C.hot, 3); label(g, `힘 ${st.F} N`, bx + 34 + st.F * 1.1, fy - 38, {color: C.hot, weight: 700, size: 12});
+    ruler(g, X(0), X(4.5), fy + 14, 0, 4.5, .5, ''); label(g, `이동 거리 ${s.toFixed(1)} m`, S.w / 2, fy + 44, {size: 12}); }
+  else if (st.wk === 'lift') { const hmax = Math.min(st.d, 2), h = hmax * prog, cx = S.w * .4, Yh = v => fy - v * 85; g.fillStyle = '#b07a40'; g.fillRect(cx - 30, Yh(h) - 46, 60, 46); label(g, `${st.m} kg`, cx, Yh(h) - 23, {color: '#fff', weight: 700});
+    arrow(g, cx, Yh(h) - 46, cx, Yh(h) - 46 - 9.8 * st.m * 1.2, C.hot, 3); label(g, `힘 ${(9.8 * st.m).toFixed(1)} N (= 중력)`, cx + 10, Yh(h) - 60 - 9.8 * st.m * .6, {color: C.hot, size: 12, align: 'left', weight: 700});
+    arrow(g, cx + 60, fy, cx + 60, Yh(h), C.muted, 1.5); label(g, `높이 ${h.toFixed(1)} m`, cx + 70, (fy + Yh(h)) / 2, {size: 12, align: 'left'}); if (st.d > 2) label(g, '(높이는 최대 2 m)', cx + 70, (fy + Yh(h)) / 2 + 16, {size: 10, color: C.muted, align: 'left'}); }
+  else { const s = st.d * prog, bx = X(s); g.fillStyle = '#b07a40'; g.fillRect(bx - 30, fy - 120, 60, 40); label(g, `${st.m} kg`, bx, fy - 100, {color: '#fff', weight: 700});
+    g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.arc(bx, fy - 60, 10, 0, TAU); g.stroke(); g.beginPath(); g.moveTo(bx, fy - 50); g.lineTo(bx, fy - 20); g.lineTo(bx - 10, fy); g.moveTo(bx, fy - 20); g.lineTo(bx + 10, fy); g.moveTo(bx - 20, fy - 80); g.lineTo(bx, fy - 44); g.lineTo(bx + 20, fy - 80); g.stroke();
+    arrow(g, bx + 44, fy - 100, bx + 44, fy - 150, C.hot, 3); label(g, '힘 (위)', bx + 50, fy - 150, {color: C.hot, size: 12, align: 'left'}); arrow(g, bx - 40, fy - 140, bx + 10, fy - 140, C.phy, 3); label(g, '이동 (수평)', bx - 40, fy - 154, {color: C.phy, size: 12, align: 'left'});
+    label(g, '힘의 방향과 이동 방향이 수직 → 한 일 0', S.w / 2, fy + 34, {weight: 700, color: C.hot}); }
+  label(g, `한 일 = ${workVal().toFixed(1)} J`, S.w / 2, 26, {weight: 700, size: 16, color: C.accent});
+  label(g, st.wk === 'push' ? '일 = 힘 × 힘의 방향으로 이동한 거리' : st.wk === 'lift' ? '중력에 대해 한 일 = 9.8 × 질량 × 높이' : '이동했지만 힘의 방향으로는 이동하지 않음', S.w / 2, 50, {size: 12, color: C.muted});
+}
+
+/* ===== 4. 위치 에너지·운동 에너지 ===== */
+const PE = () => g9 * st.m * st.h, KE = () => .5 * st.m * st.vel * st.vel;
+function drawEnergyExp(){
+  const g = S.g, fy = S.h * .78;
+  if (st.en === 'pe') { const cx = S.w * .35, Yh = v => fy - 40 - v * 260, maxDepth = PE() * 1.2;
+    g.fillStyle = '#c9b48a'; g.fillRect(0, fy, S.w, S.h - fy); g.fillStyle = '#8a6a40'; g.fillRect(cx - 10, fy - 40 + st.depth, 20, 90);
+    g.strokeStyle = C.line; g.beginPath(); g.moveTo(cx - 40, fy - 40 - 280); g.lineTo(cx - 40, fy); g.moveTo(cx + 40, fy - 40 - 280); g.lineTo(cx + 40, fy); g.stroke();
+    const yb = st.phase === 0 ? Yh(st.h) : Math.min(fy - 40 + st.depth - 20, Yh(st.h) + .5 * g9 * st.rt * st.rt * 260);
+    g.fillStyle = '#5a6370'; g.fillRect(cx - 24, yb - 20, 48, 20); label(g, st.m + ' kg', cx, yb - 10, {color: '#fff', size: 11, weight: 700});
+    for (let v = 0; v <= 1; v += .2) label(g, v.toFixed(1) + ' m', cx - 50, Yh(v), {size: 10, color: C.muted, align: 'right'});
+    label(g, `말뚝이 박힌 깊이 ${(st.depth / 4).toFixed(1)} cm (모형)`, S.w * .72, S.h * .4, {weight: 700, size: 13});
+    label(g, `위치 에너지 = 9.8 × ${st.m} × ${st.h} = ${PE().toFixed(1)} J`, S.w * .72, S.h * .4 + 26, {size: 12, color: C.accent}); }
+  else { const x0 = 40, ramp = S.w * .3, bx0 = S.w * .55; g.fillStyle = '#c9b48a'; g.fillRect(0, fy, S.w, S.h - fy);
+    const cx = st.phase === 0 ? x0 + 30 : Math.min(bx0 - 24, x0 + 30 + st.vel * st.rt * 90);
+    g.globalAlpha = 1; cart(g, cx, fy, C.phy); label(g, `${st.m} kg · ${st.vel} m/s`, cx, fy - 34, {size: 11});
+    const bx = bx0 + st.slide; g.fillStyle = '#b07a40'; g.fillRect(bx, fy - 26, 40, 26); label(g, '나무 도막', bx + 20, fy - 40, {size: 11});
+    ruler(g, bx0, bx0 + 250, fy + 14, 0, 50, 10, ' cm');
+    label(g, `나무 도막이 밀려난 거리 ${(st.slide / 5).toFixed(1)} cm (모형)`, S.w * .55, S.h * .3, {weight: 700, size: 13});
+    label(g, `운동 에너지 = ½ × ${st.m} × ${st.vel}² = ${KE().toFixed(1)} J`, S.w * .55, S.h * .3 + 26, {size: 12, color: C.accent}); }
+}
+
+/* ===== 5. 역학적 에너지 ===== */
+const H0 = 20, L = 1, TH0 = .9;
+function mechState(){ const m = 1;
+  if (st.mc === 'drop') { const h = Math.max(0, H0 - st.y); const pe = g9 * m * h, ke = .5 * m * st.vy * st.vy; return {pe, ke, h}; }
+  if (st.mc === 'toss') { const h = Math.max(0, st.y); return {pe: g9 * m * h, ke: .5 * m * st.vy * st.vy, h}; }
+  const h = L * (1 - Math.cos(st.th)); return {pe: g9 * m * h * 10, ke: .5 * m * Math.pow(st.om * L, 2) * 10, h}; }
+function drawMech(){
+  const g = S.g, E = mechState(), tot0 = st.mc === 'pend' ? g9 * L * (1 - Math.cos(TH0)) * 10 : st.mc === 'drop' ? g9 * H0 : .5 * 14 * 14;
+  if (st.mc === 'pend') { const px = S.w * .32, py = 40, len = S.h * .62, bx = px + Math.sin(st.th) * len, by = py + Math.cos(st.th) * len;
+    g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.moveTo(px - 60, py); g.lineTo(px + 60, py); g.stroke(); g.lineWidth = 1.5; g.beginPath(); g.moveTo(px, py); g.lineTo(bx, by); g.stroke();
+    g.strokeStyle = C.line; g.setLineDash([4, 4]); g.beginPath(); g.arc(px, py, len, Math.PI / 2 - TH0, Math.PI / 2 + TH0); g.stroke(); const hy = py + Math.cos(TH0) * len; g.beginPath(); g.moveTo(px - len * .9, hy); g.lineTo(px + len * .9, hy); g.stroke(); g.setLineDash([]);
+    label(g, '처음 높이', px + len * .9, hy - 10, {size: 10, color: C.muted, align: 'right'});
+    g.fillStyle = C.phy; g.beginPath(); g.arc(bx, by, 14, 0, TAU); g.fill(); label(g, 'A', px - Math.sin(TH0) * len, py + Math.cos(TH0) * len - 22, {size: 11, weight: 700}); label(g, 'O (가장 낮은 점)', px, py + len + 26, {size: 11}); label(g, 'B', px + Math.sin(TH0) * len, py + Math.cos(TH0) * len - 22, {size: 11, weight: 700}); }
+  else { const cx = S.w * .32, top = 30, H = S.h - 70, Y = h => top + H * (1 - h / 20); g.fillStyle = '#c9b48a'; g.fillRect(cx - 80, Y(0), 160, 10);
+    for (let h = 0; h <= 20; h += 5) label(g, h + ' m', cx - 70, Y(h), {size: 10, color: C.muted, align: 'right'});
+    const h = st.mc === 'drop' ? Math.max(0, H0 - st.y) : Math.max(0, st.y); g.fillStyle = C.hot; g.beginPath(); g.arc(cx, Y(Math.min(20, h)) - 8, 9, 0, TAU); g.fill();
+    if (st.mc === 'toss') label(g, '처음 속력 14 m/s로 위로 던짐', cx, 18, {size: 11, color: C.muted}); }
+  // 막대그래프
+  const bx = S.w * .62, bw = 50, base = S.h - 40, Hb = S.h - 110, sc = Hb / tot0, bars = [['위치', E.pe, C.phy], ['운동', E.ke, C.hot], ['역학적', E.pe + E.ke, C.bio]]; if (st.fric) bars.push(['열 등', st.heat, C.muted]);
+  bars.forEach(([n, v, col], i) => { const x = bx + i * (bw + 14); g.fillStyle = col; g.fillRect(x, base - v * sc, bw, v * sc); label(g, n, x + bw / 2, base + 14, {size: 11}); label(g, v.toFixed(0) + ' J', x + bw / 2, base - v * sc - 10, {size: 10, weight: 700}); });
+  g.strokeStyle = C.ink; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(bx - 6, base - tot0 * sc); g.lineTo(bx + bars.length * (bw + 14), base - tot0 * sc); g.stroke(); g.setLineDash([]);
+  label(g, '질량 1 kg 기준' + (st.mc === 'pend' ? ' (진자 에너지는 10배로 확대 표시)' : ''), bx + 100, 20, {size: 10, color: C.muted});
+}
+function stepMech(dt){
+  const k = st.fric ? .06 : 0;
+  if (st.mc === 'drop') { if (st.y < H0) { const a = g9 - k * 4 * st.vy * Math.abs(st.vy) / 40; const e0 = .5 * st.vy * st.vy; st.vy += a * dt; st.y = Math.min(H0, st.y + st.vy * dt); if (k) st.heat = Math.max(0, g9 * H0 - (g9 * Math.max(0, H0 - st.y) + .5 * st.vy * st.vy)); st.hist.push([st.y, mechState()]); } }
+  else if (st.mc === 'toss') { if (st.phase < 2) { const a = -g9 - k * 4 * st.vy * Math.abs(st.vy) / 40; st.vy += a * dt; st.y += st.vy * dt; if (st.y <= 0 && st.vy < 0) { st.y = 0; st.vy = 0; st.phase = 2; } if (k) st.heat = Math.max(0, .5 * 196 - (g9 * Math.max(0, st.y) + .5 * st.vy * st.vy)); st.hist.push([st.rt, mechState()]); } }
+  else { for (let i = 0; i < 4; i++) { const d = dt / 4, a = -g9 / L * Math.sin(st.th) - k * 3 * st.om; st.om += a * d; st.th += st.om * d; } if (k) st.heat = Math.max(0, g9 * L * (1 - Math.cos(TH0)) * 10 - (mechState().pe + mechState().ke)); st.hist.push([st.rt, mechState()]); if (st.hist.length > 900) st.hist.shift(); }
+}
+
+/* ===== 그래프 ===== */
+function two(fnL, fnR){ const half = G.w / 2; fnL({R: half + 8}); fnR({L: half + 48, keep: true}); }
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'uniform') two(p => { const m = axes(G, {x: [0, 5, 1, '시간 (s)'], y: [0, 8, 2, '이동 거리 (m)']}, p); line(G, [[0, 0], [Math.min(5, 8 / st.v), Math.min(8, 5 * st.v)]], m, C.line, 1, [4, 4]); const T = Math.min(st.rt, 8 / st.v, 5); line(G, [[0, 0], [T, st.v * T]], m, C.phy, 2.5); },
+    p => { const m = axes(G, {x: [0, 5, 1, '시간 (s)'], y: [0, 4, 1, '속력 (m/s)']}, p); const T = Math.min(st.rt, 8 / st.v, 5); g.fillStyle = 'rgba(80,120,220,.18)'; g.fillRect(m.X(0), m.Y(st.v), m.X(T) - m.X(0), m.Y(0) - m.Y(st.v)); line(G, [[0, st.v], [5, st.v]], m, C.hot, 2.5); label(g, '넓이 = 이동 거리', m.X(2.5), m.Y(st.v / 2), {size: 10, color: C.muted}); });
+  else if (st.mode === 'fall') two(p => { const m = axes(G, {x: [0, 2.2, .5, '시간 (s)'], y: [0, 22, 5, '속력 (m/s)']}, p); line(G, [[0, 0], [2.2, 21.56]], m, C.line, 1, [4, 4]); line(G, st.hist.map(([t, d, v]) => [t, v]), m, C.hot, 2.5); label(g, '진공: 1초에 9.8 m/s씩 증가', m.X(1.2), m.Y(19), {size: 10, color: C.muted}); },
+    p => { const m = axes(G, {x: [0, 2.2, .5, '시간 (s)'], y: [0, 20, 5, '낙하 거리 (m)']}, p); line(G, st.hist.map(([t, d]) => [t, Math.min(20, d)]), m, C.phy, 2.5); });
+  else if (st.mode === 'work') { if (st.wk === 'carry') { const m = axes(G, {x: [0, 4, 1, '이동 거리 (m)'], y: [0, 60, 10, '이동 방향의 힘 (N)']}); line(G, [[0, 0], [4, 0]], m, C.hot, 2.5); label(g, '이동 방향으로 작용한 힘이 0 → 일 0', m.X(2), m.Y(30), {size: 11, color: C.muted}); }
+    else { const F = st.wk === 'push' ? st.F : g9 * st.m, D = st.wk === 'push' ? st.d : Math.min(2, st.d), m = axes(G, {x: [0, 4, 1, '이동 거리 (m)'], y: [0, 60, 10, '힘 (N)']}); g.fillStyle = 'rgba(220,90,60,.2)'; g.fillRect(m.X(0), m.Y(F), m.X(D) - m.X(0), m.Y(0) - m.Y(F)); line(G, [[0, F], [D, F]], m, C.hot, 2.5); label(g, `넓이 = 일 = ${(F * D).toFixed(1)} J`, m.X(D / 2), m.Y(F / 2), {size: 12, weight: 700}); } }
+  else if (st.mode === 'energy') { if (st.en === 'pe') { const m = axes(G, {x: [0, 1, .2, '높이 (m)'], y: [0, 50, 10, '위치 에너지 (J)']}); [1, 3, 5].forEach(mm => line(G, [[0, 0], [1, g9 * mm]], m, mm === st.m ? C.phy : C.line, mm === st.m ? 2.5 : 1.2)); line(G, [[0, 0], [1, g9 * st.m]], m, C.phy, 2.5); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.h), m.Y(PE()), 5, 0, TAU); g.fill(); label(g, '질량이 클수록 기울기가 큼', m.X(.3), m.Y(44), {size: 11, color: C.muted}); }
+    else { const m = axes(G, {x: [0, 4, 1, '속력 (m/s)'], y: [0, 40, 10, '운동 에너지 (J)']}); const p = []; for (let v = 0; v <= 4; v += .1) p.push([v, .5 * st.m * v * v]); line(G, p, m, C.hot, 2.5); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.vel), m.Y(KE()), 5, 0, TAU); g.fill(); label(g, '속력이 2배 → 운동 에너지 4배', m.X(1.5), m.Y(34), {size: 11, color: C.muted}); } }
+  else { if (st.mc === 'drop') { const m = axes(G, {x: [0, 20, 5, '낙하 거리 (m)'], y: [0, 200, 50, '에너지 (J)']}); line(G, st.hist.map(([d, E]) => [d, E.pe]), m, C.phy, 2.5); line(G, st.hist.map(([d, E]) => [d, E.ke]), m, C.hot, 2.5); line(G, st.hist.map(([d, E]) => [d, E.pe + E.ke]), m, C.bio, 2.5); }
+    else { const tmax = st.mc === 'pend' ? 12 : 3, ymax = st.mc === 'pend' ? 40 : 100, m = axes(G, {x: [0, tmax, tmax / 4, '시간 (s)'], y: [0, ymax, ymax / 4, '에너지 (J)']}); const hh = st.hist.filter(([t]) => t <= tmax); line(G, hh.map(([t, E]) => [t, E.pe]), m, C.phy, 2); line(G, hh.map(([t, E]) => [t, E.ke]), m, C.hot, 2); line(G, hh.map(([t, E]) => [t, E.pe + E.ke]), m, C.bio, 2.5); } }
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>'; $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
+function table(){
+  if (st.mode === 'uniform') setTable('등속 운동', ['시간 (s)', '0', '1', '2', '3', '4'], [['이동 거리 (m)', ...[0, 1, 2, 3, 4].map(t => Math.min(8, st.v * t).toFixed(1))], ['속력 (m/s)', ...[0, 1, 2, 3, 4].map(() => st.v)]]);
+  else if (st.mode === 'fall') setTable('자유 낙하 운동 (진공)', ['시간 (s)', '0', '0.5', '1', '1.5', '2'], [['속력 (m/s)', ...[0, .5, 1, 1.5, 2].map(t => (g9 * t).toFixed(1))], ['낙하 거리 (m)', ...[0, .5, 1, 1.5, 2].map(t => (4.9 * t * t).toFixed(2))]]);
+  else if (st.mode === 'work') setTable('과학에서 일을 하지 않은 경우', ['경우', '까닭'], [['벽을 힘껏 밀었지만 움직이지 않음', '이동 거리 0'], ['가방을 들고 수평으로 걸어감', '힘과 이동 방향이 수직'], ['마찰 없는 얼음 위를 미끄러짐', '작용한 힘이 0'], ['※ 일의 단위', 'J (줄), 1 J = 1 N × 1 m']]);
+  else if (st.mode === 'energy') setTable(st.en === 'pe' ? '위치 에너지' : '운동 에너지', ['구분', '식', '비례 관계'], st.en === 'pe' ? [['중력에 의한 위치 에너지', '9.8 × 질량(kg) × 높이(m)', '질량에 비례, 높이에 비례']] : [['운동 에너지', '½ × 질량(kg) × 속력²', '질량에 비례, 속력의 제곱에 비례']]);
+  else setTable('역학적 에너지 전환', ['위치', '위치 에너지', '운동 에너지', '역학적 에너지'], [['가장 높은 곳', '최대', '최소 (0)', '일정'], ['내려가는 중', '감소', '증가', '일정'], ['가장 낮은 곳', '최소', '최대', '일정'], ['올라가는 중', '증가', '감소', '일정']]);
+}
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'uniform') { s = stat('속력', st.v, ' m/s') + stat('이동 거리', Math.min(8, st.v * st.rt).toFixed(2), ' m');
+    e = '<b>속력</b> = 이동 거리 ÷ 걸린 시간 (단위 m/s, km/h). <b>등속 운동</b>: 속력이 일정한 운동. 이동 거리는 시간에 비례하여 <b>시간–이동 거리 그래프는 기울어진 직선</b>, <b>시간–속력 그래프는 수평인 직선</b>이 됩니다.';
+    t = '속력을 바꿔 시간–이동 거리 그래프의 기울기를 비교하세요. 기울기 = 속력입니다.'; }
+  else if (st.mode === 'fall') { s = stat('속력', st.vy.toFixed(1), ' m/s') + stat('질량', st.m, ' kg');
+    e = '<b>자유 낙하 운동</b>: 정지해 있던 물체가 중력만 받아 떨어지는 운동. 속력이 1초마다 <b>9.8 m/s</b>씩 일정하게 증가하며, 이때 9.8을 <b>중력 가속도 상수</b>라고 합니다. 공기 저항이 없으면 질량에 관계없이 같은 운동을 합니다.';
+    t = '진공 속에서 쇠공과 깃털을 각각 떨어뜨려 보고, 질량도 바꿔 보세요.'; }
+  else if (st.mode === 'work') { s = stat('한 일', workVal().toFixed(1), ' J') + stat('경우', {push: '끌기', lift: '들어 올리기', carry: '들고 이동'}[st.wk]);
+    e = '<b>일</b>: 물체에 힘을 작용하여 힘의 방향으로 물체를 이동시킨 것. 일 = 힘 × 힘의 방향으로 이동한 거리 (단위 J). 물체를 들어 올릴 때는 중력에 대해 일을 하며, 그 크기는 <b>9.8 × 질량 × 높이</b>입니다.';
+    t = '[들고 수평 이동]에서는 힘을 주고 이동도 했지만 일이 0인 까닭을 생각해 보세요.'; }
+  else if (st.mode === 'energy') { s = st.en === 'pe' ? stat('위치 에너지', PE().toFixed(1), ' J') + stat('질량 × 높이', (st.m * st.h).toFixed(1)) : stat('운동 에너지', KE().toFixed(1), ' J') + stat('속력²', st.vel * st.vel);
+    e = st.en === 'pe' ? '<b>에너지</b>: 일을 할 수 있는 능력. <b>중력에 의한 위치 에너지</b>: 기준면으로부터 높은 곳에 있는 물체가 가진 에너지 = 9.8 × 질량 × 높이. 물체를 들어 올리는 데 한 일만큼 위치 에너지가 늘어납니다.' : '<b>운동 에너지</b>: 운동하는 물체가 가진 에너지 = ½ × 질량 × 속력². 질량에 비례하고 속력의 제곱에 비례합니다. 운동하는 물체가 다른 물체에 일을 할 수 있습니다.';
+    t = st.en === 'pe' ? '질량과 높이를 바꾸어 [시작]하고, 말뚝이 박힌 깊이를 비교하세요.' : '속력을 2배로 하면 나무 도막이 밀려나는 거리는 몇 배가 될까요?'; }
+  else { const E = mechState(); s = stat('위치 에너지', E.pe.toFixed(1), ' J') + stat('운동 에너지', E.ke.toFixed(1), ' J');
+    e = '<b>역학적 에너지</b> = 위치 에너지 + 운동 에너지. 물체가 내려가면 위치 에너지가 운동 에너지로, 올라가면 운동 에너지가 위치 에너지로 <b>전환</b>됩니다. 공기 저항과 마찰이 없으면 역학적 에너지는 항상 일정하게 <b>보존</b>됩니다.';
+    t = '[공기 저항·마찰 있음]을 켜면 역학적 에너지가 줄어들고 그만큼 열에너지 등이 생깁니다.'; }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 조작 ===== */
+function reset(){ st.run = false; st.rt = 0; st.hist = []; st.y = 0; st.vy = 0; st.phase = 0; st.depth = 0; st.slide = 0; st.heat = 0;
+  if (st.mode === 'mech') { if (st.mc === 'pend') { st.th = -TH0; st.om = 0; } if (st.mc === 'toss') { st.y = 0; st.vy = 14; } } }
+$('spd').oninput = e => { st.v = +e.target.value; $('spdOut').textContent = st.v + ' m/s'; reset(); table(); };
+Kit.seg($('objSeg'), 'obj', v => { st.obj = v; reset(); })('ball');
+$('vac').onchange = e => { st.vac = e.target.checked; reset(); };
+$('mass').oninput = e => { st.m = +e.target.value; $('massOut').textContent = st.m + ' kg'; reset(); };
+Kit.seg($('wkSeg'), 'wk', v => { st.wk = v; $('fF').hidden = v !== 'push' || st.mode !== 'work'; reset(); })('push');
+$('force').oninput = e => { st.F = +e.target.value; $('forceOut').textContent = st.F + ' N'; reset(); };
+$('dist').oninput = e => { st.d = +e.target.value; $('distOut').textContent = st.d + ' m'; reset(); };
+function syncEn(){ const on = st.mode === 'energy'; $('hF').hidden = !on || st.en !== 'pe'; $('vF').hidden = !on || st.en !== 'ke'; if (on) { $('gTitle').textContent = st.en === 'pe' ? '높이와 위치 에너지' : '속력과 운동 에너지'; table(); } }
+Kit.seg($('enSeg'), 'en', v => { st.en = v; reset(); syncEn(); })('pe');
+$('hgt').oninput = e => { st.h = +e.target.value; $('hgtOut').textContent = st.h + ' m'; reset(); };
+$('vel').oninput = e => { st.vel = +e.target.value; $('velOut').textContent = st.vel + ' m/s'; reset(); };
+Kit.seg($('mcSeg'), 'mc', v => { st.mc = v; reset(); if (st.mode === 'mech') $('gTitle').textContent = v === 'drop' ? '낙하 거리에 따른 에너지' : '시간에 따른 에너지'; })('drop');
+$('fric').onchange = e => { st.fric = e.target.checked; reset(); };
+$('go').onclick = () => { reset(); st.run = true; };
+Kit.tabs(m => { st.mode = m; reset(); table(); $('fF').hidden = !(m === 'work' && st.wk === 'push');
+  $('gTitle').textContent = {uniform: '시간–이동 거리 · 시간–속력 그래프', fall: '시간–속력 · 시간–낙하 거리 그래프', work: '힘–이동 거리 그래프', energy: '', mech: st.mc === 'drop' ? '낙하 거리에 따른 에너지' : '시간에 따른 에너지'}[m];
+  $('gSub').textContent = {uniform: '', fall: '점선: 진공 속 이론값', work: '색칠한 넓이 = 한 일', energy: '', mech: '파랑: 위치 · 빨강: 운동 · 초록: 역학적 에너지'}[m]; syncEn(); }, ['uniform', 'fall', 'work', 'energy', 'mech']);
+Kit.loop(dt => { st.t += dt; if (!st.run) return; st.rt += dt;
+    if (st.mode === 'fall') { if (st.y < 20) { st.vy += fallAcc(st.vy) * dt; st.y += st.vy * dt; st.hist.push([st.rt, st.y, st.vy]); } else st.run = false; }
+    if (st.mode === 'uniform' && st.v * st.rt >= 8) st.run = false;
+    if (st.mode === 'energy') { if (st.en === 'pe') { st.phase = 1; const fall = .5 * g9 * st.rt * st.rt; if (fall >= st.h) { st.depth = Math.min(PE() * 1.2, st.depth + dt * 120); if (st.depth >= PE() * 1.2) st.run = false; } }
+      else { st.phase = 1; const cx = 70 + st.vel * st.rt * 90; if (cx >= S.w * .55 - 24) { st.slide = Math.min(KE() * 5 * 1.2, st.slide + dt * 120); if (st.slide >= KE() * 6) st.run = false; } } }
+    if (st.mode === 'mech') stepMech(dt); },
+  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({uniform: drawUniform, fall: drawFall, work: drawWork, energy: drawEnergyExp, mech: drawMech})[st.mode](); drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>

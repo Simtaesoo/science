@@ -23,14 +23,14 @@ window.Kit = (() => {
     const w = cvo.w - P.L - P.R, h = cvo.h - P.T - P.B;
     const [x0, x1, xs, xl] = ax.x, [y0, y1, ys, yl] = ax.y;
     const X = v => P.L + (v - x0) / (x1 - x0) * w, Y = v => P.T + h - (v - y0) / (y1 - y0) * h;
-    g.fillStyle = C.surface; g.fillRect(0, 0, cvo.w, cvo.h);
+    if (!P.keep) { g.fillStyle = C.surface; g.fillRect(0, 0, cvo.w, cvo.h); }
     g.font = font(11); g.lineWidth = 1;
     g.textAlign = 'right'; g.textBaseline = 'middle';
     for (let v = y0; v <= y1 + 1e-9; v += ys) { g.strokeStyle = C.grid; g.beginPath(); g.moveTo(P.L, Y(v) + .5); g.lineTo(P.L + w, Y(v) + .5); g.stroke(); g.fillStyle = C.muted; g.fillText(+v.toFixed(2), P.L - 6, Y(v)); }
     g.textAlign = 'center'; g.textBaseline = 'top';
     for (let v = x0; v <= x1 + 1e-9; v += xs) g.fillText(+v.toFixed(2), X(v), P.T + h + 5);
     if (xl) g.fillText(xl, P.L + w / 2, cvo.h - 13);
-    if (yl) { g.save(); g.translate(11, P.T + h / 2); g.rotate(-Math.PI / 2); g.textBaseline = 'middle'; g.fillText(yl, 0, 0); g.restore(); }
+    if (yl) { g.save(); g.translate(P.L - 37, P.T + h / 2); g.rotate(-Math.PI / 2); g.textBaseline = 'middle'; g.fillText(yl, 0, 0); g.restore(); }
     g.strokeStyle = C.line; g.beginPath(); g.moveTo(P.L, P.T); g.lineTo(P.L, P.T + h); g.lineTo(P.L + w, P.T + h); g.stroke();
     return {X, Y, L: P.L, T: P.T, w, h};
   }
