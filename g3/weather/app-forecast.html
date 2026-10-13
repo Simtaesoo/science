@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>일기 예보관 · 중3 기권과 날씨</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'forecast', title: '일기 예보관 데뷔', unit: '중3 · 17 기권과 날씨', back: '../../index.html#g3', sim: 'sim.html#front',
+  lead: '오늘은 기상청 예보관 첫 출근! 일기도의 <b>기압과 바람</b>, 다가오는 <b>전선</b>, 공기 속 <b>수증기량</b>을 분석해 정확한 예보를 내보내세요.',
+  howto: ['<b>바람 그리기</b>: 노란 점에서 바람이 불어 가는 방향으로 <b>끌어서</b> 화살표를 그리세요.', '<b>전선 예보</b>: 전선이 움직이는 일기도를 보고 도시의 날씨를 고르세요.', '<b>습도 분석</b>: 포화 수증기량 곡선에서 상대 습도와 이슬점을 구하세요.'],
+  options: [{key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '바람은 <b>기압이 높은 곳에서 낮은 곳으로</b> 불어요. 북반구에서 <b>고기압</b>은 시계 방향으로 불어 나가고(하강 기류, 맑음), <b>저기압</b>은 시계 반대 방향으로 불어 들어와요(상승 기류, 흐리고 비). <b>온난 전선</b> 앞에서는 넓은 지역에 약한 비, <b>한랭 전선</b> 뒤에서는 좁은 지역에 소나기와 기온 하강이 나타나요. <b>상대 습도</b> = 실제 수증기량 ÷ 포화 수증기량 × 100, 공기가 <b>이슬점</b>까지 냉각되면 응결이 시작돼요.',
+  startLabel: '예보 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const SAT = [[0, 3.8], [5, 5.4], [10, 7.6], [15, 10.6], [20, 14.7], [25, 20.0], [30, 27.1], [35, 36.1]];
+const sat = T => { for (let i = 0; i < SAT.length - 1; i++) if (T <= SAT[i + 1][0]) { const [a, x] = SAT[i], [b, y] = SAT[i + 1]; return x + (y - x) * (T - a) / (b - a); } return SAT[7][1]; };
+let rounds, ri, R, ui = {}, locked, drag = null, t0;
+app.onStart = () => { rounds = ['wind', 'front', 'hum', 'wind', 'front', 'hum', 'wind', 'front'].sort(() => Math.random() - .5); ri = -1; ui.q = app.panel('예보 과제'); app.startTimer(); next(); };
+function next(){ ri++; if (ri >= rounds.length) return end(); locked = false; drag = null; t0 = performance.now(); app.setLevel(ri, rounds.length); const t = rounds[ri];
+  if (t === 'wind') { const hi = Math.random() < .5, a = Math.random() * 6.28, rr = .55 + Math.random() * .25; R = {t, hi, px: Math.cos(a) * rr, py: Math.sin(a) * rr};
+    ui.q.innerHTML = `<p class="mission">💨 노란 점에서 부는 <b>바람의 방향</b>을 그리세요.</p><p class="note-c">점에서 바람이 불어 가는 쪽으로 끌어요. 등압선과 ${hi ? '고' : '저'}기압 중심을 보세요.</p>`; }
+  if (t === 'front') { const zone = ['ahead', 'warm', 'behind'][Math.floor(Math.random() * 3)]; R = {t, zone, born: performance.now()};
+    const C = [['넓은 지역에 약한 비가 오래 내리고, 곧 기온이 오를 것', 'ahead'], ['비교적 맑고 기온이 높으며 남서풍이 붊', 'warm'], ['소나기가 그친 뒤 기온이 내려가고 북서풍이 붊', 'behind'], ['맑고 바람이 거의 없음(고기압 중심)', 'x']];
+    const ex = {ahead: '온난 전선 앞쪽: 층운형 구름, 넓은 지역에 지속적인 약한 비. 전선이 지나면 기온 상승.', warm: '두 전선 사이(따뜻한 공기 영역): 날씨가 비교적 맑고 기온이 높아요.', behind: '한랭 전선 뒤쪽: 적운형 구름의 소나기가 지나간 뒤 찬 공기가 들어와 기온이 내려가요.'}[zone];
+    app.quiz(ui.q, '🗺️ 저기압과 전선이 동쪽으로 이동 중! <b>⭐ 도시</b>의 지금 날씨는?', C.map(c => c[0]), C.findIndex(c => c[1] === zone), {explain: ex, onRight: tr => win(tr === 1 ? 100 : 40), onWrong: () => app.addScore(-10)}); }
+  if (t === 'hum') { const T = [15, 20, 25, 30][Math.floor(Math.random() * 4)], dews = SAT.filter(s => s[0] < T), d = dews[Math.floor(Math.random() * dews.length)], q = d[1]; const ask = Math.random() < .5 ? 'rh' : 'dew'; R = {t, T, q, dew: d[0], ask};
+    const rh = Math.round(q / sat(T) * 100), C = ask === 'rh' ? [rh, Math.round(rh / 2), Math.min(100, rh + 25), Math.round(q)].map(v => v + ' %') : [d[0], T, Math.max(0, d[0] - 5) === d[0] ? d[0] + 10 : d[0] - 5, Math.round((T + d[0]) / 2)].map(v => v + ' ℃');
+    const uniq = [...new Set(C)]; while (uniq.length < 4) uniq.push((ask === 'rh' ? (uniq.length * 13 + 7) + ' %' : (uniq.length * 7 + 1) + ' ℃'));
+    app.quiz(ui.q, `💧 기온 <b>${T} ℃</b>, 실제 수증기량 <b>${q} g/kg</b>인 공기의 ${ask === 'rh' ? '<b>상대 습도</b>는?' : '<b>이슬점</b>은?'}`, uniq, 0, {explain: ask === 'rh' ? `${q} ÷ ${sat(T).toFixed(1)} (${T} ℃ 포화 수증기량) × 100 ≈ ${rh} %` : `포화 수증기량이 ${q} g/kg인 온도 = ${d[0]} ℃ → 여기까지 냉각되면 응결!`, onRight: tr => { R.solved = true; win(tr === 1 ? 100 : 40); }, onWrong: () => app.addScore(-10)}); } }
+function win(p){ if (locked) return; locked = true; app.addScore(p); sfx.ok(); setTimeout(() => { app.nextTurn(); next(); }, 2200); }
+function end(){ const sc = app.player.score; app.finish({stars: app.multi ? 3 : sc >= 700 ? 3 : sc >= 450 ? 2 : 1, summary: app.multi ? '모둠별 점수입니다.' : `예보 정확도 점수 <b>${sc}</b> / 800`, best: sc + '점', bestValue: sc}); }
+const M = () => { const W = S.w, H = S.h, r = Math.min(W, H) * .42; return {cx: W / 2, cy: H / 2, r}; };
+function windVec(){ const {px, py, hi} = R, L = Math.hypot(px, py), dx = px / L, dy = py / L; const tan = hi ? [-dy, dx] : [dy, -dx], rad = hi ? [dx, dy] : [-dx, -dy], c = Math.cos(.5), s = Math.sin(.5); return [tan[0] * c + rad[0] * s, tan[1] * c + rad[1] * s]; }
+app.pointer({down(x, y){ if (!R || R.t !== 'wind' || locked) return; const m = M(), sx = m.cx + R.px * m.r, sy = m.cy + R.py * m.r; if (Math.hypot(x - sx, y - sy) < 50) drag = {x0: sx, y0: sy, x, y}; },
+  move(x, y){ if (drag) { drag.x = x; drag.y = y; } },
+  up(){ if (!drag) return; const dx = drag.x - drag.x0, dy = drag.y - drag.y0; if (Math.hypot(dx, dy) < 20) { drag = null; return; } const [wx, wy] = windVec(), ang = Math.acos(D.clamp((dx * wx + dy * wy) / Math.hypot(dx, dy), -1, 1)) * 180 / Math.PI;
+    R.user = [dx, dy]; drag = null; if (ang < 40) { toast('정확한 바람 방향!', 'good'); ui.q.innerHTML += `<p class="note-c" style="margin-top:6px">✔ ${R.hi ? '고기압: 시계 방향으로 불어 나감' : '저기압: 시계 반대 방향으로 불어 들어감'}</p>`; win(ang < 20 ? 100 : 70); }
+    else { sfx.bad(); app.addScore(-15); toast(ang > 120 ? '반대 방향이에요!' : '조금 더 생각해 보세요 (회전 방향 + 안/밖)', 'bad'); R.wrong = (R.wrong || 0) + 1; if (R.wrong >= 3) { locked = true; ui.q.innerHTML += `<p class="note-c">정답 방향을 초록 화살표로 보여 줄게요.</p>`; setTimeout(() => { app.nextTurn(); next(); }, 2600); } } }});
+function isobars(g, m, hi, t){ for (let k = 1; k <= 4; k++) { g.strokeStyle = 'rgba(60,70,90,.45)'; g.lineWidth = 1.5; g.beginPath(); for (let a = 0; a <= 6.3; a += .1) { const rr = m.r * k * .24 * (1 + .06 * Math.sin(a * 3 + k)); g.lineTo(m.cx + Math.cos(a) * rr, m.cy + Math.sin(a) * rr); } g.closePath(); g.stroke(); D.text(g, hi ? 1024 - k * 4 : 996 + k * 4, m.cx + m.r * k * .24 + 4, m.cy - 8, {size: 10, color: '#556', align: 'left'}); } }
+function korea(g, x, y, s){ g.fillStyle = '#cfe0b4'; g.strokeStyle = '#7f9a6a'; g.lineWidth = 1.5; const P = [[0, 0], [.18, -.05], [.3, .05], [.26, .25], [.32, .45], [.28, .62], [.12, .7], [-.02, .66], [-.06, .5], [.02, .35], [-.04, .2], [-.12, .1]]; g.beginPath(); P.forEach(([a, b]) => g.lineTo(x + a * s, y + b * s)); g.closePath(); g.fill(); g.stroke(); }
+app.draw = (g, W, H) => { if (!R) return; const t = performance.now() / 1000, m = M();
+  g.fillStyle = '#e4eef6'; g.fillRect(0, 0, W, H);
+  if (R.t === 'wind') { isobars(g, m, R.hi, t); D.text(g, R.hi ? 'H' : 'L', m.cx, m.cy, {size: 40, display: true, color: R.hi ? '#2f5fd0' : '#d0533f'}); D.text(g, R.hi ? '고기압' : '저기압', m.cx, m.cy + 30, {size: 13, color: '#334'});
+    const sx = m.cx + R.px * m.r, sy = m.cy + R.py * m.r; D.glow(g, sx, sy, 26, '246,211,101', .8); g.fillStyle = '#e0a400'; g.beginPath(); g.arc(sx, sy, 7, 0, 7); g.fill();
+    if (drag) D.arrow(g, drag.x0, drag.y0, drag.x, drag.y, '#2b2a26', 4); if (R.user) D.arrow(g, sx, sy, sx + R.user[0], sy + R.user[1], locked && !R.wrong ? '#2e7d4f' : '#d0533f', 4);
+    if (locked) { const [wx, wy] = windVec(); D.arrow(g, sx, sy, sx + wx * 70, sy + wy * 70, '#2e7d4f', 5); for (let k = 0; k < 8; k++) { const a = k / 8 * 6.28, px = Math.cos(a) * .6, py = Math.sin(a) * .6, Rb = R; const sv = {px: R.px, py: R.py}; R.px = px; R.py = py; const [vx, vy] = windVec(); R.px = sv.px; R.py = sv.py; const bx = m.cx + px * m.r, by = m.cy + py * m.r; D.arrow(g, bx, by, bx + vx * 34, by + vy * 34, 'rgba(46,125,79,.5)', 2.5); } }
+    D.text(g, '북반구 · 위가 북쪽', 14, 18, {size: 12, color: '#556', align: 'left'}); }
+  if (R.t === 'front') { const p = ((performance.now() - R.born) / 1000 * .02) % .2, lx = W * (.38 + p), ly = H * .32;
+    korea(g, W * .5, H * .3, H * .8); D.text(g, '한반도', W * .5 + H * .1, H * .3 + H * .3, {size: 13, color: '#5b7a48', weight: 700});
+    // 저기압 + 전선
+    for (let k = 1; k <= 3; k++) { g.strokeStyle = 'rgba(60,70,90,.35)'; g.beginPath(); g.ellipse(lx, ly, k * 40, k * 30, 0, 0, 7); g.stroke(); } D.text(g, 'L', lx, ly, {size: 34, display: true, color: '#d0533f'});
+    const warm = t2 => [lx + t2 * W * .32, ly + t2 * H * .2 + Math.sin(t2 * 3) * 10], cold = t2 => [lx - t2 * W * .12, ly + t2 * H * .5];
+    g.lineWidth = 4; g.strokeStyle = '#d0533f'; g.beginPath(); for (let i = 0; i <= 20; i++) g.lineTo(...warm(i / 20)); g.stroke(); for (let i = 1; i < 6; i++) { const [x, y] = warm(i / 6); g.fillStyle = '#d0533f'; g.beginPath(); g.arc(x, y, 8, Math.PI * 1.15, Math.PI * 2.15); g.fill(); }
+    g.strokeStyle = '#2f5fd0'; g.beginPath(); for (let i = 0; i <= 20; i++) g.lineTo(...cold(i / 20)); g.stroke(); for (let i = 1; i < 6; i++) { const [x, y] = cold(i / 6); g.fillStyle = '#2f5fd0'; g.beginPath(); g.moveTo(x - 7, y - 4); g.lineTo(x + 7, y + 4); g.lineTo(x + 9, y - 10); g.fill(); }
+    // 도시
+    const [wx, wy] = warm(.6), [cxx, cyy] = cold(.6), pos = {ahead: [wx + 70, wy + 30], warm: [(wx + cxx) / 2 + 20, (wy + cyy) / 2 + 20], behind: [cxx - 60, cyy - 10]}[R.zone];
+    // 구름·비
+    for (let i = 0; i < 6; i++) { const [x, y] = warm(.2 + i * .12); g.fillStyle = 'rgba(140,150,170,.45)'; g.beginPath(); g.ellipse(x + 40, y + 10, 40, 14, 0, 0, 7); g.fill(); }
+    for (let i = 0; i < 4; i++) { const [x, y] = cold(.2 + i * .18); g.fillStyle = 'rgba(90,100,130,.5)'; g.beginPath(); g.arc(x + 18, y - 10, 16, 0, 7); g.fill(); }
+    D.text(g, '⭐', pos[0], pos[1], {size: 26}); D.text(g, '도시', pos[0], pos[1] + 20, {size: 12, weight: 700, color: '#334'});
+    D.text(g, '온난 전선', warm(1)[0] - 10, warm(1)[1] + 18, {size: 12, color: '#d0533f', weight: 700}); D.text(g, '한랭 전선', cold(1)[0] + 30, cold(1)[1], {size: 12, color: '#2f5fd0', weight: 700}); D.text(g, '→ 편서풍 따라 동쪽으로 이동', W - 14, H - 14, {size: 12, color: '#556', align: 'right'}); }
+  if (R.t === 'hum') { const gx = W * .12, gy = H * .88, gw = W * .8, gh = H * .74, X = T => gx + T / 35 * gw, Y = q => gy - q / 40 * gh;
+    g.strokeStyle = '#333'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(gx, gy - gh); g.lineTo(gx, gy); g.lineTo(gx + gw, gy); g.stroke();
+    for (let T = 0; T <= 35; T += 5) { D.text(g, T, X(T), gy + 14, {size: 11, color: '#333'}); g.strokeStyle = '#d6e0ea'; g.beginPath(); g.moveTo(X(T), gy); g.lineTo(X(T), gy - gh); g.stroke(); } for (let q = 0; q <= 40; q += 10) D.text(g, q, gx - 14, Y(q), {size: 11, color: '#333'});
+    D.text(g, '기온 (℃)', gx + gw, gy + 30, {size: 12, color: '#333', align: 'right'}); D.text(g, '수증기량 (g/kg)', gx, gy - gh - 14, {size: 12, color: '#333', align: 'left'});
+    g.strokeStyle = '#2f5fd0'; g.lineWidth = 3; g.beginPath(); for (let T = 0; T <= 35; T += .5) g.lineTo(X(T), Y(sat(T))); g.stroke(); D.text(g, '포화 수증기량 곡선', X(29), Y(sat(31)) - 18, {size: 12, color: '#2f5fd0', weight: 700});
+    SAT.forEach(([T, q]) => { g.fillStyle = '#2f5fd0'; g.beginPath(); g.arc(X(T), Y(q), 3.5, 0, 7); g.fill(); D.text(g, q, X(T) - 16, Y(q) - 10, {size: 10, color: '#2f5fd0'}); });
+    g.fillStyle = '#d0533f'; g.beginPath(); g.arc(X(R.T), Y(R.q), 8, 0, 7); g.fill(); D.text(g, '공기 A', X(R.T) + 10, Y(R.q) - 12, {size: 12, weight: 700, color: '#d0533f', align: 'left'});
+    if (locked) { g.setLineDash([5, 4]); g.strokeStyle = '#d0533f'; g.lineWidth = 2; g.beginPath(); g.moveTo(X(R.T), Y(R.q)); g.lineTo(X(R.dew), Y(R.q)); g.moveTo(X(R.T), Y(R.q)); g.lineTo(X(R.T), Y(sat(R.T))); g.stroke(); g.setLineDash([]); D.text(g, `이슬점 ${R.dew} ℃`, X(R.dew), Y(R.q) + 16, {size: 12, weight: 700, color: '#d0533f'}); } }
+};
+</script>
+</body>
+</html>
