@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>광물 감정소 · 중2 지권의 변화</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<style>
+.nb{font-size:13.5px;line-height:1.6;background:#f7f2e6;color:#2b2a26;border-radius:10px;padding:8px 10px}
+.nb b{color:#a5462f}
+.claim{font-size:15px;line-height:1.5;background:#fffbe0;color:#2b2a26;border-radius:12px;padding:10px 12px;position:relative}
+.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.vgrid .tool{justify-content:center;font-size:14px}
+.vgrid .tool.no{opacity:.35;text-decoration:line-through}
+</style>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'mineral', title: '광물 감정소', unit: '중2 · 09 지권의 변화', back: '../../index.html#g2', sim: 'sim.html#mineral',
+  lead: '손님들이 광물을 들고 감정소에 찾아왔어요. "이거 금 맞죠?" 겉모습에 속지 말고 <b>조흔색·굳기·염산 반응·자성</b>을 시험해 진짜 이름을 감정해 주세요.',
+  howto: ['무대 위 <b>시험대</b>(조흔판·손톱·동전·유리판·염산·자석)를 누르면 시험해요. 시험마다 -5점.', '결과는 감정 노트에 적혀요. 굳기는 "긁히는지"로 판단해요.', '감정 결과를 고르세요. 손님의 주장이 틀렸을 때 바로잡으면 보너스 +20!'],
+  options: [{key: 'n', label: '손님 수', choices: [[5, '5명'], [8, '8명'], [10, '10명']], def: 8}, {key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '광물은 <b>겉보기 색</b>이 같아도 다른 경우가 많아 여러 성질로 구별합니다. <b>조흔색</b>은 조흔판에 긁어 생긴 가루의 색(금: 노란색, 황철석: 검은색, 적철석: 적갈색), <b>굳기</b>는 서로 긁어 보아 상대적으로 비교(석영 > 유리 > 방해석 > 손톱), <b>묽은 염산</b>과 반응해 거품(이산화 탄소)이 생기면 방해석, <b>자석</b>에 붙으면 자철석입니다.',
+  startLabel: '감정소 문 열기'
+});
+const {S, sfx, toast} = app, D = Draw;
+// 이름, 겉보기색, 그림색, 조흔색(이름, 색), 굳기, 염산, 자성, 특징
+const MIN = [
+  ['석영', '무색 투명', '#e9f1f4', ['흰색', '#f4f4f4'], 7, 0, 0, '육각기둥 모양 결정'],
+  ['장석', '분홍·흰색', '#f0c9b9', ['흰색', '#f4f4f4'], 6, 0, 0, '두 방향 쪼개짐'],
+  ['흑운모', '검은색', '#2e2a26', ['흰색~회색', '#d9d9d9'], 2.5, 0, 0, '얇은 판으로 벗겨짐'],
+  ['방해석', '무색·흰색', '#f3efe2', ['흰색', '#f4f4f4'], 3, 1, 0, '마름모꼴 쪼개짐'],
+  ['자철석', '검은색', '#2b2b2f', ['검은색', '#222'], 6, 0, 1, '금속 광택'],
+  ['적철석', '검붉은색', '#5a3030', ['적갈색', '#8a3b2a'], 6, 0, 0, '금속 광택'],
+  ['황철석', '노란 금빛', '#d4b24a', ['검은색', '#222'], 6, 0, 0, '정육면체 결정, "바보의 금"'],
+  ['황동석', '노란 금빛', '#c9a33a', ['녹흑색', '#2f3a25'], 4, 0, 0, '무지갯빛이 돌기도 함'],
+  ['금', '노란 금빛', '#e6c142', ['노란색', '#e2b93b'], 2.5, 0, 0, '매우 무겁고 늘어남'],
+  ['활석', '흰색·연녹색', '#dfe8d6', ['흰색', '#f4f4f4'], 1, 0, 0, '만지면 미끈미끈'],
+  ['석고', '흰색', '#f2f0ea', ['흰색', '#f4f4f4'], 2, 0, 0, '손톱에 긁힘']];
+const TEST = [['streak', '조흔판', '🧱'], ['nail', '손톱(2.5)', '💅'], ['coin', '동전(3.5)', '🪙'], ['glass', '유리판(5.5)', '🔲'], ['acid', '묽은 염산', '🧪'], ['mag', '자석', '🧲']];
+const CLAIM = ['할머니가 물려준 돌이래요. 뭔지 알려 주세요!', '하천에서 주운 돌이에요. 이름이 뭐예요?', '학교 화단에서 주웠어요! 무슨 광물이에요?', '등산하다 주웠어요. 감정해 주세요!'];
+let list, idx, cur, claim, notes, done, anim, ui = {}, locked, ruled, cands;
+app.onStart = o => { const pool = MIN.slice().sort(() => Math.random() - .5); list = []; for (let i = 0; i < o.n; i++) list.push(pool[i % pool.length]);
+  // 금빛 광물은 꼭 하나 이상
+  if (!list.some(m => m[1] === '노란 금빛')) list[0] = MIN[6];
+  idx = -1; ui.c = app.panel('손님'); ui.n = app.panel('감정 노트'); ui.n.className = 'nb'; ui.v = app.panel('감정 결과'); app.startTimer(); next(); };
+function next(){ idx++; if (idx >= list.length) return end(); cur = list[idx]; app.setLevel(idx, list.length); locked = false; notes = []; done = {}; ruled = new Set(); anim = {k: 'in', t0: performance.now()};
+  const same = MIN.filter(m => m !== cur && (m[1] === cur[1] || m[1].split('·').some(c => cur[1].includes(c.replace('색', ''))))), others = MIN.filter(m => m !== cur && !same.includes(m)).sort(() => Math.random() - .5);
+  const golds = MIN.filter(m => m[1] === '노란 금빛'); claim = cur[1] === '노란 금빛' ? (Math.random() < .7 ? '금' : golds[Math.floor(Math.random() * 3)][0]) : Math.random() < .5 && same[0] ? same[0][0] : cur[0];
+  const pick = new Set([cur, MIN.find(m => m[0] === claim)]); [...same, ...others].forEach(m => { if (pick.size < 6) pick.add(m); }); cands = [...pick].sort(() => Math.random() - .5);
+  ui.c.innerHTML = `<div class="claim">🧑 "${claim === cur[0] && Math.random() < .5 ? CLAIM[Math.floor(Math.random() * CLAIM.length)] : `이건 <b>${claim}</b>이에요. 감정해 주세요!`}"<br><small>겉보기: ${cur[1]}, ${cur[7].includes('결정') || cur[7].includes('광택') ? cur[7] : '광택이 있음'}</small></div>`;
+  ui.claim = claim; render(); }
+function render(){ ui.n.innerHTML = notes.length ? notes.join('<br>') : '시험대를 눌러 시험해 보세요.';
+  ui.v.innerHTML = '<div class="vgrid">' + cands.map(m => `<button class="tool${ruled.has(m[0]) ? ' no' : ''}" type="button" data-n="${m[0]}" ${locked ? 'disabled' : ''}>${m[0]}</button>`).join('') + '</div>';
+  ui.v.querySelectorAll('[data-n]').forEach(b => b.onclick = () => verdict(b.dataset.n)); }
+function test(k){ if (locked || done[k] || performance.now() - anim.t0 < 1200) return; done[k] = 1; app.addScore(-5); anim = {k, t0: performance.now()}; sfx.click();
+  setTimeout(() => { let s;
+    if (k === 'streak') s = `🧱 조흔색: <b>${cur[3][0]}</b>`;
+    if (k === 'nail') s = cur[4] < 2.5 ? '💅 손톱에 <b>긁힘</b> (굳기 2.5 미만)' : '💅 손톱에 <b>긁히지 않음</b>';
+    if (k === 'coin') s = cur[4] < 3.5 ? '🪙 동전에 <b>긁힘</b> (굳기 3.5 미만)' : '🪙 동전에 <b>긁히지 않음</b>';
+    if (k === 'glass') s = cur[4] > 5.5 ? '🔲 유리판을 <b>긁음</b> (유리보다 단단함)' : '🔲 유리판을 <b>긁지 못함</b>';
+    if (k === 'acid') { s = cur[5] ? '🧪 <b>거품이 생김</b> (이산화 탄소)' : '🧪 반응 <b>없음</b>'; cur[5] ? sfx.bubble() : 0; }
+    if (k === 'mag') s = cur[6] ? '🧲 자석에 <b>붙음</b>' : '🧲 자석에 붙지 <b>않음</b>';
+    notes.push(s); sfx.pop(); render(); }, 1100); }
+function verdict(n){ if (locked || ruled.has(n)) return;
+  if (n === cur[0]) { locked = true; const fix = ui.claim !== cur[0]; app.addScore(80 + (fix ? 20 : 0)); sfx.ok(); app.confetti(40); toast(fix ? `손님 주장(${ui.claim})을 바로잡았어요! +20` : '정확한 감정!', 'good');
+    notes.push(`✅ 감정 결과: <b>${cur[0]}</b> — ${cur[7]}`); render(); ui.v.insertAdjacentHTML('beforeend', '<button class="big" type="button" id="nx" style="width:100%;margin-top:10px">다음 손님 ▶</button>'); ui.v.querySelector('#nx').onclick = () => { app.nextTurn(); next(); }; anim = {k: 'ok', t0: performance.now()}; }
+  else { ruled.add(n); app.addScore(-25); sfx.bad(); toast(`${n}이(가) 아니에요`, 'bad'); render(); } }
+function end(){ const sc = app.player.score, max = list.length * 85; app.finish({stars: app.multi ? 3 : sc >= max * .75 ? 3 : sc >= max * .45 ? 2 : 1, summary: app.multi ? '모둠별 점수입니다.' : `감정 점수 <b>${sc}</b>`, best: sc + '점', bestValue: sc}); }
+const ST = () => { const W = S.w, H = S.h; return TEST.map((t, i) => ({k: t[0], n: t[1], ic: t[2], x: W * (.1 + i * .16), y: H * .82, r: Math.min(34, W * .05)})); };
+app.pointer({tap(x, y){ const s = ST().find(s => Math.hypot(x - s.x, y - s.y) < s.r + 12); if (s) test(s.k); }});
+function rock(g, x, y, r, m, t){ g.save(); g.translate(x, y); const col = m[2], metal = m[7].includes('금속') || m[1].includes('금빛');
+  g.fillStyle = col; g.strokeStyle = 'rgba(0,0,0,.4)'; g.lineWidth = 2; g.beginPath();
+  if (m[0] === '석영') { g.moveTo(-r * .4, r * .8); g.lineTo(-r * .4, -r * .4); g.lineTo(0, -r); g.lineTo(r * .4, -r * .4); g.lineTo(r * .4, r * .8); }
+  else if (m[0] === '황철석') { g.rect(-r * .7, -r * .7, r * 1.4, r * 1.4); }
+  else if (m[0] === '방해석') { g.moveTo(-r, 0); g.lineTo(-r * .2, -r * .7); g.lineTo(r, -r * .1); g.lineTo(r * .2, r * .7); }
+  else if (m[0] === '흑운모') { for (let k = 0; k < 4; k++) { g.rect(-r * .8 + k * 3, -r * .5 + k * 6, r * 1.5, r * .25); } }
+  else for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283, rr = r * (.75 + ((i * 53) % 7) / 25); g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr * .8); }
+  g.closePath(); g.fill(); g.stroke();
+  if (metal) { g.globalCompositeOperation = 'lighter'; D.glow(g, -r * .25 + Math.sin(t) * r * .2, -r * .3, r * .6, '255,255,230', .45); g.globalCompositeOperation = 'source-over'; }
+  if (m[0] === '석영' || m[0] === '방해석') { g.strokeStyle = 'rgba(255,255,255,.9)'; g.beginPath(); g.moveTo(-r * .2, -r * .5); g.lineTo(-r * .2, r * .5); g.stroke(); }
+  g.restore(); }
+app.draw = (g, W, H) => { if (!cur) return; const t = performance.now() / 1000, f = D.clamp((performance.now() - anim.t0) / 1100, 0, 1);
+  g.fillStyle = '#3b2e25'; g.fillRect(0, 0, W, H); g.fillStyle = '#6a5240'; g.fillRect(0, H * .66, W, H * .34); g.fillStyle = '#7d624c'; g.fillRect(0, H * .66, W, 6);
+  // 벽 장식: 광물 표본장
+  for (let i = 0; i < 7; i++) { g.fillStyle = 'rgba(255,255,255,.05)'; g.fillRect(W * (.04 + i * .14), H * .05, W * .11, H * .14); }
+  D.text(g, '⛏ 광물 감정소', W * .5, H * .08, {size: 20, display: true, color: '#f6d365'});
+  // 감정 받침 + 광물
+  const mx = W * .5, my = H * .42, mr = Math.min(W, H) * .13; g.fillStyle = '#2a211b'; g.beginPath(); g.ellipse(mx, my + mr * .95, mr * 1.5, mr * .35, 0, 0, 7); g.fill();
+  D.glow(g, mx, my, mr * 2, '255,240,200', .18); const bob = anim.k === 'in' ? (1 - D.ease(f)) * -H * .4 : 0; rock(g, mx, my + bob, mr, cur, t);
+  // 시험 애니메이션
+  const k = anim.k;
+  if (k === 'streak') { g.fillStyle = '#f2ece2'; g.fillRect(W * .66, H * .3, W * .22, H * .16); g.strokeStyle = '#bba'; g.strokeRect(W * .66, H * .3, W * .22, H * .16); g.strokeStyle = cur[3][1]; g.lineWidth = 7; g.lineCap = 'round'; g.beginPath(); g.moveTo(W * .69, H * .38); g.lineTo(W * .69 + W * .16 * f, H * .38 + Math.sin(f * 12) * 3); g.stroke(); D.text(g, '조흔판', W * .77, H * .27, {size: 12, color: '#f2efe4'}); if (f >= 1) D.text(g, cur[3][0], W * .77, H * .5, {size: 16, weight: 700, color: '#f6d365'}); }
+  if (k === 'nail' || k === 'coin' || k === 'glass') { const scratch = k === 'glass' ? cur[4] > 5.5 : cur[4] < (k === 'nail' ? 2.5 : 3.5), tool = {nail: '💅', coin: '🪙', glass: '🔲'}[k];
+    D.text(g, tool, mx + mr * 1.6 - f * mr * 1.2, my - mr * .2 + Math.sin(f * 20) * 6, {size: 34});
+    if (f >= 1) D.text(g, k === 'glass' ? (scratch ? '유리에 흠집!' : '유리가 멀쩡') : (scratch ? '광물에 흠집!' : '흠집 없음'), mx, my - mr * 1.4, {size: 18, weight: 700, color: scratch ? '#f28c7a' : '#9be3b5'});
+    if (f >= 1 && scratch && k !== 'glass') { g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 2; g.beginPath(); g.moveTo(mx - mr * .3, my); g.lineTo(mx + mr * .3, my + 6); g.stroke(); } }
+  if (k === 'acid') { D.text(g, '💧', mx, my - mr * 1.6 + f * mr * .8, {size: 22}); if (f > .6 && cur[5]) for (let i = 0; i < 16; i++) { const p = (t * 1.5 + i / 16) % 1; g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 1.5; g.beginPath(); g.arc(mx + Math.sin(i * 2.3) * mr * .6, my - mr * .3 - p * mr, 2 + p * 3, 0, 7); g.stroke(); } if (f >= 1) D.text(g, cur[5] ? '부글부글!' : '반응 없음', mx, my - mr * 1.5, {size: 18, weight: 700, color: cur[5] ? '#9be3b5' : '#f2efe4'}); }
+  if (k === 'mag') { const stick = cur[6], x = stick ? D.lerp(mx + mr * 2.5, mx + mr * .9, D.ease(f)) : mx + mr * 2.5 - Math.sin(f * 3.14) * mr * .6; D.text(g, '🧲', x, my, {size: 40}); if (f >= 1) D.text(g, stick ? '철컥! 붙었다' : '붙지 않음', mx, my - mr * 1.4, {size: 18, weight: 700, color: stick ? '#9be3b5' : '#f2efe4'}); }
+  if (k === 'ok') D.text(g, cur[0], mx, my - mr * 1.5, {size: 34, display: true, color: '#f6d365', stroke: '#3b2e25', strokeW: 6});
+  // 시험대
+  ST().forEach(s => { const used = done[s.k]; g.fillStyle = used ? '#4e3d31' : '#8a6c55'; g.beginPath(); g.arc(s.x, s.y, s.r, 0, 7); g.fill(); g.strokeStyle = used ? '#6a5240' : '#f6d365'; g.lineWidth = 3; g.stroke();
+    D.text(g, s.ic, s.x, s.y - 2, {size: s.r * .9}); D.text(g, s.n, s.x, s.y + s.r + 12, {size: 11, color: used ? '#9a8a7a' : '#f2efe4', weight: 700}); });
+};
+</script>
+</body>
+</html>

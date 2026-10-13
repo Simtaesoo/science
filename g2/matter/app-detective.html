@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>미지 물질 탐정 · 중2 물질의 특성</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<style>
+.tools .tool{flex:1 1 46%;justify-content:center}
+.nb{font-size:13.5px;line-height:1.6;background:#f7f2e6;color:#2b2a26;border-radius:10px;padding:8px 10px;min-height:40px}
+.nb b{color:#a5462f}
+table.ref{width:100%;border-collapse:collapse;font-size:12.5px}
+table.ref th,table.ref td{padding:4px 4px;border-bottom:1px solid rgba(255,255,255,.12);text-align:center}
+table.ref th{color:var(--yellow);font-weight:600}
+table.ref tr.pick{cursor:pointer}
+table.ref tr.pick:hover td{background:rgba(246,211,101,.15)}
+table.ref tr.no td{opacity:.35;text-decoration:line-through}
+</style>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'detective', title: '미지 물질 탐정', unit: '중2 · 08 물질의 특성', back: '../../index.html#g2', sim: 'sim.html#dens',
+  lead: '라벨이 떨어진 시약병이 실험실에 가득! 질량·부피를 재서 <b>밀도</b>를 구하고, <b>녹는점·끓는점</b>과 <b>용해성</b>을 조사해 물질의 정체를 밝혀 내세요.',
+  howto: ['실험 도구를 골라 측정하세요. 측정 결과는 <b>실험 노트</b>에 적혀요. 도구를 쓸 때마다 -8점.', '밀도 = 질량 ÷ 부피 는 직접 계산해야 해요!', '물질 특성표에서 정답이라고 생각하는 물질을 누르세요. 틀리면 -30점.'],
+  options: [{key: 'n', label: '시료 수', choices: [[4, '4개'], [6, '6개'], [8, '8개']], def: 6}, {key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '<b>물질의 특성</b>은 그 물질만이 가진 고유한 성질로, 양(질량·부피)에 관계없이 일정합니다. <b>밀도</b>(질량÷부피), <b>녹는점·어는점</b>, <b>끓는점</b>, 일정한 온도에서의 <b>용해도</b>가 대표적이에요. 에탄올과 아세톤처럼 밀도가 비슷한 물질도 끓는점으로 구별할 수 있듯, 여러 특성을 함께 조사하면 물질을 확실히 구별할 수 있습니다.',
+  startLabel: '수사 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+// 이름, 상태(l/s), 밀도 g/mL, 녹는점, 끓는점, 물에 녹음, 색
+const SUB = [
+  ['물', 'l', 1.00, 0, 100, '섞임', '#9fd3f5'], ['에탄올', 'l', 0.79, -114, 78, '섞임', '#e8f4fb'], ['아세톤', 'l', 0.79, -95, 56, '섞임', '#f4f0fb'], ['글리세린', 'l', 1.26, 18, 290, '섞임', '#f8f3d6'],
+  ['알루미늄', 's', 2.70, 660, 2470, '안 녹음', '#c9cdd3'], ['철', 's', 7.87, 1538, 2862, '안 녹음', '#7c8088'], ['구리', 's', 8.96, 1085, 2562, '안 녹음', '#d08a52'], ['납', 's', 11.3, 327, 1749, '안 녹음', '#8b8f99'],
+  ['염화 나트륨', 's', 2.16, 801, 1465, '녹음', '#ffffff'], ['설탕', 's', 1.59, 186, null, '녹음', '#fbf6ea'], ['나프탈렌', 's', 1.14, 80, 218, '안 녹음', '#f1f1ea'], ['팔미트산', 's', 0.85, 63, 351, '안 녹음', '#fbf8ef']];
+const TOOLS = [['mass', '⚖️ 전자저울'], ['vol', '🧪 눈금실린더'], ['heat', '🔥 가열 (300 ℃까지)'], ['water', '💧 물에 넣기']];
+let list, idx, cur, sm, notes, used, anim, ui = {}, locked, ruled;
+const fmt = (v, d) => v.toFixed(d);
+app.onStart = o => { const sol = SUB.filter(s => s[1] === 's').sort(() => Math.random() - .5), liq = SUB.filter(s => s[1] === 'l').sort(() => Math.random() - .5);
+  list = []; while (list.length < o.n) list.push((list.length % 3 === 1 ? liq : sol).shift() || sol.shift() || liq.shift()); list.sort(() => Math.random() - .5); idx = -1;
+  ui.t = app.panel('실험 도구'); ui.n = app.panel('실험 노트'); ui.n.className = 'nb'; ui.r = app.panel('물질 특성표 (눌러서 답하기)'); app.startTimer(); next(); };
+function next(){ idx++; if (idx >= list.length) return end(); cur = list[idx]; app.setLevel(idx, list.length); locked = false; ruled = new Set(); used = {}; notes = [];
+  const V = cur[1] === 'l' ? 10 + Math.round(Math.random() * 30) : +(2 + Math.random() * 6).toFixed(1); sm = {V, m: +(V * cur[2]).toFixed(1)}; anim = {k: 'intro', t0: performance.now()}; render(); }
+function render(){
+  ui.t.innerHTML = '<div class="tools">' + TOOLS.map(([k, n]) => `<button class="tool" data-k="${k}" type="button" ${used[k] || locked ? 'disabled' : ''}>${n}</button>`).join('') + '</div>';
+  ui.t.querySelectorAll('[data-k]').forEach(b => b.onclick = () => use(b.dataset.k));
+  ui.n.innerHTML = `<b>시료 ${String.fromCharCode(65 + idx)}</b> · ${cur[1] === 'l' ? '액체 (무색 투명)' : '고체'}<br>` + (notes.length ? notes.join('<br>') : '아직 측정한 것이 없어요.');
+  ui.r.innerHTML = `<table class="ref"><tr><th>물질</th><th>밀도<br>(g/mL)</th><th>녹는점<br>(℃)</th><th>끓는점<br>(℃)</th><th>물</th></tr>` +
+    SUB.filter(s => s[1] === cur[1]).map(s => `<tr class="pick${ruled.has(s[0]) ? ' no' : ''}" data-n="${s[0]}"><td>${s[0]}</td><td>${s[2]}</td><td>${s[3]}</td><td>${s[4] == null ? '분해' : s[4]}</td><td>${s[5]}</td></tr>`).join('') + '</table>';
+  ui.r.querySelectorAll('tr.pick').forEach(tr => tr.onclick = () => guess(tr.dataset.n)); }
+function use(k){ if (used[k] || locked) return; used[k] = 1; app.addScore(-8); anim = {k, t0: performance.now()}; sfx.click();
+  setTimeout(() => { let s = '';
+    if (k === 'mass') s = `⚖️ 질량: <b>${fmt(sm.m, 1)} g</b>`;
+    if (k === 'vol') s = cur[1] === 'l' ? `🧪 부피: <b>${sm.V.toFixed(1)} mL</b>` : `🧪 물 50.0 mL → <b>${(50 + sm.V).toFixed(1)} mL</b> (넣은 뒤 눈금)`;
+    if (k === 'heat') { const mp = cur[3], bp = cur[4];
+      if (cur[1] === 'l') s = bp <= 300 ? `🔥 <b>${bp} ℃</b>에서 끓으며 온도가 일정해짐` : '🔥 300 ℃까지 끓지 않음';
+      else s = mp <= 300 ? `🔥 <b>${mp} ℃</b>에서 녹으며 온도가 일정해짐` : '🔥 300 ℃까지 녹지 않음'; }
+    if (k === 'water') s = cur[1] === 'l' ? '💧 물과 <b>고르게 섞임</b> (층이 생기지 않음)' : cur[5] === '녹음' ? '💧 물에 <b>녹아</b> 보이지 않게 됨' : `💧 물에 녹지 않고 <b>${cur[2] < 1 ? '뜸' : '가라앉음'}</b>`;
+    notes.push(s); sfx.pop(); render(); }, k === 'heat' ? 2600 : 1300); }
+function guess(n){ if (locked) return; if (ruled.has(n)) return;
+  if (n === cur[0]) { locked = true; const pts = 100; app.addScore(pts); sfx.ok(); app.confetti(50); toast(`정답! 시료 ${String.fromCharCode(65 + idx)}는 ${n}`, 'good');
+    const d = (sm.m / sm.V).toFixed(2); ui.n.innerHTML += `<br>✅ 밀도 = ${sm.m.toFixed(1)} g ÷ ${sm.V.toFixed(1)} mL ≈ <b>${d} g/mL</b> → <b>${n}</b>`;
+    ui.t.innerHTML = '<button class="big" type="button" style="width:100%">다음 시료 ▶</button>'; ui.t.querySelector('button').onclick = () => { app.nextTurn(); next(); }; render0(); }
+  else { ruled.add(n); app.addScore(-30); sfx.bad(); toast(`${n}이(가) 아니에요`, 'bad'); render(); } }
+function render0(){ ui.r.querySelectorAll('tr.pick').forEach(tr => { if (tr.dataset.n !== cur[0]) tr.classList.add('no'); }); }
+function end(){ const sc = app.player.score, max = list.length * 76; app.finish({stars: app.multi ? 3 : sc >= max * .8 ? 3 : sc >= max * .5 ? 2 : 1, summary: app.multi ? '모둠별 점수입니다.' : `점수 <b>${sc}</b> (만점 ≈ ${max}) — 도구를 적게 쓰고 정확히 맞힐수록 높아요.`, best: sc + '점', bestValue: sc}); }
+
+/* ---------- 실험대 그리기 ---------- */
+function bottle(g, x, y, w, h, fill, lbl){ g.fillStyle = 'rgba(255,255,255,.55)'; g.strokeStyle = '#7d8a94'; g.lineWidth = 2; D.rr(g, x - w / 2, y - h, w, h, 8); g.fill(); g.stroke(); g.fillStyle = fill; D.rr(g, x - w / 2 + 3, y - h * .62, w - 6, h * .62 - 3, 6); g.fill(); g.fillStyle = '#5b6770'; g.fillRect(x - w * .22, y - h - 12, w * .44, 12); g.fillStyle = '#fff'; g.fillRect(x - w * .35, y - h * .9, w * .7, 20); D.text(g, lbl, x, y - h * .9 + 10, {size: 12, weight: 700, color: '#333'}); }
+function lump(g, x, y, r, col){ g.fillStyle = col; g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1.5; g.beginPath(); for (let i = 0; i < 9; i++) { const a = i / 9 * 6.283, rr = r * (.8 + ((i * 37) % 5) / 18); g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr * .8); } g.closePath(); g.fill(); g.stroke(); }
+app.draw = (g, W, H) => { if (!cur) return; const t = performance.now(), f = D.clamp((t - anim.t0) / (anim.k === 'heat' ? 2600 : 1300), 0, 1), by = H * .8;
+  g.fillStyle = '#e9eef0'; g.fillRect(0, 0, W, H); g.fillStyle = '#d9e2e6'; for (let x = 0; x < W; x += 60) g.fillRect(x, 0, 1, by); g.fillStyle = '#6c4f3a'; g.fillRect(0, by, W, H - by); g.fillStyle = '#8a6a4f'; g.fillRect(0, by, W, 8);
+  const lab = '시료 ' + String.fromCharCode(65 + idx), sx = W * .16, liquid = cur[1] === 'l';
+  // 시료 병(또는 접시)
+  if (liquid) bottle(g, sx, by, 70, 120, cur[6], lab); else { g.fillStyle = '#fff'; g.beginPath(); g.ellipse(sx, by - 6, 50, 12, 0, 0, 7); g.fill(); g.strokeStyle = '#999'; g.stroke(); if (anim.k !== 'mass' && anim.k !== 'vol' && anim.k !== 'water' || f >= 1) lump(g, sx, by - 18, 12 + sm.V * 1.2, cur[6]); D.text(g, lab, sx, by + 24, {size: 14, weight: 700, color: '#fff'}); }
+  const k = anim.k, cx = W * .55;
+  if (k === 'intro') D.text(g, '🔍 ' + lab + ' 도착!', cx, H * .35, {size: 30, display: true, color: `rgba(40,60,70,${1 - f * .7})`});
+  if (k === 'mass') { g.fillStyle = '#3a4650'; D.rr(g, cx - 90, by - 40, 180, 40, 8); g.fill(); g.fillStyle = '#c9d2d8'; g.fillRect(cx - 80, by - 52, 160, 12); g.fillStyle = '#0d1b10'; D.rr(g, cx - 50, by - 32, 100, 24, 4); g.fill();
+    const shown = f < .5 ? 0 : f < .9 ? sm.m * (f - .5) / .4 + (Math.random() - .5) * .3 : sm.m; D.text(g, Math.max(0, shown).toFixed(1) + ' g', cx, by - 20, {size: 16, color: '#7dff9a', weight: 700});
+    const yy = D.lerp(by - 160, by - 60, D.ease(Math.min(1, f * 2)));
+    if (liquid) { g.fillStyle = 'rgba(255,255,255,.7)'; g.strokeStyle = '#7d8a94'; D.rr(g, cx - 26, yy - 50, 52, 60, 6); g.fill(); g.stroke(); g.fillStyle = cur[6]; g.fillRect(cx - 23, yy - 20, 46, 27); D.text(g, '(용기 무게 0점 조정)', cx, by + 26, {size: 12, color: '#fff'}); }
+    else lump(g, cx, yy, 12 + sm.V * 1.2, cur[6]); }
+  if (k === 'vol') { const ch = H * .55, cw = 46, top = by - ch, cap = liquid ? 50 : 60, lv = liquid ? sm.V * D.ease(f) : 50 + sm.V * D.ease(D.clamp((f - .4) / .4, 0, 1)), ly = by - 10 - lv / cap * (ch - 30);
+    g.fillStyle = 'rgba(255,255,255,.7)'; g.strokeStyle = '#7d8a94'; g.lineWidth = 2; g.fillRect(cx - cw / 2, top, cw, ch - 10); g.strokeRect(cx - cw / 2, top, cw, ch - 10); g.fillRect(cx - 40, by - 10, 80, 10);
+    g.fillStyle = liquid ? cur[6] : '#a8d8f0'; g.fillRect(cx - cw / 2 + 2, ly, cw - 4, by - 10 - ly);
+    for (let v = 0; v <= cap; v += 1) { const y = by - 10 - v / cap * (ch - 30), L = v % 10 === 0 ? 14 : v % 5 === 0 ? 9 : 5; g.strokeStyle = '#4b5a64'; g.lineWidth = 1; g.beginPath(); g.moveTo(cx + cw / 2, y); g.lineTo(cx + cw / 2 - L, y); g.stroke(); if (v % 10 === 0) D.text(g, v, cx + cw / 2 + 14, y, {size: 11, color: '#333'}); }
+    D.text(g, 'mL', cx + cw / 2 + 16, top + 6, {size: 11, color: '#333'});
+    if (!liquid) { const fy = D.lerp(top - 30, by - 30, D.ease(D.clamp(f / .45, 0, 1))); lump(g, cx, fy, Math.min(16, 6 + sm.V * .9), cur[6]); }
+    if (liquid && f < .6) { g.fillStyle = cur[6]; g.fillRect(cx - 2, top - 40, 4, ly - top + 40); }
+    if (f >= 1) { g.strokeStyle = '#d0533f'; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(cx - 60, ly); g.lineTo(cx + cw / 2 + 40, ly); g.stroke(); g.setLineDash([]); D.text(g, '눈높이를 액체 면에 맞춰 읽기', cx - 70, ly - 14, {size: 11, color: '#a5462f', align: 'right'}); } }
+  if (k === 'heat') { // 가열 장치 + 온도 그래프
+    g.fillStyle = '#555'; g.fillRect(cx - 70, by - 18, 60, 18); g.fillStyle = '#e0533f'; g.fillRect(cx - 64, by - 22, 48, 4);
+    g.fillStyle = 'rgba(255,255,255,.7)'; g.strokeStyle = '#7d8a94'; D.rr(g, cx - 64, by - 82, 48, 60, 4); g.fill(); g.stroke(); if (liquid) { g.fillStyle = cur[6]; g.fillRect(cx - 61, by - 55, 42, 32); } else lump(g, cx - 40, by - 34, 10, cur[6]);
+    g.strokeStyle = '#c33'; g.lineWidth = 3; g.beginPath(); g.moveTo(cx - 34, by - 40); g.lineTo(cx - 34, by - 130); g.stroke();
+    const target = liquid ? cur[4] : cur[3], plateau = target != null && target <= 300, T0 = 20, gx = cx + 10, gy = by - 20, gw = W * .38, gh = H * .55;
+    g.fillStyle = '#fff'; g.fillRect(gx, gy - gh, gw, gh); g.strokeStyle = '#333'; g.lineWidth = 1.5; g.strokeRect(gx, gy - gh, gw, gh);
+    const ty = T => gy - (T + 20) / 340 * gh; for (let T = 0; T <= 300; T += 50) { D.text(g, T, gx - 14, ty(T), {size: 10, color: '#333'}); g.strokeStyle = '#eee'; g.beginPath(); g.moveTo(gx, ty(T)); g.lineTo(gx + gw, ty(T)); g.stroke(); }
+    D.text(g, '온도(℃)', gx + 26, gy - gh + 10, {size: 11, color: '#333'}); D.text(g, '시간 →', gx + gw - 26, gy + 12, {size: 11, color: '#333'});
+    const temp = u => { const rise = 300; if (!plateau) return T0 + u * (300 - T0); const ta = (target - T0) / rise; if (u < ta * .7) return T0 + u / (ta * .7) * (target - T0); if (u < ta * .7 + .3) return target; return target + (u - ta * .7 - .3) * 260; };
+    g.strokeStyle = '#d0533f'; g.lineWidth = 2.5; g.beginPath(); for (let i = 0; i <= 100 * f; i++) { const u = i / 100; g.lineTo(gx + u * gw, ty(Math.min(300, temp(u)))); } g.stroke();
+    if (f >= 1 && plateau) { g.setLineDash([4, 3]); g.strokeStyle = '#2e7d4f'; g.beginPath(); g.moveTo(gx, ty(target)); g.lineTo(gx + gw, ty(target)); g.stroke(); g.setLineDash([]); D.text(g, `${target} ℃에서 일정`, gx + gw * .5, ty(target) - 10, {size: 12, weight: 700, color: '#2e7d4f'}); }
+    if (target != null && target < 20) D.text(g, '(실온에서 이미 액체)', gx + gw / 2, gy - gh - 10, {size: 11, color: '#555'}); }
+  if (k === 'water') { const bw = 120, bh = 130, top = by - bh; g.fillStyle = 'rgba(255,255,255,.6)'; g.strokeStyle = '#7d8a94'; g.lineWidth = 2; g.fillRect(cx - bw / 2, top, bw, bh); g.strokeRect(cx - bw / 2, top, bw, bh);
+    const wy = top + 30; g.fillStyle = 'rgba(140,200,240,.55)'; g.fillRect(cx - bw / 2 + 2, wy, bw - 4, by - wy - 2);
+    if (liquid) { const mix = D.clamp((f - .3) / .7, 0, 1); g.fillStyle = cur[6]; g.globalAlpha = .7 * (1 - mix); g.fillRect(cx - 8, top - 30, 16, wy - top + 30 + (by - wy) * f * .5); g.globalAlpha = 1; for (let i = 0; i < 18; i++) { g.fillStyle = `rgba(255,255,255,${.6 * (1 - mix)})`; g.beginPath(); g.arc(cx + Math.sin(i * 7 + t / 300) * 40 * mix, wy + 20 + ((i * 13) % 80), 3, 0, 7); g.fill(); } }
+    else { const sol = cur[5] === '녹음', fl = cur[2] < 1, r = Math.min(16, 6 + sm.V * .9), y = fl ? D.lerp(top - 20, wy + r * .3, D.ease(Math.min(1, f * 1.6))) : D.lerp(top - 20, by - r - 2, D.ease(Math.min(1, f * 1.4)));
+      g.globalAlpha = sol ? 1 - D.clamp((f - .5) * 2, 0, 1) : 1; lump(g, cx, y, r, cur[6]); g.globalAlpha = 1;
+      if (sol && f > .5) for (let i = 0; i < 26; i++) { g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.arc(cx + Math.sin(i * 3.1) * (bw * .4) * (f - .5) * 2, by - 10 - ((i * 17) % 90) * (f - .5) * 2, 2, 0, 7); g.fill(); } } }
+  if (locked) D.text(g, `${cur[0]}!`, W * .55, H * .14, {size: 34, display: true, color: '#2e7d4f', stroke: '#fff', strokeW: 6});
+};
+</script>
+</body>
+</html>
