@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>힘과 운동 실험실 · 물리학</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="물리학|01 힘과 운동" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>물리학 · 01 힘과 운동 <span class="code">물리학 Ⅰ</span></div>
+      <h1>힘과 운동 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="accel">1. 등가속도 운동</button>
+      <button type="button" data-mode="newton">2. 뉴턴 운동 법칙</button>
+      <button type="button" data-mode="momentum">3. 운동량 보존과 충돌</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="운동 실험 장치"></canvas></div>
+      <div class="controls">
+        <label class="field" data-only="accel" for="v0">처음 속도 <input type="range" id="v0" min="-10" max="20" step="1" value="4"><output id="v0Out">4 m/s</output></label>
+        <label class="field" data-only="accel" for="acc">가속도 <input type="range" id="acc" min="-6" max="6" step="0.5" value="2"><output id="accOut">2 m/s²</output></label>
+        <label class="field" data-only="newton" for="m1">수레 질량 <input type="range" id="m1" min="0.5" max="4" step="0.5" value="2"><output id="m1Out">2 kg</output></label>
+        <label class="field" data-only="newton" for="m2">추 질량 <input type="range" id="m2" min="0.1" max="2" step="0.1" value="0.5"><output id="m2Out">0.5 kg</output></label>
+        <label class="field" data-only="newton" for="mu">마찰 계수 <input type="range" id="mu" min="0" max="0.3" step="0.05" value="0"><output id="muOut">0</output></label>
+        <label class="field" data-only="momentum" for="ma">A 질량 <input type="range" id="ma" min="1" max="4" step="0.5" value="2"><output id="maOut">2 kg</output></label>
+        <label class="field" data-only="momentum" for="va">A 속도 <input type="range" id="va" min="0" max="6" step="0.5" value="4"><output id="vaOut">4 m/s</output></label>
+        <label class="field" data-only="momentum" for="mb">B 질량 <input type="range" id="mb" min="1" max="4" step="0.5" value="1"><output id="mbOut">1 kg</output></label>
+        <label class="field" data-only="momentum" for="vb">B 속도 <input type="range" id="vb" min="-4" max="2" step="0.5" value="0"><output id="vbOut">0 m/s</output></label>
+        <label class="field" data-only="momentum" for="e">반발 계수 <input type="range" id="e" min="0" max="1" step="0.1" value="1"><output id="eOut">1 (탄성)</output></label>
+        <button class="btn primary" type="button" id="go">시작</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>속도–시간 그래프에서 기울기와 넓이는 각각 무엇을 뜻할까?</summary><p>기울기는 가속도, 그래프와 시간축 사이의 넓이는 변위(위치 변화량)를 뜻합니다. 넓이가 시간축 아래에 있으면 음(−)의 방향으로 이동한 변위입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>수레와 추가 실로 연결되어 함께 움직일 때 추가 받는 중력이 모두 가속에 쓰일까?</summary><p>추의 중력은 수레와 추 전체(m₁ + m₂)를 함께 가속시키므로 a = m₂g/(m₁ + m₂)입니다. 실의 장력은 추의 중력보다 작습니다(T = m₁a).</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>비탄성 충돌에서 운동 에너지는 줄어드는데 운동량은 왜 보존될까?</summary><p>충돌하는 동안 두 물체가 서로 주고받는 힘은 작용–반작용으로 크기가 같고 방향이 반대이며 작용 시간도 같습니다. 그래서 두 물체가 받는 충격량의 합이 0이 되어 전체 운동량은 보존됩니다. 반면 운동 에너지 일부는 열·소리·변형 에너지로 전환됩니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="g = 9.8 m/s². 정확한 식으로 계산합니다."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2, g9 = 9.8;
+const st = {mode: 'accel', v0: 4, a: 2, m1: 2, m2: .5, mu: 0, ma: 2, va: 4, mb: 1, vb: 0, e: 1, t: 0, run: false};
+const TA = 6;
+/* ===== 1. 등가속도 ===== */
+const xA = t => st.v0 * t + .5 * st.a * t * t, vA = t => st.v0 + st.a * t;
+function drawAccel(){ const g = S.g, W = S.w, H = S.h, T = Math.min(st.t, TA), xs = [0, ...Array.from({length: 61}, (_, i) => xA(i / 10))], xmin = Math.min(-5, ...xs), xmax = Math.max(20, ...xs), X = x => 40 + (x - xmin) / (xmax - xmin) * (W - 80), y = H * .55;
+  g.fillStyle = '#ccc'; g.fillRect(0, y, W, 6); for (let x = Math.ceil(xmin / 10) * 10; x <= xmax; x += 10) { g.fillStyle = C.muted; g.fillRect(X(x), y + 6, 1, 8); label(g, x + ' m', X(x), y + 24, {size: 10, color: C.muted}); }
+  for (let k = 0; k * .5 <= T + 1e-9; k++) { const tk = k * .5; g.globalAlpha = .25; car(g, X(xA(tk)), y); g.globalAlpha = 1; }
+  car(g, X(xA(T)), y); const v = vA(T); if (Math.abs(v) > .05) arrow(g, X(xA(T)), y - 40, X(xA(T)) + v * 6, y - 40, C.phy, 3); if (st.a) arrow(g, X(xA(T)), y - 58, X(xA(T)) + st.a * 10, y - 58, C.hot, 2);
+  label(g, `t = ${T.toFixed(1)} s · 위치 ${xA(T).toFixed(1)} m · 속도 ${v.toFixed(1)} m/s`, W / 2, 24, {size: 14, weight: 700}); label(g, '파랑: 속도 · 빨강: 가속도 (0.5 s 간격 잔상)', W / 2, 46, {size: 11, color: C.muted}); }
+function car(g, x, y){ g.fillStyle = '#4a7fd6'; g.fillRect(x - 22, y - 26, 44, 18); g.fillStyle = '#222'; g.beginPath(); g.arc(x - 12, y - 5, 5, 0, TAU); g.arc(x + 12, y - 5, 5, 0, TAU); g.fill(); }
+/* ===== 2. 뉴턴 ===== */
+const NW = () => { const drive = st.m2 * g9, fr = st.mu * st.m1 * g9, net = Math.max(0, drive - fr), a = net / (st.m1 + st.m2), T = st.m1 * a + fr; return {a, T, drive, fr, net}; };
+function drawNewton(){ const g = S.g, W = S.w, H = S.h, N = NW(), t = st.t, dx = Math.min(.5 * N.a * t * t, 2.2), px = 70 / 1, ty = H * .4, ex = W * .72, X0 = W * .12, sc = Math.min((ex - X0 - 80) / 2.2, (H - ty - 90) / 2.2);
+  g.fillStyle = '#b9a58a'; g.fillRect(0, ty, ex, 12); g.fillStyle = '#888'; g.beginPath(); g.arc(ex, ty, 12, 0, TAU); g.fill();
+  const cx = X0 + dx * sc, cw = 40 + st.m1 * 12; g.fillStyle = '#4a7fd6'; g.fillRect(cx, ty - 34, cw, 30); label(g, `${st.m1} kg`, cx + cw / 2, ty - 19, {size: 12, color: '#fff', weight: 700}); g.fillStyle = '#222'; g.beginPath(); g.arc(cx + 10, ty - 3, 5, 0, TAU); g.arc(cx + cw - 10, ty - 3, 5, 0, TAU); g.fill();
+  const hy = ty + 30 + dx * sc, hw = 18 + st.m2 * 14; g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath(); g.moveTo(cx + cw, ty - 19); g.lineTo(ex, ty - 12); g.moveTo(ex + 12, ty); g.lineTo(ex + 12, hy); g.stroke(); g.fillStyle = '#777'; g.fillRect(ex + 12 - hw / 2, hy, hw, hw); label(g, `${st.m2} kg`, ex + 12, hy + hw / 2, {size: 11, color: '#fff', weight: 700});
+  arrow(g, cx + cw + 4, ty - 44, cx + cw + 4 + N.T * 6, ty - 44, C.accent, 2.5); label(g, `장력 ${N.T.toFixed(2)} N`, cx + cw + 6, ty - 58, {size: 11, color: C.accent, align: 'left'}); arrow(g, ex + 12, hy + hw, ex + 12, hy + hw + N.drive * 6, C.hot, 2.5); label(g, `중력 ${N.drive.toFixed(2)} N`, ex + 22, hy + hw + N.drive * 3, {size: 11, color: C.hot, align: 'left'}); arrow(g, ex + 12, hy, ex + 12, hy - N.T * 6, C.accent, 2.5);
+  if (st.mu) { arrow(g, cx, ty - 8, cx - N.fr * 6, ty - 8, '#8a6a3a', 2.5); label(g, `마찰력 ${N.fr.toFixed(2)} N`, cx - 4, ty + 22, {size: 11, color: '#8a6a3a', align: 'right'}); }
+  label(g, `가속도 a = (m₂g − μm₁g) / (m₁ + m₂) = ${N.a.toFixed(2)} m/s²`, W * .4, 24, {size: 14, weight: 700}); label(g, '운동 제2법칙: 알짜힘 = (전체 질량) × 가속도', W * .4, 48, {size: 12, color: C.muted});
+  label(g, '작용–반작용: 실이 수레를 당기는 힘 ↔ 수레가 실을 당기는 힘', W * .4, H - 14, {size: 11, color: C.muted}); }
+/* ===== 3. 충돌 ===== */
+function after(){ const {ma, mb, va, vb, e} = st, P = ma * va + mb * vb; const vaf = (P - mb * e * (va - vb)) / (ma + mb), vbf = (P + ma * e * (va - vb)) / (ma + mb); return {vaf, vbf, P}; }
+function collState(t){ const A = after(), gap = 3.0, tc = st.va - st.vb > 0 ? gap / (st.va - st.vb) : Infinity; if (t < tc) return {xa: st.va * t, xb: gap + st.vb * t, va: st.va, vb: st.vb, done: false, tc}; const dt = t - tc, xa0 = st.va * tc; return {xa: xa0 + A.vaf * dt, xb: xa0 + A.vbf * dt, va: A.vaf, vb: A.vbf, done: true, tc}; }
+function drawMom(){ const g = S.g, W = S.w, H = S.h, s = collState(st.t), X = x => W * .2 + x * W * .045, y = H * .5, wa = 30 + st.ma * 10, wb = 30 + st.mb * 10;
+  g.fillStyle = '#ccc'; g.fillRect(0, y, W, 6);
+  g.fillStyle = '#4a7fd6'; g.fillRect(X(s.xa) - wa, y - 40, wa, 40); label(g, 'A', X(s.xa) - wa / 2, y - 20, {size: 14, color: '#fff', weight: 700}); g.fillStyle = '#e0533f'; g.fillRect(X(s.xb), y - 40, wb, 40); label(g, 'B', X(s.xb) + wb / 2, y - 20, {size: 14, color: '#fff', weight: 700});
+  [[s.xa, s.va, -wa / 2, '#4a7fd6'], [s.xb, s.vb, wb / 2, '#e0533f']].forEach(([x, v, o, c]) => { if (Math.abs(v) > .05) arrow(g, X(x) + o, y - 52, X(x) + o + v * 14, y - 52, c, 3); label(g, `${v.toFixed(2)} m/s`, X(x) + o, y - 70, {size: 11, color: c, weight: 700}); });
+  const A = after(), pA = st.ma * s.va, pB = st.mb * s.vb, KE = .5 * st.ma * s.va ** 2 + .5 * st.mb * s.vb ** 2; label(g, `운동량: A ${pA.toFixed(2)} + B ${pB.toFixed(2)} = ${(pA + pB).toFixed(2)} kg·m/s`, W / 2, 24, {size: 14, weight: 700, color: C.accent}); label(g, `운동 에너지 합: ${KE.toFixed(2)} J`, W / 2, 48, {size: 13}); if (s.done) label(g, st.e === 1 ? '탄성 충돌: 운동 에너지도 보존' : st.e === 0 ? '완전 비탄성 충돌: 한 덩어리로 움직임' : '비탄성 충돌: 운동 에너지 일부 손실', W / 2, H * .82, {size: 13, weight: 700, color: C.hot}); }
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g, half = G.w / 2;
+  if (st.mode === 'accel') { const T = Math.min(st.t, TA); const m1 = axes(G, {x: [0, 6, 1, '시간 (s)'], y: [-20, 40, 10, '속도 (m/s)']}, {R: half + 8}); const V = []; for (let t = 0; t <= TA; t += .05) V.push([t, vA(t)]); line(G, V, m1, C.line, 1, [4, 4]); line(G, V.filter(p => p[0] <= T), m1, C.phy, 2.5); g.fillStyle = 'rgba(80,120,220,.15)'; g.beginPath(); g.moveTo(m1.X(0), m1.Y(0)); V.filter(p => p[0] <= T).forEach(p => g.lineTo(m1.X(p[0]), m1.Y(p[1]))); g.lineTo(m1.X(T), m1.Y(0)); g.closePath(); g.fill(); label(g, '넓이 = 변위', m1.X(4.5), m1.Y(-14), {size: 10, color: C.muted});
+    const m2 = axes(G, {x: [0, 6, 1, '시간 (s)'], y: [-40, 160, 40, '위치 (m)']}, {L: half + 48, keep: true}); const X2 = []; for (let t = 0; t <= TA; t += .05) X2.push([t, xA(t)]); line(G, X2, m2, C.line, 1, [4, 4]); line(G, X2.filter(p => p[0] <= T), m2, C.hot, 2.5); label(g, '접선 기울기 = 속도', m2.X(2.5), m2.Y(140), {size: 10, color: C.muted}); }
+  else if (st.mode === 'newton') { const m = axes(G, {x: [0, 2, .4, '추 질량 m₂ (kg)'], y: [0, 6, 1, '가속도 (m/s²)']}); const P = []; for (let m2 = .05; m2 <= 2; m2 += .05) P.push([m2, Math.max(0, m2 * g9 - st.mu * st.m1 * g9) / (st.m1 + m2)]); line(G, P, m, C.phy, 2.5); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.m2), m.Y(NW().a), 5, 0, TAU); g.fill(); label(g, `수레 ${st.m1} kg 기준`, m.X(1.5), m.Y(5.5), {size: 10, color: C.muted}); }
+  else { const m = axes(G, {x: [0, 4, 1, '시간 (s)'], y: [-6, 16, 4, '운동량 (kg·m/s)']}); const PA = [], PB = [], PT = []; for (let t = 0; t <= 4; t += .02) { const s = collState(t); PA.push([t, st.ma * s.va]); PB.push([t, st.mb * s.vb]); PT.push([t, st.ma * s.va + st.mb * s.vb]); } line(G, PA, m, '#4a7fd6', 2.2); line(G, PB, m, '#e0533f', 2.2); line(G, PT, m, C.ink, 2.5, [5, 4]); label(g, '파랑 A · 빨강 B · 점선: 전체 (일정)', m.X(2.6), m.Y(14), {size: 10, color: C.muted}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
+  if (st.mode === 'accel') { const T = Math.min(st.t, TA); s.innerHTML = `<div><b>${vA(T).toFixed(1)} m/s</b><span>속도 v = v₀ + at</span></div><div><b>${xA(T).toFixed(1)} m</b><span>변위 s = v₀t + ½at²</span></div><div><b>${(vA(T) ** 2 - st.v0 ** 2).toFixed(1)} = ${(2 * st.a * xA(T)).toFixed(1)}</b><span>v² − v₀² = 2as</span></div>`; $('explain').innerHTML = '<b>등가속도 직선 운동</b>: 가속도가 일정한 직선 운동. 속도–시간 그래프는 기울기가 일정한 직선, 위치–시간 그래프는 포물선이 돼요. 속도와 가속도의 방향이 반대이면 점점 느려지다가 방향을 바꿔요.'; $('tip').textContent = '처음 속도를 양(+), 가속도를 음(−)으로 해 보세요. 브레이크를 밟는 자동차처럼 멈췄다가 되돌아와요.';
+    th.innerHTML = '<tr><th>시간 (s)</th><th>속도 (m/s)</th><th>위치 (m)</th></tr>'; tb.innerHTML = [0, 1, 2, 3, 4, 5, 6].map(t => `<tr><td>${t}</td><td>${vA(t).toFixed(1)}</td><td>${xA(t).toFixed(1)}</td></tr>`).join(''); $('tTitle').textContent = '시간에 따른 속도와 위치'; $('gTitle').textContent = '속도–시간, 위치–시간 그래프'; $('gSub').textContent = ''; }
+  else if (st.mode === 'newton') { const N = NW(); s.innerHTML = `<div><b>${N.a.toFixed(2)} m/s²</b><span>가속도</span></div><div><b>${N.T.toFixed(2)} N</b><span>실의 장력</span></div><div><b>${N.net.toFixed(2)} N</b><span>알짜힘</span></div>`; $('explain').innerHTML = '<b>뉴턴 운동 법칙</b> — 제1법칙(관성): 알짜힘이 0이면 운동 상태 유지. 제2법칙(가속도): F = ma. 제3법칙(작용 반작용): 두 물체가 주고받는 힘은 크기가 같고 방향이 반대. 실로 연결된 물체는 한 덩어리로 보고 a = (알짜힘) ÷ (전체 질량)으로 구해요.'; $('tip').textContent = '장력 T는 수레만 따로 보면 T − 마찰력 = m₁a로 구할 수 있어요.';
+    th.innerHTML = '<tr><th>법칙</th><th>내용</th><th>예</th></tr>'; tb.innerHTML = [['제1법칙 (관성)', '알짜힘 0 → 정지 또는 등속 직선 운동', '버스 출발 시 몸이 뒤로 쏠림'], ['제2법칙 (가속도)', 'F = ma', '같은 힘이면 질량이 클수록 가속도 작음'], ['제3법칙 (작용 반작용)', '크기 같고 방향 반대, 서로 다른 물체에 작용', '로켓 발사, 노 젓기']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); $('tTitle').textContent = '뉴턴 운동 법칙'; $('gTitle').textContent = '추 질량과 가속도'; $('gSub').textContent = ''; }
+  else { const A = after(), KE0 = .5 * st.ma * st.va ** 2 + .5 * st.mb * st.vb ** 2, KE1 = .5 * st.ma * A.vaf ** 2 + .5 * st.mb * A.vbf ** 2; s.innerHTML = `<div><b>${A.P.toFixed(2)} → ${(st.ma * A.vaf + st.mb * A.vbf).toFixed(2)}</b><span>전체 운동량 (보존)</span></div><div><b>${KE0.toFixed(2)} → ${KE1.toFixed(2)} J</b><span>운동 에너지</span></div>`; $('explain').innerHTML = '<b>운동량 보존 법칙</b>: 외부 힘이 작용하지 않으면 충돌 전후 운동량의 총합은 일정해요. m_A v_A + m_B v_B = m_A v_A′ + m_B v_B′. <b>반발 계수</b> e = (멀어지는 속력) ÷ (가까워지는 속력): 1이면 탄성 충돌, 0이면 완전 비탄성 충돌이에요.'; $('tip').textContent = '질량이 같은 두 물체가 탄성 충돌하면 속도를 서로 맞바꿔요. A 2 kg, B 2 kg으로 해 보세요!';
+    th.innerHTML = '<tr><th></th><th>충돌 전</th><th>충돌 후</th></tr>'; tb.innerHTML = [['A 속도', st.va, A.vaf.toFixed(2)], ['B 속도', st.vb, A.vbf.toFixed(2)], ['전체 운동량', A.P.toFixed(2), (st.ma * A.vaf + st.mb * A.vbf).toFixed(2)], ['운동 에너지 합', KE0.toFixed(2), KE1.toFixed(2)]].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); $('tTitle').textContent = '충돌 전후 비교'; $('gTitle').textContent = '시간에 따른 운동량'; $('gSub').textContent = ''; } }
+const bind = (id, k, f) => { $(id).oninput = e => { st[k] = +e.target.value; $(id + 'Out').textContent = f(st[k]); st.t = 0; st.run = false; render(); }; };
+bind('v0', 'v0', v => v + ' m/s'); bind('acc', 'a', v => v + ' m/s²'); bind('m1', 'm1', v => v + ' kg'); bind('m2', 'm2', v => v + ' kg'); bind('mu', 'mu', v => v); bind('ma', 'ma', v => v + ' kg'); bind('va', 'va', v => v + ' m/s'); bind('mb', 'mb', v => v + ' kg'); bind('vb', 'vb', v => v + ' m/s'); bind('e', 'e', v => v + (v === 1 ? ' (탄성)' : v === 0 ? ' (완전 비탄성)' : ''));
+$('go').onclick = () => { st.t = 0; st.run = true; };
+Kit.tabs(m => { st.mode = m; st.t = 0; st.run = false; render(); }, ['accel', 'newton', 'momentum']);
+Kit.loop(dt => { if (st.run) { st.t += dt; const end = st.mode === 'accel' ? TA : st.mode === 'newton' ? Math.sqrt(2 * 2.2 / Math.max(.01, NW().a)) : 4; if (st.t >= end) { st.t = end; st.run = false; } if (Math.random() < .2) render(); } }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({accel: drawAccel, newton: drawNewton, momentum: drawMom})[st.mode](); drawGraph(); });
+render();
+})();
+</script>
+</body>
+</html>
