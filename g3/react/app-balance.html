@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>반응식 밸런스 · 중3 화학 반응의 규칙과 에너지 변화</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'balance', title: '반응식 밸런스', unit: '중3 · 16 화학 반응의 규칙과 에너지 변화', back: '../../index.html#g3', sim: 'sim.html#eq',
+  lead: '화학 반응 전후에 <b>원자의 종류와 개수는 변하지 않아요</b>. 계수를 조절해 원자 저울의 균형을 맞추고 화학 반응식을 완성하세요!',
+  howto: ['화학식 위 <b>▲</b>를 누르면 계수가 1 커지고, 아래 <b>▼</b>를 누르면 작아져요.', '아래 <b>원자 저울</b>이 원소마다 반응 전후 개수를 비교해 줘요. 모두 수평이 되면 성공!', '계수는 <b>가장 간단한 정수비</b>여야 해요. 빠를수록 점수가 높아요.'],
+  options: [{key: 'lv', label: '난이도', choices: [['easy', '기초'], ['mid', '보통'], ['hard', '도전']], def: 'mid'}, {key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '<b>질량 보존 법칙</b>: 화학 반응에서 반응 전 물질의 총질량 = 반응 후 생성된 물질의 총질량. 원자가 새로 생기거나 없어지지 않고 <b>배열만 바뀌기</b> 때문이에요. <b>화학 반응식</b>은 반응물 → 생성물을 화학식으로 나타내고, 양쪽 원자의 종류와 개수가 같도록 <b>계수</b>를 맞춥니다. 계수비는 분자 수의 비(기체는 부피비)를 나타내요.',
+  startLabel: '밸런스 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const EQ = {easy: [[['H2', 'Cl2'], ['HCl'], '수소 + 염소 → 염화 수소'], [['C', 'O2'], ['CO2'], '탄소의 연소'], [['H2', 'O2'], ['H2O'], '물의 생성'], [['Mg', 'O2'], ['MgO'], '마그네슘의 연소'], [['Fe', 'S'], ['FeS'], '철과 황의 반응'], [['Cu', 'O2'], ['CuO'], '구리의 산화'], [['H2O'], ['H2', 'O2'], '물의 전기 분해']],
+  mid: [[['N2', 'H2'], ['NH3'], '암모니아 합성'], [['CH4', 'O2'], ['CO2', 'H2O'], '메테인의 연소'], [['H2O2'], ['H2O', 'O2'], '과산화 수소의 분해'], [['Na', 'Cl2'], ['NaCl'], '염화 나트륨 생성'], [['CaCO3'], ['CaO', 'CO2'], '석회석의 열분해'], [['Zn', 'HCl'], ['ZnCl2', 'H2'], '아연과 염산'], [['CO', 'O2'], ['CO2'], '일산화 탄소의 연소'], [['Mg', 'HCl'], ['MgCl2', 'H2'], '마그네슘과 염산']],
+  hard: [[['Fe', 'O2'], ['Fe2O3'], '철의 산화(녹)'], [['C3H8', 'O2'], ['CO2', 'H2O'], '프로페인의 연소'], [['NaHCO3'], ['Na2CO3', 'H2O', 'CO2'], '탄산수소 나트륨의 열분해'], [['C2H5OH', 'O2'], ['CO2', 'H2O'], '에탄올의 연소'], [['Al', 'O2'], ['Al2O3'], '알루미늄의 산화'], [['CaCO3', 'HCl'], ['CaCl2', 'H2O', 'CO2'], '탄산 칼슘과 염산'], [['C6H12O6', 'O2'], ['CO2', 'H2O'], '세포 호흡'], [['CO2', 'H2O'], ['C6H12O6', 'O2'], '광합성']]};
+const CPK = {H: '#f4f4f4', O: '#e04a3c', C: '#3a3a3a', N: '#4d7fe0', Cl: '#4fbf5a', Na: '#a77be0', Mg: '#6bd0a8', Fe: '#c07a4a', S: '#e8d24a', Cu: '#d08a52', Ca: '#c0c0c0', Zn: '#8fa3b8', Al: '#b9c3cc'};
+const MASS = {H: 1, O: 16, C: 12, N: 14, Cl: 35.5, Na: 23, Mg: 24, Fe: 56, S: 32, Cu: 64, Ca: 40, Zn: 65, Al: 27};
+function parse(f){ const c = {}; f.replace(/([A-Z][a-z]?)(\d*)/g, (_, e, n) => { c[e] = (c[e] || 0) + (+n || 1); }); return c; }
+const sub = f => f.replace(/\d/g, d => '₀₁₂₃₄₅₆₇₈₉'[d]);
+let list, qi, eq, co, ui = {}, locked, t0, tilt = {};
+app.onStart = o => { list = EQ[o.lv].slice().sort(() => Math.random() - .5).slice(0, 6); qi = -1; ui.q = app.panel('반응'); ui.m = app.panel('질량 확인'); app.startTimer(); next(); };
+function next(){ qi++; if (qi >= list.length) return end(); const [L, R, n] = list[qi]; eq = {L, R, n, all: [...L, ...R]}; co = eq.all.map(() => 1); locked = false; t0 = performance.now(); tilt = {}; app.setLevel(qi, list.length);
+  ui.q.innerHTML = `<p class="mission"><b>${n}</b></p><p class="note-c">계수 1은 쓰지 않아요. 분수는 안 돼요!</p>`; check(); }
+function counts(){ const l = {}, r = {}; eq.all.forEach((f, i) => { const c = parse(f), side = i < eq.L.length ? l : r; Object.entries(c).forEach(([e, n]) => side[e] = (side[e] || 0) + n * co[i]); }); return {l, r}; }
+const gcd = (a, b) => b ? gcd(b, a % b) : a;
+function check(){ const {l, r} = counts(), els = [...new Set([...Object.keys(l), ...Object.keys(r)])], ok = els.every(e => l[e] === r[e]);
+  const mL = eq.L.reduce((s, f, i) => s + co[i] * Object.entries(parse(f)).reduce((a, [e, n]) => a + MASS[e] * n, 0), 0), mR = eq.R.reduce((s, f, i) => s + co[eq.L.length + i] * Object.entries(parse(f)).reduce((a, [e, n]) => a + MASS[e] * n, 0), 0);
+  ui.m.innerHTML = `<p>반응 전 총질량: <b>${+mL.toFixed(1)}</b><br>반응 후 총질량: <b>${+mR.toFixed(1)}</b></p><p class="note-c">(원자량 기준 상대 질량) ${ok ? '✔ 질량 보존!' : '아직 달라요'}</p>`;
+  if (ok && !locked) { const g = co.reduce(gcd); if (g > 1) { toast(`균형은 맞지만 가장 간단한 정수비가 아니에요 (모두 ${g}로 나눠져요)`, 'bad'); return; }
+    locked = true; const sec = (performance.now() - t0) / 1000, pts = Math.round(80 + Math.max(0, 40 - sec) * 2); app.addScore(pts); sfx.win(); app.confetti(70); toast(`완성! +${pts}`, 'good');
+    ui.q.innerHTML += `<p style="margin-top:6px;font-size:16px">${eq.L.map((f, i) => (co[i] > 1 ? co[i] : '') + sub(f)).join(' + ')} → ${eq.R.map((f, i) => (co[eq.L.length + i] > 1 ? co[eq.L.length + i] : '') + sub(f)).join(' + ')}</p><button class="big" type="button" style="width:100%;margin-top:10px">다음 반응 ▶</button>`;
+    ui.q.querySelector('button').onclick = () => { app.nextTurn(); next(); }; } }
+function end(){ const sc = app.player.score; app.finish({stars: app.multi ? 3 : sc >= 900 ? 3 : sc >= 650 ? 2 : 1, summary: app.multi ? '모둠별 점수입니다.' : `반응식 6개 완성 · 점수 <b>${sc}</b>`, best: sc + '점', bestValue: sc}); }
+function layout(){ const W = S.w, H = S.h, g = S.g, y = H * .2; let fs = 28, P;
+  for (; fs >= 14; fs -= 2) { g.font = `700 ${fs}px 'IBM Plex Sans KR',sans-serif`; const cw = fs * 1.3, sw = fs * 1.5; let x = 0; P = eq.all.map((f, i) => { const w = g.measureText(sub(f)).width, o = {f, i, cx: x + cw / 2, fx: x + cw, w, fs}; x += cw + w + sw; return o; }); const total = x - fs * 1.5; if (total <= W * .94) { const off = (W - total) / 2; P.forEach(p => { p.cx += off; p.fx += off; p.x = p.cx; p.y = y; }); break; } }
+  return P; }
+app.pointer({tap(x, y){ if (locked || !eq) return; const P = layout(); P.forEach(p => { if (Math.abs(x - p.cx) < Math.max(18, p.fs * .8)) { if (y > p.y - 58 && y < p.y - 18) { co[p.i] = Math.min(12, co[p.i] + 1); sfx.pop(); check(); } else if (y > p.y + 18 && y < p.y + 58) { co[p.i] = Math.max(1, co[p.i] - 1); sfx.click(); check(); } } }); }});
+function molecule(g, f, x, y, s){ const c = parse(f), atoms = []; Object.entries(c).forEach(([e, n]) => { for (let k = 0; k < n; k++) atoms.push(e); }); const n = atoms.length, cols = Math.ceil(Math.sqrt(n));
+  atoms.forEach((e, k) => { const ax = x + ((k % cols) - (cols - 1) / 2) * s * .9, ay = y + (Math.floor(k / cols) - (Math.ceil(n / cols) - 1) / 2) * s * .9; g.fillStyle = CPK[e]; g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1; g.beginPath(); g.arc(ax, ay, s * .5, 0, 7); g.fill(); g.stroke(); }); }
+app.draw = (g, W, H) => { if (!eq) return; const t = performance.now() / 1000, P = layout(), {l, r} = counts();
+  g.fillStyle = '#f6f2e8'; g.fillRect(0, 0, W, H);
+  // 반응식
+  P.forEach((p, k) => { const c = co[p.i]; D.text(g, c > 1 ? c : '·', p.cx, p.y, {size: p.fs + 4, weight: 700, color: c > 1 ? '#d0533f' : '#bbb'}); D.text(g, '▲', p.cx, p.y - 38, {size: 18, color: '#5fb37a'}); D.text(g, '▼', p.cx, p.y + 38, {size: 18, color: '#7f9fd6'});
+    D.text(g, sub(p.f), p.fx, p.y, {size: p.fs, weight: 700, color: '#2b2a26', align: 'left'});
+    if (k < P.length - 1) D.text(g, k === eq.L.length - 1 ? '→' : '+', p.fx + p.w + p.fs * .75, p.y, {size: p.fs, weight: 700, color: '#555'});
+    // 입자 모형
+    const s = Math.min(14, W / 70); for (let m = 0; m < Math.min(c, 8); m++) molecule(g, p.f, p.fx + p.w / 2 + ((m % 4) - 1.5) * s * 3, H * .4 + Math.floor(m / 4) * s * 3.2, s); if (c > 8) D.text(g, '…', p.x + 20, H * .4 + s * 7, {size: 16}); });
+  // 원자 저울
+  const els = [...new Set([...Object.keys(l), ...Object.keys(r)])], bw = Math.min(140, W / els.length - 34), by = H * .82;
+  els.forEach((e, k) => { const cx = W / 2 + (k - (els.length - 1) / 2) * (bw + 16), d = (r[e] || 0) - (l[e] || 0); tilt[e] = D.lerp(tilt[e] || 0, D.clamp(d * .12, -.35, .35), .12); const a = tilt[e];
+    g.fillStyle = '#8a7d63'; g.beginPath(); g.moveTo(cx, by - 4); g.lineTo(cx - 10, by + 22); g.lineTo(cx + 10, by + 22); g.fill();
+    g.save(); g.translate(cx, by - 6); g.rotate(a); g.strokeStyle = d ? '#d0533f' : '#2e7d4f'; g.lineWidth = 4; g.beginPath(); g.moveTo(-bw / 2, 0); g.lineTo(bw / 2, 0); g.stroke();
+    [[-bw / 2 + 18, l[e] || 0], [bw / 2 - 18, r[e] || 0]].forEach(([x, n]) => { g.fillStyle = CPK[e] || '#ccc'; g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1; g.beginPath(); g.arc(x, -14, 11, 0, 7); g.fill(); g.stroke(); D.text(g, n, x, -36, {size: 14, weight: 700, color: '#2b2a26'}); });
+    g.restore(); D.text(g, e, cx, by + 34, {size: 14, weight: 700, color: d ? '#d0533f' : '#2e7d4f'}); });
+  D.text(g, '원자 저울: 왼쪽 접시 = 반응 전, 오른쪽 접시 = 반응 후', W / 2, by - 84, {size: 12, color: '#888'});
+  if (locked) D.text(g, '⚖️ 균형 완성!', W / 2, H * .62, {size: 34, display: true, color: '#2e7d4f', stroke: '#fff', strokeW: 6});
+};
+</script>
+</body>
+</html>
