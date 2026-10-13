@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>역학 시스템 실험실 · 통합과학1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="통합과학1|06 역학 시스템" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학1 · 06 역학 시스템 <span class="code">통과1 Ⅲ</span></div>
+      <h1>중력과 충돌 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="fall">1. 자유 낙하·수평 운동</button>
+      <button type="button" data-mode="impulse">2. 운동량과 충격량</button>
+      <button type="button" data-mode="safety">3. 충돌과 안전장치</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="역학 실험 장치"></canvas></div>
+      <div class="controls">
+        <label class="field" data-only="fall" for="vx">수평 속력 <input type="range" id="vx" min="0" max="12" step="1" value="6"><output id="vxOut">6 m/s</output></label>
+        <label class="field" data-only="fall" for="h0">높이 <input type="range" id="h0" min="5" max="45" step="5" value="20"><output id="h0Out">20 m</output></label>
+        <label class="field" data-only="impulse" for="mass">질량 <input type="range" id="mass" min="0.05" max="0.5" step="0.05" value="0.1"><output id="massOut">0.1 kg</output></label>
+        <label class="field" data-only="impulse" for="v0">충돌 속력 <input type="range" id="v0" min="2" max="10" step="1" value="6"><output id="v0Out">6 m/s</output></label>
+        <div class="field" data-only="impulse"><div class="seg" id="surfSeg"><button type="button" data-surf="hard">콘크리트</button><button type="button" data-surf="wood">나무판</button><button type="button" data-surf="soft">방석</button></div></div>
+        <label class="field" data-only="safety" for="cv">자동차 속력 <input type="range" id="cv" min="20" max="100" step="10" value="50"><output id="cvOut">50 km/h</output></label>
+        <div class="field" data-only="safety"><label><input type="checkbox" id="belt" checked> 안전띠</label> <label><input type="checkbox" id="bag" checked> 에어백</label> <label><input type="checkbox" id="crumple" checked> 찌그러지는 차체</label></div>
+        <button class="btn primary" type="button" id="go">실행</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>같은 높이에서 한 공은 떨어뜨리고 다른 공은 수평으로 던지면 어느 공이 먼저 떨어질까?</summary><p>동시에 떨어집니다. 수평으로 던진 공도 연직 방향으로는 중력만 받아 자유 낙하와 똑같이 운동하기 때문입니다. 수평 방향으로는 힘이 작용하지 않아 처음 속력으로 등속 운동을 합니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>달걀을 콘크리트 바닥에 떨어뜨리면 깨지지만 방석 위에서는 깨지지 않는 까닭은?</summary><p>두 경우 모두 달걀의 운동량 변화량(충격량)은 같습니다. 하지만 방석은 충돌 시간을 길게 하여 달걀이 받는 평균 힘을 작게 만들기 때문입니다. 충격량 = 평균 힘 × 충돌 시간.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>자동차 앞부분을 일부러 잘 찌그러지게 만드는 까닭은?</summary><p>찌그러지면서 충돌 시간이 길어져 탑승자에게 전달되는 힘이 줄어듭니다. 또한 차체가 변형되며 운동 에너지를 흡수합니다. 대신 탑승 공간은 단단하게 만들어 보호합니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="g = 9.8 m/s², 공기 저항 무시. 충돌 힘은 단순화한 모형입니다."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2, g9 = 9.8;
+const SURF = {hard: ['콘크리트', .004], wood: ['나무판', .015], soft: ['방석', .08]};
+const st = {mode: 'fall', vx: 6, h0: 20, t: 0, run: false, m: .1, v0: 6, surf: 'hard', cv: 50, belt: true, bag: true, crumple: true};
+const tland = () => Math.sqrt(2 * st.h0 / g9);
+/* ===== 1. 낙하 ===== */
+function drawFall(){ const g = S.g, top = 30, bot = S.h - 40, x0 = 70, tl = tland(), rangeMax = 12 * Math.sqrt(2 * 45 / g9), sc = Math.min((bot - top) / st.h0, (S.w - 140) / Math.max(10, st.vx * tl));
+  const X = x => x0 + x * sc, Y = y => bot - y * sc; g.fillStyle = '#c9b48a'; g.fillRect(0, Y(0), S.w, S.h - Y(0)); g.fillStyle = '#8a7a5a'; g.fillRect(x0 - 40, Y(st.h0), 40, Y(0) - Y(st.h0));
+  const T = Math.min(st.t, tl);
+  for (let k = 0; k * .2 <= T + 1e-9; k++) { const tk = k * .2, y = st.h0 - .5 * g9 * tk * tk; g.globalAlpha = .3; g.fillStyle = C.hot; g.beginPath(); g.arc(X(0), Y(y), 7, 0, TAU); g.fill(); g.fillStyle = C.phy; g.beginPath(); g.arc(X(st.vx * tk), Y(y), 7, 0, TAU); g.fill(); g.globalAlpha = 1; g.strokeStyle = 'rgba(0,0,0,.08)'; g.beginPath(); g.moveTo(X(0), Y(y)); g.lineTo(X(st.vx * tk), Y(y)); g.stroke(); }
+  const y = st.h0 - .5 * g9 * T * T; g.fillStyle = C.hot; g.beginPath(); g.arc(X(0), Y(y), 9, 0, TAU); g.fill(); g.fillStyle = C.phy; g.beginPath(); g.arc(X(st.vx * T), Y(y), 9, 0, TAU); g.fill();
+  const vy = g9 * T; arrow(g, X(st.vx * T), Y(y), X(st.vx * T) + st.vx * 5, Y(y), C.phy, 2); arrow(g, X(st.vx * T), Y(y), X(st.vx * T), Y(y) + vy * 5, C.hot, 2);
+  label(g, '빨강: 자유 낙하 · 파랑: 수평으로 던짐 (0.2초 간격)', S.w / 2, 16, {size: 12, weight: 600}); label(g, `t = ${T.toFixed(2)} s`, S.w - 80, 40, {size: 14, weight: 700}); if (st.t >= tl) label(g, `동시에 착지! (${tl.toFixed(2)} s) · 수평 거리 ${(st.vx * tl).toFixed(1)} m`, S.w / 2, Y(0) + 22, {size: 13, weight: 700, color: C.accent}); }
+/* ===== 2. 충격량 ===== */
+const dtC = () => SURF[st.surf][1], dp = () => st.m * st.v0 * 1.0, Favg = () => dp() / dtC();
+function drawImpulse(){ const g = S.g, gy = S.h * .78, cx = S.w * .32, T = st.t, drop = .5, f = Math.min(1, T / drop);
+  const sc = SURF[st.surf]; g.fillStyle = st.surf === 'hard' ? '#9aa0a8' : st.surf === 'wood' ? '#b98a50' : '#d07a9a'; const sq = st.surf === 'soft' && T > drop ? Math.min(14, (T - drop) * 200) : 0; g.fillRect(cx - 80, gy + sq * .2, 160, st.surf === 'soft' ? 26 - sq * .3 : 18); label(g, sc[0], cx, gy + 40, {size: 12});
+  const ey = T < drop ? 40 + (gy - 60) * f * f : gy - 20 + sq * .6; const broke = Favg() > 25 && T > drop;
+  g.fillStyle = '#fff8ea'; g.strokeStyle = '#c9b48a'; g.lineWidth = 2; g.beginPath(); g.ellipse(cx, ey, 15, 20, 0, 0, TAU); g.fill(); g.stroke(); if (broke) { g.strokeStyle = '#8a6a3a'; g.beginPath(); g.moveTo(cx - 14, ey); g.lineTo(cx - 5, ey - 6); g.lineTo(cx + 2, ey + 4); g.lineTo(cx + 14, ey - 3); g.stroke(); g.fillStyle = '#f2c94c'; g.beginPath(); g.ellipse(cx + 22, gy - 4, 16, 5, 0, 0, TAU); g.fill(); }
+  label(g, T > drop ? (broke ? '깨짐!' : '무사!') : '', cx, ey - 36, {size: 18, weight: 700, color: broke ? C.hot : C.bio});
+  const rx = S.w * .72; label(g, `운동량 변화량 = ${dp().toFixed(2)} kg·m/s`, rx, S.h * .3, {size: 14, weight: 700}); label(g, `충돌 시간 ≈ ${(dtC() * 1000).toFixed(0)} ms`, rx, S.h * .3 + 26, {size: 13}); label(g, `평균 힘 = ${dp().toFixed(2)} ÷ ${dtC()} = ${Favg().toFixed(0)} N`, rx, S.h * .3 + 52, {size: 13, color: C.hot, weight: 700}); label(g, '(달걀이 버티는 힘: 약 25 N으로 가정)', rx, S.h * .3 + 76, {size: 11, color: C.muted}); }
+/* ===== 3. 안전장치 ===== */
+function crash(){ const v = st.cv / 3.6, m = 70, carT = st.crumple ? .1 : .04, extra = (st.belt ? .05 : 0) + (st.bag ? .06 : 0), tBody = st.belt || st.bag ? carT + extra : .012; const F = m * v / tBody; return {v, m, p: m * v, tBody, F, g: F / m / 9.8}; }
+function drawSafety(){ const g = S.g, gy = S.h * .72, wall = S.w * .8, R = crash(), T = st.t, carL = 170, approach = .6;
+  g.fillStyle = '#ccc'; g.fillRect(0, gy, S.w, 8); g.fillStyle = '#6a6f78'; g.fillRect(wall, gy - 130, 30, 138); label(g, '벽', wall + 15, gy - 140, {size: 11});
+  const squash = T > approach ? Math.min(st.crumple ? 46 : 12, (T - approach) * 600) : 0, front = T < approach ? wall - 40 - (approach - T) * 600 : wall; const x0 = front - carL + squash;
+  g.fillStyle = '#4a7fd6'; g.beginPath(); g.moveTo(x0, gy - 10); g.lineTo(front, gy - 10); g.lineTo(front, gy - 46 + squash * .3); g.lineTo(x0 + carL * .7, gy - 50); g.lineTo(x0 + carL * .55, gy - 82); g.lineTo(x0 + carL * .22, gy - 82); g.lineTo(x0 + carL * .1, gy - 50); g.lineTo(x0, gy - 48); g.closePath(); g.fill();
+  if (squash) { g.strokeStyle = '#2a4a86'; g.lineWidth = 2; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(front - i * 8, gy - 12); g.lineTo(front - i * 8 - 4, gy - 44); g.stroke(); } }
+  g.fillStyle = '#222'; [x0 + 30, x0 + carL - 34].forEach(x => { g.beginPath(); g.arc(x, gy - 8, 13, 0, TAU); g.fill(); });
+  // 탑승자
+  const lean = T > approach ? Math.min(st.belt ? 18 : 60, (T - approach) * (st.belt ? 200 : 500)) : 0, hx = x0 + carL * .42 + lean, hy = gy - 70; g.fillStyle = '#f2c094'; g.beginPath(); g.arc(hx, hy, 9, 0, TAU); g.fill(); g.strokeStyle = '#555'; g.lineWidth = 4; g.beginPath(); g.moveTo(hx - 4, hy + 8); g.lineTo(x0 + carL * .36, gy - 30); g.stroke();
+  if (st.belt) { g.strokeStyle = '#e0a400'; g.lineWidth = 3; g.beginPath(); g.moveTo(x0 + carL * .32, gy - 60); g.lineTo(x0 + carL * .42, gy - 30); g.stroke(); }
+  if (st.bag && T > approach + .02) { g.fillStyle = 'rgba(255,255,255,.95)'; g.strokeStyle = '#aaa'; g.beginPath(); g.ellipse(x0 + carL * .56, gy - 66, 14, 16, 0, 0, TAU); g.fill(); g.stroke(); }
+  if (!st.belt && !st.bag && T > approach + .1) label(g, '💥', hx + 6, hy - 6, {size: 22});
+  const rx = S.w * .32; label(g, `탑승자가 멈추는 데 걸린 시간 ≈ ${(R.tBody * 1000).toFixed(0)} ms`, rx, 28, {size: 13, weight: 700}); label(g, `탑승자가 받는 평균 힘 ≈ ${(R.F / 1000).toFixed(1)} kN (몸무게의 약 ${R.g.toFixed(0)}배)`, rx, 52, {size: 13, weight: 700, color: R.g > 60 ? C.hot : R.g > 30 ? '#c08a00' : C.bio}); }
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'fall') { const tl = tland(), half = G.w / 2; const m1 = axes(G, {x: [0, 3, .5, '시간 (s)'], y: [0, 30, 10, '속력 (m/s)']}, {R: half + 8}); line(G, [[0, st.vx], [tl, st.vx]], m1, C.phy, 2.5); line(G, [[0, 0], [tl, g9 * tl]], m1, C.hot, 2.5); label(g, '수평 속도 (일정)', m1.X(1.5), m1.Y(st.vx) - 10, {size: 10, color: C.phy}); label(g, '연직 속도 (9.8 m/s씩 증가)', m1.X(1.2), m1.Y(18), {size: 10, color: C.hot});
+    const m2 = axes(G, {x: [0, 40, 10, '수평 거리 (m)'], y: [0, 45, 15, '높이 (m)']}, {L: half + 48, keep: true}); const P = []; for (let t = 0; t <= tl; t += .02) P.push([st.vx * t, st.h0 - .5 * g9 * t * t]); line(G, P, m2, C.phy, 2.5); line(G, [[0, st.h0], [0, 0]], m2, C.hot, 2.5); }
+  else if (st.mode === 'impulse') { const m = axes(G, {x: [0, 120, 20, '시간 (ms)'], y: [0, 400, 100, '힘 (N)']}); Object.keys(SURF).forEach(k => { const dt = SURF[k][1], Fp = dp() / dt * 1.5708 / 1.0, P = []; for (let i = 0; i <= 60; i++) { const tt = i / 60 * dt; P.push([20 + tt * 1000, Math.min(400, dp() / dt * Math.PI / 2 * Math.sin(Math.PI * tt / dt))]); } line(G, P, m, k === st.surf ? C.hot : C.line, k === st.surf ? 2.8 : 1.4); label(g, SURF[k][0], m.X(20 + dt * 1000) + 6, m.Y(Math.min(380, dp() / dt * 1.4)), {size: 10, color: k === st.surf ? C.hot : C.muted, align: 'left'}); }); label(g, '세 곡선 아래 넓이(충격량)는 모두 같다', m.X(70), m.Y(360), {size: 11, color: C.muted}); }
+  else { const m = axes(G, {x: [0, 200, 40, '충돌 후 시간 (ms)'], y: [0, 100, 20, '탑승자 감속도 (g)']}); const R = crash(), P = []; for (let i = 0; i <= 80; i++) { const tt = i / 80 * R.tBody; P.push([tt * 1000, Math.min(100, R.g * Math.PI / 2 * Math.sin(Math.PI * tt / R.tBody))]); } line(G, P, m, C.hot, 2.5); line(G, [[0, 60], [200, 60]], m, C.muted, 1, [4, 4]); label(g, '위험 수준(모형)', m.X(170), m.Y(64), {size: 10, color: C.muted}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
+  if (st.mode === 'fall') { const tl = tland(); s.innerHTML = `<div><b>${tl.toFixed(2)} s</b><span>착지 시간 (두 공 같음)</span></div><div><b>${(st.vx * tl).toFixed(1)} m</b><span>수평 도달 거리</span></div><div><b>${(g9 * tl).toFixed(1)} m/s</b><span>착지 순간 연직 속력</span></div>`; $('explain').innerHTML = '지구 표면 근처의 물체는 <b>중력</b>을 받아 연직 아래로 1초마다 9.8 m/s씩 빨라져요. 수평으로 던진 물체는 수평 방향으로 힘을 받지 않아 <b>등속 운동</b>, 연직 방향으로는 <b>자유 낙하</b>를 해요.'; $('tip').textContent = '높이 h에서 떨어지는 시간 t = √(2h/g) — 수평 속력과 질량에 관계없어요.';
+    th.innerHTML = '<tr><th>시간 (s)</th><th>수평 거리 (m)</th><th>낙하 거리 (m)</th></tr>'; const r = []; for (let t = 0; t <= tl + 1e-9; t += .5) r.push(`<tr><td>${t.toFixed(1)}</td><td>${(st.vx * t).toFixed(1)}</td><td>${(.5 * g9 * t * t).toFixed(1)}</td></tr>`); tb.innerHTML = r.join(''); $('tTitle').textContent = '수평 방향과 연직 방향의 운동'; $('gTitle').textContent = '속도 성분과 운동 경로'; $('gSub').textContent = '수평 성분은 일정, 연직 성분은 일정하게 증가'; }
+  else if (st.mode === 'impulse') { s.innerHTML = `<div><b>${(st.m * st.v0).toFixed(2)}</b><span>충돌 전 운동량 (kg·m/s)</span></div><div><b>${dp().toFixed(2)} N·s</b><span>충격량</span></div><div><b>${Favg().toFixed(0)} N</b><span>평균 힘</span></div>`; $('explain').innerHTML = '<b>운동량</b> = 질량 × 속도. <b>충격량</b> = 힘 × 힘이 작용한 시간 = 운동량의 변화량. 운동량 변화량이 같을 때 <b>충돌 시간을 길게 하면 받는 힘이 작아져요</b>.'; $('tip').textContent = '힘–시간 그래프 아래의 넓이 = 충격량. 곡선이 낮고 넓을수록 충격이 완화돼요.';
+    th.innerHTML = '<tr><th>바닥</th><th>충돌 시간</th><th>평균 힘</th><th>결과</th></tr>'; tb.innerHTML = Object.keys(SURF).map(k => { const F = dp() / SURF[k][1]; return `<tr><td>${SURF[k][0]}</td><td>${(SURF[k][1] * 1000).toFixed(0)} ms</td><td>${F.toFixed(0)} N</td><td>${F > 25 ? '깨짐' : '무사'}</td></tr>`; }).join(''); $('tTitle').textContent = '바닥에 따른 충격 비교'; $('gTitle').textContent = '힘–시간 그래프'; $('gSub').textContent = ''; }
+  else { const R = crash(); s.innerHTML = `<div><b>${R.p.toFixed(0)} kg·m/s</b><span>탑승자 운동량 (70 kg)</span></div><div><b>${(R.tBody * 1000).toFixed(0)} ms</b><span>멈추는 시간</span></div><div><b>${R.g.toFixed(0)} g</b><span>평균 감속도</span></div>`; $('explain').innerHTML = '충돌할 때 탑승자의 운동량 변화량은 속력에 따라 정해져요. 안전띠·에어백·찌그러지는 차체는 모두 <b>멈추는 시간을 늘려</b> 탑승자가 받는 힘을 줄여요.'; $('tip').textContent = '속력이 2배가 되면 운동량은 2배, 운동 에너지는 4배! 과속이 위험한 까닭이에요.';
+    th.innerHTML = '<tr><th>안전장치</th><th>원리</th></tr>'; tb.innerHTML = [['안전띠', '몸이 앞으로 튀어 나가지 않게 하고, 조금 늘어나며 멈추는 시간을 늘림'], ['에어백', '부풀어 머리·가슴이 멈추는 시간을 늘리고 힘을 넓은 면적에 분산'], ['찌그러지는 차체', '차체가 변형되며 충돌 시간을 늘리고 에너지를 흡수'], ['헬멧·보호대', '충격 흡수 소재로 충돌 시간을 늘림']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = '생활 속 안전장치'; $('gTitle').textContent = '탑승자의 감속도 (모형)'; $('gSub').textContent = '안전장치를 끄고 켜며 비교해 보세요'; } }
+const bind = (id, k, f) => { $(id).oninput = e => { st[k] = +e.target.value; $(id + 'Out').textContent = f(st[k]); st.t = 0; st.run = false; render(); }; };
+bind('vx', 'vx', v => v + ' m/s'); bind('h0', 'h0', v => v + ' m'); bind('mass', 'm', v => v + ' kg'); bind('v0', 'v0', v => v + ' m/s'); bind('cv', 'cv', v => v + ' km/h');
+Kit.seg($('surfSeg'), 'surf', v => { st.surf = v; st.t = 0; st.run = false; render(); })('hard');
+['belt', 'bag', 'crumple'].forEach(k => $(k).onchange = e => { st[k] = e.target.checked; st.t = 0; st.run = false; render(); });
+$('go').onclick = () => { st.t = 0; st.run = true; };
+Kit.tabs(m => { st.mode = m; st.t = 0; st.run = false; render(); }, ['fall', 'impulse', 'safety']);
+Kit.loop(dt => { if (st.run) { st.t += dt * (st.mode === 'safety' ? .5 : 1); const end = st.mode === 'fall' ? tland() : st.mode === 'impulse' ? 1.2 : 1.2; if (st.t > end + .3) st.run = false; } }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({fall: drawFall, impulse: drawImpulse, safety: drawSafety})[st.mode](); drawGraph(); });
+})();
+</script>
+</body>
+</html>
