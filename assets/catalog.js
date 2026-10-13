@@ -46,7 +46,10 @@ window.CATALOG = [
     {kind:'sim', title:'1차시 빛의 반사와 굴절', href:'g2/light/sim.html#refl'}, {kind:'sim', title:'2차시 거울과 렌즈에 의한 상', href:'g2/light/sim.html#image'},
     {kind:'sim', title:'3차시 빛의 합성과 물체의 색', href:'g2/light/sim.html#color'}, {kind:'sim', title:'4차시 파동과 소리 (소리 듣기)', href:'g2/light/sim.html#wave'},
     {kind:'ws', title:'학습지 1~4차시 (8쪽)', href:'g2/light/worksheet.html'} ]},
-  { no:11, area:'chem', title:'물질의 구성', code:'9과11', items:[{kind:'sim', title:'원자 모형과 이온 만들기'}]},
+  { no:11, area:'chem', title:'물질의 구성', code:'9과11', items:[
+    {kind:'sim', title:'1차시 원소와 화합물 (분자 만들기·물의 전기 분해)', href:'g2/atom/sim.html#comp'}, {kind:'sim', title:'2차시 원자의 구조', href:'g2/atom/sim.html#atom'},
+    {kind:'sim', title:'3차시 주기율표와 성질이 비슷한 원소', href:'g2/atom/sim.html#table'}, {kind:'sim', title:'4차시 원자·분자·이온', href:'g2/atom/sim.html#ion'},
+    {kind:'ws', title:'학습지 1~4차시 (8쪽)', href:'g2/atom/worksheet.html'} ]},
   { no:12, area:'bio', title:'식물과 에너지', code:'9과12', items:[{kind:'sim', title:'광합성에 영향을 주는 요인'}]},
   { no:13, area:'bio', title:'동물과 에너지', code:'9과13', items:[{kind:'sim', title:'소화·순환·호흡·배설 연결 지도'}]},
   { no:14, area:'phy', title:'전기와 자기', code:'9과14', items:[{kind:'sim', title:'전압·전류·저항 회로 실험'}, {kind:'sim', title:'전동기의 원리'}]},

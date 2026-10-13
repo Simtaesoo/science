@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>원자 공방 · 중2 물질의 구성</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+<style>.pal{display:flex;gap:6px;flex-wrap:wrap}.pal .btn{font-family:var(--f-mono);font-weight:600;min-width:44px;justify-content:center}</style>
+</head>
+<body data-root="../../" class="area-chem">
+<div class="wrap">
+  <nav class="topbar" data-topbar="2학년|11 물질의 구성" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 2 · 11 물질의 구성 <span class="code">9과11-01</span><span class="code">9과11-02</span><span class="code">9과11-03</span><span class="code">9과11-04</span></div>
+      <h1>원자 공방</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="comp">1. 원소와 화합물</button>
+      <button type="button" data-mode="atom">2. 원자의 구조</button>
+      <button type="button" data-mode="table">3. 주기율표</button>
+      <button type="button" data-mode="ion">4. 이온</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="실험 화면">
+      <div class="canvas-box"><canvas id="scene" aria-label="원자와 분자 모형"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <div class="field" data-only="comp"><div class="seg" id="cpSeg"><button type="button" data-cp="build">분자 만들기</button><button type="button" data-cp="elec">물의 전기 분해</button></div></div>
+        <div class="field pal" data-only="comp" id="pal"></div>
+        <button class="btn" type="button" id="clearMol" data-only="comp">비우기</button>
+        <button class="btn" type="button" id="power" data-only="comp ion">전원 켜기</button>
+        <div class="field pal" data-only="atom">
+          <span>양성자</span><button class="btn" type="button" data-pa="p+">+</button><button class="btn" type="button" data-pa="p-">−</button>
+          <span>중성자</span><button class="btn" type="button" data-pa="n+">+</button><button class="btn" type="button" data-pa="n-">−</button>
+          <span>전자</span><button class="btn" type="button" data-pa="e+">+</button><button class="btn" type="button" data-pa="e-">−</button></div>
+        <div class="field" data-only="table"><div class="seg" id="grpSeg"><button type="button" data-grp="0">전체</button><button type="button" data-grp="1">1족</button><button type="button" data-grp="17">17족</button><button type="button" data-grp="18">18족</button></div></div>
+        <button class="btn" type="button" id="react" data-only="table">물에 넣어 보기</button>
+        <div class="field" data-only="ion"><div class="seg" id="ionSeg"><button type="button" data-io="make">이온 만들기</button><button type="button" data-io="move">이온의 이동</button></div></div>
+        <div class="field" data-only="ion" id="ionEl">원소 <select id="ionSel"><option>Na</option><option>K</option><option>Mg</option><option>Ca</option><option>Al</option><option>Cl</option><option>F</option><option>O</option><option>S</option></select>
+          <button class="btn" type="button" id="eLose">전자 잃기</button><button class="btn" type="button" id="eGain">전자 얻기</button></div>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">정리</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>물은 왜 원소가 아니라 화합물일까?</summary>
+        <p>물을 전기 분해하면 수소와 산소라는 두 가지 원소로 나뉘기 때문입니다. 원소는 더 이상 다른 물질로 분해되지 않는 기본 성분입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>원자는 (+)전하를 띤 양성자가 있는데 왜 전기를 띠지 않을까?</summary>
+        <p>원자 속 양성자의 (+)전하량과 전자의 (−)전하량이 같아 전체적으로 전기적으로 중성이기 때문입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>네온사인에 쓰는 네온은 왜 다른 물질과 잘 반응하지 않을까?</summary>
+        <p>네온은 18족 원소로, 18족 원소들은 매우 안정하여 다른 물질과 거의 반응하지 않습니다. 자세한 원리는 고등학교에서 배웁니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="원자 모형은 이해를 돕기 위해 단순하게 그린 것입니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+const EL = [null,
+  ['H','수소',1,1],['He','헬륨',1,18],['Li','리튬',2,1],['Be','베릴륨',2,2],['B','붕소',2,13],['C','탄소',2,14],['N','질소',2,15],['O','산소',2,16],['F','플루오린',2,17],['Ne','네온',2,18],
+  ['Na','나트륨',3,1],['Mg','마그네슘',3,2],['Al','알루미늄',3,13],['Si','규소',3,14],['P','인',3,15],['S','황',3,16],['Cl','염소',3,17],['Ar','아르곤',3,18],['K','칼륨',4,1],['Ca','칼슘',4,2]];
+const zOf = sym => EL.findIndex(e => e && e[0] === sym);
+const ACOL = {H:'#f2f4f7', O:'#d2412f', C:'#3a3f46', N:'#3f6fd8', Cl:'#4caf50', Na:'#9b6ad6'};
+const st = {mode:'comp', t:0, cp:'build', mol:{H:0, O:0, C:0, N:0, Cl:0, Na:0}, power:false, elecT:0, p:6, n:6, e:6, grp:0, sel:11, react:null, io:'make', ionEl:'Na', dE:0, mvT:0};
+
+/* ===== 1. 원소와 화합물 ===== */
+const RECIPES = [
+  [{H:2}, 'H₂', '수소', '원소'], [{O:2}, 'O₂', '산소', '원소'], [{N:2}, 'N₂', '질소', '원소'], [{Cl:2}, 'Cl₂', '염소', '원소'],
+  [{H:2, O:1}, 'H₂O', '물', '화합물'], [{C:1, O:2}, 'CO₂', '이산화 탄소', '화합물'], [{C:1, O:1}, 'CO', '일산화 탄소', '화합물'],
+  [{N:1, H:3}, 'NH₃', '암모니아', '화합물'], [{C:1, H:4}, 'CH₄', '메테인', '화합물'], [{H:2, O:2}, 'H₂O₂', '과산화 수소', '화합물'],
+  [{H:1, Cl:1}, 'HCl', '염화 수소', '화합물'], [{Na:1, Cl:1}, 'NaCl', '염화 나트륨', '화합물 (이온으로 이루어짐)']
+];
+function matchMol(){ return RECIPES.find(([r]) => Object.keys(st.mol).every(k => (r[k] || 0) === st.mol[k])); }
+function drawBuild(){
+  const g = S.g, atoms = []; Object.entries(st.mol).forEach(([k, n]) => { for (let i = 0; i < n; i++) atoms.push(k); });
+  const cx = S.w / 2, cy = S.h * .5, m = matchMol();
+  if (!atoms.length) { label(g, '아래 원소 기호 버튼을 눌러 원자를 모아 보세요', cx, cy, {color: C.muted}); return; }
+  // 가운데 원자 하나에 나머지를 둘러 붙인다 (단순 모형)
+  const center = atoms.find(a => a !== 'H') || atoms[0], rest = atoms.slice(); rest.splice(rest.indexOf(center), 1);
+  const R = 34, pos = [[cx, cy, center]];
+  rest.forEach((a, i) => { const ang = -Math.PI / 2 + i * TAU / Math.max(rest.length, 2) + (rest.length === 2 && center === 'O' ? .5 : 0); pos.push([cx + Math.cos(ang) * R * 1.5, cy + Math.sin(ang) * R * 1.5, a]); });
+  pos.slice(1).forEach(([x, y]) => { g.strokeStyle = C.line; g.lineWidth = 6; g.beginPath(); g.moveTo(cx, cy); g.lineTo(x, y); g.stroke(); });
+  pos.forEach(([x, y, a], i) => { const r = a === 'H' ? 20 : 30; g.fillStyle = ACOL[a]; g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill(); g.stroke(); label(g, a, x, y, {weight: 700, color: a === 'H' ? '#16202a' : '#fff'}); });
+  label(g, m ? `${m[2]} (${m[1]}) · ${m[3]}` : '아직 알려진 물질이 아니에요', cx, 24, {weight: 700, size: 16, color: m ? C.chem : C.muted});
+}
+function drawElec(){
+  const g = S.g, cx = S.w / 2, top = 40, w = 220, h = S.h - 110, k = st.elecT;
+  g.fillStyle = 'rgba(80,150,230,.25)'; g.fillRect(cx - w / 2, top + h * .35, w, h * .65);
+  g.strokeStyle = C.ink; g.lineWidth = 2; g.strokeRect(cx - w / 2, top + h * .35, w, h * .65);
+  [[-1, '(−)극', 'H₂ (수소)', 2], [1, '(+)극', 'O₂ (산소)', 1]].forEach(([s, n, gas, r]) => {
+    const tx = cx + s * w * .25, tw = 36, th = h * .75, ty = top;
+    const gasH = Math.min(th * .9, k * 6 * r);
+    g.fillStyle = 'rgba(80,150,230,.25)'; g.fillRect(tx - tw / 2, ty + gasH, tw, th - gasH); g.strokeStyle = C.ink; g.strokeRect(tx - tw / 2, ty, tw, th);
+    if (st.power) for (let i = 0; i < 6 * r; i++) { const by = ty + th - ((st.t * 70 * (1 + i % 3) + i * 23) % (th - gasH)); g.strokeStyle = C.muted; g.lineWidth = 1; g.beginPath(); g.arc(tx - 8 + (i * 7) % 16, by, 2.5, 0, TAU); g.stroke(); }
+    g.fillStyle = C.ink; g.fillRect(tx - 3, ty + th - 6, 6, 40);
+    label(g, n, tx, ty + th + 50, {size: 12, weight: 600}); label(g, gas, tx, ty - 12, {size: 12, color: C.chem, weight: 700});
+  });
+  label(g, st.power ? '물 → 수소 + 산소 (부피비 약 2 : 1)' : '[전원 켜기]를 누르세요 (전기가 잘 통하도록 물에 수산화 나트륨을 조금 녹임)', cx, S.h - 14, {size: 12});
+}
+
+/* ===== 2. 원자의 구조 ===== */
+function drawAtom(cx, cy, p, n, e, sc){
+  const g = S.g, nucR = (6 + Math.sqrt(p + n) * 4) * sc;
+  const shells = [2, 8, 8, 2]; let left = e;
+  shells.forEach((cap, i) => { const r = nucR + (28 + i * 34) * sc; const k = Math.min(cap, left); left -= k; if (k <= 0 && i > 0 && left <= 0) return;
+    g.strokeStyle = C.line; g.lineWidth = 1; g.beginPath(); g.arc(cx, cy, r, 0, TAU); g.stroke();
+    for (let j = 0; j < k; j++) { const a = j / cap * TAU + st.t * (0.6 - i * .12); g.fillStyle = C.phy; g.beginPath(); g.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 6 * sc, 0, TAU); g.fill(); g.fillStyle = '#fff'; g.font = font(9 * sc, 700); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('−', cx + Math.cos(a) * r, cy + Math.sin(a) * r); } });
+  const parts = []; for (let i = 0; i < p; i++) parts.push('p'); for (let i = 0; i < n; i++) parts.push('n');
+  parts.sort((a, b) => ((a.charCodeAt(0) * 7 + parts.length) % 3) - 1);
+  parts.forEach((t, i) => { const a = i * 2.4, r = Math.sqrt(i) * 5.2 * sc; const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+    g.fillStyle = t === 'p' ? C.hot : C.muted; g.beginPath(); g.arc(x, y, 6 * sc, 0, TAU); g.fill(); g.strokeStyle = C.surface; g.lineWidth = 1; g.stroke();
+    if (t === 'p') { g.fillStyle = '#fff'; g.font = font(9 * sc, 700); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('+', x, y); } });
+}
+function drawAtomTab(){
+  const g = S.g, sc = Math.min(S.w, S.h) / 420;
+  drawAtom(S.w * .42, S.h * .5, st.p, st.n, st.e, sc);
+  const z = st.p, el = EL[z], q = st.p - st.e;
+  label(g, el ? `${el[1]} (${el[0]})` : st.p === 0 ? '양성자가 없음' : '이 실험실에서는 20번까지', S.w * .82, S.h * .3, {weight: 700, size: 18, color: C.chem});
+  label(g, q === 0 ? '전기적으로 중성' : q > 0 ? `${q}+ 전하 (양이온)` : `${-q}− 전하 (음이온)`, S.w * .82, S.h * .3 + 28, {weight: 600, color: q === 0 ? C.ink : q > 0 ? C.hot : C.phy});
+  label(g, '빨강: 양성자(+) · 회색: 중성자 · 파랑: 전자(−)', S.w / 2, S.h - 12, {size: 11, color: C.muted});
+}
+
+/* ===== 3. 주기율표 ===== */
+let cells = [];
+function drawTable(){
+  const g = S.g; cells = [];
+  if (st.react) return drawReact();
+  const cw = Math.min((S.w - 30) / 18, 46), ch = cw * 1.15, x0 = (S.w - cw * 18) / 2, y0 = 30;
+  for (let z = 1; z <= 20; z++) {
+    const [sym, nm, per, grp] = EL[z], x = x0 + (grp - 1) * cw, y = y0 + (per - 1) * ch;
+    const dim = st.grp && grp !== st.grp, col = grp === 1 && z > 1 ? '#f6d6c9' : grp === 2 ? '#f8e6c9' : grp === 17 ? '#d8f0d8' : grp === 18 ? '#dbe6f8' : '#eef0f3';
+    g.globalAlpha = dim ? .25 : 1; g.fillStyle = col; g.fillRect(x + 1, y + 1, cw - 2, ch - 2); g.strokeStyle = z === st.sel ? C.ink : C.line; g.lineWidth = z === st.sel ? 2.5 : 1; g.strokeRect(x + 1, y + 1, cw - 2, ch - 2);
+    g.fillStyle = '#16202a'; g.font = font(Math.max(8, cw * .2)); g.textAlign = 'left'; g.textBaseline = 'top'; g.fillText(z, x + 4, y + 3);
+    g.font = font(Math.max(11, cw * .36), 700); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(sym, x + cw / 2, y + ch * .55);
+    g.globalAlpha = 1; cells.push([z, x, y, cw, ch]);
+  }
+  for (let k = 1; k <= 18; k++) label(g, k, x0 + (k - .5) * cw, y0 - 10, {size: 9, color: C.muted});
+  for (let k = 1; k <= 4; k++) label(g, k, x0 - 10, y0 + (k - .5) * ch, {size: 9, color: C.muted});
+  // 고른 원소의 원자 모형
+  const z = st.sel; drawAtom(S.w * .5, y0 + ch * 4 + (S.h - y0 - ch * 4) / 2, z, z === 1 ? 0 : Math.round(z * 1.05), z, Math.min(S.w, S.h) / 700);
+  label(g, '족: 세로줄 (1~18족) · 주기: 가로줄 · 원소를 눌러 보세요', S.w / 2, S.h - 10, {size: 11, color: C.muted});
+}
+$('scene').addEventListener('click', e => { if (st.mode !== 'table' || st.react) return; const r = $('scene').getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  const c = cells.find(([z, cx, cy, w, h]) => x > cx && x < cx + w && y > cy && y < cy + h); if (c) st.sel = c[0]; });
+function drawReact(){
+  const g = S.g, list = st.grp === 18 ? ['He', 'Ne', 'Ar'] : ['Li', 'Na', 'K'], vig = st.grp === 18 ? [0, 0, 0] : [1, 2.2, 3.6];
+  list.forEach((sym, i) => { const cx = S.w * (0.2 + i * .3), top = 60, w = 120, h = S.h - 140;
+    g.fillStyle = 'rgba(80,150,230,.25)'; g.fillRect(cx - w / 2, top + h * .3, w, h * .7); g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - w / 2, top); g.lineTo(cx - w / 2, top + h); g.lineTo(cx + w / 2, top + h); g.lineTo(cx + w / 2, top); g.stroke();
+    const v = vig[i], sx = cx + Math.sin(st.t * 3 * v) * 20 * v / 3, sy = top + h * .3 - 4;
+    if (st.grp !== 18) { g.fillStyle = '#c9ccd2'; g.beginPath(); g.ellipse(sx, sy, 10, 6, 0, 0, TAU); g.fill();
+      for (let b = 0; b < v * 8; b++) { const by = sy - ((st.t * 60 * v + b * 13) % 50); g.strokeStyle = C.muted; g.lineWidth = 1; g.beginPath(); g.arc(sx - 10 + (b * 7) % 20, by, 2, 0, TAU); g.stroke(); }
+      if (v > 3) { g.fillStyle = 'rgba(200,120,255,.6)'; g.beginPath(); g.arc(sx, sy - 6, 9 + Math.sin(st.t * 20) * 3, 0, TAU); g.fill(); } }
+    else { g.fillStyle = 'rgba(200,200,255,.25)'; g.fillRect(cx - w / 2 + 4, top + 4, w - 8, h * .3 - 8); label(g, '기체', cx, top + h * .15, {size: 11, color: C.muted}); }
+    label(g, `${EL[zOf(sym)][1]} (${sym})`, cx, top + h + 22, {weight: 700}); label(g, st.grp === 18 ? '반응 없음' : ['천천히 반응', '격렬하게 반응', '매우 격렬 (불꽃)'][i], cx, top + h + 42, {size: 12, color: st.grp === 18 ? C.muted : C.hot}); });
+  label(g, st.grp === 18 ? '18족 원소는 매우 안정하여 다른 물질과 거의 반응하지 않는다' : '1족 원소는 모두 물과 반응하여 수소 기체를 낸다 (아래 주기로 갈수록 격렬)', S.w / 2, 26, {weight: 700, size: 13});
+}
+
+/* ===== 4. 이온 ===== */
+const IONQ = {Na:1, K:1, Mg:2, Ca:2, Al:3, Cl:-1, F:-1, O:-2, S:-2};
+function ionName(sym, q){ const nm = EL[zOf(sym)][1]; if (q === 0) return `${nm} 원자`; if (q > 0) return `${nm} 이온`; return {Cl:'염화 이온', F:'플루오린화 이온', O:'산화 이온', S:'황화 이온'}[sym] || nm + ' 이온'; }
+const sup = q => q === 0 ? '' : (Math.abs(q) > 1 ? Math.abs(q) : '') + (q > 0 ? '⁺' : '⁻');
+function drawIon(){
+  const g = S.g;
+  if (st.io === 'make') {
+    const z = zOf(st.ionEl), e = z - st.dE, q = z - e; const sc = Math.min(S.w, S.h) / 520;
+    drawAtom(S.w * .4, S.h * .5, z, Math.round(z * 1.05), e, sc);
+    label(g, `${st.ionEl}${sup(q)}`, S.w * .8, S.h * .35, {weight: 700, size: 30, color: q > 0 ? C.hot : q < 0 ? C.phy : C.ink});
+    label(g, ionName(st.ionEl, q), S.w * .8, S.h * .35 + 34, {weight: 600});
+    label(g, q === IONQ[st.ionEl] ? '이 원소가 잘 만드는 이온입니다' : '', S.w * .8, S.h * .35 + 58, {size: 12, color: C.bio});
+    return;
+  }
+  // 이온의 이동: 질산 칼륨 용액을 적신 거름종이에 황산 구리(Ⅱ)·과망가니즈산 칼륨 용액을 떨어뜨림
+  const x0 = 40, x1 = S.w - 40, cy = S.h / 2, mid = S.w / 2, k = st.mvT;
+  g.fillStyle = '#f6f7f2'; g.fillRect(x0, cy - 60, x1 - x0, 120); g.strokeStyle = C.line; g.strokeRect(x0, cy - 60, x1 - x0, 120);
+  g.fillStyle = C.ink; g.fillRect(x0 - 14, cy - 30, 10, 60); g.fillRect(x1 + 4, cy - 30, 10, 60);
+  label(g, '(−)극', x0 - 9, cy - 44, {size: 12, weight: 700}); label(g, '(+)극', x1 + 9, cy - 44, {size: 12, weight: 700});
+  const cu = mid - 30 - k * 14, mn = mid + 30 + k * 14;
+  g.fillStyle = 'rgba(50,120,220,.75)'; g.beginPath(); g.ellipse(mid - 30 - k * 7, cy - 20, 12 + k * 7, 12, 0, 0, TAU); g.fill();
+  g.fillStyle = 'rgba(150,40,150,.75)'; g.beginPath(); g.ellipse(mid + 30 + k * 7, cy + 20, 12 + k * 7, 12, 0, 0, TAU); g.fill();
+  label(g, 'Cu²⁺ (파란색)', mid - 30 - k * 14, cy - 44, {size: 12, color: '#2a5fb0', weight: 700}); label(g, 'MnO₄⁻ (보라색)', mid + 30 + k * 14, cy + 48, {size: 12, color: '#962896', weight: 700});
+  label(g, st.power ? '전원이 연결되어 있음' : '[전원 켜기]를 누르세요', S.w / 2, 22, {weight: 700, color: st.power ? C.hot : C.muted});
+}
+
+/* ===== 그래프·표·설명 ===== */
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'comp') {
+    if (st.cp === 'elec') { const m = axes(G, {x: [0, 20, 5, '시간 (초)'], y: [0, 40, 10, '모인 기체 부피 (상대값)']}); line(G, [[0, 0], [st.elecT, st.elecT * 2]], m, C.phy); line(G, [[0, 0], [st.elecT, st.elecT]], m, C.hot); }
+    else { const m = axes(G, {x: [0, 6, 1, ''], y: [0, 4, 1, '원자 수']}, {L: 50}); Object.entries(st.mol).forEach(([k, n], i) => { g.fillStyle = ACOL[k]; g.strokeStyle = C.ink; g.fillRect(m.X(i + .2), m.Y(n), m.X(.6) - m.X(0), m.Y(0) - m.Y(n)); g.strokeRect(m.X(i + .2), m.Y(n), m.X(.6) - m.X(0), m.Y(0) - m.Y(n)); label(g, k, m.X(i + .5), m.T + m.h + 12, {size: 11, weight: 700}); }); }
+  } else if (st.mode === 'atom') { const m = axes(G, {x: [0, 3, 1, ''], y: [0, 20, 5, '개수']}); [['양성자', st.p, C.hot], ['중성자', st.n, C.muted], ['전자', st.e, C.phy]].forEach(([n, v, c], i) => { g.fillStyle = c; g.fillRect(m.X(i + .25), m.Y(v), m.X(.5) - m.X(0), m.Y(0) - m.Y(v)); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 11}); }); }
+  else if (st.mode === 'table') { const m = axes(G, {x: [1, 20, 1, '원자 번호'], y: [0, 20, 5, '양성자 수 = 전자 수']}); line(G, [[1, 1], [20, 20]], m, C.chem); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.sel), m.Y(st.sel), 6, 0, TAU); g.fill(); }
+  else { const m = axes(G, {x: [0, 9, 1, ''], y: [-3, 3, 1, '잘 만드는 이온의 전하']}, {L: 50}); Object.entries(IONQ).forEach(([k, q], i) => { g.fillStyle = q > 0 ? C.hot : C.phy; g.fillRect(m.X(i + .2), Math.min(m.Y(0), m.Y(q)), m.X(.6) - m.X(0), Math.abs(m.Y(q) - m.Y(0))); label(g, k, m.X(i + .5), m.Y(0) + (q > 0 ? 10 : -10), {size: 11, weight: 700}); }); }
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>'; $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
+function table(){
+  if (st.mode === 'comp') setTable('만들 수 있는 물질', ['화학식', '이름', '구분'], RECIPES.map(r => [r[1], r[2], r[3]]));
+  else if (st.mode === 'atom') setTable('원자를 이루는 입자', ['입자', '위치', '전하'], [['양성자', '원자핵', '(+)'], ['중성자', '원자핵', '없음'], ['전자', '원자핵 주위', '(−)']]);
+  else if (st.mode === 'table') setTable('성질이 비슷한 원소', ['족', '원소', '공통 성질'], [['1족 (수소 제외)', '리튬, 나트륨, 칼륨', '물과 반응하여 수소 기체 발생, 무른 금속'], ['17족', '플루오린, 염소', '다른 물질과 반응을 잘함'], ['18족', '헬륨, 네온, 아르곤', '매우 안정하여 거의 반응하지 않음']]);
+  else setTable('이온의 표현', ['이온', '이름', '만들어지는 과정'], [['Na⁺', '나트륨 이온', '전자 1개를 잃음'], ['Mg²⁺', '마그네슘 이온', '전자 2개를 잃음'], ['Cl⁻', '염화 이온', '전자 1개를 얻음'], ['O²⁻', '산화 이온', '전자 2개를 얻음'], ['Cu²⁺', '구리 이온', '전자 2개를 잃음']]);
+}
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'comp') {
+    if (st.cp === 'build') { const m = matchMol(); s = stat('화학식', m ? m[1] : '-') + stat('구분', m ? m[3].split(' ')[0] : '-');
+      e = '<b>원소</b>: 더 이상 다른 물질로 분해되지 않는 물질의 기본 성분. <b>화합물</b>: 두 가지 이상의 원소가 결합하여 만들어진 물질. <b>화학식</b>: 원소 기호와 숫자로 물질을 나타낸 식 (예: H₂O는 수소 원자 2개와 산소 원자 1개).';
+      t = 'H₂O₂(과산화 수소)는 H₂O와 같은 원소로 이루어졌지만 원자의 개수가 달라 전혀 다른 물질입니다.'; }
+    else { s = stat('(−)극 기체', '수소') + stat('(+)극 기체', '산소'); e = '<b>물의 전기 분해</b>: 물에 전류를 흘려 주면 (−)극에서 수소, (+)극에서 산소가 약 2 : 1의 부피비로 발생합니다. 물은 수소와 산소로 분해되므로 화합물입니다.'; t = '수소는 성냥불을 대면 "퍽" 소리를 내며 타고, 산소는 꺼져 가는 불씨를 다시 타게 합니다.'; }
+  } else if (st.mode === 'atom') { const el = EL[st.p], q = st.p - st.e;
+    s = stat('원소', el ? el[1] : '-') + stat('원자 번호', st.p) + stat('전체 전하', q === 0 ? '0' : (q > 0 ? '+' : '') + q);
+    e = '<b>원자</b>는 (+)전하를 띤 <b>원자핵</b>과 (−)전하를 띤 <b>전자</b>로 이루어지며, 원자핵은 <b>양성자</b>와 <b>중성자</b>로 이루어져 있습니다. 원소의 종류는 <b>양성자 수</b>에 따라 결정됩니다.';
+    t = '중성자 수를 바꿔도 원소의 종류는 바뀌지 않습니다. 양성자 수를 바꾸면 다른 원소가 됩니다.';
+  } else if (st.mode === 'table') { const el = EL[st.sel];
+    s = stat('원소', `${el[1]} (${el[0]})`) + stat('원자 번호', st.sel) + stat('족', el[3]) + stat('주기', el[2]);
+    e = '<b>주기율표</b>: 원소를 원자 번호(양성자 수) 순서로 배열하고, 성질이 비슷한 원소가 같은 세로줄(<b>족</b>)에 오도록 만든 표. 가로줄은 <b>주기</b>라고 합니다.';
+    t = st.grp ? '[물에 넣어 보기]로 같은 족 원소의 성질을 비교해 보세요.' : '1족, 17족, 18족 버튼을 눌러 같은 족 원소를 확인하세요.';
+  } else if (st.io === 'make') { const z = zOf(st.ionEl), q = st.dE;
+    s = stat('양성자', z, '개') + stat('전자', z - q, '개') + stat('이온', `${st.ionEl}${sup(q)}`);
+    e = '원자는 전기적으로 중성이지만, 전자를 <b>잃으면 양이온</b>(+), 전자를 <b>얻으면 음이온</b>(−)이 됩니다. 이온은 원소 기호 오른쪽 위에 잃거나 얻은 전자 수와 전하의 종류를 적어 나타냅니다.';
+    t = '금속 원소는 주로 양이온, 비금속 원소는 주로 음이온이 됩니다.';
+  } else { s = stat('Cu²⁺ 이동', '(−)극 쪽') + stat('MnO₄⁻ 이동', '(+)극 쪽');
+    e = '전원을 연결하면 양이온은 (−)극으로, 음이온은 (+)극으로 이동합니다. 이것으로 이온이 <b>전하를 띠고 있음</b>을 알 수 있습니다.';
+    t = '파란색은 구리 이온(Cu²⁺), 보라색은 과망가니즈산 이온(MnO₄⁻) 때문에 나타나는 색입니다.'; }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 조작 ===== */
+$('pal').innerHTML = Object.keys(st.mol).map(k => `<button class="btn" type="button" data-at="${k}">${k}</button>`).join('');
+$('pal').querySelectorAll('[data-at]').forEach(b => b.onclick = () => { const tot = Object.values(st.mol).reduce((a, c) => a + c, 0); if (tot < 6) st.mol[b.dataset.at]++; });
+$('clearMol').onclick = () => Object.keys(st.mol).forEach(k => st.mol[k] = 0);
+Kit.seg($('cpSeg'), 'cp', v => { st.cp = v; $('pal').hidden = v !== 'build'; $('clearMol').hidden = v !== 'build'; $('power').hidden = v !== 'elec'; st.elecT = 0; st.power = false; $('power').textContent = '전원 켜기'; $('gTitle').textContent = v === 'elec' ? '모인 기체의 부피 (파랑: 수소, 빨강: 산소)' : '모은 원자'; })('build');
+$('power').onclick = () => { st.power = !st.power; $('power').textContent = st.power ? '전원 끄기' : '전원 켜기'; };
+document.querySelectorAll('[data-pa]').forEach(b => b.onclick = () => { const [k, sgn] = [b.dataset.pa[0], b.dataset.pa[1]]; const d = sgn === '+' ? 1 : -1;
+  if (k === 'p') st.p = Math.max(1, Math.min(20, st.p + d)); if (k === 'n') st.n = Math.max(0, Math.min(24, st.n + d)); if (k === 'e') st.e = Math.max(0, Math.min(20, st.e + d)); });
+Kit.seg($('grpSeg'), 'grp', v => { st.grp = +v; st.react = null; $('react').hidden = !(+v === 1 || +v === 18); $('react').textContent = +v === 18 ? '반응성 비교하기' : '물에 넣어 보기'; })('0');
+$('react').onclick = () => { st.react = st.react ? null : st.grp; $('react').textContent = st.react ? '주기율표로 돌아가기' : '물에 넣어 보기'; };
+Kit.seg($('ionSeg'), 'io', v => { st.io = v; $('ionEl').hidden = v !== 'make'; $('power').hidden = v !== 'move'; st.mvT = 0; st.power = false; $('power').textContent = '전원 켜기'; })('make');
+$('ionSel').onchange = e => { st.ionEl = e.target.value; st.dE = 0; };
+$('eLose').onclick = () => { st.dE = Math.min(3, st.dE + 1); };
+$('eGain').onclick = () => { st.dE = Math.max(-3, st.dE - 1); };
+Kit.tabs(m => { st.mode = m; table(); st.power = false; $('power').textContent = '전원 켜기';
+  $('power').hidden = !((m === 'comp' && st.cp === 'elec') || (m === 'ion' && st.io === 'move'));
+  $('pal').hidden = !(m === 'comp' && st.cp === 'build'); $('clearMol').hidden = !(m === 'comp' && st.cp === 'build'); $('react').hidden = !(m === 'table' && (st.grp === 1 || st.grp === 18)); $('ionEl').hidden = !(m === 'ion' && st.io === 'make');
+  $('gTitle').textContent = {comp: '모은 원자', atom: '입자의 수', table: '원자 번호와 양성자 수', ion: '원소별로 잘 만드는 이온'}[m]; $('gSub').textContent = ''; }, ['comp', 'atom', 'table', 'ion']);
+Kit.loop(dt => { st.t += dt; if (st.power && st.mode === 'comp' && st.cp === 'elec') st.elecT = Math.min(20, st.elecT + dt); if (st.power && st.mode === 'ion') st.mvT = Math.min(14, st.mvT + dt); },
+  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h);
+    if (st.mode === 'comp') (st.cp === 'build' ? drawBuild : drawElec)(); else if (st.mode === 'atom') drawAtomTab(); else if (st.mode === 'table') drawTable(); else drawIon();
+    drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>
