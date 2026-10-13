@@ -31,7 +31,7 @@ window.CATALOG = [
   { no:7, area:'earth', title:'태양계', code:'9과07', items:[
     {kind:'sim', title:'1차시 태양계 천체와 행성의 분류', href:'g1/solar/sim.html#planets'}, {kind:'sim', title:'2차시 태양 활동과 지구', href:'g1/solar/sim.html#sun'},
     {kind:'sim', title:'3차시 지구의 자전과 공전 (일주·연주 운동)', href:'g1/solar/sim.html#rot'}, {kind:'sim', title:'4차시 달의 위상과 일식·월식', href:'g1/solar/sim.html#moon'},
-    {kind:'ws', title:'학습지 1~4차시 (8쪽)', href:'g1/solar/worksheet.html'} ]}
+    {kind:'app', title:'게임: 달 모양 탐정 (달의 위상)', href:'g1/solar/app-moon.html'}, {kind:'ws', title:'학습지 1~4차시 (8쪽)', href:'g1/solar/worksheet.html'} ]}
  ]},
  { id:'g2', grade:'2학년', book:'과학 2', units:[
   { no:8, area:'chem', title:'물질의 특성', code:'9과08', items:[
