@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>탐구 보고서 양식</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/worksheet.css">
+<script src="../assets/worksheet.js"></script>
+<style>
+.f{border:1pt solid var(--line);border-radius:2mm;padding:2mm 3mm;min-height:var(--h,14mm);outline:none;background:repeating-linear-gradient(transparent 0 6.6mm,var(--line) 6.6mm 6.8mm);line-height:6.8mm;font-size:10pt}
+.f:empty::before{content:attr(data-ph);color:#9aa5b0;font-size:9pt}
+.f:focus{border-color:var(--area)}
+.lab{font-size:9pt;font-weight:700;color:var(--area);margin-bottom:1mm}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm}
+table.ws td[contenteditable]{height:8mm;outline:none}
+.chk{display:grid;grid-template-columns:1fr auto auto auto;gap:0;font-size:9pt;border:.8pt solid var(--line);border-radius:2mm;overflow:hidden}
+.chk > *{padding:1.6mm 2.5mm;border-bottom:.6pt solid var(--line)}
+.chk .h{background:var(--soft);font-weight:700}
+.chk span.c{text-align:center;color:var(--muted)}
+.topic-in{font:inherit;font-size:19pt;font-weight:700;border:0;border-bottom:1pt dashed var(--line);width:100%;outline:none;padding:0;background:transparent;color:var(--ink)}
+@media print{.topic-in{border:0}.topic-in::placeholder{color:transparent}.f:empty::before{content:''}}
+</style>
+</head>
+<body class="area-gen">
+<div class="toolbar">
+  <span class="title">탐구 보고서 양식 (화면에서 바로 입력하거나 인쇄해서 쓰기)</span>
+  <a href="../index.html">목록</a><a href="rubric.html">평가 기준표</a>
+  <button type="button" id="clear">입력 지우기</button><button type="button" data-print>인쇄하기</button>
+</div>
+<main class="sheets">
+<section class="sheet"><div class="band"><div><div class="kicker">과학 탐구 보고서 · 1쪽 탐구 설계</div><input class="topic-in" id="topic" placeholder="탐구 주제를 적으세요" aria-label="탐구 주제"></div><div class="who"><span>학번</span><span class="l"></span><span>이름</span><span class="l"></span></div></div>
+<div class="grid3"><div><div class="lab">모둠원</div><div class="f" contenteditable data-ph="이름 (역할)" style="--h:14mm"></div></div><div><div class="lab">탐구 날짜</div><div class="f" contenteditable data-ph="년 월 일" style="--h:14mm"></div></div><div><div class="lab">관련 단원 · 시뮬레이션</div><div class="f" contenteditable data-ph="예: 물리학 03 전기와 자기" style="--h:14mm"></div></div></div>
+<div class="sec"><div class="sec-h"><span class="n">1</span>문제 인식</div><div class="f" contenteditable data-ph="무엇이 궁금한가? 관찰한 현상과 궁금증을 의문문으로 적는다." style="--h:20mm"></div></div>
+<div class="sec"><div class="sec-h"><span class="n">2</span>가설</div><div class="f" contenteditable data-ph="'~하면 ~할 것이다' 형태로, 근거(배운 개념)와 함께 적는다." style="--h:20mm"></div></div>
+<div class="sec"><div class="sec-h"><span class="n">3</span>변인 통제</div>
+<table class="ws"><tr><th style="width:24%">조작 변인<br><small>내가 바꾸는 것</small></th><th style="width:24%">종속 변인<br><small>측정하는 결과</small></th><th>통제 변인<br><small>같게 유지하는 것</small></th></tr><tr><td contenteditable style="height:16mm"></td><td contenteditable></td><td contenteditable></td></tr></table></div>
+<div class="sec"><div class="sec-h"><span class="n">4</span>준비물과 탐구 과정</div><div class="two"><div class="f" contenteditable data-ph="준비물 (시뮬레이션 주소 포함)" style="--h:40mm"></div><div class="f" contenteditable data-ph="① ② ③ … 순서대로, 다른 사람이 똑같이 따라 할 수 있게" style="--h:40mm"></div></div></div>
+<div class="sec"><div class="sec-h"><span class="n">5</span>안전 점검</div>
+<div class="chk"><span class="h">점검 항목</span><span class="h c">예</span><span class="h c">아니요</span><span class="h c">해당 없음</span>
+<span>보안경·실험복 등 보호 장구를 갖추었다.</span><span class="c">□</span><span class="c">□</span><span class="c">□</span>
+<span>사용하는 약품·기구의 위험성과 처리 방법을 확인했다.</span><span class="c">□</span><span class="c">□</span><span class="c">□</span>
+<span>전기·불·날카로운 기구 사용 규칙을 모둠원과 공유했다.</span><span class="c">□</span><span class="c">□</span><span class="c">□</span></div></div>
+<div class="pfoot"><span>중·고 과학 실험실 · 탐구 보고서</span><span data-page></span></div></section>
+<section class="sheet"><div class="band mini"><div><div class="kicker">과학 탐구 보고서 · 2쪽 결과와 결론</div><h1 id="topic2">탐구 결과와 결론</h1></div><div class="who"><span>학번</span><span class="l"></span><span>이름</span><span class="l"></span></div></div>
+<div class="sec"><div class="sec-h"><span class="n">6</span>측정 결과</div>
+<table class="ws"><tr><th contenteditable>조작 변인 ( 단위 )</th><th contenteditable></th><th contenteditable></th><th contenteditable></th><th contenteditable></th><th contenteditable></th></tr>
+<tr><td contenteditable>1회</td><td contenteditable></td><td contenteditable></td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
+<tr><td contenteditable>2회</td><td contenteditable></td><td contenteditable></td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
+<tr><td contenteditable>3회</td><td contenteditable></td><td contenteditable></td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr>
+<tr><th>평균</th><td contenteditable></td><td contenteditable></td><td contenteditable></td><td contenteditable></td><td contenteditable></td></tr></table></div>
+<div class="sec"><div class="sec-h"><span class="n">7</span>그래프와 해석</div><div class="two"><div><svg data-graph data-x="0,10,2,조작 변인 ( )" data-y="0,10,2,종속 변인 ( )"></svg><p style="margin:1mm 0 0;font-size:8.5pt;color:var(--muted)">축의 눈금과 단위를 알맞게 고쳐 쓰고, 점을 찍은 뒤 경향을 나타내는 선을 그린다.</p></div><div class="f" contenteditable data-ph="그래프에서 찾은 규칙: 조작 변인이 커질수록 종속 변인은 어떻게 변하는가? 비례·반비례 등 관계를 수치와 함께 쓴다." style="--h:56mm"></div></div></div>
+<div class="sec"><div class="sec-h"><span class="n">8</span>결론</div><div class="f" contenteditable data-ph="가설은 맞았는가? 결과를 근거로 결론을 쓰고, 배운 과학 개념으로 설명한다." style="--h:27mm"></div></div>
+<div class="sec"><div class="sec-h"><span class="n">9</span>평가와 더 나아가기</div><div class="two"><div class="f" contenteditable data-ph="오차의 원인과 개선 방법" style="--h:27mm"></div><div class="f" contenteditable data-ph="새롭게 생긴 질문, 일상생활과의 연결" style="--h:27mm"></div></div></div>
+<div class="sec"><div class="sec-h"><span class="n">10</span>스스로 점검</div>
+<div class="chk"><span class="h">나는…</span><span class="h c">잘함</span><span class="h c">보통</span><span class="h c">노력</span>
+<span>변인을 구분하고 하나만 바꾸어 실험했다.</span><span class="c">□</span><span class="c">□</span><span class="c">□</span>
+<span>3회 이상 측정하고 단위를 빠짐없이 적었다.</span><span class="c">□</span><span class="c">□</span><span class="c">□</span>
+<span>결론을 데이터와 과학 개념을 근거로 설명했다.</span><span class="c">□</span><span class="c">□</span><span class="c">□</span>
+<span>모둠 활동에서 맡은 역할을 성실히 수행했다.</span><span class="c">□</span><span class="c">□</span><span class="c">□</span></div></div>
+<div class="pfoot"><span>중·고 과학 실험실 · 탐구 보고서</span><span data-page></span></div></section>
+</main>
+<script>
+(() => {
+  const KEY = 'report-v1', topic = document.getElementById('topic'), t2 = document.getElementById('topic2'), q = new URLSearchParams(location.search).get('t');
+  const fields = [...document.querySelectorAll('[contenteditable]')];
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify({t: topic.value, f: fields.map(f => f.innerText)})); } catch (e) {} };
+  try { const d = JSON.parse(localStorage.getItem(KEY) || 'null'); if (d) { topic.value = d.t || ''; d.f.forEach((v, i) => { if (fields[i] && v) fields[i].innerText = v; }); } } catch (e) {}
+  if (q && !topic.value) topic.value = q;
+  const sync = () => { t2.textContent = topic.value ? topic.value + ' — 결과와 결론' : '탐구 결과와 결론'; };
+  topic.oninput = () => { sync(); save(); }; fields.forEach(f => f.addEventListener('input', save)); sync();
+  document.getElementById('clear').onclick = () => { if (!confirm('입력한 내용을 모두 지울까요?')) return; topic.value = ''; fields.forEach(f => { if (f.tagName === 'TD' && f.parentElement.rowIndex >= 1 && f.cellIndex === 0 && /회$/.test(f.innerText)) return; if (f.tagName === 'TH' && f.cellIndex === 0) { f.innerText = '조작 변인 ( 단위 )'; return; } f.innerText = ''; }); sync(); save(); };
+})();
+</script>
+</body>
+</html>

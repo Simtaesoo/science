@@ -39,6 +39,12 @@
 #grades{flex-wrap:wrap}
 .filter{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .filter label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.toolstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.toolstrip a{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-decoration:none;min-width:0}
+.toolstrip a:hover{border-color:var(--muted)}
+.toolstrip .ic{font-size:22px;flex:none}
+.toolstrip b{display:block;font-size:14px}
+.toolstrip span.d{display:block;font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body data-root="./">
@@ -51,6 +57,13 @@
     </div>
     <div class="progress" id="progress"></div>
   </section>
+
+  <nav class="toolstrip" aria-label="수업 도구">
+    <a href="tools/class.html"><span class="ic">⏱</span><span><b>수업 진행 도구</b><span class="d">타이머 · 발표자 뽑기 · 모둠 편성</span></span></a>
+    <a href="tools/report.html"><span class="ic">📝</span><span><b>탐구 보고서 양식</b><span class="d">화면 입력 · A4 인쇄 2쪽</span></span></a>
+    <a href="tools/rubric.html"><span class="ic">✅</span><span><b>수행평가 기준표</b><span class="d">루브릭 · 자기·동료 평가지</span></span></a>
+    <a href="quiz/bell.html?u=1"><span class="ic">🔔</span><span><b>퀴즈 배틀 · 골든벨</b><span class="d">50개 단원 446문항 (단원 카드에서 선택)</span></span></a>
+  </nav>
 
   <div class="filter">
     <div class="seg" role="group" aria-label="학년" id="grades"></div>
