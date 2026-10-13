@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>분류 탐정 · 중1 생물의 구성과 다양성</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<style>
+.yn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.clues{display:grid;gap:6px}
+.clue{display:flex;gap:8px;align-items:flex-start;text-align:left;background:var(--board-3);border:0;border-radius:10px;padding:8px 10px;color:var(--chalk);font:inherit;font-size:13px;cursor:pointer}
+.clue[disabled]{cursor:default;background:#3a5f54}
+.clue .k{font-size:18px}
+.q{font-size:16px;line-height:1.45}
+</style>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'key', title: '분류 탐정', unit: '중1 · 02 생물의 구성과 다양성', back: '../../index.html#g1', sim: 'sim.html#classify',
+  lead: '정체불명의 생물이 연구소에 도착했어요! <b>현미경·몸 구조·생활 방식</b>을 조사하고 <b>분류 열쇠</b>의 질문에 답해 5계 중 어디에 속하는지 밝혀 내세요.',
+  howto: ['오른쪽 <b>단서 카드</b>를 눌러 조사하세요. 단서 하나에 -5점이지만 틀리는 것보다 나아요.', '분류 열쇠 질문에 <b>예 / 아니요</b>로 답하며 내려가세요.', '모양만 보고 판단하면 속아요! 미역, 산호, 남세균… 함정 생물을 조심하세요.'],
+  options: [{key: 'n', label: '문제 수', choices: [[8, '8마리'], [12, '12마리'], [16, '16마리']], def: 12}, {key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '생물은 <b>핵막의 유무</b>에 따라 원핵생물계와 나머지로 나뉩니다. 핵이 있는 생물 중 광합성을 하고 조직·기관이 발달한 다세포 생물은 <b>식물계</b>, 세포벽이 있고 균사(또는 효모)로 되어 흡수로 양분을 얻는 생물은 <b>균계</b>, 기관이 발달한 다세포로 다른 생물을 먹는 생물은 <b>동물계</b>, 이 어디에도 속하지 않는 단세포·간단한 다세포 생물은 <b>원생생물계</b>입니다. 겉모습(미역은 식물처럼, 산호는 식물처럼 보임)이 아니라 <b>세포와 몸의 특징</b>으로 분류해요.',
+  startLabel: '조사 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+// 열쇠: id → [질문, 예→, 아니요→, 판단할 단서 키]
+const KEY = {
+  q1: ['세포에 <b>핵막</b>으로 둘러싸인 핵이 있나요?', 'q2', '원핵생물계', 'micro'],
+  q2: ['<b>광합성</b>을 하나요? (엽록체가 있나요?)', 'q3', 'q4', 'life'],
+  q3: ['<b>다세포</b>이고 뿌리·줄기·잎 같은 <b>조직과 기관</b>이 발달했나요?', '식물계', '원생생물계', 'body'],
+  q4: ['<b>세포벽</b>이 있고 몸이 <b>균사</b>(또는 효모)로 되어 양분을 <b>흡수</b>하나요?', '균계', 'q5', 'micro'],
+  q5: ['<b>다세포</b>이고 조직과 <b>기관</b>이 발달했나요?', '동물계', '원생생물계', 'body']};
+const KING = {'원핵생물계': '#c7b3f2', '원생생물계': '#8ecdf2', '균계': '#f2b77a', '식물계': '#9be3b5', '동물계': '#f28c7a'};
+// 이름, 그림, 계, 단서(현미경/몸/생활), 함정 설명
+const ORG = [
+  ['대장균', '🦠', '원핵생물계', '핵막이 없고 유전 물질이 세포질에 퍼져 있어요. 세포벽이 있어요.', '하나의 세포로 된 단세포 생물이에요.', '광합성을 하지 않고 장 속 양분을 흡수해요.'],
+  ['젖산균', '🧫', '원핵생물계', '핵막이 없어요. 세포벽이 있어요.', '단세포 생물이에요.', '당을 분해해 젖산을 만들어요. 광합성은 하지 않아요.'],
+  ['남세균', '🟢', '원핵생물계', '핵막이 없어요! 엽록체는 없지만 엽록소가 있어요.', '단세포가 실처럼 이어져 있기도 해요.', '광합성을 해서 산소를 만들어요.', '광합성을 해도 핵막이 없으면 원핵생물이에요.'],
+  ['짚신벌레', '🥿', '원생생물계', '핵막이 있는 핵이 있어요. 세포벽은 없어요.', '단세포 생물이에요. 섬모가 있어요.', '섬모로 헤엄치며 먹이를 먹어요. 광합성은 하지 않아요.'],
+  ['아메바', '🫧', '원생생물계', '핵이 있어요. 세포벽이 없어요.', '단세포 생물이에요. 모양이 계속 바뀌어요.', '헛발로 먹이를 감싸 먹어요. 광합성은 하지 않아요.'],
+  ['유글레나', '🌿', '원생생물계', '핵이 있고 엽록체가 있어요.', '단세포 생물이에요. 편모가 있어요.', '광합성도 하고 빛이 없으면 양분을 흡수해요.', '광합성을 해도 단세포라서 식물이 아니에요.'],
+  ['미역', '🌊', '원생생물계', '핵과 엽록체가 있어요.', '다세포지만 뿌리·줄기·잎이 구분되지 않아요(헛뿌리).', '바닷속에서 광합성을 해요.', '식물처럼 보이지만 조직·기관이 발달하지 않아 원생생물이에요.'],
+  ['해캄', '🧵', '원생생물계', '핵과 나선 모양 엽록체가 있어요.', '세포가 실처럼 이어진 단순한 다세포예요.', '민물에서 광합성을 해요.'],
+  ['효모', '🍞', '균계', '핵이 있고 세포벽이 있어요. 엽록체는 없어요.', '단세포로 출아법(싹 트기)으로 번식해요.', '당을 흡수해 이산화 탄소를 내보내요(빵 부풀리기).', '단세포지만 균계예요!'],
+  ['표고버섯', '🍄', '균계', '핵이 있고 세포벽이 있어요. 엽록체가 없어요.', '가는 실 같은 균사가 모여 몸을 이뤄요.', '죽은 나무의 양분을 흡수해요. 포자로 번식해요.'],
+  ['푸른곰팡이', '🟦', '균계', '핵과 세포벽이 있어요. 엽록체가 없어요.', '균사로 되어 있어요.', '귤이나 빵의 양분을 흡수해요. 포자로 번식해요.'],
+  ['고사리', '🌱', '식물계', '핵, 세포벽, 엽록체가 있어요.', '다세포이고 뿌리·줄기·잎이 있어요.', '광합성을 해요. 포자로 번식해요.'],
+  ['소나무', '🌲', '식물계', '핵, 세포벽, 엽록체가 있어요.', '다세포이고 뿌리·줄기·잎이 발달했어요.', '광합성을 해요. 씨로 번식해요.'],
+  ['해바라기', '🌻', '식물계', '핵, 세포벽, 엽록체가 있어요.', '다세포이고 뿌리·줄기·잎·꽃이 있어요.', '광합성을 해요.'],
+  ['해파리', '🪼', '동물계', '핵이 있고 세포벽이 없어요.', '다세포이고 조직이 있어요(신경망, 촉수).', '먹이를 잡아먹어요. 광합성은 하지 않아요.'],
+  ['산호', '🪸', '동물계', '핵이 있고 세포벽이 없어요.', '다세포이고 촉수와 입이 있어요.', '촉수로 플랑크톤을 잡아먹어요. 스스로 광합성은 하지 않아요.', '식물처럼 붙어살지만 동물이에요.'],
+  ['지렁이', '🪱', '동물계', '핵이 있고 세포벽이 없어요.', '다세포이고 기관이 발달했어요.', '흙 속 유기물을 먹어요.'],
+  ['불가사리', '⭐', '동물계', '핵이 있고 세포벽이 없어요.', '다세포이고 관족 등 기관이 있어요.', '조개를 잡아먹어요.'],
+  ['고양이', '🐈', '동물계', '핵이 있고 세포벽이 없어요.', '다세포이고 기관계까지 발달했어요.', '먹이를 먹고 스스로 움직여요.']];
+const ANS = { // 각 질문에서 정답(예=true)
+  q1: o => o[2] !== '원핵생물계', q2: o => ['식물계'].includes(o[2]) || ['유글레나', '미역', '해캄'].includes(o[0]),
+  q3: o => o[2] === '식물계', q4: o => o[2] === '균계', q5: o => o[2] === '동물계'};
+let list, idx, cur, node, path, seen, ui = {}, locked, t0, wrongs, pop = 0, solved = [];
+app.onStart = o => { list = ORG.slice().sort(() => Math.random() - .5).slice(0, o.n); idx = -1; solved = [];
+  ui.c = app.panel('단서 조사'); ui.q = app.panel('분류 열쇠'); app.startTimer(); next(); };
+function next(){ idx++; if (idx >= list.length) return end(); cur = list[idx]; node = 'q1'; path = ['q1']; seen = {}; locked = false; wrongs = 0; t0 = performance.now(); pop = performance.now(); app.setLevel(idx, list.length); render(); }
+function render(){
+  const C = [['micro', '🔬', '현미경 관찰'], ['body', '📏', '몸 구조'], ['life', '🌱', '생활 방식']], ci = {micro: 3, body: 4, life: 5};
+  ui.c.innerHTML = '<div class="clues">' + C.map(([k, ic, n]) => `<button class="clue" data-k="${k}" type="button" ${seen[k] ? 'disabled' : ''}><span class="k">${ic}</span><span><b>${n}</b>${seen[k] ? '<br>' + cur[ci[k]] : ' <small>(-5점)</small>'}</span></button>`).join('') + '</div>';
+  ui.c.querySelectorAll('.clue:not([disabled])').forEach(b => b.onclick = () => { seen[b.dataset.k] = 1; app.addScore(-5); sfx.pop(); render(); });
+  if (locked) return;
+  const q = KEY[node]; ui.q.innerHTML = `<p class="q">${q[0]}</p><p class="note-c" style="margin-top:4px">도움 단서: ${{micro: '🔬 현미경', body: '📏 몸 구조', life: '🌱 생활 방식'}[q[3]]}</p><div class="yn"><button class="big" data-v="1" type="button">예</button><button class="big alt" data-v="0" type="button">아니요</button></div>`;
+  ui.q.querySelectorAll('[data-v]').forEach(b => b.onclick = () => answer(b.dataset.v === '1')); }
+function answer(yes){ if (locked) return; const right = ANS[node](cur), q = KEY[node];
+  if (yes !== right) { wrongs++; app.addScore(-15); sfx.bad(); toast(cur[6] ? '함정! 단서를 다시 보세요' : '다시 생각해 보세요', 'bad'); const k = q[3]; if (!seen[k]) { seen[k] = 1; render(); } return; }
+  sfx.click(); const to = yes ? q[1] : q[2];
+  if (KEY[to]) { node = to; path.push(to); render(); return; }
+  locked = true; path.push(to); const sec = (performance.now() - t0) / 1000, pts = Math.max(20, Math.round(100 + Math.max(0, 20 - sec) * 2)); app.addScore(pts); solved.push([cur, wrongs]);
+  sfx.ok(); app.confetti(40); ui.q.innerHTML = `<p class="q">정답! <b style="color:${KING[to]}">${cur[0]}</b>은(는) <b>${to}</b></p>${cur[6] ? `<p class="note-c" style="margin-top:6px">💡 ${cur[6]}</p>` : ''}<button class="big" type="button" style="margin-top:10px;width:100%">다음 생물 ▶</button>`;
+  ui.q.querySelector('button').onclick = () => { app.nextTurn(); next(); }; }
+function end(){ const sc = app.player.score, perfect = solved.filter(s => !s[1]).length;
+  app.finish({stars: app.multi ? 3 : perfect >= list.length * .9 ? 3 : perfect >= list.length * .6 ? 2 : 1, summary: app.multi ? '모둠별 점수입니다.' : `한 번에 맞힌 생물 <b>${perfect}/${list.length}</b> · 점수 <b>${sc}</b>`, best: sc + '점', bestValue: sc}); }
+
+app.draw = (g, W, H) => { if (!cur) return; const t = performance.now() / 1000;
+  g.fillStyle = '#f7f2e6'; g.fillRect(0, 0, W, H); g.strokeStyle = 'rgba(0,0,0,.05)'; for (let x = 0; x < W; x += 24) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); } for (let y = 0; y < H; y += 24) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
+  // 표본 카드
+  const pf = D.clamp((performance.now() - pop) / 400, 0, 1), cw = W * .3, ch = H * .62, cx = W * .04, cy = H * .06;
+  g.save(); g.translate(cx + cw / 2, cy + ch / 2); g.rotate(-.03); g.scale(D.ease(pf), D.ease(pf)); g.translate(-cw / 2, -ch / 2);
+  g.fillStyle = '#fff'; g.shadowColor = 'rgba(0,0,0,.18)'; g.shadowBlur = 14; D.rr(g, 0, 0, cw, ch, 14); g.fill(); g.shadowBlur = 0;
+  g.fillStyle = '#e8f1ee'; D.rr(g, 12, 12, cw - 24, ch * .62, 10); g.fill();
+  D.text(g, cur[1], cw / 2, 12 + ch * .31, {size: Math.min(cw, ch) * .38});
+  D.text(g, '표본 #' + String(idx + 1).padStart(2, '0'), cw / 2, ch * .74, {size: 12, color: '#888'});
+  D.text(g, cur[0], cw / 2, ch * .86, {size: 26, display: true, color: '#2b2a26'}); g.restore();
+  // 테이프
+  g.fillStyle = 'rgba(246,211,101,.7)'; g.save(); g.translate(cx + cw / 2, cy + 4); g.rotate(.05); g.fillRect(-36, -10, 72, 20); g.restore();
+  // 분류 열쇠 나무
+  const NODE = {q1: [.66, .1], q2: [.55, .32], q3: [.44, .56], q4: [.76, .56], q5: [.84, .78], '원핵생물계': [.92, .26], '식물계': [.40, .88], '원생생물계A': [.55, .88], '균계': [.66, .82], '동물계': [.92, .96], '원생생물계B': [.72, .97]};
+  const EDGE = [['q1', 'q2', '예'], ['q1', '원핵생물계', '아니요'], ['q2', 'q3', '예'], ['q2', 'q4', '아니요'], ['q3', '식물계', '예'], ['q3', '원생생물계A', '아니요'], ['q4', '균계', '예'], ['q4', 'q5', '아니요'], ['q5', '동물계', '예'], ['q5', '원생생물계B', '아니요']];
+  const P = k => [(.44 + (NODE[k][0] - .40) * .86) * W, NODE[k][1] * H * .93 + H * .02];
+  const onPath = (a, b) => { const i = path.indexOf(a); if (i < 0) return false; const nb = path[i + 1]; return nb && (nb === b || (b.startsWith('원생생물계') && nb === '원생생물계' && ((a === 'q3' && b.endsWith('A')) || (a === 'q5' && b.endsWith('B'))))); };
+  EDGE.forEach(([a, b, l]) => { const [x0, y0] = P(a), [x1, y1] = P(b), on = onPath(a, b); g.strokeStyle = on ? '#e0a400' : '#c9c2b2'; g.lineWidth = on ? 4 : 2; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); D.text(g, l, (x0 + x1) / 2 + 8, (y0 + y1) / 2 - 8, {size: 11, color: on ? '#b07f00' : '#999', weight: 700}); });
+  Object.keys(NODE).forEach(k => { const [x, y] = P(k), isQ = k[0] === 'q', nm = k.replace(/[AB]$/, ''), act = k === node && !locked, done = path.includes(nm) && (!isQ || path.includes(k));
+    if (isQ) { const r = act ? 18 + Math.sin(t * 5) * 2 : 15; g.fillStyle = act ? '#f6d365' : done ? '#f1dca0' : '#fff'; g.strokeStyle = '#8a7d63'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.stroke(); D.text(g, 'Q' + k[1], x, y, {size: 13, weight: 700, color: '#4a4232'}); }
+    else { const hit = locked && path[path.length - 1] === nm && ((nm !== '원생생물계') || (k.endsWith('A') ? path.includes('q3') : path.includes('q5'))); const w = 86, h = 28; g.fillStyle = hit ? KING[nm] : '#fff'; g.strokeStyle = KING[nm]; g.lineWidth = hit ? 4 : 2; D.rr(g, x - w / 2, y - h / 2, w, h, 8); g.fill(); g.stroke(); D.text(g, nm, x, y, {size: 12, weight: 700, color: '#333'}); if (hit) D.text(g, cur[1], x + w / 2 + 2, y - 16, {size: 22 + Math.sin(t * 6) * 2}); } });
+  // 조사 메모
+  const notes = [['micro', '🔬', 3], ['body', '📏', 4], ['life', '🌱', 5]].filter(n => seen && seen[n[0]]); let ny = cy + ch + 18;
+  notes.forEach(n => { const txt = cur[n[2]]; g.fillStyle = '#fffbe0'; D.rr(g, cx, ny, W * .34, 30, 6); g.fill(); g.font = "12px 'IBM Plex Sans KR',sans-serif"; let s = txt; while (g.measureText(s).width > W * .3 - 36 && s.length > 4) s = s.slice(0, -2); if (s !== txt) s = s.slice(0, -1) + '…'; D.text(g, n[1] + ' ' + s, cx + 8, ny + 15, {size: 12, align: 'left', color: '#4a4232'}); ny += 34; });
+};
+</script>
+</body>
+</html>

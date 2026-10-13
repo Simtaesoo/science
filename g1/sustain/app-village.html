@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>탄소 제로 마을 · 중1 지속가능한 삶</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<style>
+.cards{display:grid;gap:8px}
+.cardp{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;text-align:left;background:var(--board-3);border:2px solid transparent;border-radius:12px;padding:8px 10px;color:var(--chalk);font:inherit;cursor:pointer}
+.cardp[aria-pressed="true"]{border-color:var(--yellow);background:#3d6a5d}
+.cardp:disabled{opacity:.45;cursor:not-allowed}
+.cardp .ic{font-size:24px}
+.cardp b{display:block;font-size:14px}
+.cardp small{font-size:11.5px;opacity:.85;line-height:1.35;display:block}
+.cardp .cost{font-family:'Jua',sans-serif;color:var(--yellow);font-size:16px;white-space:nowrap}
+.eff{font-size:11px;display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.eff span{padding:0 5px;border-radius:6px;background:rgba(0,0,0,.25)}
+.meter{display:grid;grid-template-columns:70px 1fr 44px;gap:6px;align-items:center;font-size:13px;margin:4px 0}
+.meter i{display:block;height:10px;border-radius:6px;background:rgba(0,0,0,.3);overflow:hidden}
+.meter i u{display:block;height:100%;border-radius:6px}
+.log{font-size:12.5px;line-height:1.5;max-height:150px;overflow:auto}
+.log p{margin:0 0 4px}
+</style>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'village', title: '탄소 제로 마을', unit: '중1 · 01 과학과 인류의 지속가능한 삶', back: '../../index.html#g1', sim: 'sim.html#carbon',
+  lead: '여러분은 2026년 우리 마을의 <b>기후 대책 위원회</b>입니다. 2050년까지 예산 안에서 정책 카드를 골라 <b>온실 기체 배출량을 0에 가깝게</b> 줄이세요. 주민 행복과 생태계도 지켜야 해요!',
+  howto: ['매년 카드 4장이 나와요. <b>예산(🪙)</b> 안에서 원하는 카드를 고르고 <b>[한 해 보내기]</b>를 누르세요.', '카드마다 배출량(🏭)·생태(🌿)·행복(😊)·수입(🪙)이 달라져요. 돈을 주는 카드는 대가가 있어요.', '배출량이 많으면 폭염·홍수 같은 <b>기후 사건</b>이 생겨요. 9년 차(2050년) 결과로 별을 받아요.'],
+  options: [{key: 'diff', label: '난이도', choices: [['easy', '쉬움'], ['mid', '보통'], ['hard', '어려움']], def: 'mid'}],
+  recap: '<b>지속가능한 삶</b>은 미래 세대가 쓸 자원과 환경을 해치지 않으면서 지금의 필요를 채우는 삶입니다. 화석 연료 대신 <b>재생 에너지</b>를 쓰고, 에너지를 아끼고(단열·효율), 숲과 습지처럼 <b>탄소를 흡수</b>하는 생태계를 지키는 것이 <b>탄소 중립</b>의 핵심입니다. 한 가지 정책만으로는 어렵고 과학기술·생활 습관·제도가 함께 바뀌어야 해요.',
+  startLabel: '위원회 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const DECK = [
+  {k: 'solar', ic: '☀️', n: '태양광 지붕', c: 4, co2: -10, hap: 1, inc: 1, why: '태양의 빛에너지를 전기에너지로 바꿔 화석 연료 발전을 줄여요.'},
+  {k: 'wind', ic: '🌬️', n: '풍력 발전 단지', c: 6, co2: -16, bio: -3, why: '바람의 운동 에너지로 전기를 만들어요. 새들의 이동 경로는 피해서 지어야 해요.'},
+  {k: 'coal', ic: '🏭', n: '석탄 발전소 폐쇄', c: 5, co2: -22, hap: -6, once: 1, why: '석탄은 같은 전기를 만들 때 이산화 탄소를 가장 많이 내보내요. 일자리 전환 대책이 필요해요.'},
+  {k: 'tree', ic: '🌳', n: '도시 숲 가꾸기', c: 3, co2: -5, bio: 10, hap: 3, why: '나무는 광합성으로 이산화 탄소를 흡수하고 그늘로 기온을 낮춰요.'},
+  {k: 'bus', ic: '🚌', n: '전기 버스 도입', c: 4, co2: -8, hap: 4, why: '내연 기관 대신 전동기를 써서 배기가스가 없어요. 전기를 재생 에너지로 만들면 효과가 더 커져요.'},
+  {k: 'bike', ic: '🚲', n: '자전거 도로', c: 2, co2: -4, hap: 5, bio: 1, why: '가까운 거리는 자전거로! 배출도 줄고 건강도 좋아져요.'},
+  {k: 'insul', ic: '🧱', n: '건물 단열 리모델링', c: 3, co2: -7, hap: 2, why: '열의 전도·대류를 막으면 냉난방 에너지가 줄어요(중1 열 단원!).'},
+  {k: 'recycle', ic: '♻️', n: '자원 순환 센터', c: 2, co2: -3, bio: 4, hap: 1, why: '재활용하면 새 원료를 캐고 가공하는 데 드는 에너지를 아껴요.'},
+  {k: 'wet', ic: '🦢', n: '습지 보전 구역', c: 3, co2: -3, bio: 12, once: 1, why: '습지는 탄소를 많이 저장하고 다양한 생물의 서식지예요.'},
+  {k: 'grid', ic: '🔌', n: '스마트 전력망', c: 4, co2: -6, inc: 1, once: 1, why: '전기가 남을 때 저장하고 모자랄 때 나눠 써서 재생 에너지를 더 잘 활용해요.'},
+  {k: 'market', ic: '🥬', n: '로컬 푸드 장터', c: 2, co2: -3, hap: 4, why: '가까운 곳에서 기른 음식은 운송 거리가 짧아 배출이 적어요.'},
+  {k: 'ccs', ic: '🧪', n: '탄소 포집 시설', c: 7, co2: -14, hap: -1, why: '공장 굴뚝의 이산화 탄소를 모아 땅속에 저장하는 기술이에요. 비용이 많이 들어요.'},
+  {k: 'cup', ic: '🥤', n: '일회용품 줄이기', c: 1, co2: -2, bio: 3, hap: -1, why: '작은 습관도 모이면 커요. 처음엔 조금 불편할 수 있어요.'},
+  {k: 'led', ic: '💡', n: 'LED 가로등', c: 1, co2: -3, why: '같은 밝기를 내는 데 전기를 훨씬 적게 써요.'},
+  {k: 'h2', ic: '🚛', n: '수소 연료 전지 트럭', c: 5, co2: -9, why: '수소와 산소가 반응해 전기를 만들고 물만 나와요.'},
+  {k: 'roof', ic: '🌱', n: '옥상 정원', c: 2, co2: -2, bio: 5, hap: 3, why: '옥상의 흙과 식물이 단열재 역할을 하고 도시 열섬을 줄여요.'},
+  {k: 'factory', ic: '🏗️', n: '공장 확장 (돈 +5/년)', c: 0, co2: 15, bio: -6, hap: 3, inc: 5, temp: 1, why: '수입과 일자리는 늘지만 화석 연료 사용이 크게 늘어요.'},
+  {k: 'golf', ic: '⛳', n: '숲 개발해 골프장 (돈 +3/년)', c: 0, co2: 4, bio: -12, hap: 2, inc: 3, temp: 1, why: '숲이 사라지면 이산화 탄소 흡수원과 서식지가 줄어요.'}
+];
+const DIFF = {easy: {co2: 90, money: 12, inc: 7}, mid: {co2: 100, money: 10, inc: 6}, hard: {co2: 115, money: 8, inc: 5}};
+let m, built, hist, year, hand, sel, ui = {}, ended, anim = 0, events = [];
+const YEARS = [2026, 2029, 2032, 2035, 2038, 2041, 2044, 2047, 2050];
+app.onStart = o => { const d = DIFF[o.diff]; m = {co2: d.co2, bio: 50, hap: 60, money: d.money, inc: d.inc}; built = {}; hist = [m.co2]; year = 0; ended = false; events = [];
+  ui.m = app.panel('마을 상태'); ui.h = app.panel('올해의 정책 카드'); ui.log = app.panel('위원회 기록'); ui.log.className = 'log'; app.setLevel(0, YEARS.length); deal(); render(); };
+function deal(){ const pool = DECK.filter(c => !(c.once && built[c.k])); hand = []; const tempt = pool.filter(c => c.temp), good = pool.filter(c => !c.temp);
+  good.sort(() => Math.random() - .5); hand = good.slice(0, 3); if (Math.random() < .7 && tempt.length) hand.push(tempt[Math.floor(Math.random() * tempt.length)]); else hand.push(good[3]); hand.sort(() => Math.random() - .5); sel = new Set(); }
+const spent = () => [...sel].reduce((s, i) => s + hand[i].c, 0);
+function eff(c){ const a = []; const f = (v, ic) => v ? a.push(`<span>${ic}${v > 0 ? '+' : ''}${v}</span>`) : 0; f(c.co2, '🏭'); f(c.bio, '🌿'); f(c.hap, '😊'); f(c.inc, '🪙/년'); return a.join(''); }
+function bar(lbl, v, max, col, txt){ return `<div class="meter"><span>${lbl}</span><i><u style="width:${D.clamp(v / max * 100, 0, 100)}%;background:${col}"></u></i><b>${txt}</b></div>`; }
+function render(){ const left = m.money - spent();
+  ui.m.innerHTML = `<p style="margin-bottom:4px"><b style="font-family:Jua,sans-serif;font-size:20px;color:var(--yellow)">${YEARS[year]}년</b> · 예산 <b>🪙 ${left}</b> <small>(매년 +${m.inc})</small></p>` +
+    bar('🏭 배출량', m.co2, 130, m.co2 > 70 ? '#f28c7a' : m.co2 > 35 ? '#f6d365' : '#9be3b5', Math.round(m.co2)) + bar('🌿 생태', m.bio, 100, '#9be3b5', Math.round(m.bio)) + bar('😊 행복', m.hap, 100, '#8ecdf2', Math.round(m.hap)) +
+    `<p class="note-c" style="margin-top:4px">목표: 2050년 배출량 <b>20 이하</b>, 생태·행복 <b>50 이상</b></p>`;
+  if (ended) return;
+  ui.h.innerHTML = '<div class="cards">' + hand.map((c, i) => `<button type="button" class="cardp" data-i="${i}" aria-pressed="${sel.has(i)}" ${!sel.has(i) && c.c > left ? 'disabled' : ''}><span class="ic">${c.ic}</span><span><b>${c.n}</b><small>${c.why}</small><span class="eff">${eff(c)}</span></span><span class="cost">🪙${c.c}</span></button>`).join('') + '</div><button class="big" type="button" id="nextY" style="margin-top:10px;width:100%">한 해 보내기 ▶</button>';
+  ui.h.querySelectorAll('.cardp').forEach(b => b.onclick = () => { const i = +b.dataset.i; sel.has(i) ? sel.delete(i) : sel.add(i); sfx.click(); render(); });
+  ui.h.querySelector('#nextY').onclick = advance; }
+function log(h){ ui.log.insertAdjacentHTML('afterbegin', `<p>${h}</p>`); }
+function advance(){ const picked = [...sel].map(i => hand[i]); m.money -= spent();
+  picked.forEach(c => { m.co2 += c.co2 || 0; m.bio += c.bio || 0; m.hap += c.hap || 0; m.inc += c.inc || 0; built[c.k] = (built[c.k] || 0) + 1; });
+  if (built.coal && picked.some(c => c.k === 'factory')) m.co2 += 5;
+  m.co2 += 3; // 인구·소비 증가
+  let ev = '';
+  if (m.co2 > 75 && Math.random() < .75) { ev = Math.random() < .5 ? '🔥 폭염 경보! 온열 질환자가 늘었어요.' : '🌊 집중 호우로 하천이 넘쳤어요.'; m.hap -= 6; m.money -= 2; }
+  else if (m.bio < 35 && Math.random() < .7) { ev = '🐝 꽃가루 매개 곤충이 줄어 과수 농사가 흉년이에요.'; m.hap -= 4; m.money -= 1; }
+  else if (m.bio > 70 && Math.random() < .5) { ev = '🦋 생태 관광객이 늘었어요! 수입 +2'; m.money += 2; m.hap += 2; }
+  else if (Math.random() < .35) { ev = '🔬 태양 전지 효율이 좋아졌어요. 다음 해 예산 +2'; m.money += 2; }
+  if (!picked.length) m.hap -= 2;
+  m.bio = D.clamp(m.bio, 0, 100); m.hap = D.clamp(m.hap, 0, 100); m.co2 = Math.max(0, m.co2);
+  log(`<b>${YEARS[year]}</b> ${picked.length ? picked.map(c => c.ic + c.n).join(', ') : '아무 정책도 시행하지 않음'}${ev ? '<br>' + ev : ''}`);
+  if (ev) toast(ev.slice(0, 26), ev.includes('+') ? 'good' : 'bad'); else sfx.whoosh();
+  hist.push(m.co2); anim = performance.now();
+  if (picked.some(c => c.temp)) sfx.bad(); else if (picked.length) sfx.ok();
+  year++; if (year >= YEARS.length) return end();
+  app.setLevel(year, YEARS.length); m.money += m.inc; deal(); render(); }
+function end(){ ended = true; render(); ui.h.innerHTML = '<p>2050년이 되었습니다! 결과를 확인하세요…</p>';
+  const ok = m.co2 <= 20 && m.bio >= 50 && m.hap >= 50, stars = ok ? 3 : m.co2 <= 45 && m.hap >= 40 ? 2 : 1, sc = Math.round(Math.max(0, 130 - m.co2) * 5 + m.bio * 2 + m.hap * 2);
+  app.addScore(sc);
+  setTimeout(() => app.finish({stars, title: ok ? '탄소 중립 달성! 🌏' : null, summary: `2050년 배출량 <b>${Math.round(m.co2)}</b> (처음 ${hist[0]}) · 생태 <b>${Math.round(m.bio)}</b> · 행복 <b>${Math.round(m.hap)}</b><br>점수 <b>${sc}</b>${!ok ? '<br>힌트: 배출을 크게 줄이는 정책은 비싸요. 초반에 수입을 늘리는 정책(스마트 전력망·태양광)을 먼저 해 보세요.' : ''}`, best: sc + '점', bestValue: sc}), 1600); }
+
+/* ---------- 마을 그리기 ---------- */
+app.draw = (g, W, H) => { if (!m) return; const t = performance.now() / 1000, dirty = D.clamp(m.co2 / 120, 0, 1), gy = H * .62;
+  const sky = g.createLinearGradient(0, 0, 0, gy); sky.addColorStop(0, `rgb(${D.lerp(110, 150, dirty)},${D.lerp(185, 140, dirty)},${D.lerp(240, 130, dirty)})`); sky.addColorStop(1, `rgb(${D.lerp(205, 190, dirty)},${D.lerp(232, 170, dirty)},${D.lerp(245, 140, dirty)})`);
+  g.fillStyle = sky; g.fillRect(0, 0, W, gy);
+  D.glow(g, W * .12, H * .14, 60, '255,230,140', .9 - dirty * .5); g.fillStyle = '#ffe58a'; g.beginPath(); g.arc(W * .12, H * .14, 20, 0, 7); g.fill();
+  // 언덕 + 풍력
+  g.fillStyle = `rgb(${D.lerp(120, 140, dirty)},${D.lerp(180, 150, dirty)},${D.lerp(110, 100, dirty)})`; g.beginPath(); g.moveTo(0, gy); g.quadraticCurveTo(W * .7, H * .3, W * 1.05, gy); g.fill();
+  for (let i = 0; i < Math.min(5, built.wind || 0) * 2; i++) { const x = W * (.5 + i * .055), y = gy - (H * .2) * Math.sin(Math.PI * (x / W - .1) / 1.0) * .9 - 4; g.strokeStyle = '#f4f4f4'; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - 46); g.stroke();
+    for (let b = 0; b < 3; b++) { const a = t * 2 + i + b * 2.094; g.beginPath(); g.moveTo(x, y - 46); g.lineTo(x + Math.cos(a) * 20, y - 46 + Math.sin(a) * 20); g.stroke(); } }
+  // 땅
+  g.fillStyle = `rgb(${D.lerp(126, 150, dirty)},${D.lerp(196, 160, dirty)},${D.lerp(110, 100, dirty)})`; g.fillRect(0, gy, W, H - gy);
+  g.fillStyle = '#5c6470'; g.fillRect(0, H * .82, W, H * .07); if (built.bike) { g.fillStyle = '#4fa16b'; g.fillRect(0, H * .89, W, H * .025); D.text(g, '🚲', (t * 60) % (W + 40) - 20, H * .9, {size: 14}); }
+  g.strokeStyle = '#e9e3c8'; g.setLineDash([16, 14]); g.lineWidth = 2; g.beginPath(); g.moveTo(0, H * .855); g.lineTo(W, H * .855); g.stroke(); g.setLineDash([]);
+  // 공장
+  const fx = W * .08, fy = gy; const coalOn = !built.coal, big = built.factory || 0;
+  g.fillStyle = '#7b6f68'; g.fillRect(fx - 10, fy - 50 - big * 8, 70 + big * 16, 50 + big * 8); g.fillStyle = '#5d524c'; g.fillRect(fx + 30, fy - 100 - big * 8, 12, 50);
+  if (built.ccs) { g.fillStyle = '#8ecdf2'; g.fillRect(fx + 50, fy - 30, 24, 30); D.text(g, 'CCS', fx + 62, fy - 15, {size: 9, color: '#123'}); }
+  const smoke = Math.max(0, m.co2 / 100); for (let i = 0; i < 10; i++) { const p = (t * .3 + i / 10) % 1; g.fillStyle = `rgba(${coalOn ? '80,80,80' : '200,200,200'},${(1 - p) * .5 * smoke})`; g.beginPath(); g.arc(fx + 36 + p * 60 + Math.sin(p * 9 + i) * 8, fy - 105 - big * 8 - p * 90, 8 + p * 22 * smoke, 0, 7); g.fill(); }
+  if (!coalOn) D.text(g, '폐쇄', fx + 25, fy - 25, {size: 12, color: '#fff', weight: 700});
+  // 집
+  const nh = 6, solar = (built.solar || 0) * 2, ins = built.insul || 0, roof = built.roof || 0;
+  for (let i = 0; i < nh; i++) { const x = W * (.3 + i * .1), y = gy + H * .02, w = W * .07, h = H * .1;
+    g.fillStyle = i < ins * 2 ? '#f0e2c8' : '#e6d3b3'; g.fillRect(x, y, w, h); g.fillStyle = i < roof * 2 ? '#58a36a' : '#b85c4a'; g.beginPath(); g.moveTo(x - 5, y); g.lineTo(x + w / 2, y - h * .6); g.lineTo(x + w + 5, y); g.fill();
+    if (i < solar) { g.fillStyle = '#26466e'; g.save(); g.translate(x + w * .28, y - h * .28); g.rotate(-.48); g.fillRect(-w * .2, -4, w * .4, 8); g.restore(); }
+    g.fillStyle = `rgba(255,${240 - (built.led ? 0 : 40)},150,.9)`; g.fillRect(x + w * .35, y + h * .3, w * .3, h * .3); }
+  // 나무
+  const nt = Math.round(m.bio / 7); for (let i = 0; i < nt; i++) { const x = (i * 97 + 30) % W, y = gy + H * (.12 + ((i * 37) % 7) / 100); g.fillStyle = '#6b4a2b'; g.fillRect(x - 2, y - 2, 4, 12); g.fillStyle = i % 3 ? '#3f9a55' : '#2f7c46'; g.beginPath(); g.arc(x, y - 6, 9, 0, 7); g.fill(); }
+  if (built.wet) { g.fillStyle = '#6bb6d6'; g.beginPath(); g.ellipse(W * .9, gy + H * .08, W * .07, H * .035, 0, 0, 7); g.fill(); D.text(g, '🦢', W * .9 + Math.sin(t) * 12, gy + H * .07, {size: 14}); }
+  if (built.golf) { g.fillStyle = '#a8de8a'; g.beginPath(); g.ellipse(W * .78, gy + H * .14, W * .06, H * .025, 0, 0, 7); g.fill(); D.text(g, '⛳', W * .78, gy + H * .12, {size: 14}); }
+  // 차
+  const cars = Math.max(1, 5 - (built.bus || 0) - (built.bike || 0)); for (let i = 0; i < cars; i++) { const x = ((t * 80 + i * W / cars) % (W + 60)) - 30; g.fillStyle = '#c94f4f'; D.rr(g, x, H * .83, 30, 12, 4); g.fill(); g.fillStyle = `rgba(90,90,90,${.4 * dirty})`; g.beginPath(); g.arc(x - 6, H * .845, 5, 0, 7); g.fill(); }
+  if (built.bus) { const x = W - ((t * 50) % (W + 80)); g.fillStyle = '#4c8bd6'; D.rr(g, x, H * .86, 54, 16, 4); g.fill(); D.text(g, '⚡', x + 27, H * .868, {size: 10}); }
+  // 그래프
+  const cx = W * .66, cy = H * .04, cw = W * .31, ch = H * .25; g.fillStyle = 'rgba(255,255,255,.85)'; D.rr(g, cx, cy, cw, ch, 10); g.fill();
+  D.text(g, '연간 온실 기체 배출량', cx + cw / 2, cy + 12, {size: 11, weight: 700, color: '#333'});
+  const px = i => cx + 12 + i / (YEARS.length - 1) * (cw - 24), py = v => cy + ch - 10 - v / 140 * (ch - 30);
+  g.strokeStyle = '#9be3b5'; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(cx + 10, py(20)); g.lineTo(cx + cw - 10, py(20)); g.stroke(); g.setLineDash([]); D.text(g, '목표 20', cx + cw - 30, py(20) - 7, {size: 9, color: '#2e7d4f'});
+  g.strokeStyle = '#d0533f'; g.lineWidth = 2.5; g.beginPath(); hist.forEach((v, i) => g.lineTo(px(i), py(v))); g.stroke(); hist.forEach((v, i) => { g.fillStyle = '#d0533f'; g.beginPath(); g.arc(px(i), py(v), 3, 0, 7); g.fill(); });
+  if (performance.now() - anim < 900) { const f = (performance.now() - anim) / 900; D.text(g, YEARS[Math.min(year, YEARS.length - 1)] + '년', W / 2, H * .4, {size: 48, display: true, color: `rgba(255,255,255,${1 - f})`, stroke: `rgba(0,0,0,${.4 * (1 - f)})`}); }
+};
+</script>
+</body>
+</html>
