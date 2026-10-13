@@ -77,7 +77,7 @@ function drawMech(){ const g = S.g, W = S.w, H = S.h, s = mechState(st.run ? st.
   const bx = X(s.pos), by = s.pos > 1 ? Y(s.h) : gy; g.save(); g.translate(bx, by); if (s.pos > 1) g.rotate(-Math.PI / 6); g.fillStyle = '#4a7fd6'; g.fillRect(0, -26, 30, 26); label(g, st.m + 'kg', 15, -13, {size: 10, color: '#fff', weight: 700}); g.restore();
   const hm = hmax(); g.strokeStyle = C.hot; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(X(.8), Y(hm)); g.lineTo(W - 20, Y(hm)); g.stroke(); g.setLineDash([]); label(g, `최고 높이 ${hm.toFixed(3)} m`, W - 24, Y(hm) - 10, {size: 11, color: C.hot, align: 'right'});
   // 막대
-  const E0 = Es(), bxx = W * .62, bw = 40, bh = H * .38, by0 = H * .44, sc = bh / Math.max(E0, .01), bars = [['탄성 퍼텐셜', s.es, '#9a7ad0'], ['운동', s.ke, C.hot], ['중력 퍼텐셜', st.m * g9 * s.h, C.phy], ['열', s.q, C.muted]];
+  const E0 = Es(), bxx = W * .62, bw = 40, bh = H * .38, by0 = H * .44, sc = bh / Math.max(E0, .01), r1 = v => Math.round(v * 10) / 10, dEs = r1(s.es), dPe = r1(st.m * g9 * s.h), dQ = r1(s.q), dKe = Math.max(0, r1(r1(E0) - dEs - dPe - dQ)), bars = [['탄성 퍼텐셜', dEs, '#9a7ad0'], ['운동', dKe, C.hot], ['중력 퍼텐셜', dPe, C.phy], ['열', dQ, C.muted]];
   bars.forEach(([n, v, c], i) => { const x = bxx + i * (bw + 12); g.fillStyle = c; g.fillRect(x, by0 - v * sc, bw, v * sc); label(g, n, x + bw / 2, by0 + 12, {size: 9}); label(g, v.toFixed(1), x + bw / 2, by0 - v * sc - 8, {size: 10, weight: 700}); });
   g.strokeStyle = C.ink; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(bxx - 4, by0 - E0 * sc); g.lineTo(bxx + 4 * (bw + 12), by0 - E0 * sc); g.stroke(); g.setLineDash([]); label(g, `전체 ${E0.toFixed(1)} J`, bxx + 2 * (bw + 12), by0 - E0 * sc - 12, {size: 11, weight: 700}); }
 /* ===== 2. 열역학 제1법칙 ===== */
