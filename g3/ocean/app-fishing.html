@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>조경 수역 어부 · 중3 해수의 성질과 순환</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'fishing', title: '조경 수역 어부', unit: '중3 · 18 해수의 성질과 순환', back: '../../index.html#g3', sim: 'sim.html#current', dark: true,
+  lead: '우리나라 주변 바다는 <b>난류와 한류</b>가 만나는 황금 어장! 계절에 따라 달라지는 <b>수온</b>과 <b>조경 수역</b>의 위치를 읽고 그물을 던져 물고기를 잡으세요.',
+  howto: ['바다 위에 손가락(마우스)을 올리면 <b>표층 수온</b>이 보여요.', '그물을 던질 곳을 <b>누르세요</b>. 의뢰마다 3번 던질 수 있어요.', '물고기마다 좋아하는 수온이 달라요. 한류와 난류가 만나는 <b>조경 수역</b>은 영양염과 플랑크톤이 많아 보너스!'],
+  options: [{key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '우리나라 주변에는 <b>쿠로시오 해류</b>에서 갈라진 <b>동한 난류·황해 난류</b>와, 북쪽에서 내려오는 <b>북한 한류</b>가 흐릅니다. 동해에서 난류와 한류가 만나는 <b>조경 수역</b>은 영양염과 플랑크톤이 풍부해 좋은 어장이 되며, 난류가 강한 <b>여름에는 북쪽</b>으로, 한류가 강한 <b>겨울에는 남쪽</b>으로 이동해요. 해수는 깊이에 따라 <b>혼합층 · 수온 약층 · 심해층</b>으로 나뉘고, 해수 1 kg에 녹아 있는 염류의 양(g)을 <b>염분</b>(psu)이라고 해요.',
+  startLabel: '출항!'
+});
+const {S, sfx, toast} = app, D = Draw;
+const KOR = [[.30, .02], [.52, .02], [.60, .10], [.58, .20], [.62, .32], [.64, .45], [.63, .58], [.60, .70], [.52, .76], [.44, .78], [.38, .74], [.40, .66], [.36, .58], [.40, .50], [.36, .42], [.30, .38], [.33, .30], [.28, .22], [.30, .12]];
+const JPN = [[.84, .64], [.92, .55], [1.02, .5], [1.02, 1.02], [.8, 1.02], [.74, .86], [.78, .74]];
+const FISH = {명태: ['🐟', 2, 8, '한류성'], 오징어: ['🦑', 12, 20, '난류성'], 고등어: ['🐠', 15, 22, '난류성'], 대구: ['🐡', 3, 10, '한류성']};
+const MIS = [['winter', '명태', '겨울 동해에서 <b>명태</b>(한류성)를 잡아라!'], ['summer', '오징어', '여름에 <b>오징어</b>(난류성)를 잡아라!'], ['summer', null, '여름의 <b>조경 수역</b>을 찾아 그물을 던져라!'], ['winter', null, '겨울의 <b>조경 수역</b>을 찾아라! (여름과 비교해 보세요)'], ['winter', '고등어', '겨울에 <b>고등어</b>(난류성)를 잡아라!']];
+const QZ = [['깊이에 따라 수온이 급격히 낮아지며 매우 안정해 위아래로 잘 섞이지 않는 층은?', ['수온 약층', '혼합층', '심해층'], 0, '수온 약층은 위가 따뜻하고 아래가 차가워 대류가 일어나지 않는 안정한 층이에요.'],
+  ['혼합층이 가장 두껍게 발달하는 조건은?', ['바람이 강하게 부는 곳', '바람이 거의 없는 곳', '수심이 얕은 곳'], 0, '바람이 해수를 섞어 수온이 일정한 혼합층이 두꺼워져요.'],
+  ['해수 2 kg에 염류 70 g이 녹아 있다면 염분은?', ['35 psu', '70 psu', '140 psu', '3.5 psu'], 0, '염분 = 해수 1 kg 속 염류(g) → 70 ÷ 2 = 35 psu'],
+  ['염분이 다른 두 바다에서 같은 것은?', ['염류 사이의 비율 (염분비)', '염류의 총량', '수온'], 0, '염분비 일정 법칙: 염분은 달라도 염류 사이의 비율은 일정해요.'],
+  ['강물이 흘러드는 연안이나 비가 많이 오는 지역의 염분은?', ['낮다', '높다', '변화 없다'], 0, '담수가 섞이면 염분이 낮아지고, 증발이 많으면 높아져요.']];
+let mis, mi, R, ui = {}, hover = null, boat = {x: .8, y: .95, tx: .8, ty: .95}, nets = [], catchFx = [], locked;
+const yf = s => s === 'summer' ? .3 : .5;
+const ss = (a, b, v) => { const t = D.clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+function temp(x, y, s){ const base = s === 'summer' ? 15 + 12 * y : 2 + 14 * y, east = ss(.56, .66, x) * ss(.8, .68, y), west = ss(.4, .32, x); const w = (Math.tanh((y - yf(s)) / .04) + 1) / 2; return base + east * D.lerp(-4, 3, w) + (1 - east) * (1 + west * (s === 'summer' ? 0 : 1)); }
+const inLand = (x, y) => { const P = [KOR, JPN]; return P.some(poly => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; }); };
+app.onStart = () => { mis = MIS.slice(); mi = -1; ui.q = app.panel('의뢰'); ui.c = app.panel('어획 기록'); app.startTimer(); next(); };
+function next(){ mi++; locked = false; nets = []; if (mi >= mis.length + 3) return end(); app.setLevel(mi, mis.length + 3);
+  if (mi >= mis.length) { const q = QZ.sort(() => Math.random() - .5)[0]; QZ.push(QZ.shift()); R = {quiz: true, s: 'summer'}; app.quiz(ui.q, '📘 해양 연구소 질문: ' + q[0], q[1], q[2], {explain: q[3], onRight: tr => { app.addScore(tr === 1 ? 60 : 20); locked = true; setTimeout(() => { app.nextTurn(); next(); }, 2200); }, onWrong: () => app.addScore(-10)}); return; }
+  const [s, f, txt] = mis[mi]; R = {s, f, casts: 0, total: 0}; ui.q.innerHTML = `<p class="mission">${txt}</p>${f ? `<p class="note-c">${FISH[f][0]} ${f}: ${FISH[f][3]}, 좋아하는 수온 ${FISH[f][1]}~${FISH[f][2]} ℃</p>` : '<p class="note-c">조경 수역: 난류와 한류가 만나 수온이 급하게 변하는 곳</p>'}<p>그물 남음: <b>3</b></p>`; ui.c.innerHTML = '<p class="note-c">아직 던지지 않았어요.</p>'; }
+function geo(){ const W = S.w, H = S.h, s = Math.min(W * .62, H * .98); return {ox: (W - s) / 2 - W * .02, oy: (H - s) / 2, s}; }
+const toN = (x, y) => { const G = geo(); return [(x - G.ox) / G.s, (y - G.oy) / G.s]; };
+app.pointer({move(x, y){ hover = toN(x, y); }, tap(x, y){ if (!R || R.quiz || locked) return; const [nx, ny] = toN(x, y); if (nx < 0 || nx > 1 || ny < 0 || ny > 1) return; if (inLand(nx, ny)) { toast('육지에는 그물을 던질 수 없어요', 'bad'); return; } cast(nx, ny); }});
+function cast(x, y){ R.casts++; boat.tx = x; boat.ty = y; sfx.whoosh(); const T = temp(x, y, R.s), front = x > .6 && y < .72 && Math.abs(y - yf(R.s)) < .06; let n, msg;
+  if (R.f) { const [, lo, hi] = FISH[R.f], d = T < lo ? lo - T : T > hi ? T - hi : 0; n = Math.max(0, Math.round(12 * Math.exp(-d * d / 8) + (front ? 4 : 0) + Math.random() * 2)); msg = `${FISH[R.f][0]} ${R.f} ${n}마리`; }
+  else { n = front ? 14 + Math.round(Math.random() * 4) : Math.max(0, 4 - Math.round(Math.abs(y - yf(R.s)) * 20)) + Math.round(Math.random() * 2); msg = `🐟 여러 물고기 ${n}마리${front ? ' (조경 수역!)' : ''}`; }
+  R.total += n; nets.push({x, y, n, T, front, t0: performance.now()}); app.addScore(n * 5); setTimeout(() => { n >= 10 ? sfx.ok() : n ? sfx.pop() : sfx.bad(); catchFx.push({x, y, n, t0: performance.now()}); }, 700);
+  ui.c.innerHTML = nets.map((m, i) => `<p>${i + 1}차: 수온 <b>${m.T.toFixed(1)} ℃</b> → ${i === nets.length - 1 ? msg : (R.f ? FISH[R.f][0] : '🐟') + ' ' + m.n + '마리'}${m.front ? ' ⭐' : ''}</p>`).join('');
+  ui.q.querySelector('b:last-of-type') && (ui.q.innerHTML = ui.q.innerHTML.replace(/그물 남음: <b>\d<\/b>/, `그물 남음: <b>${3 - R.casts}</b>`));
+  if (R.casts >= 3) { locked = true; setTimeout(() => { ui.c.innerHTML += `<p style="margin-top:6px">이번 의뢰 어획 <b>${R.total}마리</b></p><p class="note-c">조경 수역(⭐)은 ${R.s === 'summer' ? '여름엔 북쪽(동해 중부)' : '겨울엔 남쪽(동해 남부)'}에 있어요.</p><button class="big" type="button" style="width:100%;margin-top:8px">다음 ▶</button>`; R.reveal = true; ui.c.querySelector('button').onclick = () => { app.nextTurn(); next(); }; }, 1200); } }
+function end(){ const sc = app.player.score; app.finish({stars: app.multi ? 3 : sc >= 400 ? 3 : sc >= 260 ? 2 : 1, summary: app.multi ? '모둠별 점수입니다.' : `총점 <b>${sc}</b>`, best: sc + '점', bestValue: sc}); }
+function tcol(T){ const f = D.clamp((T - 0) / 30, 0, 1); return `hsl(${220 - f * 220} 70% ${38 + f * 10}%)`; }
+app.step = dt => { boat.x = D.lerp(boat.x, boat.tx, Math.min(1, dt * 2.5)); boat.y = D.lerp(boat.y, boat.ty, Math.min(1, dt * 2.5)); };
+app.draw = (g, W, H) => { if (!R) return; const G = geo(), t = performance.now() / 1000, P = (x, y) => [G.ox + x * G.s, G.oy + y * G.s];
+  g.fillStyle = '#0b1622'; g.fillRect(0, 0, W, H);
+  // 수온 지도
+  const n = 40, c = G.s / n; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { const x = (i + .5) / n, y = (j + .5) / n; g.fillStyle = tcol(temp(x, y, R.s)); g.fillRect(G.ox + i * c, G.oy + j * c, c + .5, c + .5); }
+  [KOR, JPN].forEach(poly => { g.fillStyle = '#c9b98f'; g.strokeStyle = '#7a6a48'; g.lineWidth = 2; g.beginPath(); poly.forEach(([x, y]) => g.lineTo(...P(x, y))); g.closePath(); g.fill(); g.stroke(); });
+  D.text(g, '동해', ...P(.78, .2), {size: 14, color: 'rgba(255,255,255,.8)', weight: 700}); D.text(g, '황해', ...P(.16, .45), {size: 14, color: 'rgba(255,255,255,.8)', weight: 700}); D.text(g, '남해', ...P(.5, .88), {size: 14, color: 'rgba(255,255,255,.8)', weight: 700});
+  g.fillStyle = '#c9b98f'; g.beginPath(); g.arc(...P(.74, .38), 3, 0, 7); g.fill(); g.beginPath(); g.arc(...P(.8, .39), 2, 0, 7); g.fill();
+  // 해류 화살표 (흐르는 점선)
+  const yF = yf(R.s), CUR = [[[[.95, .98], [.9, .8], [.82, .72], [.7, .66], [.68, .5], [.7, yF + .02]], '#ff8a6a', '동한 난류'], [[[.62, .9], [.5, .9], [.3, .82], [.2, .6], [.22, .4]], '#ff8a6a', '황해 난류'], [[[.62, .02], [.64, .12], [.66, .22], [.67, yF - .02]], '#7ab8ff', '북한 한류']];
+  CUR.forEach(([pts, col, nm]) => { g.strokeStyle = col; g.lineWidth = 3; g.setLineDash([10, 8]); g.lineDashOffset = -t * 30; g.beginPath(); pts.forEach(p => g.lineTo(...P(...p))); g.stroke(); g.setLineDash([]); const a = pts[pts.length - 2], b = pts[pts.length - 1]; D.arrow(g, ...P(...a).map((v, i) => D.lerp(v, P(...b)[i], .6)), ...P(...b), col, 3); const m = pts[Math.floor(pts.length / 2)]; D.text(g, nm, P(...m)[0] + 8, P(...m)[1], {size: 11, color: col, weight: 700, align: 'left', stroke: 'rgba(0,0,0,.5)', strokeW: 3}); });
+  if (R.reveal) { g.strokeStyle = '#f6d365'; g.lineWidth = 3; g.setLineDash([6, 5]); g.strokeRect(...P(.62, yF - .06), G.s * .38, G.s * .12); g.setLineDash([]); D.text(g, '⭐ 조경 수역', ...P(.86, yF - .08), {size: 13, weight: 700, color: '#f6d365'}); }
+  // 그물·배
+  nets.forEach(m => { const [x, y] = P(m.x, m.y), f = D.clamp((performance.now() - m.t0) / 700, 0, 1); g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 1.5; g.beginPath(); g.arc(x, y, 6 + f * 12, 0, 7); g.stroke(); D.text(g, m.n, x, y + 26, {size: 13, weight: 700, color: '#fff', stroke: 'rgba(0,0,0,.6)', strokeW: 3}); });
+  const [bx, by] = P(boat.x, boat.y); D.text(g, '⛵', bx, by - 6 + Math.sin(t * 2) * 2, {size: 22});
+  catchFx = catchFx.filter(f => performance.now() - f.t0 < 1200); catchFx.forEach(f => { const p = (performance.now() - f.t0) / 1200, [x, y] = P(f.x, f.y); for (let k = 0; k < Math.min(8, f.n); k++) D.text(g, R.f ? FISH[R.f][0] : '🐟', x + Math.cos(k) * 20 * p, y - 30 * p - k * 3, {size: 16}); });
+  // 범례 + 수온계
+  const lx = W - 30, ly = H * .12, lh = H * .6; for (let i = 0; i < 30; i++) { g.fillStyle = tcol(30 - i); g.fillRect(lx - 10, ly + i * lh / 30, 14, lh / 30 + 1); } D.text(g, '30℃', lx - 3, ly - 10, {size: 10, color: '#cfe3ff'}); D.text(g, '0℃', lx - 3, ly + lh + 10, {size: 10, color: '#cfe3ff'});
+  if (hover && hover[0] >= 0 && hover[0] <= 1 && hover[1] >= 0 && hover[1] <= 1 && !inLand(...hover)) { const T = temp(hover[0], hover[1], R.s), [x, y] = P(...hover); g.fillStyle = 'rgba(0,0,0,.6)'; D.rr(g, x + 12, y - 30, 78, 24, 8); g.fill(); D.text(g, `🌡 ${T.toFixed(1)} ℃`, x + 51, y - 18, {size: 12, color: '#fff', weight: 700}); }
+  D.text(g, R.s === 'summer' ? '☀️ 여름 (8월) 표층 수온' : '❄️ 겨울 (2월) 표층 수온', G.ox + 8, G.oy + 14, {size: 13, color: '#fff', weight: 700, align: 'left', stroke: 'rgba(0,0,0,.5)', strokeW: 3});
+};
+</script>
+</body>
+</html>
