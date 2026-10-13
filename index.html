@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>중학 과학 실험실</title>
-<meta name="description" content="2022 개정 교육과정 중학교 과학 단원별 시뮬레이션과 학습지">
+<title>중·고 과학 실험실</title>
+<meta name="description" content="2022 개정 교육과정 중학교 과학·고등학교 통합과학·물리 단원별 시뮬레이션, 실험·게임, 학습지">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="assets/site.css">
@@ -34,6 +34,9 @@
 .items .ready .tag.k-quiz{background:#c7b3f2;border-color:#a68fd8;color:#24183f;font-weight:700}
 .items .plan span.t{color:var(--muted);flex:1;min-width:0}
 .items .soon{font-size:11px;color:var(--muted);flex:none}
+.seg .lvl{font-size:11px;color:var(--muted);padding:0 4px 0 10px;align-self:center;font-weight:700}
+.seg .lvl:first-child{padding-left:4px}
+#grades{flex-wrap:wrap}
 .filter{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .filter label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
 </style>
@@ -43,8 +46,8 @@
   <section class="hero">
     <div>
       <div class="eyebrow" id="curr"></div>
-      <h1 id="siteName">중학 과학 실험실</h1>
-      <p>단원마다 직접 조작해 보는 시뮬레이션과 수업에 바로 쓰는 학습지를 모았습니다. 학년을 고르고 단원을 찾아 들어가세요.</p>
+      <h1 id="siteName">중·고 과학 실험실</h1>
+      <p>단원마다 직접 조작해 보는 시뮬레이션, 흥미를 끄는 실험·게임, 수업에 바로 쓰는 학습지를 모았습니다. 학년·과목을 고르고 단원을 찾아 들어가세요.</p>
     </div>
     <div class="progress" id="progress"></div>
   </section>
@@ -65,7 +68,7 @@
 (() => {
   const $ = id => document.getElementById(id);
   $('siteName').textContent = SITE.name; document.title = SITE.name;
-  $('curr').textContent = SITE.curriculum + ' · 중학교 과학';
+  $('curr').textContent = SITE.curriculum + ' · 중학교 과학 · 고등학교 통합과학·물리';
   let grade = (location.hash || '#g1').slice(1);
   if (!CATALOG.some(g => g.id === grade)) grade = 'g1';
   let onlyReady = false;
@@ -74,7 +77,8 @@
   const done = all.filter(i => i.href).length;
   $('progress').innerHTML = `<b>${done}</b> / ${all.length}<br>완성된 자료`;
 
-  $('grades').innerHTML = CATALOG.map(g => `<button type="button" data-g="${g.id}">${g.grade} · ${g.book}</button>`).join('');
+  const lv = g => g.level || '중';
+  $('grades').innerHTML = ['중', '고'].map(L => `<span class="lvl">${L === '중' ? '중학교' : '고등학교'}</span>` + CATALOG.filter(g => lv(g) === L).map(g => `<button type="button" data-g="${g.id}">${L === '중' ? g.grade + ' · ' + g.book : g.book}</button>`).join('')).join('');
   $('grades').querySelectorAll('button').forEach(b => b.onclick = () => { grade = b.dataset.g; history.replaceState(null, '', '#' + grade); render(); });
   $('onlyReady').onchange = e => { onlyReady = e.target.checked; render(); };
 
@@ -90,7 +94,7 @@
           : `<li class="plan">${tag}<span class="t">${i.title}</span><span class="soon">준비 중</span></li>`;
       }).join('');
       return `<article class="unit area-${u.area}">
-        <div class="unit-head"><span class="unit-no">${String(u.no).padStart(2, '0')}</span>
+        <div class="unit-head"><span class="unit-no">${String(u.disp || u.no).padStart(2, '0')}</span>
           <span class="unit-title">${u.title}</span>
           <span class="unit-meta"><span class="code">${u.code}</span>${u.items.filter(i => i.href).length}/${u.items.length} 완성</span></div>
         <ul class="items">${items}</ul></article>`;

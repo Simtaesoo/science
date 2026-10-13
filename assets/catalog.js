@@ -1,7 +1,7 @@
 /* 사이트 전체 목차. 새 자료를 만들면 href를 채우면 메인 화면에 '바로 열기'로 바뀝니다.
    area: phy(물리) chem(화학) bio(생명) earth(지구) gen(통합) */
 window.SITE = {
-  name: '중학 과학 실험실',
+  name: '중·고 과학 실험실',
   author: '',            // 예: '○○중 홍길동' — 채우면 모든 페이지 아래에 표시됩니다
   curriculum: '2022 개정 교육과정'
 };
@@ -66,6 +66,43 @@ window.CATALOG = [
   { no:21, area:'bio', title:'생식과 유전', code:'9과21', items:[{kind:'sim', title:'1차시 세포 분열의 필요성과 염색체', href:'g3/genetics/sim.html#size'}, {kind:'sim', title:'2차시 체세포 분열', href:'g3/genetics/sim.html#mitosis'}, {kind:'sim', title:'3차시 감수 분열', href:'g3/genetics/sim.html#meiosis'}, {kind:'sim', title:'4차시 사람의 발생', href:'g3/genetics/sim.html#develop'}, {kind:'sim', title:'5차시 멘델의 유전 원리', href:'g3/genetics/sim.html#mendel'}, {kind:'sim', title:'6차시 사람의 유전 (혈액형·색맹·가계도)', href:'g3/genetics/sim.html#human'}, {kind:'sim', title:'(덤) 멘델의 유전 실험실', href:'g3/heredity/sim.html'}, {kind:'app', title:'게임: 완두 육종가 (교배·검정 교배·순종 만들기)', href:'g3/genetics/app-breeder.html'}, {kind:'quiz', title:'퀴즈 배틀 · 골든벨 (10문항, 모둠 대결)', href:'quiz/bell.html?u=21'}, {kind:'ws', title:'학습지 1~6차시 (12쪽)', href:'g3/genetics/worksheet.html'}]},
   { no:22, area:'gen', title:'재해·재난과 안전', code:'9과22', items:[{kind:'sim', title:'1차시 재해·재난의 종류와 특징', href:'g3/safety/sim.html#types'}, {kind:'sim', title:'2차시 지진 (P파·S파, 내진 설계)', href:'g3/safety/sim.html#quake'}, {kind:'sim', title:'3차시 태풍과 위험 반원', href:'g3/safety/sim.html#storm'}, {kind:'sim', title:'4차시 감염병 확산 모형', href:'g3/safety/sim.html#epi'}, {kind:'sim', title:'5차시 화학 사고 대피와 화재 안전', href:'g3/safety/sim.html#chem'}, {kind:'app', title:'게임: 재난 탈출 시뮬레이터 (지진·화재·태풍·화학 물질·감염병)', href:'g3/safety/app-escape.html'}, {kind:'quiz', title:'퀴즈 배틀 · 골든벨 (10문항, 모둠 대결)', href:'quiz/bell.html?u=22'}, {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g3/safety/worksheet.html'}]},
   { no:23, area:'gen', title:'과학과 나의 미래', code:'9과23', items:[{kind:'sim', title:'1차시 과학기술과 미래 사회', href:'g3/future/sim.html#tech'}, {kind:'sim', title:'2차시 과학 관련 직업 탐색', href:'g3/future/sim.html#jobs'}, {kind:'sim', title:'3차시 나의 진로 설계', href:'g3/future/sim.html#plan'}, {kind:'app', title:'게임: 미래 기술 카드 짝 (기술과 과학 원리)', href:'g3/future/app-match.html'}, {kind:'quiz', title:'퀴즈 배틀 · 골든벨 (10문항, 모둠 대결)', href:'quiz/bell.html?u=23'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g3/future/worksheet.html'}]}
+ ]},
+ { id:'hi1', level:'고', grade:'고1', book:'통합과학1', units:[
+  { no:24, disp:1, area:'gen', title:'과학의 기초', code:'통과1 Ⅰ', dir:'h1/base', items:[{kind:'sim', title:'1차시 기본량과 단위, 측정과 어림', href:''}, {kind:'sim', title:'2차시 아날로그 신호의 디지털 변환', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:25, disp:2, area:'earth', title:'자연의 구성 원소', code:'통과1 Ⅱ', dir:'h1/origin', items:[{kind:'sim', title:'1차시 스펙트럼과 우주의 구성 원소', href:''}, {kind:'sim', title:'2차시 빅뱅과 원소의 생성', href:''}, {kind:'sim', title:'3차시 별의 진화와 무거운 원소의 생성', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:26, disp:3, area:'chem', title:'물질의 규칙성과 결합', code:'통과1 Ⅱ', dir:'h1/bond', items:[{kind:'sim', title:'1차시 주기율표와 원소의 주기성', href:''}, {kind:'sim', title:'2차시 이온 결합', href:''}, {kind:'sim', title:'3차시 공유 결합과 물질의 성질', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:27, disp:4, area:'gen', title:'지각·생명체 구성 물질과 신소재', code:'통과1 Ⅱ', dir:'h1/material', items:[{kind:'sim', title:'1차시 규산염 광물의 구조', href:''}, {kind:'sim', title:'2차시 단백질과 핵산의 구조', href:''}, {kind:'sim', title:'3차시 반도체·초전도체·그래핀', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:28, disp:5, area:'earth', title:'지구시스템', code:'통과1 Ⅲ', dir:'h1/earthsys', items:[{kind:'sim', title:'1차시 지구시스템의 구성과 상호작용', href:''}, {kind:'sim', title:'2차시 물과 탄소의 순환', href:''}, {kind:'sim', title:'3차시 판 구조론과 지권의 변화', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:29, disp:6, area:'phy', title:'역학 시스템', code:'통과1 Ⅲ', dir:'h1/mech', items:[{kind:'sim', title:'1차시 자유 낙하와 수평 방향 운동', href:''}, {kind:'sim', title:'2차시 운동량과 충격량', href:''}, {kind:'sim', title:'3차시 충돌과 안전장치', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:30, disp:7, area:'bio', title:'생명 시스템', code:'통과1 Ⅲ', dir:'h1/life', items:[{kind:'sim', title:'1차시 세포막을 통한 물질 이동', href:''}, {kind:'sim', title:'2차시 물질대사와 효소', href:''}, {kind:'sim', title:'3차시 유전자 발현 (전사와 번역)', href:''}, {kind:'ws', title:'학습지', href:''}]}
+ ]},
+ { id:'hi2', level:'고', grade:'고1', book:'통합과학2', units:[
+  { no:31, disp:1, area:'earth', title:'지질 시대와 생물 다양성', code:'통과2 Ⅰ', dir:'h2/geo', items:[{kind:'sim', title:'1차시 지질 시대와 대멸종', href:''}, {kind:'sim', title:'2차시 변이와 자연선택', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:32, disp:2, area:'chem', title:'화학 변화', code:'통과2 Ⅰ', dir:'h2/redox', items:[{kind:'sim', title:'1차시 산화와 환원', href:''}, {kind:'sim', title:'2차시 산·염기와 중화 반응', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:33, disp:3, area:'bio', title:'생태계와 환경', code:'통과2 Ⅱ', dir:'h2/eco', items:[{kind:'sim', title:'1차시 생태계 구성 요소와 먹이 그물', href:''}, {kind:'sim', title:'2차시 생태 피라미드와 생태계 평형', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:34, disp:4, area:'earth', title:'지구 환경 변화', code:'통과2 Ⅱ', dir:'h2/climate', items:[{kind:'sim', title:'1차시 대기 대순환과 해류', href:''}, {kind:'sim', title:'2차시 엘니뇨와 라니냐', href:''}, {kind:'sim', title:'3차시 지구 온난화와 기후 변화', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:35, disp:5, area:'phy', title:'에너지와 발전', code:'통과2 Ⅱ', dir:'h2/power', items:[{kind:'sim', title:'1차시 에너지 전환과 효율', href:''}, {kind:'sim', title:'2차시 발전기와 전자기 유도', href:''}, {kind:'sim', title:'3차시 전력 수송과 손실', href:''}, {kind:'sim', title:'4차시 태양 에너지와 핵융합', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:36, disp:6, area:'gen', title:'과학과 미래 사회', code:'통과2 Ⅲ', dir:'h2/future', items:[{kind:'sim', title:'1차시 감염병의 확산과 예방', href:''}, {kind:'sim', title:'2차시 빅데이터와 과학 탐구', href:''}, {kind:'ws', title:'학습지', href:''}]}
+ ]},
+ { id:'phys', level:'고', grade:'고2', book:'물리학', units:[
+  { no:37, disp:1, area:'phy', title:'힘과 운동', code:'물리학 Ⅰ', dir:'p/motion', items:[{kind:'sim', title:'1차시 등가속도 운동', href:''}, {kind:'sim', title:'2차시 뉴턴 운동 법칙', href:''}, {kind:'sim', title:'3차시 운동량 보존과 충돌', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:38, disp:2, area:'phy', title:'에너지와 열', code:'물리학 Ⅰ', dir:'p/energy', items:[{kind:'sim', title:'1차시 역학적 에너지 보존', href:''}, {kind:'sim', title:'2차시 열역학 제1법칙', href:''}, {kind:'sim', title:'3차시 열기관과 열효율', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:39, disp:3, area:'phy', title:'전기와 자기', code:'물리학 Ⅱ', dir:'p/em', items:[{kind:'sim', title:'1차시 원자의 에너지 준위와 스펙트럼', href:''}, {kind:'sim', title:'2차시 에너지띠와 반도체·다이오드', href:''}, {kind:'sim', title:'3차시 전류에 의한 자기장', href:''}, {kind:'sim', title:'4차시 전자기 유도', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:40, disp:4, area:'phy', title:'빛과 물질', code:'물리학 Ⅲ', dir:'p/light', items:[{kind:'sim', title:'1차시 굴절과 전반사', href:''}, {kind:'sim', title:'2차시 파동의 간섭', href:''}, {kind:'sim', title:'3차시 빛의 입자성 (광전 효과)', href:''}, {kind:'sim', title:'4차시 물질파와 전자 현미경', href:''}, {kind:'ws', title:'학습지', href:''}]}
+ ]},
+ { id:'mech', level:'고', grade:'고3', book:'역학과 에너지', units:[
+  { no:41, disp:1, area:'phy', title:'평면 운동', code:'역학과 에너지 Ⅰ', dir:'m/plane', items:[{kind:'sim', title:'1차시 포물선 운동', href:''}, {kind:'sim', title:'2차시 등속 원운동', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:42, disp:2, area:'phy', title:'천체의 운동', code:'역학과 에너지 Ⅰ', dir:'m/orbit', items:[{kind:'sim', title:'1차시 케플러 법칙', href:''}, {kind:'sim', title:'2차시 만유인력과 인공위성', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:43, disp:3, area:'phy', title:'단진동', code:'역학과 에너지 Ⅰ', dir:'m/shm', items:[{kind:'sim', title:'1차시 용수철 진자의 단진동', href:''}, {kind:'sim', title:'2차시 단진자의 주기', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:44, disp:4, area:'phy', title:'열역학', code:'역학과 에너지 Ⅱ', dir:'m/gas', items:[{kind:'sim', title:'1차시 기체 분자 운동', href:''}, {kind:'sim', title:'2차시 열역학 과정과 P–V 그래프', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:45, disp:5, area:'phy', title:'탄성파와 소리', code:'역학과 에너지 Ⅲ', dir:'m/wave', items:[{kind:'sim', title:'1차시 도플러 효과', href:''}, {kind:'sim', title:'2차시 정상파와 공명', href:''}, {kind:'ws', title:'학습지', href:''}]}
+ ]},
+ { id:'eq', level:'고', grade:'고3', book:'전자기와 양자', units:[
+  { no:46, disp:1, area:'phy', title:'전기장과 전위', code:'전자기와 양자 Ⅰ', dir:'q/efield', items:[{kind:'sim', title:'1차시 전기장과 전기력선', href:''}, {kind:'sim', title:'2차시 전위와 등전위선', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:47, disp:2, area:'phy', title:'축전기와 회로', code:'전자기와 양자 Ⅰ', dir:'q/cap', items:[{kind:'sim', title:'1차시 축전기의 전기 용량', href:''}, {kind:'sim', title:'2차시 축전기의 충전과 방전', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:48, disp:3, area:'phy', title:'자기장과 교류', code:'전자기와 양자 Ⅰ', dir:'q/ac', items:[{kind:'sim', title:'1차시 자기장 속 전하의 운동', href:''}, {kind:'sim', title:'2차시 교류와 RLC 회로의 공명', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:49, disp:4, area:'phy', title:'빛의 파동성', code:'전자기와 양자 Ⅱ', dir:'q/wave', items:[{kind:'sim', title:'1차시 이중 슬릿 간섭', href:''}, {kind:'sim', title:'2차시 회절과 분해능', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:50, disp:5, area:'phy', title:'양자 현상', code:'전자기와 양자 Ⅱ', dir:'q/quantum', items:[{kind:'sim', title:'1차시 상자 속 입자와 에너지 양자화', href:''}, {kind:'sim', title:'2차시 양자 터널링', href:''}, {kind:'sim', title:'3차시 불확정성 원리', href:''}, {kind:'ws', title:'학습지', href:''}]}
  ]}
 ];
 
