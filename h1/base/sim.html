@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>과학의 기초 실험실 · 통합과학1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-gen">
+<div class="wrap">
+  <nav class="topbar" data-topbar="통합과학1|01 과학의 기초" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학1 · 01 과학의 기초 <span class="code">통과1 Ⅰ</span></div>
+      <h1>과학의 기초 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="measure">1. 측정과 어림</button>
+      <button type="button" data-mode="digital">2. 디지털 변환</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="측정 실험 장치"></canvas></div>
+      <div class="controls">
+        <div class="field" data-only="measure"><div class="seg" id="mSeg"><button type="button" data-m="read">눈금 읽기</button><button type="button" data-m="acc">정확도·정밀도</button></div></div>
+        <div class="field" data-only="measure" id="rulF"><div class="seg" id="rSeg"><button type="button" data-r="cm">1 cm 눈금 자</button><button type="button" data-r="mm">1 mm 눈금 자</button></div></div>
+        <button class="btn" type="button" id="newObj" data-only="measure">다른 물체</button>
+        <label class="field" data-only="measure" id="biasF" for="bias">계통 오차 <input type="range" id="bias" min="0" max="3" step="0.5" value="0"><output id="biasOut">0</output></label>
+        <label class="field" data-only="measure" id="sprF" for="spr">우연 오차 <input type="range" id="spr" min="0.2" max="3" step="0.2" value="1"><output id="sprOut">1</output></label>
+        <button class="btn primary" type="button" id="shoot" data-only="measure">10번 측정</button>
+        <div class="field" data-only="digital"><div class="seg" id="wSeg"><button type="button" data-w="sine">사인파</button><button type="button" data-w="voice">목소리</button><button type="button" data-w="temp">하루 기온</button></div></div>
+        <label class="field" data-only="digital" for="fs">표본화 간격 수 <input type="range" id="fs" min="4" max="64" step="1" value="12"><output id="fsOut">12</output></label>
+        <label class="field" data-only="digital" for="bits">양자화 비트 <input type="range" id="bits" min="1" max="8" step="1" value="3"><output id="bitsOut">3비트</output></label>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>같은 연필을 1 cm 눈금 자와 1 mm 눈금 자로 쟀을 때 측정값의 자릿수가 다른 까닭은?</summary>
+        <p>측정값은 최소 눈금의 1/10까지 어림하여 읽습니다. 1 cm 눈금 자는 0.1 cm 자리까지, 1 mm 눈금 자는 0.01 cm(0.1 mm) 자리까지 읽을 수 있어 1 mm 눈금 자의 측정값이 유효 숫자가 하나 더 많습니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>정밀하지만 정확하지 않은 측정은 어떤 경우일까?</summary>
+        <p>측정값끼리는 서로 가깝게 모여 있지만(정밀) 참값에서 한쪽으로 치우친 경우입니다. 영점이 맞지 않은 저울처럼 계통 오차가 있을 때 생기며, 측정을 여러 번 평균해도 줄어들지 않으므로 기기를 보정해야 합니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>표본화 간격을 촘촘하게, 비트 수를 크게 하면 무엇이 좋고 무엇이 나빠질까?</summary>
+        <p>원래 아날로그 신호에 더 가깝게 복원되어 정보 손실(오차)이 줄어듭니다. 하지만 저장해야 할 데이터의 양(표본 수 × 비트 수)이 늘어나 저장 공간과 전송 시간이 더 필요합니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="측정값은 모형 데이터입니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+const OBJ = [['연필', 14.37, '#e8b84a'], ['지우개', 4.62, '#f0f0f0'], ['클립', 3.18, '#9aa4b0'], ['열쇠', 6.84, '#c9a24a'], ['머리핀', 5.55, '#333']];
+const st = {mode: 'measure', m: 'read', r: 'mm', oi: 0, bias: 0, spr: 1, shots: [], fs: 12, bits: 3, w: 'sine', t: 0};
+/* ===== 1. 측정과 어림 ===== */
+function reading(){ const L = OBJ[st.oi][1]; return st.r === 'cm' ? (Math.round(L * 10) / 10).toFixed(1) : (Math.round(L * 100) / 100).toFixed(2); }
+function drawRead(){
+  const g = S.g, x0 = 50, x1 = S.w - 40, cmMax = 16, X = v => x0 + (x1 - x0) * v / cmMax, y = S.h * .55, [nm, L, col] = OBJ[st.oi];
+  label(g, `${nm}의 길이를 ${st.r === 'cm' ? '1 cm' : '1 mm'} 눈금 자로 재기 — 최소 눈금의 1/10까지 어림하여 읽어요`, S.w / 2, 24, {size: 13, weight: 600});
+  // 물체
+  g.fillStyle = col; g.strokeStyle = C.ink; g.lineWidth = 1.2;
+  if (nm === '연필') { g.fillRect(X(0), y - 34, X(L - 1.2) - X(0), 18); g.strokeRect(X(0), y - 34, X(L - 1.2) - X(0), 18); g.fillStyle = '#e9d3a8'; g.beginPath(); g.moveTo(X(L - 1.2), y - 34); g.lineTo(X(L), y - 25); g.lineTo(X(L - 1.2), y - 16); g.fill(); g.stroke(); }
+  else { g.beginPath(); g.roundRect ? g.roundRect(X(0), y - 40, X(L) - X(0), 26, 6) : g.rect(X(0), y - 40, X(L) - X(0), 26); g.fill(); g.stroke(); }
+  // 자
+  g.fillStyle = '#f6e7b8'; g.fillRect(X(-.3), y, X(cmMax) - X(-.3) + 10, 52); g.strokeStyle = '#a08a50'; g.strokeRect(X(-.3), y, X(cmMax) - X(-.3) + 10, 52);
+  for (let mm = 0; mm <= cmMax * 10; mm++) { const isCm = mm % 10 === 0; if (st.r === 'cm' && !isCm) continue; const xx = X(mm / 10), h = isCm ? 22 : mm % 5 === 0 ? 15 : 9; g.strokeStyle = '#333'; g.lineWidth = 1; g.beginPath(); g.moveTo(xx, y); g.lineTo(xx, y + h); g.stroke(); if (isCm) label(g, mm / 10, xx, y + 34, {size: 11, color: '#333'}); }
+  label(g, 'cm', X(cmMax) + 2, y + 34, {size: 10, color: '#333', align: 'left'});
+  // 확대경
+  const zx = S.w * .7, zy = S.h * .2, zr = Math.min(80, S.h * .17), zoom = st.r === 'cm' ? 5 : 14; g.save(); g.beginPath(); g.arc(zx, zy + 20, zr, 0, TAU); g.clip(); g.fillStyle = C.surface; g.fillRect(zx - zr, zy + 20 - zr, zr * 2, zr * 2);
+  const ZX = v => zx + (v - L) * (x1 - x0) / cmMax * zoom / 2.4, zy0 = zy + 30; g.fillStyle = '#f6e7b8'; g.fillRect(zx - zr, zy0, zr * 2, 60);
+  for (let mm = Math.floor((L - 1) * 10); mm <= Math.ceil((L + 1) * 10); mm++) { const isCm = mm % 10 === 0; if (st.r === 'cm' && !isCm) continue; const xx = ZX(mm / 10); g.strokeStyle = '#333'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(xx, zy0); g.lineTo(xx, zy0 + (isCm ? 30 : mm % 5 === 0 ? 22 : 14)); g.stroke(); if (isCm || st.r === 'mm' && mm % 5 === 0) label(g, isCm ? mm / 10 : '', xx, zy0 + 42, {size: 12, color: '#333'}); }
+  g.fillStyle = col; g.fillRect(zx - zr, zy0 - 26, ZX(L) - (zx - zr), 22); g.strokeStyle = C.hot; g.lineWidth = 2; g.beginPath(); g.moveTo(ZX(L), zy0 - 30); g.lineTo(ZX(L), zy0 + 34); g.stroke();
+  g.restore(); g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.arc(zx, zy + 20, zr, 0, TAU); g.stroke(); g.beginPath(); g.moveTo(zx + zr * .7, zy + 20 + zr * .7); g.lineTo(zx + zr * 1.1, zy + 20 + zr * 1.1); g.stroke(); label(g, '돋보기로 끝부분 확대', zx, zy + 20 + zr + 14, {size: 10, color: C.muted});
+  label(g, `측정값 = ${reading()} cm`, S.w * .3, S.h * .2, {size: 20, weight: 700, color: C.accent});
+  const r = reading(), sig = r.replace('.', '').replace(/^0+/, '').length; label(g, `확실한 숫자 + 어림한 마지막 한 자리 → 유효 숫자 ${sig}개`, S.w * .3, S.h * .2 + 28, {size: 12, color: C.muted});
+}
+function shoot(){ st.shots = Array.from({length: 10}, () => { const a = Math.random() * TAU, rr = Math.sqrt(-2 * Math.log(Math.random() + 1e-9)) * st.spr * .5; return [st.bias + Math.cos(a) * rr, Math.sin(a) * rr * .8 + st.bias * .3]; }); }
+function drawAcc(){
+  const g = S.g, cx = S.w * .32, cy = S.h * .52, R = Math.min(S.w * .26, S.h * .42), sc = R / 5;
+  for (let k = 5; k >= 1; k--) { g.fillStyle = k % 2 ? '#f4f1e8' : '#e3ddcd'; g.beginPath(); g.arc(cx, cy, k * sc, 0, TAU); g.fill(); } g.fillStyle = C.hot; g.beginPath(); g.arc(cx, cy, 4, 0, TAU); g.fill(); label(g, '참값', cx, cy - 12, {size: 10, color: C.hot, weight: 700});
+  st.shots.forEach(([x, y]) => { g.fillStyle = C.phy; g.beginPath(); g.arc(cx + x * sc, cy + y * sc, 5, 0, TAU); g.fill(); });
+  if (st.shots.length) { const mx = st.shots.reduce((a, s) => a + s[0], 0) / 10, my = st.shots.reduce((a, s) => a + s[1], 0) / 10; g.strokeStyle = C.accent; g.lineWidth = 2; g.beginPath(); g.moveTo(cx + mx * sc - 8, cy + my * sc); g.lineTo(cx + mx * sc + 8, cy + my * sc); g.moveTo(cx + mx * sc, cy + my * sc - 8); g.lineTo(cx + mx * sc, cy + my * sc + 8); g.stroke(); label(g, '평균', cx + mx * sc + 12, cy + my * sc - 10, {size: 10, color: C.accent, align: 'left'}); }
+  const A = accStats(); label(g, '측정값의 분포 (과녁 모형)', cx, 22, {size: 13, weight: 600});
+  if (A) { const rx = S.w * .74; label(g, A.acc ? '정확도 높음 ✔' : '정확도 낮음 ✖', rx, S.h * .35, {size: 16, weight: 700, color: A.acc ? C.bio : C.hot}); label(g, A.pre ? '정밀도 높음 ✔' : '정밀도 낮음 ✖', rx, S.h * .35 + 30, {size: 16, weight: 700, color: A.pre ? C.bio : C.hot}); label(g, `평균의 치우침 ${A.off.toFixed(2)} · 흩어짐 ${A.sd.toFixed(2)}`, rx, S.h * .35 + 60, {size: 12, color: C.muted}); }
+}
+function accStats(){ if (!st.shots.length) return null; const mx = st.shots.reduce((a, s) => a + s[0], 0) / 10, my = st.shots.reduce((a, s) => a + s[1], 0) / 10, off = Math.hypot(mx, my), sd = Math.sqrt(st.shots.reduce((a, s) => a + (s[0] - mx) ** 2 + (s[1] - my) ** 2, 0) / 10); return {off, sd, acc: off < .8, pre: sd < .9}; }
+/* ===== 2. 디지털 변환 ===== */
+function sig(u){ if (st.w === 'sine') return Math.sin(u * TAU * 2); if (st.w === 'voice') return .55 * Math.sin(u * TAU * 3) + .3 * Math.sin(u * TAU * 7 + 1) + .15 * Math.sin(u * TAU * 13); return Math.sin((u - .3) * TAU) * .85 + .1 * Math.sin(u * TAU * 5); }
+function samples(){ const n = st.fs, L = Math.pow(2, st.bits); return Array.from({length: n + 1}, (_, i) => { const u = i / n, v = sig(u), q = Math.round((v + 1) / 2 * (L - 1)); return {u, v, q, vq: q / (L - 1) * 2 - 1}; }); }
+function drawDigital(){
+  const g = S.g, m = axes(S, {x: [0, 1, .1, '시간'], y: [-1, 1, .5, '신호 세기']}, {L: 48, B: 28, T: 30});
+  const L = Math.pow(2, st.bits); for (let k = 0; k < L; k++) { const v = k / (L - 1) * 2 - 1; g.strokeStyle = 'rgba(120,120,120,.18)'; g.setLineDash([2, 4]); g.beginPath(); g.moveTo(m.X(0), m.Y(v)); g.lineTo(m.X(1), m.Y(v)); g.stroke(); g.setLineDash([]); if (L <= 16) label(g, k.toString(2).padStart(st.bits, '0'), m.X(1) + 4, m.Y(v), {size: 9, color: C.muted, align: 'left'}); }
+  const P = []; for (let i = 0; i <= 400; i++) P.push([i / 400, sig(i / 400)]); line(S, P, m, C.line, 2);
+  const sm = samples(); g.strokeStyle = C.accent; g.lineWidth = 2.5; g.beginPath(); sm.forEach((s, i) => { const x0 = m.X(s.u), x1 = m.X(Math.min(1, s.u + 1 / st.fs)); if (i === 0) g.moveTo(x0, m.Y(s.vq)); else g.lineTo(x0, m.Y(s.vq)); if (i < sm.length - 1) g.lineTo(x1, m.Y(s.vq)); }); g.stroke();
+  sm.forEach(s => { g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(s.u), m.Y(s.vq), 3.5, 0, TAU); g.fill(); g.strokeStyle = 'rgba(220,90,60,.35)'; g.beginPath(); g.moveTo(m.X(s.u), m.Y(s.v)); g.lineTo(m.X(s.u), m.Y(s.vq)); g.stroke(); });
+  label(g, '회색: 아날로그 신호 · 빨간 점: 표본화+양자화한 값 · 주황: 복원한 디지털 신호', S.w / 2, 14, {size: 11, color: C.muted});
+}
+function err(){ const sm = samples(); let e = 0; for (let i = 0; i < 400; i++) { const u = i / 400, k = Math.min(st.fs, Math.floor(u * st.fs)); e += Math.abs(sig(u) - sm[k].vq); } return e / 400; }
+/* ===== 표·그래프·설명 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'measure') { if (st.m === 'read') { const m = axes(G, {x: [0, 5, 1, ''], y: [0, 4, 1, '유효 숫자 수']}); const r = ['1 cm 자', '1 mm 자'].map((n, i) => { const L = OBJ[st.oi][1], v = i ? (Math.round(L * 100) / 100).toFixed(2) : (Math.round(L * 10) / 10).toFixed(1); return [n, v.replace('.', '').replace(/^0+/, '').length, v]; });
+      r.forEach(([n, k, v], i) => { const x = m.X(1.2 + i * 2.2); g.fillStyle = i ? C.accent : C.phy; g.fillRect(x - 30, m.Y(k), 60, m.Y(0) - m.Y(k)); label(g, `${n}: ${v} cm`, x, m.Y(0) + 14, {size: 11}); label(g, k + '개', x, m.Y(k) - 10, {size: 11, weight: 700}); }); }
+    else { const m = axes(G, {x: [0, 11, 1, '측정 번호'], y: [-4, 6, 2, '참값과의 차']}); line(G, [[0, 0], [11, 0]], m, C.hot, 1.5, [4, 4]); st.shots.forEach(([x], i) => { g.fillStyle = C.phy; g.beginPath(); g.arc(m.X(i + 1), m.Y(x), 4, 0, TAU); g.fill(); }); } }
+  else { const m = axes(G, {x: [1, 8, 1, '양자화 비트 수'], y: [0, .5, .1, '평균 오차']}); const P = []; const keep = st.bits; for (let b = 1; b <= 8; b++) { st.bits = b; P.push([b, err()]); } st.bits = keep; line(G, P, m, C.accent, 2.5); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.bits), m.Y(err()), 5, 0, TAU); g.fill(); label(g, `표본 ${st.fs + 1}개 기준`, m.X(6), m.Y(.45), {size: 11, color: C.muted}); } }
+function ledger(){ const s = $('stats');
+  if (st.mode === 'measure') { if (st.m === 'read') { s.innerHTML = `<div><b>${reading()} cm</b><span>측정값</span></div><div><b>${st.r === 'cm' ? '0.1 cm' : '0.01 cm'}</b><span>어림한 자리</span></div>`; $('explain').innerHTML = '<b>측정값</b>은 확실한 숫자에 <b>어림한 숫자 한 자리</b>를 더해 나타냅니다. 이 숫자들을 <b>유효 숫자</b>라고 해요. 눈금이 촘촘한 도구일수록 더 많은 자릿수를 얻을 수 있어요.'; $('tip').textContent = '국제단위계(SI) 기본량 7가지: 길이(m), 질량(kg), 시간(s), 전류(A), 온도(K), 물질량(mol), 광도(cd).'; }
+    else { const A = accStats(); s.innerHTML = A ? `<div><b>${A.off.toFixed(2)}</b><span>평균의 치우침</span></div><div><b>${A.sd.toFixed(2)}</b><span>흩어진 정도</span></div>` : '<div><b>–</b><span>[10번 측정]을 누르세요</span></div>'; $('explain').innerHTML = '<b>정확도</b>: 측정값이 참값에 얼마나 가까운가 (계통 오차가 작을수록 높음). <b>정밀도</b>: 측정값끼리 얼마나 가깝게 모여 있는가 (우연 오차가 작을수록 높음).'; $('tip').textContent = '계통 오차는 영점 조절·보정으로, 우연 오차는 여러 번 측정해 평균을 내면 줄일 수 있어요.'; } }
+  else { const n = st.fs + 1, bits = n * st.bits; s.innerHTML = `<div><b>${n}개</b><span>표본 수</span></div><div><b>${Math.pow(2, st.bits)}단계</b><span>표현 가능한 값</span></div><div><b>${bits}비트</b><span>데이터 양</span></div><div><b>${err().toFixed(3)}</b><span>평균 오차</span></div>`;
+    $('explain').innerHTML = '아날로그 신호를 디지털로 바꾸려면 ① 일정한 시간 간격으로 값을 뽑는 <b>표본화</b>, ② 그 값을 정해진 단계로 어림하는 <b>양자화</b>, ③ 0과 1로 나타내는 <b>부호화</b>를 거칩니다.'; $('tip').textContent = 'n비트로는 2ⁿ가지 값을 나타낼 수 있어요. 디지털 정보는 복제·전송해도 잡음에 강해 정보가 거의 손상되지 않아요.'; } }
+function table(){ const th = $('thead'), tb = $('tbody');
+  if (st.mode === 'measure') { th.innerHTML = '<tr><th>기본량</th><th>단위</th><th>기호</th></tr>'; tb.innerHTML = [['길이', '미터', 'm'], ['질량', '킬로그램', 'kg'], ['시간', '초', 's'], ['전류', '암페어', 'A'], ['온도', '켈빈', 'K'], ['물질량', '몰', 'mol'], ['광도', '칸델라', 'cd']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); $('tTitle').textContent = '국제단위계(SI) 기본량'; }
+  else { const sm = samples(); th.innerHTML = '<tr><th>표본</th><th>원래 값</th><th>양자화 단계</th><th>부호(2진수)</th></tr>'; tb.innerHTML = sm.slice(0, 9).map((s, i) => `<tr><td>${i}</td><td>${s.v.toFixed(2)}</td><td>${s.q}</td><td style="font-family:var(--f-mono)">${s.q.toString(2).padStart(st.bits, '0')}</td></tr>`).join('') + (sm.length > 9 ? '<tr><td colspan="4">…</td></tr>' : ''); $('tTitle').textContent = '부호화 결과 (앞 9개)'; } }
+function render(){ ledger(); table(); $('gTitle').textContent = st.mode === 'measure' ? (st.m === 'read' ? '자의 종류와 유효 숫자' : '측정값의 오차') : '비트 수와 오차'; $('gSub').textContent = st.mode === 'digital' ? '비트 수가 늘수록 오차가 줄지만 데이터 양은 늘어나요' : ''; }
+/* ===== 조작 ===== */
+Kit.seg($('mSeg'), 'm', v => { st.m = v; ['rulF', 'newObj'].forEach(id => $(id).style.display = v === 'read' ? '' : 'none'); ['biasF', 'sprF', 'shoot'].forEach(id => $(id).style.display = v === 'acc' ? '' : 'none'); render(); })('read');
+Kit.seg($('rSeg'), 'r', v => { st.r = v; render(); })('mm');
+Kit.seg($('wSeg'), 'w', v => { st.w = v; render(); })('sine');
+$('newObj').onclick = () => { st.oi = (st.oi + 1) % OBJ.length; render(); };
+$('bias').oninput = e => { st.bias = +e.target.value; $('biasOut').textContent = st.bias; }; $('spr').oninput = e => { st.spr = +e.target.value; $('sprOut').textContent = st.spr; };
+$('shoot').onclick = () => { shoot(); render(); };
+$('fs').oninput = e => { st.fs = +e.target.value; $('fsOut').textContent = st.fs; render(); }; $('bits').oninput = e => { st.bits = +e.target.value; $('bitsOut').textContent = st.bits + '비트'; render(); };
+Kit.tabs(m => { st.mode = m; if (m === 'measure') $('mSeg').querySelector(`[data-m="${st.m}"]`).click(); render(); }, ['measure', 'digital']);
+Kit.loop(() => {}, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); if (st.mode === 'measure') (st.m === 'read' ? drawRead : drawAcc)(); else drawDigital(); drawGraph(); });
+})();
+</script>
+</body>
+</html>
