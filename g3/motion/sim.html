@@ -159,6 +159,10 @@ function drawEnergyExp(){
 
 /* ===== 5. 역학적 에너지 ===== */
 const H0 = 20, L = 1, TH0 = .9;
+function mechDisp(E, tot0, dec){ // 표시용: 반올림 후에도 위치 + 운동 + 열 = 처음 에너지가 정확히 맞게
+  const f = Math.pow(10, dec), r = n => Math.round(n * f) / f, pe = r(E.pe), heat = st.fric ? r(st.heat) : 0, tot = r(tot0), ke = Math.max(0, r(tot - heat - pe));
+  return {pe, ke, heat, mech: r(pe + ke)}; }
+function mechTot(){ return st.mc === 'pend' ? g9 * L * (1 - Math.cos(TH0)) * 10 : st.mc === 'drop' ? g9 * H0 : .5 * 14 * 14; }
 function mechState(){ const m = 1;
   if (st.mc === 'drop') { const h = Math.max(0, H0 - st.y); const pe = g9 * m * h, ke = .5 * m * st.vy * st.vy; return {pe, ke, h}; }
   if (st.mc === 'toss') { const h = Math.max(0, st.y); return {pe: g9 * m * h, ke: .5 * m * st.vy * st.vy, h}; }
@@ -175,16 +179,26 @@ function drawMech(){
     const h = st.mc === 'drop' ? Math.max(0, H0 - st.y) : Math.max(0, st.y); g.fillStyle = C.hot; g.beginPath(); g.arc(cx, Y(Math.min(20, h)) - 8, 9, 0, TAU); g.fill();
     if (st.mc === 'toss') label(g, '처음 속력 14 m/s로 위로 던짐', cx, 18, {size: 11, color: C.muted}); }
   // 막대그래프
-  const bx = S.w * .62, bw = 50, base = S.h - 40, Hb = S.h - 110, sc = Hb / tot0, bars = [['위치', E.pe, C.phy], ['운동', E.ke, C.hot], ['역학적', E.pe + E.ke, C.bio]]; if (st.fric) bars.push(['열 등', st.heat, C.muted]);
+  const D = mechDisp(E, tot0, 0), bx = S.w * .62, bw = 50, base = S.h - 40, Hb = S.h - 110, sc = Hb / tot0, bars = [['위치', D.pe, C.phy], ['운동', D.ke, C.hot], ['역학적', D.mech, C.bio]]; if (st.fric) bars.push(['열 등', D.heat, C.muted]);
   bars.forEach(([n, v, col], i) => { const x = bx + i * (bw + 14); g.fillStyle = col; g.fillRect(x, base - v * sc, bw, v * sc); label(g, n, x + bw / 2, base + 14, {size: 11}); label(g, v.toFixed(0) + ' J', x + bw / 2, base - v * sc - 10, {size: 10, weight: 700}); });
   g.strokeStyle = C.ink; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(bx - 6, base - tot0 * sc); g.lineTo(bx + bars.length * (bw + 14), base - tot0 * sc); g.stroke(); g.setLineDash([]);
   label(g, '질량 1 kg 기준' + (st.mc === 'pend' ? ' (진자 에너지는 10배로 확대 표시)' : ''), bx + 100, 20, {size: 10, color: C.muted});
 }
 function stepMech(dt){
-  const k = st.fric ? .06 : 0;
-  if (st.mc === 'drop') { if (st.y < H0) { const a = g9 - k * 4 * st.vy * Math.abs(st.vy) / 40; const e0 = .5 * st.vy * st.vy; st.vy += a * dt; st.y = Math.min(H0, st.y + st.vy * dt); if (k) st.heat = Math.max(0, g9 * H0 - (g9 * Math.max(0, H0 - st.y) + .5 * st.vy * st.vy)); st.hist.push([st.y, mechState()]); } }
-  else if (st.mc === 'toss') { if (st.phase < 2) { const a = -g9 - k * 4 * st.vy * Math.abs(st.vy) / 40; st.vy += a * dt; st.y += st.vy * dt; if (st.y <= 0 && st.vy < 0) { st.y = 0; st.vy = 0; st.phase = 2; } if (k) st.heat = Math.max(0, .5 * 196 - (g9 * Math.max(0, st.y) + .5 * st.vy * st.vy)); st.hist.push([st.rt, mechState()]); } }
-  else { for (let i = 0; i < 4; i++) { const d = dt / 4, a = -g9 / L * Math.sin(st.th) - k * 3 * st.om; st.om += a * d; st.th += st.om * d; } if (k) st.heat = Math.max(0, g9 * L * (1 - Math.cos(TH0)) * 10 - (mechState().pe + mechState().ke)); st.hist.push([st.rt, mechState()]); if (st.hist.length > 900) st.hist.shift(); }
+  // 마찰이 없으면 정확한 식(등가속도 운동, 에너지 보존)으로 계산해 반올림 오차 외의 어긋남이 생기지 않게 한다.
+  const k = st.fric ? .06 : 0, t = st.rt;
+  if (st.mc === 'drop') { if (st.y >= H0) return;
+    if (!k) { const tl = Math.sqrt(2 * H0 / g9), tt = Math.min(t, tl); st.y = .5 * g9 * tt * tt; st.vy = g9 * tt; if (t >= tl) { st.y = H0; st.vy = Math.sqrt(2 * g9 * H0); } }
+    else { for (let i = 0; i < 8; i++) { const d = dt / 8, a = g9 - k * 4 * st.vy * Math.abs(st.vy) / 40; st.vy += a * d; st.y = Math.min(H0, st.y + st.vy * d); } st.heat = Math.max(0, g9 * H0 - (g9 * (H0 - st.y) + .5 * st.vy * st.vy)); }
+    st.hist.push([st.y, mechState()]); }
+  else if (st.mc === 'toss') { if (st.phase >= 2) return; const v0 = 14;
+    if (!k) { const tl = 2 * v0 / g9; if (t >= tl) { st.y = 0; st.vy = -v0; st.phase = 2; } else { st.y = v0 * t - .5 * g9 * t * t; st.vy = v0 - g9 * t; } }
+    else { for (let i = 0; i < 8; i++) { const d = dt / 8, a = -g9 - k * 4 * st.vy * Math.abs(st.vy) / 40; st.vy += a * d; st.y += st.vy * d; } if (st.y <= 0 && st.vy < 0) { st.y = 0; st.phase = 2; } st.heat = Math.max(0, .5 * v0 * v0 - (g9 * Math.max(0, st.y) + .5 * st.vy * st.vy)); }
+    st.hist.push([st.rt, mechState()]); }
+  else { for (let i = 0; i < 16; i++) { const d = dt / 16, a = -g9 / L * Math.sin(st.th) - k * 3 * st.om; st.om += a * d; st.th += st.om * d; }
+    if (!k) { const w2 = 2 * g9 / L * (Math.cos(st.th) - Math.cos(TH0)); st.om = (st.om >= 0 ? 1 : -1) * Math.sqrt(Math.max(0, w2)); if (Math.abs(st.th) > TH0) st.th = Math.sign(st.th) * TH0; }
+    else st.heat = Math.max(0, g9 * L * (1 - Math.cos(TH0)) * 10 - (mechState().pe + mechState().ke));
+    st.hist.push([st.rt, mechState()]); if (st.hist.length > 900) st.hist.shift(); }
 }
 
 /* ===== 그래프 ===== */
@@ -225,7 +239,7 @@ function ledger(){
   else if (st.mode === 'energy') { s = st.en === 'pe' ? stat('위치 에너지', PE().toFixed(1), ' J') + stat('질량 × 높이', (st.m * st.h).toFixed(1)) : stat('운동 에너지', KE().toFixed(1), ' J') + stat('속력²', st.vel * st.vel);
     e = st.en === 'pe' ? '<b>에너지</b>: 일을 할 수 있는 능력. <b>중력에 의한 위치 에너지</b>: 기준면으로부터 높은 곳에 있는 물체가 가진 에너지 = 9.8 × 질량 × 높이. 물체를 들어 올리는 데 한 일만큼 위치 에너지가 늘어납니다.' : '<b>운동 에너지</b>: 운동하는 물체가 가진 에너지 = ½ × 질량 × 속력². 질량에 비례하고 속력의 제곱에 비례합니다. 운동하는 물체가 다른 물체에 일을 할 수 있습니다.';
     t = st.en === 'pe' ? '질량과 높이를 바꾸어 [시작]하고, 말뚝이 박힌 깊이를 비교하세요.' : '속력을 2배로 하면 나무 도막이 밀려나는 거리는 몇 배가 될까요?'; }
-  else { const E = mechState(); s = stat('위치 에너지', E.pe.toFixed(1), ' J') + stat('운동 에너지', E.ke.toFixed(1), ' J');
+  else { const D = mechDisp(mechState(), mechTot(), 1); s = stat('위치 에너지', D.pe.toFixed(1), ' J') + stat('운동 에너지', D.ke.toFixed(1), ' J');
     e = '<b>역학적 에너지</b> = 위치 에너지 + 운동 에너지. 물체가 내려가면 위치 에너지가 운동 에너지로, 올라가면 운동 에너지가 위치 에너지로 <b>전환</b>됩니다. 공기 저항과 마찰이 없으면 역학적 에너지는 항상 일정하게 <b>보존</b>됩니다.';
     t = '[공기 저항·마찰 있음]을 켜면 역학적 에너지가 줄어들고 그만큼 열에너지 등이 생깁니다.'; }
   $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
@@ -252,7 +266,7 @@ Kit.tabs(m => { st.mode = m; reset(); table(); $('fF').hidden = !(m === 'work' &
   $('gTitle').textContent = {uniform: '시간–이동 거리 · 시간–속력 그래프', fall: '시간–속력 · 시간–낙하 거리 그래프', work: '힘–이동 거리 그래프', energy: '', mech: st.mc === 'drop' ? '낙하 거리에 따른 에너지' : '시간에 따른 에너지'}[m];
   $('gSub').textContent = {uniform: '', fall: '점선: 진공 속 이론값', work: '색칠한 넓이 = 한 일', energy: '', mech: '파랑: 위치 · 빨강: 운동 · 초록: 역학적 에너지'}[m]; syncEn(); }, ['uniform', 'fall', 'work', 'energy', 'mech']);
 Kit.loop(dt => { st.t += dt; if (!st.run) return; st.rt += dt;
-    if (st.mode === 'fall') { if (st.y < 20) { st.vy += fallAcc(st.vy) * dt; st.y += st.vy * dt; st.hist.push([st.rt, st.y, st.vy]); } else st.run = false; }
+    if (st.mode === 'fall') { if (st.y < 20) { if (st.vac || st.obj === 'ball' && false) { st.y = Math.min(20, .5 * g9 * st.rt * st.rt); st.vy = g9 * st.rt; } else { for (let i = 0; i < 8; i++) { st.vy += fallAcc(st.vy) * dt / 8; st.y += st.vy * dt / 8; } } st.hist.push([st.rt, st.y, st.vy]); } else st.run = false; }
     if (st.mode === 'uniform' && st.v * st.rt >= 8) st.run = false;
     if (st.mode === 'energy') { if (st.en === 'pe') { st.phase = 1; const fall = .5 * g9 * st.rt * st.rt; if (fall >= st.h) { st.depth = Math.min(PE() * 1.2, st.depth + dt * 120); if (st.depth >= PE() * 1.2) st.run = false; } }
       else { st.phase = 1; const cx = 70 + st.vel * st.rt * 90; if (cx >= S.w * .55 - 24) { st.slide = Math.min(KE() * 5 * 1.2, st.slide + dt * 120); if (st.slide >= KE() * 6) st.run = false; } } }

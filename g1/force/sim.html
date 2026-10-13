@@ -350,12 +350,12 @@ function ledger(){
     t = '완전히 잠긴 뒤에는 더 깊이 넣어도 부력이 변하지 않습니다. 진한 소금물에서는 부력이 더 큽니다.';
   } else if (k === 'net') {
     const p = st.puck, sp = Math.hypot(p.vx, p.vy);
-    s = stat('알짜힘', st.fdir === 'none' ? '0' : '있음') + stat('속력', (sp * 100).toFixed(1));
+    s = stat('알짜힘', st.fdir === 'none' ? '0' : '있음') + stat('속력 (상대값)', (sp * 100).toFixed(1));
     e = '<b>알짜힘이 0</b>이면 운동 상태가 변하지 않습니다. 알짜힘이 0이 아니면 <b>속력</b>이나 <b>운동 방향</b>, 또는 둘 다 변합니다.';
     t = '힘의 방향을 바꾸며 관찰하면 기록표에 운동 변화가 자동으로 분류됩니다.';
   } else {
     const f = subForces();
-    s = stat('중력', f.W.toFixed(1), 'N') + stat('부력', f.B.toFixed(1), 'N') + stat('알짜힘', Math.abs(f.B - f.W).toFixed(1), 'N') + stat('상태', Math.abs(st.svy) < 0.01 ? '멈춤' : st.svy > 0 ? '떠오름' : '가라앉음');
+    s = stat('중력', f.W.toFixed(1), 'N') + stat('부력', f.B.toFixed(1), 'N') + stat('알짜힘', (st.sy <= -0.42 && f.W > f.B ? 0 : Math.abs(Math.round(f.B * 10) - Math.round(f.W * 10)) / 10).toFixed(1), 'N') + stat('상태', st.sy <= -0.42 && f.W > f.B ? '바닥에 닿음' : Math.abs(f.B - f.W) < 0.05 ? '멈춤 (평형)' : f.B > f.W ? '떠오르는 중' : '가라앉는 중');
     e = '잠수정은 물탱크에 물을 넣거나 빼서 <b>중력</b>을 조절합니다. 중력이 부력보다 크면 가라앉고, 작으면 떠오르며, <b>같으면 평형</b>이 되어 그 깊이에 머무릅니다.';
     t = '물탱크의 물을 조절해 잠수정을 초록색 목표 구간에 멈추게 해 보세요. 성공한 값을 [기록]하세요.';
   }
