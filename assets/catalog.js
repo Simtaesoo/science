@@ -50,7 +50,9 @@ window.CATALOG = [
     {kind:'sim', title:'1차시 원소와 화합물 (분자 만들기·물의 전기 분해)', href:'g2/atom/sim.html#comp'}, {kind:'sim', title:'2차시 원자의 구조', href:'g2/atom/sim.html#atom'},
     {kind:'sim', title:'3차시 주기율표와 성질이 비슷한 원소', href:'g2/atom/sim.html#table'}, {kind:'sim', title:'4차시 원자·분자·이온', href:'g2/atom/sim.html#ion'},
     {kind:'ws', title:'학습지 1~4차시 (8쪽)', href:'g2/atom/worksheet.html'} ]},
-  { no:12, area:'bio', title:'식물과 에너지', code:'9과12', items:[{kind:'sim', title:'광합성에 영향을 주는 요인'}]},
+  { no:12, area:'bio', title:'식물과 에너지', code:'9과12', items:[
+    {kind:'sim', title:'1차시 광합성과 환경 요인 (실험 설계)', href:'g2/plant/sim.html#photo'}, {kind:'sim', title:'2차시 광합성과 호흡 (BTB 실험)', href:'g2/plant/sim.html#resp'},
+    {kind:'sim', title:'3차시 광합성 산물의 저장과 이용', href:'g2/plant/sim.html#store'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g2/plant/worksheet.html'} ]},
   { no:13, area:'bio', title:'동물과 에너지', code:'9과13', items:[{kind:'sim', title:'소화·순환·호흡·배설 연결 지도'}]},
   { no:14, area:'phy', title:'전기와 자기', code:'9과14', items:[{kind:'sim', title:'전압·전류·저항 회로 실험'}, {kind:'sim', title:'전동기의 원리'}]},
   { no:15, area:'earth', title:'별과 우주', code:'9과15', items:[{kind:'sim', title:'연주 시차와 별의 거리'}, {kind:'sim', title:'팽창하는 우주 풍선 모형'}]}

@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>광합성 온실 · 중2 식물과 에너지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-bio">
+<div class="wrap">
+  <nav class="topbar" data-topbar="2학년|12 식물과 에너지" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 2 · 12 식물과 에너지 <span class="code">9과12-01</span><span class="code">9과12-02</span><span class="code">9과12-03</span></div>
+      <h1>광합성 온실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="photo">1. 광합성과 환경 요인</button>
+      <button type="button" data-mode="resp">2. 광합성과 호흡</button>
+      <button type="button" data-mode="store">3. 산물의 저장과 이용</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="식물 실험 장치"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <label class="field" data-only="photo" for="light">빛의 세기 <input type="range" id="light" min="0" max="100" step="10" value="60"><output id="lightOut">60</output></label>
+        <label class="field" data-only="photo" for="co2">탄산수소 나트륨 (CO₂) <input type="range" id="co2" min="0" max="100" step="10" value="50"><output id="co2Out">50</output></label>
+        <label class="field" data-only="photo" for="temp">온도 <input type="range" id="temp" min="5" max="45" step="5" value="25"><output id="tempOut">25 °C</output></label>
+        <button class="btn" type="button" id="count" data-only="photo">1분 동안 기포 세기</button>
+        <div class="field" data-only="resp"><div class="seg" id="rSeg"><button type="button" data-r="day">하루 관찰</button><button type="button" data-r="btb">BTB 용액 실험</button></div></div>
+        <label class="field" data-only="resp" for="hour" id="hourWrap">시각 <input type="range" id="hour" min="0" max="24" step="1" value="12"><output id="hourOut">12시</output></label>
+        <div class="field" data-only="resp" id="btbWrap">시험관 <div class="seg" id="tubeSeg"><button type="button" data-tube="light">빛을 비춤</button><button type="button" data-tube="dark">빛을 가림</button></div></div>
+        <div class="field" data-only="store"><div class="seg" id="sSeg"><button type="button" data-s="move">밤과 낮의 이동</button><button type="button" data-s="iodine">잎의 녹말 검출</button></div></div>
+        <div class="field" data-only="store" id="organWrap">저장 기관 <select id="organ"><option value="potato">감자 (줄기)</option><option value="sweet">고구마 (뿌리)</option><option value="bean">콩 (씨)</option><option value="fruit">사과 (열매)</option></select></div>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <div class="headrow"><h2 id="tTitle">기록</h2><button class="btn" id="clear" type="button">표 비우기</button></div>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>비닐하우스 안에 이산화 탄소를 넣어 주는 까닭은?</summary>
+        <p>이산화 탄소는 광합성의 재료입니다. 빛이 충분할 때 이산화 탄소 농도를 높이면 광합성량이 늘어 작물이 더 잘 자랍니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>식물은 낮에도 호흡을 할까?</summary>
+        <p>식물은 낮과 밤 모두 호흡합니다. 다만 낮에는 광합성이 호흡보다 활발해 전체적으로 산소를 내보내는 것처럼 보입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>감자에는 왜 녹말이 많을까?</summary>
+        <p>잎에서 만든 양분이 설탕 형태로 체관을 따라 이동해 땅속줄기인 감자에 녹말로 저장되기 때문입니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="광합성량은 환경 요인의 영향을 보여 주기 위한 모형 값입니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+const st = {mode:'photo', t:0, light:60, co2:50, temp:25, bubbles:[], rows:[], r:'day', hour:12, tube:'light', btbT:0, s:'move', organ:'potato', day:true};
+
+/* ===== 1. 광합성과 환경 요인 ===== */
+// 광합성량: 가장 부족한 요인이 결정 (모형). 온도는 약 30 °C에서 최대, 너무 높으면 급감
+function rate(L, Cd, T){
+  const fL = L / 100, fC = 0.15 + 0.85 * Cd / 100, fT = T <= 35 ? Math.max(0, (T - 0) / 30) : Math.max(0, 1 - (T - 35) / 12);
+  return Math.round(40 * Math.min(fL, fC) * Math.min(1, fT));
+}
+function drawPhoto(){
+  const g = S.g, lx = S.w * .12, cx = S.w * .55, top = 50, w = 160, h = S.h - 110, rt = rate(st.light, st.co2, st.temp);
+  // 전등
+  g.fillStyle = st.light ? `rgba(255,210,80,${.3 + st.light / 140})` : C.line; g.beginPath(); g.arc(lx, S.h * .45, 22, 0, TAU); g.fill();
+  if (st.light) for (let k = -2; k <= 2; k++) { g.strokeStyle = `rgba(230,180,40,${st.light / 160})`; g.lineWidth = 2; g.beginPath(); g.moveTo(lx + 28, S.h * .45 + k * 12); g.lineTo(cx - w / 2 - 8, S.h * .45 + k * 22); g.stroke(); }
+  label(g, '전등', lx, S.h * .45 + 38, {size: 12, color: C.muted});
+  // 비커와 검정말
+  g.fillStyle = `rgba(80,150,230,${.18 + st.co2 / 400})`; g.fillRect(cx - w / 2, top + h * .15, w, h * .85);
+  g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - w / 2, top); g.lineTo(cx - w / 2, top + h); g.lineTo(cx + w / 2, top + h); g.lineTo(cx + w / 2, top); g.stroke();
+  g.strokeStyle = '#2f8a4e'; g.lineWidth = 4; g.beginPath(); g.moveTo(cx, top + h - 6); g.quadraticCurveTo(cx + 10, top + h * .6, cx - 4, top + h * .3); g.stroke();
+  for (let i = 0; i < 14; i++) { const y = top + h * .32 + i * h * .045, s = i % 2 ? 1 : -1; g.fillStyle = '#3c9a3c'; g.beginPath(); g.ellipse(cx + s * 12 + (i % 3), y, 12, 4, s * .5, 0, TAU); g.fill(); }
+  // 기포
+  st.bubbles.forEach(b => { g.strokeStyle = C.muted; g.lineWidth = 1.2; g.beginPath(); g.arc(cx - 4 + b.x, b.y, 3, 0, TAU); g.stroke(); });
+  // 온도계
+  const tx = cx + w / 2 + 30; g.fillStyle = C.surface; g.strokeStyle = C.ink; g.strokeRect(tx - 4, top, 8, h); g.fillStyle = C.hot; g.fillRect(tx - 2, top + h - h * st.temp / 50, 4, h * st.temp / 50);
+  label(g, st.temp + ' °C', tx + 10, top + h - h * st.temp / 50, {align: 'left', size: 12});
+  label(g, `기포 발생 (산소): 1분에 약 ${rt}개`, cx, 24, {weight: 700, color: C.bio});
+}
+function stepPhoto(dt){
+  const rt = rate(st.light, st.co2, st.temp), top = 50, h = S.h - 110;
+  if (Math.random() < rt / 60 * dt * 6) st.bubbles.push({x: (Math.random() - .5) * 6, y: top + h * .3});
+  st.bubbles.forEach(b => b.y -= 60 * dt); st.bubbles = st.bubbles.filter(b => b.y > top + h * .15);
+}
+
+/* ===== 2. 광합성과 호흡 ===== */
+function lightAt(hr){ return Math.max(0, Math.sin((hr - 6) / 12 * Math.PI)); }
+function drawResp(){
+  const g = S.g;
+  if (st.r === 'btb') return drawBTB();
+  const L = lightAt(st.hour), P = L * 10, R = 3, net = P - R;
+  g.fillStyle = L > 0 ? `rgba(200,225,255,${.3 + L * .6})` : '#1b2433'; g.fillRect(0, 0, S.w, S.h);
+  if (L > 0) { g.fillStyle = '#ffcf4a'; g.beginPath(); g.arc(S.w * .15, 50 + (1 - L) * 60, 24, 0, TAU); g.fill(); } else { g.fillStyle = '#e8e4c9'; g.beginPath(); g.arc(S.w * .15, 50, 16, 0, TAU); g.fill(); }
+  g.fillStyle = '#7a5a3a'; g.fillRect(0, S.h - 40, S.w, 40);
+  const px = S.w * .5, py = S.h - 40; g.strokeStyle = '#4b7a2c'; g.lineWidth = 6; g.beginPath(); g.moveTo(px, py); g.lineTo(px, py - S.h * .45); g.stroke();
+  [[-1, .2], [1, .3], [-1, .45], [1, .55]].forEach(([s, f]) => { g.fillStyle = '#3c9a3c'; g.beginPath(); g.ellipse(px + s * 40, py - S.h * .45 * f - 20, 40, 14, s * -.4, 0, TAU); g.fill(); });
+  const ay = py - S.h * .3;
+  // 광합성: CO₂ 들어오고 O₂ 나감, 호흡: O₂ 들어오고 CO₂ 나감
+  if (P > 0.1) { arrow(g, px - 150, ay - 30, px - 60, ay - 30, C.muted, 2 + P / 3); label(g, 'CO₂ (광합성)', px - 150, ay - 46, {align: 'left', size: 12});
+    arrow(g, px + 60, ay - 30, px + 150, ay - 30, C.phy, 2 + P / 3); label(g, 'O₂ (광합성)', px + 150, ay - 46, {align: 'right', size: 12, color: C.phy}); }
+  arrow(g, px - 150, ay + 30, px - 60, ay + 30, C.phy, 2 + R / 3); label(g, 'O₂ (호흡)', px - 150, ay + 50, {align: 'left', size: 12, color: C.phy});
+  arrow(g, px + 60, ay + 30, px + 150, ay + 30, C.muted, 2 + R / 3); label(g, 'CO₂ (호흡)', px + 150, ay + 50, {align: 'right', size: 12});
+  label(g, net > 0.3 ? '광합성량 > 호흡량 → 산소를 내보냄' : net < -0.3 ? '광합성량 < 호흡량 → 이산화 탄소를 내보냄' : '광합성량 ≈ 호흡량', S.w / 2, 22, {weight: 700, color: L > 0 ? C.ink : '#fff'});
+}
+function btbColor(state){ return state > .5 ? '#3a6fd8' : state < -.5 ? '#e0c030' : '#4caf50'; }
+function drawBTB(){
+  const g = S.g, k = Math.min(1, st.btbT / 8);
+  // 처음: 숨을 불어넣어 초록(약한 산성 쪽) → 빛: CO₂ 감소로 파랑, 어둠: CO₂ 증가로 노랑
+  const cols = [['검정말 + 빛', st.tube === 'light' ? k : 0, true, true], ['검정말 + 어둠', st.tube === 'dark' ? -k : 0, false, true], ['검정말 없음 (대조군)', 0, st.tube === 'light', false]];
+  cols.forEach(([n, v, lit, plant], i) => {
+    const cx = S.w * (0.22 + i * .28), top = 50, w = 60, h = S.h - 130;
+    g.fillStyle = btbColor(v); g.globalAlpha = .75; g.fillRect(cx - w / 2, top + 20, w, h - 20); g.globalAlpha = 1;
+    g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - w / 2, top); g.lineTo(cx - w / 2, top + h); g.arc(cx, top + h, w / 2, Math.PI, 0, true); g.lineTo(cx + w / 2, top); g.stroke();
+    if (plant) { g.strokeStyle = '#2f6b2f'; g.lineWidth = 3; g.beginPath(); g.moveTo(cx, top + h); g.lineTo(cx, top + 40); g.stroke(); for (let j = 0; j < 8; j++) { g.fillStyle = '#2f6b2f'; g.beginPath(); g.ellipse(cx + (j % 2 ? 8 : -8), top + 50 + j * (h - 60) / 8, 8, 3, 0, 0, TAU); g.fill(); } }
+    if (i === 1) { g.fillStyle = 'rgba(30,30,30,.55)'; g.fillRect(cx - w / 2 - 6, top - 6, w + 12, h + 40); }
+    label(g, n, cx, top + h + 52, {size: 12, weight: 600});
+  });
+  label(g, st.tube === 'light' ? '빛을 비춘 시험관만 관찰 중' : '빛을 가린 시험관만 관찰 중', S.w / 2, 22, {weight: 700});
+}
+
+/* ===== 3. 산물의 저장과 이용 ===== */
+const ORG = {potato:['감자', '땅속줄기', '녹말', 'stem'], sweet:['고구마', '뿌리', '녹말', 'root'], bean:['콩', '씨', '단백질', 'seed'], fruit:['사과', '열매', '포도당·과당', 'fruit']};
+function drawStore(){
+  const g = S.g;
+  if (st.s === 'iodine') return drawIodine();
+  const day = (st.t % 12) < 6;
+  g.fillStyle = day ? '#e3efff' : '#1b2433'; g.fillRect(0, 0, S.w, S.h * .62);
+  g.fillStyle = '#8a6a48'; g.fillRect(0, S.h * .62, S.w, S.h * .38);
+  const px = S.w * .45, gy = S.h * .62, O = ORG[st.organ];
+  g.strokeStyle = '#4b7a2c'; g.lineWidth = 6; g.beginPath(); g.moveTo(px, gy + 40); g.lineTo(px, gy - S.h * .45); g.stroke();
+  [[-1, .55], [1, .7], [-1, .85]].forEach(([s, f]) => { g.fillStyle = day ? '#3c9a3c' : '#2a6a2a'; g.beginPath(); g.ellipse(px + s * 50, gy - S.h * .45 * f, 48, 16, s * -.35, 0, TAU); g.fill(); });
+  // 저장 기관 그리기
+  const sx = O[3] === 'root' ? px + 10 : O[3] === 'stem' ? px + 50 : O[3] === 'seed' ? px - 70 : px + 70, sy = O[3] === 'seed' || O[3] === 'fruit' ? gy - S.h * .3 : gy + 50;
+  g.fillStyle = {stem: '#c9a46a', root: '#b35a4a', seed: '#e6d6a0', fruit: '#d2412f'}[O[3]]; g.beginPath(); g.ellipse(sx, sy, 26, 18, 0, 0, TAU); g.fill();
+  if (O[3] === 'stem') { g.strokeStyle = '#4b7a2c'; g.lineWidth = 2; g.beginPath(); g.moveTo(px, gy + 30); g.lineTo(sx - 20, sy); g.stroke(); }
+  label(g, O[0], sx, sy + 30, {size: 12, weight: 700, color: O[3] === 'seed' || O[3] === 'fruit' ? (day ? C.ink : '#fff') : '#fff'});
+  // 이동하는 양분 (체관을 따라, 주로 밤에)
+  const n = day ? 3 : 10;
+  for (let i = 0; i < n; i++) { const f = ((st.t * .3 + i / n) % 1); const x = px + (sx - px) * Math.min(1, f * 1.2), y = (gy - S.h * .35) + (sy - (gy - S.h * .35)) * f; g.fillStyle = C.warn; g.beginPath(); g.arc(x, y, 4, 0, TAU); g.fill(); }
+  if (day) for (let i = 0; i < 6; i++) { const x = px - 60 + (i * 23) % 110, y = gy - S.h * .4 - (i % 3) * 8; g.fillStyle = 'rgba(255,255,255,.95)'; g.fillRect(x, y, 6, 6); }
+  label(g, day ? '낮: 잎에서 광합성 → 포도당 → 녹말로 잠시 저장 (흰 점)' : '밤: 녹말이 설탕으로 바뀌어 체관을 따라 이동 (노란 점)', S.w / 2, 22, {weight: 700, color: day ? C.ink : '#fff'});
+}
+function drawIodine(){
+  const g = S.g, k = Math.min(1, (st.t % 10) / 4), cx = S.w * .45, cy = S.h * .5;
+  g.fillStyle = C.soft; g.fillRect(0, 0, S.w, S.h);
+  // 잎 (일부를 알루미늄 포일로 가렸던 잎)
+  g.save(); g.beginPath(); g.ellipse(cx, cy, 150, 80, -.2, 0, TAU); g.clip();
+  g.fillStyle = `rgb(${Math.round(60 + (200 - 60) * k * .0 + 30 * (1 - k))},${Math.round(150 * (1 - k) + 40 * k)},${Math.round(60 * (1 - k) + 90 * k)})`; g.fillRect(cx - 160, cy - 90, 320, 180);
+  g.fillStyle = `rgb(${Math.round(60 * (1 - k) + 220 * k)},${Math.round(150 * (1 - k) + 190 * k)},${Math.round(60 * (1 - k) + 110 * k)})`; g.fillRect(cx - 20, cy - 90, 90, 180);
+  g.restore();
+  g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.ellipse(cx, cy, 150, 80, -.2, 0, TAU); g.stroke();
+  label(g, '포일로 가렸던 부분', cx + 25, cy + 105, {size: 12, weight: 600}); label(g, '빛을 받은 부분', cx - 100, cy + 105, {size: 12, weight: 600});
+  label(g, k < 1 ? '잎을 에탄올로 탈색한 뒤 아이오딘-아이오딘화 칼륨 용액을 떨어뜨리는 중' : '빛을 받은 부분만 청람색 → 녹말이 만들어졌다', S.w / 2, 22, {weight: 700});
+}
+
+/* ===== 그래프·표·설명 ===== */
+function legend(items, m){ const g = G.g; let x = m.L + 8; g.font = font(11); items.forEach(([n, c]) => { g.fillStyle = c; g.fillRect(x, m.T + 6, 14, 3); g.fillStyle = C.ink; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(n, x + 18, m.T + 8); x += g.measureText(n).width + 34; }); }
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'photo') {
+    const m = axes(G, {x: [0, 100, 20, '빛의 세기'], y: [0, 40, 10, '기포 수 (1분)']});
+    const a = [], b = []; for (let L = 0; L <= 100; L += 2) { a.push([L, rate(L, st.co2, st.temp)]); b.push([L, rate(L, 100, st.temp)]); }
+    line(G, b, m, C.line, 1.5, [4, 4]); line(G, a, m, C.bio);
+    st.rows.forEach(r => { g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(r[0]), m.Y(r[3]), 4, 0, TAU); g.fill(); });
+    legend([['지금 CO₂ 농도', C.bio], ['CO₂ 충분할 때', C.line]], m);
+  } else if (st.mode === 'resp') {
+    const m = axes(G, {x: [0, 24, 6, '시각 (시)'], y: [-4, 10, 2, '양 (상대값)']});
+    const p = [], r = [], n = []; for (let h = 0; h <= 24; h += .25) { p.push([h, lightAt(h) * 10]); r.push([h, 3]); n.push([h, lightAt(h) * 10 - 3]); }
+    line(G, p, m, C.bio); line(G, r, m, C.hot); line(G, n, m, C.ink, 1.5, [4, 4]);
+    g.strokeStyle = C.muted; g.beginPath(); g.moveTo(m.X(st.hour), m.T); g.lineTo(m.X(st.hour), m.T + m.h); g.stroke();
+    legend([['광합성량', C.bio], ['호흡량', C.hot], ['광합성량 − 호흡량', C.ink]], m);
+  } else {
+    G.g.fillStyle = C.surface; G.g.fillRect(0, 0, G.w, G.h);
+    const steps = ['잎: 광합성 → 포도당', '포도당 → 녹말 (잎에 잠시 저장)', '녹말 → 설탕 (물에 잘 녹음)', '체관을 따라 이동', '저장 기관: 녹말·단백질·지방으로 저장', '세포 호흡 → 생명 활동 에너지'];
+    steps.forEach((s, i) => { const y = 20 + i * (G.h - 30) / 6; g.fillStyle = C.bio; g.beginPath(); g.arc(30, y + 6, 8, 0, TAU); g.fill(); label(g, i + 1, 30, y + 6, {color: '#fff', size: 10, weight: 700}); label(g, s, 48, y + 6, {align: 'left', size: 13}); });
+  }
+}
+function table(){
+  const head = st.mode === 'photo' ? ['빛', 'CO₂', '온도', '기포 수'] : st.mode === 'resp' ? ['구분', '광합성', '호흡'] : ['구분', '내용'];
+  $('tTitle').textContent = st.mode === 'photo' ? '측정 기록' : st.mode === 'resp' ? '광합성과 호흡 비교' : '저장 기관과 저장 형태';
+  $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>';
+  let rows = st.rows.map(r => [r[0], r[1], r[2] + ' °C', r[3]]);
+  if (st.mode === 'resp') rows = [['장소', '엽록체', '모든 살아 있는 세포 (마이토콘드리아)'], ['시간', '빛이 있을 때', '항상'], ['물질', '이산화 탄소 + 물 → 포도당 + 산소', '포도당 + 산소 → 이산화 탄소 + 물'], ['에너지', '빛에너지 → 화학 에너지로 저장', '화학 에너지 → 생명 활동 에너지']];
+  if (st.mode === 'store') rows = Object.values(ORG).map(o => [o[0] + ' (' + o[1] + ')', o[2] + '로 저장']);
+  $('clear').hidden = st.mode !== 'photo';
+  $('tbody').innerHTML = rows.length ? rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join('') : '<tr class="empty"><td colspan="4">조건을 바꾸고 [1분 동안 기포 세기]를 눌러 기록하세요. 한 번에 한 가지 조건만 바꾸세요.</td></tr>';
+}
+$('clear').onclick = () => { st.rows = []; table(); };
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'photo') { s = stat('빛의 세기', st.light) + stat('CO₂', st.co2) + stat('온도', st.temp, '°C') + stat('기포', rate(st.light, st.co2, st.temp), '개/분');
+    e = '<b>광합성</b>: 식물이 빛에너지를 이용하여 이산화 탄소와 물로 포도당을 만드는 과정. 이때 <b>산소</b>가 발생합니다. 엽록체에서 일어납니다. 빛의 세기, 이산화 탄소 농도, 온도가 광합성량에 영향을 줍니다.';
+    t = '빛을 아주 세게 해도 이산화 탄소가 부족하면 광합성량이 더 늘지 않습니다. 온도가 너무 높아도 광합성량이 줄어듭니다.'; }
+  else if (st.r === 'day') { const L = lightAt(st.hour); s = stat('시각', st.hour, '시') + stat('광합성', L > 0 ? '일어남' : '일어나지 않음') + stat('호흡', '항상 일어남');
+    e = '<b>호흡</b>: 세포에서 포도당을 산소로 분해하여 생명 활동에 필요한 에너지를 얻는 과정. 식물은 낮에는 광합성과 호흡을 함께 하고, 밤에는 호흡만 합니다.'; t = '광합성과 호흡은 서로 반대 방향으로 물질이 출입합니다. 시각 막대를 움직여 기체의 출입을 비교하세요.'; }
+  else { s = stat('빛 비춘 시험관', '파란색') + stat('빛 가린 시험관', '노란색');
+    e = '<b>BTB 용액</b>은 이산화 탄소가 많아지면 노란색, 적어지면 파란색으로 변합니다. 빛을 비추면 광합성으로 이산화 탄소가 줄고, 빛을 가리면 호흡으로 이산화 탄소가 늘어납니다.'; t = '검정말이 없는 대조군은 색이 변하지 않아, 색 변화가 검정말 때문임을 확인할 수 있습니다.'; }
+  if (st.mode === 'store') { const O = ORG[st.organ];
+    s = stat('저장 기관', `${O[0]} (${O[1]})`) + stat('저장 형태', O[2]);
+    e = '광합성으로 만든 포도당은 녹말로 바뀌어 잎에 잠시 저장되었다가, 주로 밤에 <b>설탕</b>으로 바뀌어 <b>체관</b>을 따라 이동합니다. 뿌리·줄기·열매·씨에 녹말, 단백질, 지방 등으로 저장되거나 <b>세포 호흡의 에너지원</b>으로 쓰입니다.';
+    t = st.s === 'iodine' ? '아이오딘-아이오딘화 칼륨 용액은 녹말과 만나면 청람색으로 변합니다.' : '설탕은 물에 잘 녹아 이동하기 쉽고, 녹말은 물에 잘 녹지 않아 저장하기 좋습니다.'; }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 조작 ===== */
+$('light').oninput = e => { st.light = +e.target.value; $('lightOut').textContent = st.light; };
+$('co2').oninput = e => { st.co2 = +e.target.value; $('co2Out').textContent = st.co2; };
+$('temp').oninput = e => { st.temp = +e.target.value; $('tempOut').textContent = st.temp + ' °C'; };
+$('count').onclick = () => { st.rows.push([st.light, st.co2, st.temp, rate(st.light, st.co2, st.temp) + Math.round((Math.random() - .5) * 2)]); if (st.rows.length > 12) st.rows.shift(); table(); };
+Kit.seg($('rSeg'), 'r', v => { st.r = v; $('hourWrap').hidden = v !== 'day'; $('btbWrap').hidden = v !== 'btb'; st.btbT = 0; })('day');
+$('hour').oninput = e => { st.hour = +e.target.value; $('hourOut').textContent = st.hour + '시'; };
+Kit.seg($('tubeSeg'), 'tube', v => { st.tube = v; st.btbT = 0; })('light');
+Kit.seg($('sSeg'), 's', v => { st.s = v; $('organWrap').hidden = v !== 'move'; st.t = 0; })('move');
+$('organ').onchange = e => st.organ = e.target.value;
+Kit.tabs(m => { st.mode = m; table();
+  $('hourWrap').hidden = !(m === 'resp' && st.r === 'day'); $('btbWrap').hidden = !(m === 'resp' && st.r === 'btb'); $('organWrap').hidden = !(m === 'store' && st.s === 'move');
+  $('gTitle').textContent = {photo: '빛의 세기와 광합성량', resp: '하루 동안의 광합성과 호흡', store: '광합성 산물의 이동과 이용'}[m];
+  $('gSub').textContent = {photo: '빨간 점은 기록한 측정값입니다.', resp: '세로선은 지금 시각입니다.', store: ''}[m]; }, ['photo', 'resp', 'store']);
+Kit.loop(dt => { st.t += dt; if (st.mode === 'photo') stepPhoto(dt); if (st.mode === 'resp' && st.r === 'btb') st.btbT += dt; },
+  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({photo: drawPhoto, resp: drawResp, store: drawStore})[st.mode](); drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>
