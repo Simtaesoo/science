@@ -9,7 +9,8 @@ window.SITE = {
 window.CATALOG = [
  { id:'g1', grade:'1학년', book:'과학 1', units:[
   { no:1, area:'gen', title:'과학과 인류의 지속가능한 삶', code:'9과01', items:[
-    {kind:'sim', title:'변인 통제 실험 설계하기'}, {kind:'sim', title:'우리 반 탄소 발자국 계산기'} ]},
+    {kind:'sim', title:'1차시 과학적 탐구 방법 (변인 통제)', href:'g1/sustain/sim.html#inq'}, {kind:'sim', title:'2차시 과학기술과 미래 사회 (인공지능 체험)', href:'g1/sustain/sim.html#future'},
+    {kind:'sim', title:'3차시 지속가능한 삶 (탄소 발자국)', href:'g1/sustain/sim.html#carbon'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/sustain/worksheet.html'} ]},
   { no:2, area:'bio', title:'생물의 구성과 다양성', code:'9과02', items:[
     {kind:'sim', title:'1차시 세포의 구조와 기능', href:'g1/life/sim.html#cell'}, {kind:'sim', title:'2차시 생물의 구성 단계', href:'g1/life/sim.html#level'},
     {kind:'sim', title:'3차시 변이와 생물다양성', href:'g1/life/sim.html#vary'}, {kind:'sim', title:'4차시 종의 개념과 5계 분류', href:'g1/life/sim.html#classify'},

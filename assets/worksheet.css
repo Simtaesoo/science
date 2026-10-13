@@ -7,7 +7,7 @@
   color-scheme:light;
 }
 .area-phy{--area:#2b5bd7;--area-soft:#ecf1fd} .area-chem{--area:#7a3fc4;--area-soft:#f3edfb}
-.area-bio{--area:#2f8a4e;--area-soft:#ebf6ee} .area-earth{--area:#b4570e;--area-soft:#fbf0e6}
+.area-bio{--area:#2f8a4e;--area-soft:#ebf6ee} .area-earth{--area:#b4570e;--area-soft:#fbf0e6} .area-gen{--area:#4a5563;--area-soft:#eef0f3}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:10pt;line-height:1.55}

@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>탐구와 미래 실험실 · 중1 과학과 인류의 지속가능한 삶</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+<style>
+.html-scene{padding:14px;display:flex;flex-direction:column;gap:12px}
+.steps{display:flex;flex-wrap:wrap;gap:6px;font-size:12px}
+.steps span{border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--muted)}
+.steps span.on{background:var(--area);border-color:var(--area);color:var(--surface)}
+.vgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:600px){.vgrid{grid-template-columns:1fr}}
+.var{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px;background:var(--soft)}
+.var b{font-size:13px}
+.feedback{font-size:14px;border-left:3px solid var(--warn);padding-left:10px;min-height:22px}
+.feedback.good{border-color:var(--bio)}
+.feedback:empty{display:none}
+.timeline{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow:auto}
+.ev{display:grid;grid-template-columns:62px 1fr;gap:10px;align-items:start;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);cursor:pointer;text-align:left;font:inherit;color:inherit}
+.ev[aria-pressed="true"]{border-color:var(--area);outline:2px solid var(--area)}
+.ev .y{font-family:var(--f-mono);font-weight:600;color:var(--area)}
+.ev small{color:var(--muted)}
+.cats{display:flex;gap:6px;flex-wrap:wrap}
+.calc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:600px){.calc{grid-template-columns:1fr}}
+.calc .var label{display:flex;justify-content:space-between;gap:8px;font-size:13px;align-items:center}
+.calc input[type=range]{width:100%;accent-color:var(--accent)}
+.acts{display:flex;flex-direction:column;gap:4px;font-size:13px}
+</style>
+</head>
+<body data-root="../../" class="area-gen">
+<div class="wrap">
+  <nav class="topbar" data-topbar="1학년|01 과학과 인류의 지속가능한 삶" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 1 · 01 과학과 인류의 지속가능한 삶 <span class="code">9과01-01</span><span class="code">9과01-02</span><span class="code">9과01-03</span></div>
+      <h1>탐구와 미래 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="inq">1. 과학적 탐구</button>
+      <button type="button" data-mode="future">2. 과학과 미래 사회</button>
+      <button type="button" data-mode="carbon">3. 지속가능한 삶</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="활동 화면">
+      <div class="canvas-box" id="cbox"><canvas id="scene" aria-label="실험 장치"></canvas></div>
+      <div class="html-scene" id="hscene" hidden></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <div class="field" data-only="inq">이번 실험에서 바꿀 변인을 정하고 값을 고르세요</div>
+        <label class="field" data-only="inq" for="len">실 길이 <select id="len"><option>20</option><option selected>40</option><option>60</option><option>80</option></select> cm</label>
+        <label class="field" data-only="inq" for="mass">추 질량 <select id="mass"><option>50</option><option selected>100</option><option>150</option></select> g</label>
+        <label class="field" data-only="inq" for="amp">처음 각도 <select id="amp"><option>10</option><option selected>15</option><option>20</option></select> °</label>
+        <button class="btn" type="button" id="measure" data-only="inq">10번 왕복 시간 측정</button>
+        <button class="btn" type="button" id="clearInq" data-only="inq">기록 지우기</button>
+        <div class="field" data-only="future"><div class="seg" id="fSeg"><button type="button" data-f="time">과학 발견과 기술 연표</button><button type="button" data-f="ai">데이터로 배우는 인공지능</button></div></div>
+        <div class="field" data-only="future" id="aiCtl">데이터 추가 <div class="seg" id="lblSeg"><button type="button" data-lbl="A">사과로 표시</button><button type="button" data-lbl="B">귤로 표시</button></div></div>
+        <button class="btn" type="button" id="aiReset" data-only="future">데이터 지우기</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <div class="steps" id="steps" data-only="inq"><span>문제 인식</span><span>가설 설정</span><span>탐구 설계</span><span>탐구 수행</span><span>자료 해석</span><span>결론 도출</span></div>
+      <p class="explain" id="explain"></p>
+      <div class="feedback" id="fb"></div>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">기록</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>왜 한 번에 한 가지 변인만 바꿔야 할까?</summary>
+        <p>두 가지 이상을 함께 바꾸면 결과가 달라졌을 때 어떤 변인 때문인지 알 수 없기 때문입니다. 나머지 조건을 같게 하는 것을 변인 통제라고 합니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>인공지능이 잘못 판단하는 까닭은 무엇일까?</summary>
+        <p>인공지능은 학습한 데이터를 바탕으로 판단합니다. 데이터가 적거나 한쪽으로 치우쳐 있으면 처음 보는 경우를 잘못 판단할 수 있습니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>나 하나의 실천이 정말 의미가 있을까?</summary>
+        <p>한 사람이 줄이는 양은 작아도 우리 반, 우리 학교, 우리나라 전체로 곱해지면 큰 양이 됩니다. 개인의 실천이 사회의 제도와 기술 발전으로 이어지기도 합니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="탄소 배출량은 수업용 대략적인 값입니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+const st = {mode:'inq', t:0, rows:[], swing:0, f:'time', ev:0, pts:[], lbl:'A', carbon:null};
+
+/* ===== 1. 과학적 탐구: 진자 ===== */
+const val = id => +$(id).value;
+function period(Lcm){ return TAU * Math.sqrt(Lcm / 100 / 9.8); }
+function measure(){
+  const L = val('len'), m = val('mass'), a = val('amp');
+  const T10 = +(period(L) * 10 * (1 + (Math.random() - .5) * 0.02)).toFixed(1);   // 측정 오차 ±1%
+  st.rows.push({L, m, a, T10}); if (st.rows.length > 10) st.rows.shift();
+  judge(); table();
+}
+function judge(){
+  const r = st.rows; if (r.length < 2) { $('fb').textContent = '조건을 하나만 바꿔 가며 두 번 이상 측정해 보세요.'; $('fb').className = 'feedback'; return; }
+  const a = r[r.length - 2], b = r[r.length - 1];
+  const changed = ['L', 'm', 'a'].filter(k => a[k] !== b[k]);
+  const name = {L: '실의 길이', m: '추의 질량', a: '처음 각도'};
+  if (changed.length === 0) { $('fb').textContent = '조건이 같아요. 같은 조건에서 반복 측정하면 결과를 더 믿을 수 있습니다.'; $('fb').className = 'feedback good'; }
+  else if (changed.length > 1) { $('fb').textContent = `${changed.map(k => name[k]).join('과(와) ')}을(를) 함께 바꿨어요. 결과가 달라진 까닭을 알 수 없습니다. 한 가지만 바꿔 보세요.`; $('fb').className = 'feedback'; }
+  else { const k = changed[0], diff = Math.abs(a.T10 - b.T10) > 0.4;
+    $('fb').textContent = `잘했어요! ${name[k]}만 바꾸고 나머지는 같게 했습니다(변인 통제). → ${name[k]}을(를) 바꾸었더니 주기가 ${diff ? '달라졌습니다.' : '거의 변하지 않았습니다.'}`; $('fb').className = 'feedback good'; }
+}
+function drawInq(){
+  const g = S.g, px = S.w * 0.42, py = 30, Lpx = val('len') / 80 * (S.h - 110), a0 = val('amp') * Math.PI / 180;
+  const th = a0 * Math.cos(TAU * st.swing / period(val('len')));
+  g.fillStyle = C.ink; g.fillRect(px - 80, py - 8, 160, 8);
+  const bx = px + Math.sin(th) * Lpx, by = py + Math.cos(th) * Lpx, br = 8 + val('mass') / 15;
+  g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath(); g.moveTo(px, py); g.lineTo(bx, by); g.stroke();
+  g.fillStyle = C.gen; g.beginPath(); g.arc(bx, by, br, 0, TAU); g.fill();
+  g.setLineDash([3, 4]); g.strokeStyle = C.muted; g.beginPath(); g.moveTo(px, py); g.lineTo(px, py + Lpx + 20); g.stroke(); g.setLineDash([]);
+  g.strokeStyle = C.muted; g.beginPath(); g.arc(px, py, 40, Math.PI / 2 - a0, Math.PI / 2); g.stroke();
+  label(g, `${val('amp')}°`, px + 26, py + 52, {size: 11, color: C.muted});
+  label(g, `실 ${val('len')} cm · 추 ${val('mass')} g`, S.w * 0.78, 40, {weight: 600});
+  label(g, '탐구 문제: 진자가 한 번 왕복하는 시간(주기)은', S.w * 0.78, 80, {size: 12, color: C.muted});
+  label(g, '무엇에 따라 달라질까?', S.w * 0.78, 98, {size: 12, color: C.muted});
+}
+
+/* ===== 2. 과학과 미래 사회 ===== */
+const EVS = [
+  [1590, '현미경 발명', '세포와 미생물을 관찰할 수 있게 되어 생명 과학과 의학이 발전했다.', '의료'],
+  [1687, '뉴턴의 운동 법칙', '물체의 운동을 예측하게 되어 기계, 건축, 우주 탐사의 바탕이 되었다.', '교통'],
+  [1769, '증기 기관 개량', '공장과 기차가 생기며 산업 혁명이 일어났다.', '에너지'],
+  [1831, '전자기 유도 발견', '발전기를 만들 수 있게 되어 전기를 쓰는 생활이 시작되었다.', '에너지'],
+  [1876, '전화 발명', '멀리 떨어진 사람과 목소리로 소통하게 되었다.', '통신'],
+  [1928, '페니실린 발견', '세균 감염을 치료하는 항생제가 등장해 많은 생명을 구했다.', '의료'],
+  [1947, '트랜지스터 발명', '전자 기기가 작고 싸져 컴퓨터와 휴대 전화가 나올 수 있었다.', '통신'],
+  [1953, 'DNA 구조 발견', '유전 정보를 이해하게 되어 유전자 진단과 치료가 발전했다.', '의료'],
+  [1969, '인터넷의 시작', '전 세계의 정보를 실시간으로 주고받게 되었다.', '통신'],
+  [2007, '스마트폰 보급', '언제 어디서나 정보를 찾고 소통하는 생활이 되었다.', '통신'],
+  [2016, '인공지능의 급성장', '사람의 말을 이해하고 그림을 그리는 인공지능이 생활 곳곳에 쓰이고 있다.', '생활'],
+  [2020, 'mRNA 백신 실용화', '새로운 감염병에 대한 백신을 빠르게 개발할 수 있게 되었다.', '의료']
+];
+function renderTimeline(){
+  $('hscene').innerHTML = `<div><b>사건을 눌러 과학과 기술이 우리 생활을 어떻게 바꾸었는지 살펴보세요.</b></div>
+    <div class="timeline">${EVS.map((e, i) => `<button type="button" class="ev" data-i="${i}" aria-pressed="${st.ev === i}"><span class="y">${e[0]}</span><span><b>${e[1]}</b> <small>· ${e[3]}</small><br><small>${e[2]}</small></span></button>`).join('')}</div>`;
+  $('hscene').querySelectorAll('.ev').forEach(b => b.onclick = () => { st.ev = +b.dataset.i; renderTimeline(); });
+}
+// 인공지능 체험: 가장 가까운 데이터 3개로 판단 (k-최근접 이웃)
+function seedAI(){ st.pts = [[.75, .8, 'A'], [.8, .7, 'A'], [.68, .9, 'A'], [.25, .45, 'B'], [.3, .3, 'B'], [.2, .38, 'B']]; }
+function predict(x, y){ if (!st.pts.length) return null; const d = st.pts.map(p => [Math.hypot(p[0] - x, p[1] - y), p[2]]).sort((a, b) => a[0] - b[0]).slice(0, 3);
+  const a = d.filter(q => q[1] === 'A').length; return a * 2 > d.length ? 'A' : 'B'; }
+function drawAI(){
+  const g = S.g, x0 = 60, y0 = 20, w = S.w - 90, h = S.h - 70, X = x => x0 + x * w, Y = y => y0 + (1 - y) * h;
+  const step = 14;
+  for (let i = 0; i < w; i += step) for (let j = 0; j < h; j += step) { const p = predict(i / w, 1 - j / h); if (!p) continue; g.fillStyle = p === 'A' ? 'rgba(210,65,47,.12)' : 'rgba(224,160,40,.14)'; g.fillRect(x0 + i, y0 + j, step, step); }
+  g.strokeStyle = C.line; g.strokeRect(x0, y0, w, h);
+  label(g, '크기 →', x0 + w / 2, y0 + h + 22, {size: 12, color: C.muted});
+  g.save(); g.translate(26, y0 + h / 2); g.rotate(-Math.PI / 2); label(g, '붉은 정도 →', 0, 0, {size: 12, color: C.muted}); g.restore();
+  st.pts.forEach(p => { g.fillStyle = p[2] === 'A' ? '#d2412f' : '#e0a028'; g.beginPath(); g.arc(X(p[0]), Y(p[1]), 9, 0, TAU); g.fill(); g.strokeStyle = C.ink; g.lineWidth = 1.5; g.stroke(); });
+  label(g, '빈 곳을 누르면 인공지능이 판단하고, 아래 버튼으로 데이터를 직접 추가할 수 있어요', S.w / 2, S.h - 10, {size: 11, color: C.muted});
+  if (st.q) { const p = predict(st.q[0], st.q[1]); g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.arc(X(st.q[0]), Y(st.q[1]), 12, 0, TAU); g.stroke(); label(g, p === 'A' ? '사과로 판단' : '귤로 판단', X(st.q[0]), Y(st.q[1]) - 22, {weight: 700}); }
+}
+$('scene').addEventListener('click', e => {
+  if (st.mode !== 'future' || st.f !== 'ai') return;
+  const r = $('scene').getBoundingClientRect(), x = (e.clientX - r.left - 60) / (S.w - 90), y = 1 - (e.clientY - r.top - 20) / (S.h - 70);
+  if (x < 0 || x > 1 || y < 0 || y > 1) return;
+  if (e.shiftKey || st.adding) { st.pts.push([x, y, st.lbl]); st.adding = false; } else st.q = [x, y];
+});
+
+/* ===== 3. 탄소 발자국 ===== */
+const CI = [ // [id, 이름, 단위, 최대, 기본값, kg CO2/단위]
+  ['car', '승용차 이용', 'km', 40, 10, 0.21], ['bus', '버스·지하철 이용', 'km', 40, 5, 0.06], ['elec', '전기 사용 (가정 1인분)', 'kWh', 15, 6, 0.46],
+  ['beef', '소고기 반찬', '번', 3, 1, 3.0], ['pork', '돼지·닭고기 반찬', '번', 3, 1, 1.0], ['veg', '채소 위주 식사', '번', 3, 1, 0.4],
+  ['cup', '일회용 컵·용기', '개', 10, 2, 0.05], ['shower', '따뜻한 물 샤워', '분', 30, 10, 0.07]
+];
+const ACT = [['walk', '가까운 거리는 걸어서 가기', 'car', 0.5], ['tumbler', '텀블러 쓰기', 'cup', 0], ['light', '안 쓰는 전등·플러그 끄기', 'elec', 0.8], ['meat', '고기 반찬을 하루 한 번 줄이기', 'beef', 0], ['shower', '샤워 시간 5분 줄이기', 'shower', -5]];
+st.carbon = {}; CI.forEach(c => st.carbon[c[0]] = c[4]); st.acts = {};
+function renderCarbon(){
+  $('hscene').innerHTML = `<div><b>나의 하루를 입력하고, 실천 방법을 골라 탄소 배출량이 얼마나 줄어드는지 확인하세요.</b></div>
+    <div class="calc">${CI.map(c => `<div class="var"><label for="c_${c[0]}">${c[1]} <output id="o_${c[0]}">${st.carbon[c[0]]} ${c[2]}</output></label><input type="range" id="c_${c[0]}" min="0" max="${c[3]}" step="1" value="${st.carbon[c[0]]}"></div>`).join('')}</div>
+    <div class="var"><b>실천 방법</b><div class="acts">${ACT.map(a => `<label for="a_${a[0]}"><input type="checkbox" id="a_${a[0]}" ${st.acts[a[0]] ? 'checked' : ''}> ${a[1]}</label>`).join('')}</div></div>`;
+  CI.forEach(c => $('c_' + c[0]).oninput = e => { st.carbon[c[0]] = +e.target.value; $('o_' + c[0]).textContent = e.target.value + ' ' + c[2]; });
+  ACT.forEach(a => $('a_' + a[0]).onchange = e => { st.acts[a[0]] = e.target.checked; });
+}
+function carbonNow(withActs){
+  const v = Object.assign({}, st.carbon);
+  if (withActs) {
+    if (st.acts.walk) v.car *= 0.5; if (st.acts.tumbler) v.cup = 0; if (st.acts.light) v.elec *= 0.8;
+    if (st.acts.meat && v.beef > 0) { v.beef -= 1; v.veg += 1; } if (st.acts.shower) v.shower = Math.max(0, v.shower - 5);
+  }
+  const by = {}; CI.forEach(c => by[c[0]] = v[c[0]] * c[5]);
+  return {total: Object.values(by).reduce((a, b) => a + b, 0), by};
+}
+
+/* ===== 그래프·표·설명 ===== */
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'inq') {
+    const m = axes(G, {x: [0, 100, 20, '실의 길이 (cm)'], y: [0, 20, 5, '10번 왕복 시간 (초)']});
+    st.rows.forEach(r => { g.fillStyle = r.m !== 100 || r.a !== 15 ? C.warn : C.gen; g.beginPath(); g.arc(m.X(r.L), m.Y(r.T10), 5, 0, TAU); g.fill(); });
+    label(g, '점: 측정값 (회색: 질량 100 g·각도 15°, 노랑: 다른 조건)', m.L + m.w, m.T + 8, {align: 'right', size: 11, color: C.muted});
+  } else if (st.mode === 'future') {
+    if (st.f === 'time') {
+      const m = axes(G, {x: [1550, 2050, 100, '연도'], y: [0, 5, 1, '']});
+      const cats = ['의료', '교통', '에너지', '통신', '생활'];
+      cats.forEach((c, i) => label(g, c, m.L - 8, m.Y(4.5 - i), {align: 'right', size: 11}));
+      EVS.forEach((e, i) => { const y = m.Y(4.5 - cats.indexOf(e[3])); g.fillStyle = i === st.ev ? C.hot : C.gen; g.beginPath(); g.arc(m.X(e[0]), y, i === st.ev ? 7 : 5, 0, TAU); g.fill(); });
+    } else {
+      G.g.fillStyle = C.surface; G.g.fillRect(0, 0, G.w, G.h);
+      const a = st.pts.filter(p => p[2] === 'A').length, b = st.pts.length - a;
+      label(g, `학습 데이터: 사과 ${a}개, 귤 ${b}개`, G.w / 2, G.h / 2 - 12, {weight: 700});
+      label(g, '데이터가 많고 고르게 있을수록 판단이 정확해집니다.', G.w / 2, G.h / 2 + 12, {size: 12, color: C.muted});
+    }
+  } else {
+    const now = carbonNow(false), aft = carbonNow(true), max = Math.max(4, Math.ceil(now.total));
+    const m = axes(G, {x: [0, max, Math.max(1, Math.round(max / 5)), '하루 탄소 배출량 (kg CO₂)'], y: [0, 2, 1, '']}, {L: 70});
+    [['지금', now], ['실천 후', aft]].forEach(([n, d], i) => {
+      let x = 0; const y = m.Y(1.5 - i), cols = [C.hot, C.warn, C.phy, C.earth, C.chem, C.bio, C.muted, C.cold];
+      CI.forEach((c, k) => { const v = d.by[c[0]]; g.fillStyle = cols[k]; g.fillRect(m.X(x), y - 12, m.X(x + v) - m.X(x), 24); x += v; });
+      label(g, n, m.L - 8, y, {align: 'right', size: 12, weight: 600}); label(g, d.total.toFixed(1) + ' kg', m.X(x) + 6, y, {align: 'left', size: 12, weight: 700});
+    });
+  }
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>';
+  $('tbody').innerHTML = rows.length ? rows.map(r => '<tr>' + r.map(x => `<td>${x}</td>`).join('') + '</tr>').join('') : `<tr class="empty"><td colspan="${head.length}">[10번 왕복 시간 측정]을 눌러 기록을 모으세요.</td></tr>`; }
+function table(){
+  if (st.mode === 'inq') setTable('측정 기록', ['번호', '실 길이 (cm)', '추 질량 (g)', '각도 (°)', '10번 왕복 (초)'], st.rows.map((r, i) => [i + 1, r.L, r.m, r.a, r.T10]));
+  else if (st.mode === 'future') setTable('과학기술의 영향', ['분야', '긍정적 영향', '생각할 문제'], [['의료', '수명 연장, 질병 치료', '의료 격차'], ['통신', '실시간 소통, 정보 공유', '개인 정보 유출, 가짜 뉴스'], ['에너지', '편리한 생활', '환경 오염, 기후 변화'], ['인공지능', '반복 업무 자동화, 새로운 창작 도구', '일자리 변화, 판단 편향, 책임 문제']].map(r => r.map(x => `<span style="font-family:var(--f-body)">${x}</span>`)));
+  else { const now = carbonNow(false), aft = carbonNow(true);
+    setTable('1년으로 늘려 보면', ['구분', '하루 (kg)', '1년 (kg)', '흡수에 필요한 소나무'], [['지금', now.total.toFixed(1), Math.round(now.total * 365), Math.round(now.total * 365 / 6.6) + '그루'], ['실천 후', aft.total.toFixed(1), Math.round(aft.total * 365), Math.round(aft.total * 365 / 6.6) + '그루'], ['줄인 양', (now.total - aft.total).toFixed(1), Math.round((now.total - aft.total) * 365), Math.round((now.total - aft.total) * 365 / 6.6) + '그루']]); }
+}
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'inq') {
+    const r = st.rows[st.rows.length - 1];
+    s = stat('측정 횟수', st.rows.length, '번') + stat('최근 10번 왕복', r ? r.T10 : '-', '초');
+    e = '<b>변인 통제</b>: 실험에서 결과에 영향을 줄 수 있는 조건 중 확인하려는 조건(<b>조작 변인</b>)만 바꾸고 나머지(<b>통제 변인</b>)는 같게 하는 것. 그 결과로 측정하는 값이 <b>종속 변인</b>입니다.';
+    t = '가설을 먼저 세워 보세요. 예: "실이 길수록 진자가 천천히 왕복할 것이다." 한 번에 하나씩 바꾸며 가설이 맞는지 확인합니다.';
+    const n = st.rows.length; document.querySelectorAll('#steps span').forEach((sp, i) => sp.classList.toggle('on', i <= Math.min(5, 2 + n)));
+  } else if (st.mode === 'future') {
+    if (st.f === 'time') { const ev = EVS[st.ev]; s = stat('연도', ev[0]) + stat('분야', ev[3]); e = `<b>${ev[1]}</b>: ${ev[2]}`; t = '과학 원리의 발견이 새로운 기술을 낳고, 그 기술이 다시 사회와 문화를 바꿉니다. 과학은 기술·공학·예술·수학과도 서로 영향을 주고받습니다.'; }
+    else { s = stat('학습 데이터', st.pts.length, '개') + stat('판단 방법', '가까운 3개');
+      e = '인공지능은 많은 <b>데이터</b>에서 규칙을 찾아 새로운 대상을 판단합니다. 이 체험에서는 새로운 과일과 가장 가까운 데이터 3개를 보고 판단합니다.';
+      t = '경계 근처에 사과 데이터를 몇 개 추가하면 판단 영역이 어떻게 바뀌나요? 잘못된 데이터를 넣으면 어떻게 될까요?'; }
+    $('fb').textContent = '';
+  } else {
+    const now = carbonNow(false), aft = carbonNow(true);
+    s = stat('지금 하루', now.total.toFixed(1), 'kg CO₂') + stat('실천 후 하루', aft.total.toFixed(1), 'kg CO₂');
+    e = '<b>지속가능한 발전</b>: 미래 세대가 쓸 자원과 환경을 해치지 않으면서 현재 세대의 필요를 채우는 발전. 과학기술은 문제를 찾고 해결하는 데 중요한 역할을 합니다.';
+    t = '30년생 소나무 한 그루는 1년에 약 6.6 kg의 이산화 탄소를 흡수한다고 알려져 있습니다. 표의 그루 수로 실천의 효과를 실감해 보세요.';
+    $('fb').textContent = '';
+  }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 조작 ===== */
+$('measure').onclick = measure;
+$('clearInq').onclick = () => { st.rows = []; judge(); table(); };
+['len', 'mass', 'amp'].forEach(id => $(id).onchange = () => { st.swing = 0; });
+Kit.seg($('fSeg'), 'f', v => { st.f = v; $('cbox').hidden = v === 'time'; $('hscene').hidden = v !== 'time'; $('aiCtl').hidden = v !== 'ai'; $('aiReset').hidden = v !== 'ai'; if (v === 'time') renderTimeline();
+  $('gTitle').textContent = v === 'time' ? '분야별 연표' : '학습 데이터'; $('gSub').textContent = v === 'time' ? '빨간 점이 고른 사건입니다.' : ''; })('time');
+Kit.seg($('lblSeg'), 'lbl', v => { st.lbl = v; st.adding = true; $('fb').textContent = `그래프 위를 누르면 ${v === 'A' ? '사과' : '귤'} 데이터가 추가됩니다.`; });
+document.querySelectorAll('#lblSeg button').forEach(b => b.setAttribute('aria-pressed', 'false'));
+$('aiReset').onclick = () => { st.pts = []; st.q = null; };
+seedAI();
+Kit.tabs(m => {
+  st.mode = m; table();
+  if (m === 'inq') { $('cbox').hidden = false; $('hscene').hidden = true; judge(); $('gTitle').textContent = '실의 길이와 주기'; $('gSub').textContent = '실의 길이만 바꾼 측정값이 어떤 경향을 보이나요?'; }
+  if (m === 'future') { $('cbox').hidden = st.f === 'time'; $('hscene').hidden = st.f !== 'time'; if (st.f === 'time') renderTimeline(); $('aiCtl').hidden = st.f !== 'ai'; $('aiReset').hidden = st.f !== 'ai';
+    $('gTitle').textContent = st.f === 'time' ? '분야별 연표' : '학습 데이터'; $('gSub').textContent = ''; }
+  if (m === 'carbon') { $('cbox').hidden = true; $('hscene').hidden = false; renderCarbon(); $('gTitle').textContent = '하루 탄소 배출량 비교'; $('gSub').textContent = '색은 항목을 나타냅니다. 실천 방법을 골라 막대 길이를 비교하세요.'; }
+}, ['inq', 'future', 'carbon']);
+let tAcc = 0;
+Kit.loop(dt => { st.swing += dt; tAcc += dt; if (tAcc > 0.5 && st.mode === 'carbon') { tAcc = 0; table(); } }, () => {
+  S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h);
+  if (st.mode === 'inq') drawInq(); else if (st.mode === 'future' && st.f === 'ai') drawAI();
+  drawGraph(); ledger();
+}, $('play'));
+})();
+</script>
+</body>
+</html>
