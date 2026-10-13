@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>역학적 에너지 실험실</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: graph-paper lab bench. Scene canvas left, live energy ledger right, time graph + 기록표 below. */
+:root{
+  --bg:#eef2f4; --surface:#ffffff; --ink:#15202b; --muted:#5a6876; --line:#d5dde3; --grid:#e6ecf0; --grid-strong:#cdd7de;
+  --ep:#2b5bd7; --ek:#e0731a; --heat:#c23b36; --accent:#1d3557; --accent-ink:#ffffff; --ball:#15202b; --soft:#f5f8fa;
+  --f-body:"IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1217; --surface:#141b22; --ink:#e4eaf0; --muted:#93a2b0; --line:#26323d; --grid:#1a232b; --grid-strong:#27333e;
+  --ep:#6e9bff; --ek:#ffa04a; --heat:#ff6a62; --accent:#9cc0ff; --accent-ink:#0d1217; --ball:#e4eaf0; --soft:#18212a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1217; --surface:#141b22; --ink:#e4eaf0; --muted:#93a2b0; --line:#26323d; --grid:#1a232b; --grid-strong:#27333e;
+  --ep:#6e9bff; --ek:#ffa04a; --heat:#ff6a62; --accent:#9cc0ff; --accent-ink:#0d1217; --ball:#e4eaf0; --soft:#18212a; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:500}
+h1{margin:2px 0 0;font-size:clamp(22px,3.2vw,30px);font-weight:700;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:15px;font-weight:700}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px}
+.tabs button{border:0;background:transparent;color:var(--muted);font:500 14px var(--f-body);padding:7px 14px;border-radius:7px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--ep);outline-offset:2px}
+
+.main{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.main{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.scene{padding:0;overflow:hidden;display:flex;flex-direction:column}
+.canvas-box{position:relative;width:100%;aspect-ratio:16/10;max-width:100%}
+.canvas-box canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.hint{position:absolute;left:12px;top:10px;font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:3px 8px;border-radius:6px;pointer-events:none}
+.controls{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);background:var(--soft)}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:500 14px var(--f-body);padding:7px 14px;border-radius:8px;cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);min-width:84px}
+.field{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.field input[type=range]{width:110px;accent-color:var(--accent)}
+.field output{font-family:var(--f-mono);color:var(--ink);font-size:13px;min-width:52px}
+select{font:inherit;font-size:13px;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+
+.ledger{display:flex;flex-direction:column;gap:14px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:var(--soft);border-radius:8px;padding:8px 10px}
+.stat .k{font-size:12px;color:var(--muted)}
+.stat .v{font-family:var(--f-mono);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat .v small{font-size:12px;color:var(--muted);font-weight:400;margin-left:3px}
+.erow{display:grid;grid-template-columns:12px 1fr auto;gap:4px 10px;align-items:baseline}
+.sw{width:12px;height:12px;border-radius:3px;align-self:center}
+.erow .name{font-weight:500}
+.erow .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+.erow .calc{grid-column:2 / 4;font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.stack{display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--grid);border:1px solid var(--line)}
+.stack div{height:100%;transition:width .05s linear}
+.total{display:flex;justify-content:space-between;align-items:baseline;border-top:2px solid var(--ink);padding-top:8px}
+.total .num{font-family:var(--f-mono);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.note{font-size:13px;color:var(--muted);margin:0}
+.note b{color:var(--ink);font-weight:500}
+
+.lower{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.lower{grid-template-columns:1fr}}
+.graph-box{position:relative;width:100%;height:220px}
+.graph-box canvas{position:absolute;inset:0;width:100%;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin:8px 0 6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:16px;height:3px;border-radius:2px}
+.headrow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.tbl-wrap{overflow-x:auto;margin-top:8px}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:500;color:var(--muted);font-size:12px}
+td{font-family:var(--f-mono)}
+td:first-child,th:first-child{text-align:left}
+td.sum{font-weight:600}
+.empty td{font-family:var(--f-body);color:var(--muted);text-align:left;white-space:normal}
+
+.think{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:860px){.think{grid-template-columns:1fr}}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+summary{cursor:pointer;font-weight:500}
+details p{margin:8px 0 0;color:var(--muted);font-size:14px}
+.qnum{font-family:var(--f-mono);color:var(--ep);margin-right:6px}
+footer{font-size:12px;color:var(--muted)}
+.back{font-size:13px;color:var(--muted);text-decoration:none}.back:hover{color:var(--ink);text-decoration:underline}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="back" href="../../index.html#g3">← 중학 과학 실험실 · 3학년</a>
+  <header>
+    <div>
+      <div class="eyebrow">중학교 3학년 과학 · 운동과 에너지</div>
+      <h1>역학적 에너지 전환과 보존</h1>
+    </div>
+    <div class="tabs" role="group" aria-label="실험 장치">
+      <button type="button" data-mode="coaster" aria-pressed="true">롤러코스터</button>
+      <button type="button" data-mode="pendulum" aria-pressed="false">진자</button>
+      <button type="button" data-mode="fall" aria-pressed="false">자유 낙하</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="시뮬레이션 화면">
+      <div class="canvas-box" id="sceneBox">
+        <canvas id="scene" aria-label="물체가 경로를 따라 움직이는 모습"></canvas>
+        <div class="hint" id="hint">경로 위를 끌어서 출발 위치를 정하세요</div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <button class="btn" id="reset" type="button">처음으로</button>
+        <button class="btn" id="record" type="button">이 순간 기록</button>
+        <label class="field" for="mass">질량
+          <input type="range" id="mass" min="1" max="10" step="1" value="2"><output id="massOut">2 kg</output></label>
+        <label class="field" for="fric">마찰·공기 저항
+          <input type="range" id="fric" min="0" max="10" step="1" value="0"><output id="fricOut">없음</output></label>
+        <label class="field" for="speed">재생 속도
+          <select id="speed"><option value="1">1배</option><option value="0.5">0.5배</option><option value="0.25">0.25배</option></select></label>
+      </div>
+    </section>
+
+    <aside class="panel ledger" aria-label="에너지 계산">
+      <div class="stats">
+        <div class="stat"><div class="k">높이 h</div><div class="v" id="hVal">0.0<small>m</small></div></div>
+        <div class="stat"><div class="k">속력 v</div><div class="v" id="vVal">0.0<small>m/s</small></div></div>
+      </div>
+
+      <div class="stack" aria-hidden="true">
+        <div id="barEp" style="background:var(--ep)"></div>
+        <div id="barEk" style="background:var(--ek)"></div>
+        <div id="barHeat" style="background:var(--heat)"></div>
+      </div>
+
+      <div class="erow">
+        <span class="sw" style="background:var(--ep)"></span><span class="name">위치 에너지</span><span class="num" id="epVal">0.0 J</span>
+        <span class="calc" id="epCalc">9.8 × m × h</span>
+      </div>
+      <div class="erow">
+        <span class="sw" style="background:var(--ek)"></span><span class="name">운동 에너지</span><span class="num" id="ekVal">0.0 J</span>
+        <span class="calc" id="ekCalc">½ × m × v²</span>
+      </div>
+      <div class="total">
+        <span><b>역학적 에너지</b> <span class="note" style="display:inline">(위치 + 운동)</span></span>
+        <span class="num" id="mechVal">0.0 J</span>
+      </div>
+      <div class="erow" id="heatRow">
+        <span class="sw" style="background:var(--heat)"></span><span class="name">열·소리 에너지로 전환</span><span class="num" id="heatVal">0.0 J</span>
+      </div>
+      <p class="note" id="msg">마찰이 없으면 역학적 에너지는 처음 값 그대로 유지됩니다.</p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2>시간에 따른 에너지 변화</h2>
+      <div class="legend">
+        <span><i style="background:var(--ep)"></i>위치 에너지</span>
+        <span><i style="background:var(--ek)"></i>운동 에너지</span>
+        <span><i style="background:var(--ink)"></i>역학적 에너지</span>
+        <span><i style="background:var(--heat)"></i>열 에너지</span>
+      </div>
+      <div class="graph-box" id="graphBox"><canvas id="graph" aria-label="최근 8초 동안의 에너지 그래프"></canvas></div>
+    </section>
+
+    <section class="panel">
+      <div class="headrow">
+        <h2>기록표</h2>
+        <button class="btn" id="clear" type="button">표 비우기</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>지점</th><th>h (m)</th><th>v (m/s)</th><th>위치 (J)</th><th>운동 (J)</th><th>합 (J)</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details><summary><span class="qnum">Q1</span>운동 에너지가 가장 큰 곳은 어디일까?</summary>
+        <p>가장 낮은 곳입니다. 높이가 낮을수록 위치 에너지가 줄어든 만큼 운동 에너지로 바뀌기 때문입니다. 기록표에서 h가 가장 작은 행의 운동 에너지를 확인해 보세요.</p></details>
+      <details><summary><span class="qnum">Q2</span>질량을 2배로 하면 무엇이 달라질까?</summary>
+        <p>모든 에너지 값이 2배가 되지만, 같은 높이에서의 속력은 그대로입니다. 9.8mh = ½mv²에서 양변의 m이 약분되기 때문입니다.</p></details>
+      <details><summary><span class="qnum">Q3</span>마찰을 켜면 줄어든 에너지는 어디로 갈까?</summary>
+        <p>사라지지 않고 열 에너지와 소리 에너지로 전환됩니다. 역학적 에너지는 줄어들지만, 열 에너지까지 더한 전체 에너지는 처음과 같습니다.</p></details>
+    </div>
+  </section>
+
+  <footer>g = 9.8 m/s², 기준면(h = 0)은 바닥입니다. 수치는 소수 첫째 자리까지 반올림해서 보여 줍니다.</footer>
+</div>
+
+<script>
+(() => {
+const G = 9.8;
+const $ = id => document.getElementById(id);
+const sceneCv = $('scene'), graphCv = $('graph');
+const sctx = sceneCv.getContext('2d'), gctx = graphCv.getContext('2d');
+const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- 경로 만들기 ---------- */
+function finalize(pts){
+  const s=[0];
+  for(let i=1;i<pts.length;i++) s.push(s[i-1]+Math.hypot(pts[i].x-pts[i-1].x, pts[i].y-pts[i-1].y));
+  return {pts, s, len:s[s.length-1]};
+}
+function coasterPath(){
+  const kp=[[0,12],[10,0],[19,7],[26,2],[34,10],[40,13]], pts=[];
+  for(let k=0;k<kp.length-1;k++){
+    const [x0,y0]=kp[k],[x1,y1]=kp[k+1];
+    for(let i=0;i<120;i++){ const t=i/120, e=t*t*(3-2*t); pts.push({x:x0+(x1-x0)*t, y:y0+(y1-y0)*e}); }
+  }
+  pts.push({x:40,y:13});
+  return finalize(pts);
+}
+const PEN_L=8;
+function pendulumPath(){
+  const pts=[], a=80*Math.PI/180;
+  for(let i=0;i<=500;i++){ const th=-a+2*a*i/500; pts.push({x:PEN_L*Math.sin(th), y:PEN_L-PEN_L*Math.cos(th)}); }
+  return finalize(pts);
+}
+function fallPath(){
+  const pts=[]; for(let i=0;i<=300;i++) pts.push({x:0,y:14-14*i/300});
+  return finalize(pts);
+}
+const MODES={
+  coaster:{build:coasterPath, startH:12, view:{x0:-2,x1:42,y0:-1.2,y1:14.5}},
+  pendulum:{build:pendulumPath, startH:4, view:{x0:-9.5,x1:9.5,y0:-1.2,y1:9.2}},
+  fall:{build:fallPath, startH:10, view:{x0:-10,x1:10,y0:-1.2,y1:15}}
+};
+
+/* 경로 위 위치 s에서 좌표와 기울기 */
+function at(path,s){
+  const S=path.s, P=path.pts;
+  s=Math.max(0,Math.min(path.len,s));
+  let lo=0,hi=S.length-1;
+  while(hi-lo>1){ const m=(lo+hi)>>1; if(S[m]<=s) lo=m; else hi=m; }
+  const ds=S[hi]-S[lo]||1e-9, t=(s-S[lo])/ds;
+  const dx=P[hi].x-P[lo].x, dy=P[hi].y-P[lo].y;
+  return {x:P[lo].x+dx*t, y:P[lo].y+dy*t, tx:dx/ds, ty:dy/ds};
+}
+function sForHeight(path,h,fromStart){
+  // 처음(왼쪽/위)부터 내려가며 높이 h에 가장 가까운 첫 지점
+  let best=0,bd=Infinity;
+  for(let i=0;i<path.pts.length;i++){ const d=Math.abs(path.pts[i].y-h); if(d<bd-1e-6){bd=d;best=i;} if(fromStart && path.pts[i].y<h-0.5 && bd<0.2) break; }
+  return path.s[best];
+}
+
+/* ---------- 상태 ---------- */
+const st={mode:'coaster', path:null, s:0, v:0, m:2, c:0, running:!reduceMotion, speed:1,
+          e0:0, t:0, hist:[], trail:[], rows:0, dragging:false, startS:0};
+
+function setStart(s){
+  st.s=s; st.v=0; st.startS=s; st.t=0; st.hist=[]; st.trail=[];
+  st.e0=G*at(st.path,s).y;           // 질량 1 kg당 처음 역학적 에너지
+}
+function setMode(mode){
+  st.mode=mode; st.path=MODES[mode].build();
+  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.mode===mode));
+  setStart(sForHeight(st.path, MODES[mode].startH, true));
+  clearRows();
+  resize();
+}
+
+/* ---------- 물리 ---------- */
+function step(dt){
+  const p=at(st.path,st.s);
+  const a=-G*p.ty - st.c*st.v;
+  st.v+=a*dt; st.s+=st.v*dt;
+  if(st.s<0){ st.s=-st.s; st.v=-st.v; }
+  if(st.s>st.path.len){ st.s=2*st.path.len-st.s; st.v=-st.v; }
+  if(st.c===0){ // 마찰이 없을 때 수치 오차 보정: 에너지 보존을 정확히 유지
+    const h=at(st.path,st.s).y, v2=2*(st.e0-G*h);
+    if(v2>=0) st.v=(st.v<0?-1:1)*Math.sqrt(v2);
+  }
+  st.t+=dt;
+}
+function energies(){
+  const p=at(st.path,st.s), m=st.m, h=Math.max(0,p.y), v=Math.abs(st.v);
+  const ep=G*m*h, ek=0.5*m*v*v, total=m*st.e0;
+  return {h, v, ep, ek, mech:ep+ek, heat:Math.max(0,total-ep-ek), total, p};
+}
+
+/* ---------- 색 ---------- */
+let C={};
+function readColors(){
+  const cs=getComputedStyle(document.documentElement);
+  ['bg','surface','ink','muted','line','grid','grid-strong','ep','ek','heat','accent','ball','soft']
+    .forEach(k=>C[k]=cs.getPropertyValue('--'+k).trim());
+}
+
+/* ---------- 캔버스 크기 ---------- */
+let SW=0,SH=0,GW=0,GH=0,view=null;
+function fitCanvas(cv,box){
+  const r=box.getBoundingClientRect(), d=window.devicePixelRatio||1;
+  cv.width=Math.round(r.width*d); cv.height=Math.round(r.height*d);
+  cv.getContext('2d').setTransform(d,0,0,d,0,0);
+  return [r.width,r.height];
+}
+function resize(){
+  [SW,SH]=fitCanvas(sceneCv,$('sceneBox'));
+  [GW,GH]=fitCanvas(graphCv,$('graphBox'));
+  const v=MODES[st.mode].view, padL=46, padR=18, padT=36, padB=14;
+  const sc=Math.min((SW-padL-padR)/(v.x1-v.x0),(SH-padT-padB)/(v.y1-v.y0));
+  const cx=padL+((SW-padL-padR)-(v.x1-v.x0)*sc)/2;
+  const cy=padT+((SH-padT-padB)-(v.y1-v.y0)*sc)/2;
+  view={sc, X:x=>cx+(x-v.x0)*sc, Y:y=>cy+(v.y1-y)*sc, ix:px=>(px-cx)/sc+v.x0, iy:py=>v.y1-(py-cy)/sc, v};
+}
+new ResizeObserver(()=>{resize();}).observe($('sceneBox'));
+new ResizeObserver(()=>{resize();}).observe($('graphBox'));
+
+/* ---------- 장면 그리기 ---------- */
+function drawScene(E){
+  const g=sctx, {X,Y,sc,v}=view;
+  g.fillStyle=C.surface; g.fillRect(0,0,SW,SH);
+  // 모눈 (1 m)
+  g.lineWidth=1;
+  for(let x=Math.ceil(v.x0);x<=v.x1;x++){ g.strokeStyle=x%5===0?C['grid-strong']:C.grid; g.beginPath(); g.moveTo(X(x)+.5,Y(v.y1)); g.lineTo(X(x)+.5,Y(0)); g.stroke(); }
+  for(let y=0;y<=v.y1;y++){ g.strokeStyle=y%5===0?C['grid-strong']:C.grid; g.beginPath(); g.moveTo(X(v.x0),Y(y)+.5); g.lineTo(X(v.x1),Y(y)+.5); g.stroke(); }
+  // 바닥 = 기준면
+  g.fillStyle=C.soft; g.fillRect(X(v.x0),Y(0),X(v.x1)-X(v.x0),Y(v.y0)-Y(0));
+  g.strokeStyle=C.ink; g.lineWidth=2; g.beginPath(); g.moveTo(X(v.x0),Y(0)); g.lineTo(X(v.x1),Y(0)); g.stroke();
+  g.fillStyle=C.muted; g.font='12px '+getComputedStyle(document.body).fontFamily; g.textAlign='right'; g.textBaseline='top';
+  g.fillText('기준면 (h = 0)', X(v.x1)-4, Y(0)+4);
+  // 눈금자
+  g.textAlign='right'; g.textBaseline='middle';
+  const stepY=v.y1>12?2:1;
+  for(let y=0;y<=v.y1;y+=stepY){ g.fillText(y+' m', X(v.x0)-6, Y(y)); }
+
+  const P=st.path.pts;
+  // 출발 높이 점선
+  const sp=at(st.path,st.startS);
+  g.setLineDash([6,5]); g.strokeStyle=C.ep; g.globalAlpha=.55; g.lineWidth=1.5;
+  g.beginPath(); g.moveTo(X(v.x0),Y(sp.y)); g.lineTo(X(v.x1),Y(sp.y)); g.stroke();
+  g.globalAlpha=1; g.setLineDash([]);
+  g.fillStyle=C.ep; g.textAlign='left'; g.textBaseline='bottom';
+  g.fillText('출발 높이 '+sp.y.toFixed(1)+' m', X(v.x0)+6, Y(sp.y)-3);
+
+  // 경로
+  if(st.mode==='coaster'){
+    g.strokeStyle=C.muted; g.lineWidth=1;
+    for(let i=0;i<P.length;i+=24){ g.beginPath(); g.moveTo(X(P[i].x),Y(P[i].y)); g.lineTo(X(P[i].x),Y(0)); g.stroke(); }
+    g.strokeStyle=C.ink; g.lineWidth=4; g.lineJoin='round';
+    g.beginPath(); P.forEach((p,i)=>i?g.lineTo(X(p.x),Y(p.y)):g.moveTo(X(p.x),Y(p.y))); g.stroke();
+  } else if(st.mode==='pendulum'){
+    g.strokeStyle=C.line; g.lineWidth=2; g.setLineDash([3,5]);
+    g.beginPath(); P.forEach((p,i)=>i?g.lineTo(X(p.x),Y(p.y)):g.moveTo(X(p.x),Y(p.y))); g.stroke(); g.setLineDash([]);
+    g.fillStyle=C.ink; g.fillRect(X(-2.5),Y(PEN_L)-6,X(2.5)-X(-2.5),6);
+  } else {
+    g.strokeStyle=C.line; g.lineWidth=2; g.setLineDash([3,5]);
+    g.beginPath(); g.moveTo(X(0),Y(14)); g.lineTo(X(0),Y(0)); g.stroke(); g.setLineDash([]);
+  }
+
+  // 자취
+  g.fillStyle=C.muted;
+  st.trail.forEach((t,i)=>{ g.globalAlpha=0.08+0.35*i/st.trail.length; g.beginPath(); g.arc(X(t.x),Y(t.y),2.2,0,7); g.fill(); });
+  g.globalAlpha=1;
+
+  const p=E.p, r=Math.max(7, (0.35+0.06*st.m)*sc*0.9);
+  const bx=X(p.x), by=Y(p.y);
+  // 진자 줄
+  if(st.mode==='pendulum'){ g.strokeStyle=C.ink; g.lineWidth=1.5; g.beginPath(); g.moveTo(X(0),Y(PEN_L)); g.lineTo(bx,by); g.stroke(); }
+  // 법선 방향으로 공을 살짝 띄움 (롤러코스터)
+  let ox=0,oy=0;
+  if(st.mode==='coaster'){ ox=-p.ty*r; oy=-p.tx*r; }
+  const cxp=bx+ox, cyp=by+oy;
+  // 높이선
+  g.strokeStyle=C.ep; g.lineWidth=1.5; g.setLineDash([4,4]);
+  g.beginPath(); g.moveTo(cxp+r+8,by); g.lineTo(cxp+r+8,Y(0)); g.stroke(); g.setLineDash([]);
+  g.fillStyle=C.ep; g.textAlign='left'; g.textBaseline='middle';
+  if(E.h>0.4) g.fillText('h = '+E.h.toFixed(1)+' m', cxp+r+13, (by+Y(0))/2);
+  // 속도 화살표
+  if(Math.abs(st.v)>0.15){
+    const dir=st.v>0?1:-1, len=Math.min(110, Math.abs(st.v)*6);
+    const ux=p.tx*dir, uy=-p.ty*dir;
+    const ex=cxp+ux*(r+len), ey=cyp+uy*(r+len);
+    g.strokeStyle=C.ek; g.fillStyle=C.ek; g.lineWidth=3;
+    g.beginPath(); g.moveTo(cxp+ux*r,cyp+uy*r); g.lineTo(ex,ey); g.stroke();
+    const ang=Math.atan2(uy,ux);
+    g.beginPath(); g.moveTo(ex+Math.cos(ang)*8,ey+Math.sin(ang)*8);
+    g.lineTo(ex+Math.cos(ang+2.4)*8,ey+Math.sin(ang+2.4)*8);
+    g.lineTo(ex+Math.cos(ang-2.4)*8,ey+Math.sin(ang-2.4)*8); g.closePath(); g.fill();
+  }
+  // 공
+  g.fillStyle=C.ball; g.beginPath(); g.arc(cxp,cyp,r,0,7); g.fill();
+  g.strokeStyle=C.surface; g.lineWidth=2; g.stroke();
+  g.fillStyle=C.surface; g.textAlign='center'; g.textBaseline='middle';
+  g.font='600 '+Math.max(10,Math.min(13,r*0.9))+'px '+getComputedStyle(document.body).fontFamily;
+  if(r>=11) g.fillText(st.m+'kg',cxp,cyp);
+}
+
+/* ---------- 그래프 ---------- */
+const WIN=8;
+function drawGraph(E){
+  const g=gctx, L=44, R=10, T=8, B=24, w=GW-L-R, h=GH-T-B;
+  g.fillStyle=C.surface; g.fillRect(0,0,GW,GH);
+  const ymax=Math.max(1,E.total)*1.1;
+  const tEnd=Math.max(WIN,st.t), tStart=tEnd-WIN;
+  const X=t=>L+(t-tStart)/WIN*w, Y=v=>T+h-(v/ymax)*h;
+  const font='11px '+getComputedStyle(document.body).fontFamily;
+  g.font=font; g.fillStyle=C.muted; g.lineWidth=1;
+  // 가로 눈금
+  const nice=[1,2,5,10,20,25,50,100,200,250,500,1000,2000,5000];
+  let stp=nice.find(n=>ymax/n<=5)||5000;
+  g.textAlign='right'; g.textBaseline='middle';
+  for(let v=0;v<=ymax;v+=stp){ g.strokeStyle=C.grid; g.beginPath(); g.moveTo(L,Y(v)+.5); g.lineTo(L+w,Y(v)+.5); g.stroke(); g.fillText(v+' J',L-6,Y(v)); }
+  g.textAlign='center'; g.textBaseline='top';
+  for(let t=Math.ceil(tStart);t<=tEnd;t++){ if(t%2===0) g.fillText(t+'초',X(t),T+h+6); }
+  g.strokeStyle=C.line; g.beginPath(); g.moveTo(L,T); g.lineTo(L,T+h); g.lineTo(L+w,T+h); g.stroke();
+  const pts=st.hist.filter(d=>d.t>=tStart);
+  const line=(key,color,width,dash)=>{
+    if(pts.length<2) return;
+    g.strokeStyle=color; g.lineWidth=width; g.setLineDash(dash||[]);
+    g.beginPath(); pts.forEach((d,i)=>i?g.lineTo(X(d.t),Y(d[key])):g.moveTo(X(d.t),Y(d[key]))); g.stroke(); g.setLineDash([]);
+  };
+  line('heat',C.heat,2);
+  line('ep',C.ep,2.5);
+  line('ek',C.ek,2.5);
+  line('mech',C.ink,2,[6,4]);
+}
+
+/* ---------- 계기판 ---------- */
+const f1=n=>n.toFixed(1);
+function updateLedger(E){
+  $('hVal').innerHTML=f1(E.h)+'<small>m</small>';
+  $('vVal').innerHTML=f1(E.v)+'<small>m/s</small>';
+  $('epVal').textContent=f1(E.ep)+' J';
+  $('ekVal').textContent=f1(E.ek)+' J';
+  $('mechVal').textContent=f1(E.mech)+' J';
+  $('heatVal').textContent=f1(E.heat)+' J';
+  $('epCalc').textContent='9.8 × '+st.m+' kg × '+f1(E.h)+' m = '+f1(E.ep)+' J';
+  $('ekCalc').textContent='½ × '+st.m+' kg × ('+f1(E.v)+' m/s)² = '+f1(E.ek)+' J';
+  const T=E.total||1;
+  $('barEp').style.width=(E.ep/T*100)+'%';
+  $('barEk').style.width=(E.ek/T*100)+'%';
+  $('barHeat').style.width=(E.heat/T*100)+'%';
+  $('heatRow').style.opacity=st.c>0||E.heat>0.05?1:.45;
+  $('msg').innerHTML = st.c>0
+    ? '역학적 에너지가 줄어든 만큼 열 에너지가 생깁니다. <b>역학적 + 열 = '+f1(E.mech+E.heat)+' J</b>로 전체 에너지는 처음과 같습니다.'
+    : '마찰이 없으면 역학적 에너지는 <b>'+f1(E.total)+' J</b>로 어느 지점에서나 같습니다.';
+}
+
+/* ---------- 기록표 ---------- */
+function clearRows(){ st.rows=0; $('tbody').innerHTML='<tr class="empty"><td colspan="6">움직이는 중에 [이 순간 기록]을 눌러 여러 지점의 값을 모아 보세요. 합이 어떻게 되는지 비교해 봅시다.</td></tr>'; }
+function addRow(){
+  const E=energies(); if(st.rows===0) $('tbody').innerHTML='';
+  if(st.rows>=10) $('tbody').firstElementChild.remove();
+  st.rows++;
+  const tr=document.createElement('tr');
+  tr.innerHTML='<td>'+String.fromCharCode(64+((st.rows-1)%26)+1)+'</td><td>'+f1(E.h)+'</td><td>'+f1(E.v)+'</td><td style="color:var(--ep)">'+f1(E.ep)+'</td><td style="color:var(--ek)">'+f1(E.ek)+'</td><td class="sum">'+f1(E.mech)+'</td>';
+  $('tbody').appendChild(tr);
+}
+
+/* ---------- 조작 ---------- */
+function setRunning(r){ st.running=r; $('play').textContent=r?'일시정지':'재생'; }
+$('play').onclick=()=>setRunning(!st.running);
+$('reset').onclick=()=>{ setStart(st.startS); };
+$('record').onclick=addRow;
+$('clear').onclick=clearRows;
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+$('mass').oninput=e=>{ st.m=+e.target.value; $('massOut').textContent=st.m+' kg'; };
+$('fric').oninput=e=>{ const k=+e.target.value; st.c=k*0.04; $('fricOut').textContent=k===0?'없음':(k<=3?'약함':k<=6?'보통':'강함'); };
+$('speed').onchange=e=>{ st.speed=+e.target.value; };
+document.addEventListener('keydown',e=>{ if(e.code==='Space' && !/INPUT|SELECT|BUTTON|SUMMARY/.test(document.activeElement.tagName)){ e.preventDefault(); setRunning(!st.running);} });
+
+function nearestS(px,py){
+  const wx=view.ix(px), wy=view.iy(py); let best=0,bd=Infinity;
+  st.path.pts.forEach((p,i)=>{ const d=(p.x-wx)**2+(p.y-wy)**2; if(d<bd){bd=d;best=i;} });
+  return st.path.s[best];
+}
+function ptr(e){ const r=sceneCv.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; }
+let wasRunning=false;
+sceneCv.addEventListener('pointerdown',e=>{
+  st.dragging=true; wasRunning=st.running; setRunning(false); sceneCv.setPointerCapture(e.pointerId);
+  sceneCv.style.cursor='grabbing'; setStart(nearestS(...ptr(e))); $('hint').hidden=true;
+});
+sceneCv.addEventListener('pointermove',e=>{ if(st.dragging) setStart(nearestS(...ptr(e))); });
+const endDrag=()=>{ if(!st.dragging) return; st.dragging=false; sceneCv.style.cursor='grab'; setRunning(true); };
+sceneCv.addEventListener('pointerup',endDrag); sceneCv.addEventListener('pointercancel',endDrag);
+
+/* ---------- 루프 ---------- */
+let last=performance.now(), sampleAcc=0;
+function frame(now){
+  const dtReal=Math.min(0.05,(now-last)/1000); last=now;
+  readColors();
+  if(st.running && !st.dragging){
+    const simDt=dtReal*st.speed, n=Math.max(1,Math.ceil(simDt/0.0015));
+    for(let i=0;i<n;i++) step(simDt/n);
+    sampleAcc+=simDt;
+    if(sampleAcc>0.03){ sampleAcc=0;
+      const E=energies(); st.hist.push({t:st.t,ep:E.ep,ek:E.ek,mech:E.mech,heat:E.heat});
+      if(st.hist.length>600) st.hist.shift();
+      st.trail.push({x:E.p.x,y:E.p.y}); if(st.trail.length>40) st.trail.shift();
+    }
+  }
+  const E=energies();
+  if(st.hist.length===0) st.hist.push({t:0,ep:E.ep,ek:E.ek,mech:E.mech,heat:E.heat});
+  drawScene(E); drawGraph(E); updateLedger(E);
+  requestAnimationFrame(frame);
+}
+
+readColors();
+setMode('coaster');
+setRunning(st.running);
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>

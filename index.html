@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>중학 과학 실험실</title>
+<meta name="description" content="2022 개정 교육과정 중학교 과학 단원별 시뮬레이션과 학습지">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/catalog.js"></script>
+<style>
+.hero{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;padding-block:12px 4px}
+.hero h1{font-size:clamp(26px,4vw,40px)}
+.hero p{margin:6px 0 0;color:var(--muted);max-width:56ch}
+.progress{font-family:var(--f-mono);font-size:13px;color:var(--muted);text-align:right}
+.progress b{font-size:22px;color:var(--ink)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+@media (max-width:400px){.units{grid-template-columns:1fr}}
+.unit{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.unit-head{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:baseline}
+.unit-no{font-family:var(--f-mono);font-size:22px;font-weight:600;color:var(--area);grid-row:span 2;line-height:1}
+.unit-title{font-weight:700;font-size:16px}
+.unit-meta{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.items li{display:flex;align-items:center;gap:8px;font-size:14px;min-width:0}
+.items .tag{font-size:11px;border-radius:4px;padding:1px 6px;flex:none;border:1px solid var(--line);color:var(--muted)}
+.items a{flex:1;min-width:0;text-decoration:none;font-weight:500}
+.items a:hover{text-decoration:underline}
+.items .ready .tag{background:var(--area);border-color:var(--area);color:var(--surface)}
+.items .plan span.t{color:var(--muted);flex:1;min-width:0}
+.items .soon{font-size:11px;color:var(--muted);flex:none}
+.filter{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.filter label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+</style>
+</head>
+<body data-root="./">
+<div class="wrap">
+  <section class="hero">
+    <div>
+      <div class="eyebrow" id="curr"></div>
+      <h1 id="siteName">중학 과학 실험실</h1>
+      <p>단원마다 직접 조작해 보는 시뮬레이션과 수업에 바로 쓰는 학습지를 모았습니다. 학년을 고르고 단원을 찾아 들어가세요.</p>
+    </div>
+    <div class="progress" id="progress"></div>
+  </section>
+
+  <div class="filter">
+    <div class="seg" role="group" aria-label="학년" id="grades"></div>
+    <label for="onlyReady"><input type="checkbox" id="onlyReady"> 완성된 자료만 보기</label>
+  </div>
+  <div class="legend">
+    <span><i class="area-dot area-phy"></i>물리</span><span><i class="area-dot area-chem"></i>화학</span>
+    <span><i class="area-dot area-bio"></i>생명과학</span><span><i class="area-dot area-earth"></i>지구과학</span><span><i class="area-dot area-gen"></i>통합</span>
+  </div>
+
+  <div class="units" id="units"></div>
+  <footer class="site" data-footer></footer>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  $('siteName').textContent = SITE.name; document.title = SITE.name;
+  $('curr').textContent = SITE.curriculum + ' · 중학교 과학';
+  let grade = (location.hash || '#g1').slice(1);
+  if (!CATALOG.some(g => g.id === grade)) grade = 'g1';
+  let onlyReady = false;
+
+  const all = CATALOG.flatMap(g => g.units.flatMap(u => u.items));
+  const done = all.filter(i => i.href).length;
+  $('progress').innerHTML = `<b>${done}</b> / ${all.length}<br>완성된 자료`;
+
+  $('grades').innerHTML = CATALOG.map(g => `<button type="button" data-g="${g.id}">${g.grade} · ${g.book}</button>`).join('');
+  $('grades').querySelectorAll('button').forEach(b => b.onclick = () => { grade = b.dataset.g; history.replaceState(null, '', '#' + grade); render(); });
+  $('onlyReady').onchange = e => { onlyReady = e.target.checked; render(); };
+
+  function render() {
+    $('grades').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.g === grade));
+    const g = CATALOG.find(x => x.id === grade);
+    const units = g.units.filter(u => !onlyReady || u.items.some(i => i.href));
+    $('units').innerHTML = units.map(u => {
+      const items = u.items.filter(i => !onlyReady || i.href).map(i => {
+        const tag = `<span class="tag">${i.kind === 'ws' ? '학습지' : '시뮬레이션'}</span>`;
+        return i.href
+          ? `<li class="ready">${tag}<a href="${i.href}">${i.title}</a></li>`
+          : `<li class="plan">${tag}<span class="t">${i.title}</span><span class="soon">준비 중</span></li>`;
+      }).join('');
+      return `<article class="unit area-${u.area}">
+        <div class="unit-head"><span class="unit-no">${String(u.no).padStart(2, '0')}</span>
+          <span class="unit-title">${u.title}</span>
+          <span class="unit-meta"><span class="code">${u.code}</span>${u.items.filter(i => i.href).length}/${u.items.length} 완성</span></div>
+        <ul class="items">${items}</ul></article>`;
+    }).join('') || '<p class="note">이 학년에는 아직 완성된 자료가 없습니다.</p>';
+  }
+  render();
+})();
+</script>
+</body>
+</html>

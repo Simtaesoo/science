@@ -1,0 +1,65 @@
+/* 사이트 전체 목차. 새 자료를 만들면 href를 채우면 메인 화면에 '바로 열기'로 바뀝니다.
+   area: phy(물리) chem(화학) bio(생명) earth(지구) gen(통합) */
+window.SITE = {
+  name: '중학 과학 실험실',
+  author: '',            // 예: '○○중 홍길동' — 채우면 모든 페이지 아래에 표시됩니다
+  curriculum: '2022 개정 교육과정'
+};
+
+window.CATALOG = [
+ { id:'g1', grade:'1학년', book:'과학 1', units:[
+  { no:1, area:'gen', title:'과학과 인류의 지속가능한 삶', code:'9과01', items:[
+    {kind:'sim', title:'변인 통제 실험 설계하기'}, {kind:'sim', title:'우리 반 탄소 발자국 계산기'} ]},
+  { no:2, area:'bio', title:'생물의 구성과 다양성', code:'9과02', items:[
+    {kind:'sim', title:'동물 세포와 식물 세포 탐색기'}, {kind:'sim', title:'세포에서 개체까지 확대해 보기'}, {kind:'sim', title:'5계 분류 게임'} ]},
+  { no:3, area:'phy', title:'열', code:'9과03', items:[
+    {kind:'sim', title:'입자 운동으로 보는 열평형'}, {kind:'sim', title:'전도·대류·복사 비교'}, {kind:'sim', title:'비열과 열팽창 실험'} ]},
+  { no:4, area:'chem', title:'물질의 상태 변화', code:'9과04', items:[
+    {kind:'sim', title:'입자 모형 실험실 (확산·증발 / 세 가지 상태 / 가열·냉각 곡선)', href:'g1/state/sim.html'},
+    {kind:'ws', title:'학습지 3차시', href:'g1/state/worksheet.html'} ]},
+  { no:5, area:'phy', title:'힘의 작용', code:'9과05', items:[
+    {kind:'sim', title:'힘의 합성과 평형'}, {kind:'sim', title:'탄성력·마찰력·부력 측정'}, {kind:'sim', title:'알짜힘과 운동 변화'} ]},
+  { no:6, area:'chem', title:'기체의 성질', code:'9과06', items:[
+    {kind:'sim', title:'기체 실험실 (압력과 입자 충돌 / 압력과 부피 / 온도와 부피)', href:'g1/gas/sim.html'},
+    {kind:'ws', title:'학습지 3차시', href:'g1/gas/worksheet.html'} ]},
+  { no:7, area:'earth', title:'태양계', code:'9과07', items:[
+    {kind:'sim', title:'지구형·목성형 행성 분류'}, {kind:'sim', title:'자전·공전과 별자리'}, {kind:'sim', title:'달의 위상과 일식·월식'} ]}
+ ]},
+ { id:'g2', grade:'2학년', book:'과학 2', units:[
+  { no:8, area:'chem', title:'물질의 특성', code:'9과08', items:[{kind:'sim', title:'밀도·용해도로 물질 구별하기'}, {kind:'sim', title:'혼합물 분리 실험'}]},
+  { no:9, area:'earth', title:'지권의 변화', code:'9과09', items:[{kind:'sim', title:'암석의 순환'}, {kind:'sim', title:'판의 경계와 지진·화산'}]},
+  { no:10, area:'phy', title:'빛과 파동', code:'9과10', items:[{kind:'sim', title:'거울과 렌즈의 상'}, {kind:'sim', title:'빛의 합성과 물체의 색'}, {kind:'sim', title:'소리의 진폭·진동수'}]},
+  { no:11, area:'chem', title:'물질의 구성', code:'9과11', items:[{kind:'sim', title:'원자 모형과 이온 만들기'}]},
+  { no:12, area:'bio', title:'식물과 에너지', code:'9과12', items:[{kind:'sim', title:'광합성에 영향을 주는 요인'}]},
+  { no:13, area:'bio', title:'동물과 에너지', code:'9과13', items:[{kind:'sim', title:'소화·순환·호흡·배설 연결 지도'}]},
+  { no:14, area:'phy', title:'전기와 자기', code:'9과14', items:[{kind:'sim', title:'전압·전류·저항 회로 실험'}, {kind:'sim', title:'전동기의 원리'}]},
+  { no:15, area:'earth', title:'별과 우주', code:'9과15', items:[{kind:'sim', title:'연주 시차와 별의 거리'}, {kind:'sim', title:'팽창하는 우주 풍선 모형'}]}
+ ]},
+ { id:'g3', grade:'3학년', book:'과학 3', units:[
+  { no:16, area:'chem', title:'화학 반응의 규칙성', code:'9과16', items:[{kind:'sim', title:'질량 보존과 일정 성분비'}]},
+  { no:17, area:'earth', title:'날씨와 기후변화', code:'9과17', items:[{kind:'sim', title:'온실 효과 모형'}, {kind:'sim', title:'기단과 전선'}]},
+  { no:18, area:'earth', title:'수권과 해수의 순환', code:'9과18', items:[{kind:'sim', title:'해수의 수온·염분 분포'}]},
+  { no:19, area:'phy', title:'운동과 에너지', code:'9과19', items:[
+    {kind:'sim', title:'역학적 에너지 전환과 보존', href:'g3/energy/sim.html'}, {kind:'sim', title:'자유 낙하 운동 그래프'} ]},
+  { no:20, area:'bio', title:'자극과 반응', code:'9과20', items:[{kind:'sim', title:'반응 속도 측정 실험'}]},
+  { no:21, area:'bio', title:'생식과 유전', code:'9과21', items:[
+    {kind:'sim', title:'멘델의 유전 실험실', href:'g3/heredity/sim.html'}, {kind:'sim', title:'체세포 분열과 감수 분열'}, {kind:'sim', title:'가계도 분석'} ]},
+  { no:22, area:'gen', title:'재해·재난과 안전', code:'9과22', items:[{kind:'sim', title:'재해 대응 시나리오'}]},
+  { no:23, area:'gen', title:'과학과 나의 미래', code:'9과23', items:[{kind:'sim', title:'과학 관련 직업 탐색'}]}
+ ]}
+];
+
+/* 하위 페이지 공통: 상단 이동 막대와 바닥글을 채운다 */
+window.addEventListener('DOMContentLoaded', () => {
+  const root = document.body.dataset.root || './';
+  const bar = document.querySelector('[data-topbar]');
+  if (bar) {
+    const crumbs = (bar.dataset.topbar || '').split('|').filter(Boolean);
+    bar.innerHTML = `<a class="brand" href="${root}index.html">${SITE.name}</a>` +
+      crumbs.map(c => `<span class="sep">›</span><span>${c}</span>`).join('') +
+      `<span class="spacer"></span>` + (bar.dataset.ws ? `<a class="btn" href="${bar.dataset.ws}">학습지</a>` : '') +
+      (bar.dataset.sim ? `<a class="btn" href="${bar.dataset.sim}">시뮬레이션</a>` : '');
+  }
+  const ft = document.querySelector('[data-footer]');
+  if (ft) ft.innerHTML = `${SITE.name} · ${SITE.curriculum} 기준${SITE.author ? ' · 제작 ' + SITE.author : ''}` + (ft.dataset.extra ? ' · ' + ft.dataset.extra : '');
+});

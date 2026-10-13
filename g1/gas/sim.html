@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>기체 실험실 · 중1 기체의 성질</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+</head>
+<body data-root="../../" class="area-chem">
+<div class="wrap">
+  <nav class="topbar" data-topbar="1학년|06 기체의 성질" data-ws="worksheet.html"></nav>
+
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 1 · 06 기체의 성질 <span class="code">9과06-01</span><span class="code">9과06-02</span><span class="code">9과06-03</span></div>
+      <h1>기체 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="실험 고르기">
+      <button type="button" data-mode="p">1. 압력과 입자 충돌</button>
+      <button type="button" data-mode="pv">2. 압력과 부피</button>
+      <button type="button" data-mode="tv">3. 온도와 부피</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="실린더 속 기체 입자의 움직임"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <button class="btn" id="record" type="button">측정값 기록</button>
+        <label class="field" data-only="p" for="count">입자 수
+          <input type="range" id="count" min="10" max="150" step="10" value="60"><output id="countOut">60개</output></label>
+        <label class="field" data-only="p tv" for="temp">온도
+          <input type="range" id="temp" min="0" max="100" step="5" value="25"><output id="tempOut">25 °C</output></label>
+        <div class="field" data-only="pv">추
+          <div class="seg" role="group" aria-label="추 개수" id="weights">
+            <button type="button" data-w="1">1개</button><button type="button" data-w="2">2개</button>
+            <button type="button" data-w="3">3개</button><button type="button" data-w="4">4개</button></div></div>
+        <label class="field" for="trace"><input type="checkbox" id="trace"> 입자 하나 따라가기</label>
+      </div>
+    </section>
+
+    <aside class="panel ledger" aria-label="측정값">
+      <div class="stats">
+        <div class="stat"><div class="k" id="pLabel">압력</div><div class="v" id="pVal">1.0<small>기압</small></div></div>
+        <div class="stat"><div class="k">부피</div><div class="v" id="vVal">120<small>mL</small></div></div>
+        <div class="stat"><div class="k">온도</div><div class="v" id="tVal">25<small>°C</small></div></div>
+        <div class="stat"><div class="k">입자 수</div><div class="v" id="nVal">60<small>개</small></div></div>
+      </div>
+      <div>
+        <div class="headrow"><span class="note">피스톤(뚜껑)에 부딪히는 횟수</span><span class="note" style="font-family:var(--f-mono)" id="hitVal">0 회/초</span></div>
+        <div class="meter" style="margin-top:6px"><i id="hitBar" style="width:0%"></i></div>
+      </div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="graphTitle">그래프</h2>
+      <p class="sub" id="graphSub"></p>
+      <div class="graph-box" id="graphBox" style="margin-top:8px"><canvas id="graph" aria-label="측정값 그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <div class="headrow"><h2>측정 기록표</h2><button class="btn" id="clear" type="button">표 비우기</button></div>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>기체가 벽을 미는 힘은 어디에서 생길까?</summary>
+        <p>쉬지 않고 움직이는 수많은 입자가 벽에 부딪히기 때문입니다. 일정한 면적에 더 자주, 더 세게 부딪힐수록 압력이 커집니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>추를 올리면 부피가 줄어드는데, 입자 수는 그대로일까?</summary>
+        <p>입자 수는 변하지 않습니다. 입자 사이의 거리가 가까워져 같은 면적에 부딪히는 횟수가 늘어나고, 그래서 늘어난 바깥 압력과 다시 같아집니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>찌그러진 탁구공을 뜨거운 물에 넣으면 펴지는 까닭은?</summary>
+        <p>공 속 기체의 온도가 올라가면 입자의 운동이 빨라져 더 세게 부딪히고, 기체의 부피가 커지면서 찌그러진 곳을 밀어냅니다.</p></details>
+    </div>
+  </section>
+
+  <footer class="site" data-footer data-extra="이 단원은 수식 계산 없이 입자 모형으로 관계를 설명하는 데 초점을 둡니다."></footer>
+</div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const cv = $('scene'), ctx = cv.getContext('2d'), gcv = $('graph'), gctx = gcv.getContext('2d');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const V_REF = 120;            // 1기압, 25°C에서의 부피 (mL)
+const V0 = 0.8;               // 25°C에서 입자의 평균 속력 (화면 단위/초)
+const MODES = {
+  p:  {graph:'압력의 변화', sub:'최근 10초 동안 측정한 압력입니다. 입자 수와 온도를 바꾸며 변화를 비교해 보세요.',
+       explain:'기체의 <b>압력</b>은 입자들이 벽에 부딪히며 일정한 면적을 미는 힘입니다. 입자 수가 많을수록, 온도가 높을수록 압력이 커집니다.',
+       tip:'뚜껑이 고정되어 부피가 변하지 않는 용기입니다.'},
+  pv: {graph:'압력과 부피의 관계', sub:'추를 바꿀 때마다 피스톤이 멈춘 뒤 [측정값 기록]을 누르세요.',
+       explain:'온도가 일정할 때 기체에 가하는 <b>압력이 커지면 부피는 작아집니다</b>. 입자 사이 거리가 가까워져 벽에 더 자주 부딪히기 때문입니다.',
+       tip:'추 1개가 1기압을 나타냅니다. 온도는 25 °C로 일정합니다.'},
+  tv: {graph:'온도와 부피의 관계', sub:'온도를 바꿀 때마다 피스톤이 멈춘 뒤 [측정값 기록]을 누르세요.',
+       explain:'압력이 일정할 때 기체의 <b>온도가 높아지면 부피가 커집니다</b>. 입자가 더 빠르게 움직여 피스톤을 세게 밀기 때문입니다.',
+       tip:'추 1개(1기압)를 올려 둔 채 온도만 바꿉니다.'}
+};
+
+const st = {mode:'pv', run:!reduce, n:60, T:25, w:1, H:1.2, Ht:1.2, parts:[], hits:[], imp:0, pEMA:1, rateEMA:0, hitCount:0,
+            hist:[], rows:{p:[],pv:[],tv:[]}, trace:false, trail:[], t:0};
+
+/* ---------- 입자 ---------- */
+const vT = T => V0 * Math.sqrt((T + 273) / 298);
+function spawn(n){
+  st.parts = [];
+  for (let i = 0; i < n; i++) addParticle();
+}
+function addParticle(){
+  const a = Math.random() * Math.PI * 2, s = vT(st.T) * (0.5 + Math.random());
+  st.parts.push({x: 0.03 + Math.random() * 0.94, y: 0.03 + Math.random() * (st.H - 0.06), vx: Math.cos(a) * s, vy: Math.sin(a) * s});
+}
+function targetH(){
+  if (st.mode === 'p') return 1.2;
+  const P = st.mode === 'pv' ? st.w : 1;
+  return (V_REF / 100) * ((st.T + 273) / 298) / P;
+}
+function thermostat(){
+  // 평균 운동 에너지를 설정 온도에 맞춘다 (압축·팽창 후에도 온도 일정)
+  let s = 0; for (const p of st.parts) s += p.vx * p.vx + p.vy * p.vy;
+  const want = vT(st.T) ** 2 * 1.083 * st.parts.length;   // (0.5~1.5 균등분포 평균 제곱 보정)
+  if (s <= 0) return;
+  const f = Math.sqrt(want / s), k = Math.pow(f, 0.08);
+  for (const p of st.parts) { p.vx *= k; p.vy *= k; }
+}
+function step(dt){
+  st.H += (st.Ht - st.H) * Math.min(1, dt * 2.2);
+  const r = 0.012;
+  for (const p of st.parts) {
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.x < r) { p.x = 2 * r - p.x; p.vx = Math.abs(p.vx); }
+    if (p.x > 1 - r) { p.x = 2 * (1 - r) - p.x; p.vx = -Math.abs(p.vx); }
+    if (p.y < r) { p.y = 2 * r - p.y; p.vy = Math.abs(p.vy); }
+    if (p.y > st.H - r) {
+      if (p.vy > 0) { st.imp += 2 * p.vy; st.hitCount++; if (st.hits.length < 120) st.hits.push({x: p.x, age: 0}); }
+      p.y = Math.min(st.H - r, 2 * (st.H - r) - p.y); p.vy = -Math.abs(p.vy);
+    }
+  }
+  st.t += dt;
+}
+// 기준 상태(60개, 25°C, 120 mL)에서 1.0이 되도록 맞춘 압력 환산 계수
+const P_SCALE = 1 / (60 / (1.2 - 0.024) * (vT(25) ** 2 * 1.083) / 2);
+
+/* ---------- 캔버스 ---------- */
+let W = 0, Hc = 0, G = {w:0, h:0};
+function fit(c){ const r = c.parentElement.getBoundingClientRect(), d = devicePixelRatio || 1;
+  c.width = Math.round(r.width * d); c.height = Math.round(r.height * d); c.getContext('2d').setTransform(d, 0, 0, d, 0, 0); return r; }
+function resize(){ const a = fit(cv); W = a.width; Hc = a.height; const b = fit(gcv); G.w = b.width; G.h = b.height; }
+new ResizeObserver(resize).observe(cv.parentElement);
+new ResizeObserver(resize).observe(gcv.parentElement);
+
+let C = {};
+function colors(){ const cs = getComputedStyle(document.documentElement);
+  ['surface','ink','muted','line','soft','grid','chem','hot','cold','accent','warn'].forEach(k => C[k] = cs.getPropertyValue('--' + k).trim()); }
+const font = (s, w) => `${w || 400} ${s}px ${getComputedStyle(document.body).fontFamily}`;
+
+function drawScene(){
+  const g = ctx; g.fillStyle = C.surface; g.fillRect(0, 0, W, Hc);
+  const s = Math.min(W * 0.34, (Hc - 120) / 1.65);
+  const cx = Math.max(56, W * 0.30 - s / 2), base = Hc - 46;           // 실린더 왼쪽 아래
+  const X = x => cx + x * s, Y = y => base - y * s;
+  const showHeat = st.mode !== 'pv';
+
+  // 가열 장치
+  if (showHeat) {
+    const k = st.T / 100;
+    g.fillStyle = C.soft; g.fillRect(X(-0.15), base + 8, s * 1.3, 18);
+    const glow = g.createLinearGradient(0, base + 8, 0, base + 26);
+    glow.addColorStop(0, C.hot); glow.addColorStop(1, C.surface);
+    g.globalAlpha = 0.15 + 0.75 * k; g.fillStyle = glow; g.fillRect(X(-0.15), base + 8, s * 1.3, 18); g.globalAlpha = 1;
+    g.fillStyle = C.muted; g.font = font(11); g.textAlign = 'center'; g.textBaseline = 'top';
+    g.fillText(`가열 장치 ${st.T} °C`, X(0.5), base + 29 > Hc - 14 ? Hc - 14 : base + 29);
+  }
+
+  // 실린더 눈금
+  g.font = font(11); g.textAlign = 'left'; g.textBaseline = 'middle';
+  for (let v = 20; v <= 160; v += 20) {
+    const y = Y(v / 100);
+    g.strokeStyle = C.line; g.lineWidth = 1; g.beginPath(); g.moveTo(X(1) + 4, y); g.lineTo(X(1) + (v % 40 ? 9 : 14), y); g.stroke();
+    if (v % 40 === 0) { g.fillStyle = C.muted; g.fillText(v + ' mL', X(1) + 18, y); }
+  }
+  // 기체 영역
+  g.fillStyle = C.soft; g.fillRect(X(0), Y(st.H), s, st.H * s);
+  // 벽
+  g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath();
+  g.moveTo(X(0), Y(1.65)); g.lineTo(X(0), Y(0)); g.lineTo(X(1), Y(0)); g.lineTo(X(1), Y(1.65)); g.stroke();
+
+  // 충돌 표시
+  for (const h of st.hits) { g.globalAlpha = Math.max(0, 1 - h.age * 3); g.fillStyle = C.hot; g.fillRect(X(h.x) - 3, Y(st.H) - 2, 6, 4); }
+  g.globalAlpha = 1;
+
+  // 입자
+  const pr = Math.max(3, s * 0.014);
+  if (st.trace && st.trail.length > 1) {
+    g.strokeStyle = C.hot; g.globalAlpha = .45; g.lineWidth = 1.5; g.beginPath();
+    st.trail.forEach((t, i) => i ? g.lineTo(X(t.x), Y(t.y)) : g.moveTo(X(t.x), Y(t.y))); g.stroke(); g.globalAlpha = 1;
+  }
+  g.fillStyle = C.chem;
+  st.parts.forEach((p, i) => { if (st.trace && i === 0) return; g.beginPath(); g.arc(X(p.x), Y(p.y), pr, 0, 7); g.fill(); });
+  if (st.trace && st.parts[0]) { const p = st.parts[0]; g.fillStyle = C.hot; g.beginPath(); g.arc(X(p.x), Y(p.y), pr * 1.6, 0, 7); g.fill(); }
+
+  // 피스톤 또는 뚜껑
+  const py = Y(st.H);
+  g.fillStyle = C.ink; g.fillRect(X(0) + 2, py - 10, s - 4, 10);
+  if (st.mode === 'p') {
+    g.fillStyle = C.muted; g.font = font(11); g.textAlign = 'center'; g.textBaseline = 'bottom'; g.fillText('고정된 뚜껑', X(0.5), py - 14);
+  } else {
+    const nw = st.mode === 'pv' ? st.w : 1, bw = s * 0.46, bh = Math.min(26, s * 0.12);
+    g.fillRect(X(0.5) - 3, py - 22, 6, 12);
+    for (let i = 0; i < nw; i++) {
+      const y0 = py - 22 - (i + 1) * (bh + 3);
+      g.fillStyle = C.muted; g.fillRect(X(0.5) - bw / 2, y0, bw, bh);
+      g.fillStyle = C.surface; g.font = font(11, 600); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('1기압', X(0.5), y0 + bh / 2);
+    }
+  }
+
+  // 압력계
+  const gx = Math.min(W - 70, X(1) + s * 0.75 + 60), gy = Math.max(80, Hc * 0.32), gr = Math.min(56, W * 0.09);
+  if (gx - gr > X(1) + 60) {
+    const Pm = st.pEMA, a0 = Math.PI * 0.8, a1 = Math.PI * 2.2, frac = Math.min(1, Pm / 5);
+    g.lineWidth = 8; g.strokeStyle = C.grid; g.beginPath(); g.arc(gx, gy, gr, a0, a1); g.stroke();
+    g.strokeStyle = C.chem; g.beginPath(); g.arc(gx, gy, gr, a0, a0 + (a1 - a0) * frac); g.stroke();
+    g.fillStyle = C.muted; g.font = font(10); g.textAlign = 'center'; g.textBaseline = 'middle';
+    for (let k = 0; k <= 5; k++) { const a = a0 + (a1 - a0) * k / 5; g.fillText(k, gx + Math.cos(a) * (gr - 18), gy + Math.sin(a) * (gr - 18)); }
+    const a = a0 + (a1 - a0) * frac; g.strokeStyle = C.ink; g.lineWidth = 2.5;
+    g.beginPath(); g.moveTo(gx, gy); g.lineTo(gx + Math.cos(a) * (gr - 8), gy + Math.sin(a) * (gr - 8)); g.stroke();
+    g.fillStyle = C.ink; g.beginPath(); g.arc(gx, gy, 4, 0, 7); g.fill();
+    g.font = font(13, 600); g.fillText(Pm.toFixed(1), gx, gy + gr * 0.55);
+    g.font = font(11); g.fillStyle = C.muted; g.fillText('압력계 (기압)', gx, gy + gr + 16);
+  }
+}
+
+/* ---------- 그래프 ---------- */
+function drawGraph(){
+  const g = gctx, L = 46, R = 12, T = 10, B = 30, w = G.w - L - R, h = G.h - T - B;
+  g.fillStyle = C.surface; g.fillRect(0, 0, G.w, G.h);
+  let xr, yr, xl, yl, pts;
+  if (st.mode === 'p') {
+    const t1 = Math.max(10, st.t), t0 = t1 - 10;
+    xr = [t0, t1]; yr = [0, Math.max(2, 2 * Math.ceil((Math.max(...st.hist.map(d => d.p), 1) + 0.3) / 2))]; xl = '시간 (초)'; yl = '압력 (기압)';
+    pts = st.hist.filter(d => d.t >= t0).map(d => [d.t, d.p]);
+  } else if (st.mode === 'pv') {
+    xr = [0, 5]; yr = [0, 140]; xl = '압력 (기압)'; yl = '부피 (mL)';
+    pts = st.rows.pv.map(r => [r.P, r.V]).sort((a, b) => a[0] - b[0]);
+  } else {
+    xr = [0, 100]; yr = [0, 180]; xl = '온도 (°C)'; yl = '부피 (mL)';
+    pts = st.rows.tv.map(r => [r.T, r.V]).sort((a, b) => a[0] - b[0]);
+  }
+  const X = x => L + (x - xr[0]) / (xr[1] - xr[0]) * w, Y = y => T + h - (y - yr[0]) / (yr[1] - yr[0]) * h;
+  g.font = font(11); g.fillStyle = C.muted; g.lineWidth = 1;
+  const ys = (yr[1] - yr[0]) / 4;
+  g.textAlign = 'right'; g.textBaseline = 'middle';
+  for (let i = 0; i <= 4; i++) { const v = yr[0] + ys * i; g.strokeStyle = C.grid; g.beginPath(); g.moveTo(L, Y(v) + .5); g.lineTo(L + w, Y(v) + .5); g.stroke(); g.fillText(+v.toFixed(1), L - 6, Y(v)); }
+  g.textAlign = 'center'; g.textBaseline = 'top';
+  const xs = st.mode === 'tv' ? 20 : st.mode === 'pv' ? 1 : 2;
+  for (let v = Math.ceil(xr[0] / xs) * xs; v <= xr[1] + 1e-9; v += xs) g.fillText(Math.round(v), X(v), T + h + 5);
+  g.fillText(xl, L + w / 2, T + h + 17 > G.h - 12 ? G.h - 12 : T + h + 17);
+  g.save(); g.translate(11, T + h / 2); g.rotate(-Math.PI / 2); g.textBaseline = 'middle'; g.fillText(yl, 0, 0); g.restore();
+  g.strokeStyle = C.line; g.beginPath(); g.moveTo(L, T); g.lineTo(L, T + h); g.lineTo(L + w, T + h); g.stroke();
+  if (!pts.length) {
+    if (st.mode !== 'p') { g.fillStyle = C.muted; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = font(13); g.fillText('측정값을 기록하면 여기에 점이 찍힙니다', L + w / 2, T + h / 2); }
+    return;
+  }
+  g.strokeStyle = C.chem; g.lineWidth = 2; g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(X(p[0]), Y(p[1])) : g.moveTo(X(p[0]), Y(p[1]))); g.stroke();
+  if (st.mode !== 'p') { g.fillStyle = C.chem; pts.forEach(p => { g.beginPath(); g.arc(X(p[0]), Y(p[1]), 4.5, 0, 7); g.fill(); }); }
+}
+
+/* ---------- 기록표 ---------- */
+const HEAD = {p:['번호','입자 수','온도 (°C)','압력 (기압)'], pv:['번호','압력 (기압)','부피 (mL)'], tv:['번호','온도 (°C)','부피 (mL)']};
+function renderTable(){
+  $('thead').innerHTML = '<tr>' + HEAD[st.mode].map(h => `<th>${h}</th>`).join('') + '</tr>';
+  const rows = st.rows[st.mode];
+  $('tbody').innerHTML = rows.length ? rows.map((r, i) => '<tr><td>' + (i + 1) + '</td>' + (
+    st.mode === 'p' ? `<td>${r.n}</td><td>${r.T}</td><td>${r.P.toFixed(1)}</td>` :
+    st.mode === 'pv' ? `<td>${r.P}</td><td>${r.V}</td>` : `<td>${r.T}</td><td>${r.V}</td>`) + '</tr>').join('')
+    : `<tr class="empty"><td colspan="${HEAD[st.mode].length}">${st.mode === 'p' ? '입자 수나 온도를 바꾼 뒤 [측정값 기록]을 누르세요.' : st.mode === 'pv' ? '추를 1개부터 4개까지 바꿔 가며 기록해 보세요.' : '온도를 0 °C부터 100 °C까지 바꿔 가며 기록해 보세요.'}</td></tr>`;
+}
+const vol = () => Math.round(st.H * 100);
+$('record').onclick = () => {
+  const r = st.rows[st.mode];
+  if (st.mode === 'p') r.push({n: st.n, T: st.T, P: st.pEMA});
+  else if (st.mode === 'pv') { const i = r.findIndex(x => x.P === st.w); const row = {P: st.w, V: vol()}; i >= 0 ? r[i] = row : r.push(row); }
+  else { const i = r.findIndex(x => x.T === st.T); const row = {T: st.T, V: vol()}; i >= 0 ? r[i] = row : r.push(row); }
+  if (r.length > 12) r.shift();
+  renderTable();
+};
+$('clear').onclick = () => { st.rows[st.mode] = []; renderTable(); };
+
+/* ---------- 조작 ---------- */
+function setMode(m){
+  st.mode = m;
+  document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
+  document.querySelectorAll('[data-only]').forEach(el => el.hidden = !el.dataset.only.split(' ').includes(m));
+  if (m !== 'p') { st.n = 60; $('count').value = 60; $('countOut').textContent = '60개'; }
+  if (m === 'pv') { st.T = 25; $('temp').value = 25; $('tempOut').textContent = '25 °C'; }
+  spawnIfNeeded(); st.Ht = targetH(); st.hist = []; st.t = 0;
+  const M = MODES[m];
+  $('graphTitle').textContent = M.graph; $('graphSub').textContent = M.sub;
+  $('explain').innerHTML = M.explain; $('tip').textContent = M.tip;
+  $('pLabel').textContent = m === 'p' ? '압력 (측정)' : '압력 (추)';
+  renderTable();
+  try { history.replaceState(null, '', '#' + m); } catch (e) {}
+}
+function spawnIfNeeded(){
+  while (st.parts.length < st.n) addParticle();
+  if (st.parts.length > st.n) st.parts.length = st.n;
+}
+function setRun(r){ st.run = r; $('play').textContent = r ? '일시정지' : '재생'; }
+$('play').onclick = () => setRun(!st.run);
+$('count').oninput = e => { st.n = +e.target.value; $('countOut').textContent = st.n + '개'; spawnIfNeeded(); };
+$('temp').oninput = e => {
+  const T = +e.target.value, f = Math.sqrt((T + 273) / (st.T + 273));
+  st.parts.forEach(p => { p.vx *= f; p.vy *= f; });
+  st.T = T; $('tempOut').textContent = T + ' °C'; st.Ht = targetH();
+};
+$('weights').querySelectorAll('button').forEach(b => b.onclick = () => { st.w = +b.dataset.w; st.Ht = targetH(); updWeights(); });
+function updWeights(){ $('weights').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.w === st.w)); }
+$('trace').onchange = e => { st.trace = e.target.checked; st.trail = []; };
+document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+
+/* ---------- 계기판 ---------- */
+function ledger(){
+  const Pshow = st.mode === 'p' ? st.pEMA : (st.mode === 'pv' ? st.w : 1);
+  $('pVal').innerHTML = (st.mode === 'p' ? Pshow.toFixed(1) : Pshow.toFixed(1)) + '<small>기압</small>';
+  $('vVal').innerHTML = vol() + '<small>mL</small>';
+  $('tVal').innerHTML = st.T + '<small>°C</small>';
+  $('nVal').innerHTML = st.parts.length + '<small>개</small>';
+  $('hitVal').textContent = Math.round(st.rateEMA) + ' 회/초';
+  $('hitBar').style.width = Math.min(100, st.rateEMA / 0.8) + '%';
+}
+
+/* ---------- 반복 ---------- */
+let last = performance.now(), acc = 0;
+function frame(now){
+  const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
+  colors();
+  if (st.run) {
+    const n = 4; for (let i = 0; i < n; i++) step(dt / n);
+    thermostat();
+    acc += dt;
+    st.hits.forEach(h => h.age += dt); st.hits = st.hits.filter(h => h.age < 0.35);
+    if (st.trace && st.parts[0]) { st.trail.push({x: st.parts[0].x, y: st.parts[0].y}); if (st.trail.length > 90) st.trail.shift(); }
+    if (acc >= 0.25) {
+      const P = st.imp / acc * P_SCALE, rate = st.hitCount / acc, k = 0.25;
+      st.pEMA += (P - st.pEMA) * k; st.rateEMA += (rate - st.rateEMA) * k;
+      st.imp = 0; st.hitCount = 0; acc = 0;
+      if (st.mode === 'p') { st.hist.push({t: st.t, p: st.pEMA}); if (st.hist.length > 80) st.hist.shift(); }
+    }
+  }
+  drawScene(); drawGraph(); ledger();
+  requestAnimationFrame(frame);
+}
+
+colors();
+const start = (location.hash || '').slice(1);
+spawn(60); updWeights();
+setMode(MODES[start] ? start : 'pv');
+st.H = st.Ht;
+setRun(st.run);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

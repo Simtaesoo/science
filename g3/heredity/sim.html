@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>멘델의 유전 실험실</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: garden-plot lab bench. Parents + gametes on the left, Punnett square on the right, random crossing results below. */
+:root{
+  --bg:#eef2ef; --surface:#ffffff; --ink:#18221c; --muted:#5b6a60; --line:#d4ddd6; --soft:#f4f7f4;
+  --accent:#24533a; --accent-ink:#ffffff; --t1:#2b5bd7; --t2:#b4570e;
+  --pea-y:#e6bd34; --pea-y-edge:#a7841a; --pea-g:#74ac4f; --pea-g-edge:#467a2b;
+  --f-body:"IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1310; --surface:#151c17; --ink:#e3ebe5; --muted:#94a59a; --line:#27332b; --soft:#19221c;
+  --accent:#8fd1a8; --accent-ink:#0e1310; --t1:#7ea4ff; --t2:#f0a160;
+  --pea-y:#e6c040; --pea-y-edge:#8c6f12; --pea-g:#7bb556; --pea-g-edge:#3e6b25; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1310; --surface:#151c17; --ink:#e3ebe5; --muted:#94a59a; --line:#27332b; --soft:#19221c;
+  --accent:#8fd1a8; --accent-ink:#0e1310; --t1:#7ea4ff; --t2:#f0a160;
+  --pea-y:#e6c040; --pea-y-edge:#8c6f12; --pea-g:#7bb556; --pea-g-edge:#3e6b25; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:500}
+h1{margin:2px 0 0;font-size:clamp(22px,3.2vw,30px);font-weight:700;text-wrap:balance;letter-spacing:-.01em}
+h2{margin:0;font-size:15px;font-weight:700}
+.sub{font-size:13px;color:var(--muted);margin:2px 0 0}
+.seg{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;color:var(--muted);font:500 14px var(--f-body);padding:7px 14px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg.small button{font-size:13px;padding:5px 10px;font-family:var(--f-mono)}
+button:focus-visible,summary:focus-visible{outline:2px solid var(--t1);outline-offset:2px}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:500 14px var(--f-body);padding:7px 14px;border-radius:8px;cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.presets{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.presets .lab{font-size:13px;color:var(--muted);margin-right:4px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:16px}
+@media (max-width:900px){.main{grid-template-columns:1fr}}
+
+.parents{display:flex;flex-direction:column;gap:14px}
+.parent{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:start}
+.parent .peabox{width:64px;height:64px;display:grid;place-items:center;background:var(--soft);border-radius:10px}
+.parent h3{margin:0 0 6px;font-size:14px;font-weight:700;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.parent h3 .ph{font-weight:400;color:var(--muted);font-size:13px}
+.trait{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.trait .tn{font-size:12px;color:var(--muted);width:44px}
+.times{text-align:center;font-family:var(--f-mono);color:var(--muted);font-size:13px}
+.gam{border-top:1px dashed var(--line);padding-top:12px}
+.gam p{margin:0 0 8px;font-size:13px;color:var(--muted)}
+.gamrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.gamrow .who{font-size:12px;color:var(--muted);width:56px}
+.chip{font-family:var(--f-mono);font-weight:600;font-size:14px;border:1.5px solid var(--line);border-radius:999px;padding:2px 10px;background:var(--soft)}
+.a1{color:var(--t1)} .a2{color:var(--t2)}
+
+.punnett-wrap{overflow-x:auto}
+table.pq{border-collapse:separate;border-spacing:4px;margin:8px auto 0}
+.pq th{font-family:var(--f-mono);font-weight:600;font-size:14px;padding:4px 6px;color:var(--muted)}
+.pq th.corner{font-family:var(--f-body);font-size:11px;font-weight:400;line-height:1.3}
+.pq td{background:var(--soft);border:1.5px solid transparent;border-radius:8px;text-align:center;padding:6px 4px;transition:opacity .15s,border-color .15s}
+.pq td .g{font-family:var(--f-mono);font-size:13px;font-weight:600;display:block;margin-top:2px}
+.pq.two td{padding:4px 2px} .pq.two td .g{font-size:11.5px}
+.pq td.dim{opacity:.25}
+.pq td.hit{border-color:var(--accent)}
+.ratio{display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:center;margin-top:12px;font-size:14px}
+.ratio b{font-family:var(--f-mono)}
+
+.exp-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.exp-btns{display:flex;gap:8px;flex-wrap:wrap}
+.total{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.res{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;margin-top:12px}
+@media (max-width:900px){.res{grid-template-columns:1fr}}
+.tbl-wrap{overflow-x:auto}
+table.rt{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+.rt th,.rt td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.rt th{font-weight:500;color:var(--muted);font-size:12px}
+.rt td{font-family:var(--f-mono)}
+.rt td:first-child,.rt th:first-child{text-align:left;font-family:var(--f-body)}
+.rt tbody tr{cursor:default}
+.rt tbody tr:hover,.rt tbody tr:focus{background:var(--soft);outline:none}
+.phn{display:inline-flex;align-items:center;gap:8px}
+.bar{position:relative;height:10px;background:var(--soft);border-radius:5px;min-width:90px;border:1px solid var(--line)}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:5px;transition:width .2s}
+.bar s{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);text-decoration:none}
+.legend{font-size:12px;color:var(--muted);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.field{display:flex;flex-wrap:wrap;align-content:flex-start;gap:3px;background:var(--soft);border-radius:10px;padding:10px;min-height:120px;max-height:260px;overflow:auto}
+.field svg{display:block}
+.field .empty{font-size:13px;color:var(--muted);align-self:center}
+.cap{font-size:12px;color:var(--muted);margin-top:6px}
+
+.think{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.think{grid-template-columns:1fr}}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+summary{cursor:pointer;font-weight:500}
+details p{margin:8px 0 0;color:var(--muted);font-size:14px}
+.qnum{font-family:var(--f-mono);color:var(--accent);margin-right:6px}
+footer{font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.back{font-size:13px;color:var(--muted);text-decoration:none}.back:hover{color:var(--ink);text-decoration:underline}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="back" href="../../index.html#g3">← 중학 과학 실험실 · 3학년</a>
+  <header>
+    <div>
+      <div class="eyebrow">중학교 3학년 과학 · 생식과 유전</div>
+      <h1>멘델의 유전 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="형질 수">
+      <button type="button" data-mode="1" aria-pressed="true">한 가지 형질 · 분리의 법칙</button>
+      <button type="button" data-mode="2" aria-pressed="false">두 가지 형질 · 독립의 법칙</button>
+    </div>
+  </header>
+
+  <div class="presets" id="presets"></div>
+
+  <div class="main">
+    <section class="panel parents" aria-label="어버이와 생식세포">
+      <div>
+        <h2>어버이 고르기</h2>
+        <p class="sub">대문자는 우성, 소문자는 열성 대립유전자입니다. <span class="a1">R</span> 둥근 · <span class="a1">r</span> 주름진<span id="legend2"> · <span class="a2">Y</span> 노란 · <span class="a2">y</span> 초록</span></p>
+      </div>
+      <div id="parentA" class="parent"></div>
+      <div class="times">×</div>
+      <div id="parentB" class="parent"></div>
+      <div class="gam">
+        <p>감수 분열로 대립유전자 쌍이 나뉘어 생식세포로 들어갑니다.</p>
+        <div class="gamrow"><span class="who">어버이 1</span><span id="gamA" style="display:contents"></span></div>
+        <div class="gamrow"><span class="who">어버이 2</span><span id="gamB" style="display:contents"></span></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="자손 예상 표">
+      <h2>자손의 유전자형 예상하기</h2>
+      <p class="sub">생식세포가 만나는 경우를 모두 나타낸 표입니다. 아래 결과표의 표현형에 마우스를 올리면 해당 칸이 강조됩니다.</p>
+      <div class="punnett-wrap"><table class="pq" id="pq"></table></div>
+      <div class="ratio" id="ratio"></div>
+    </section>
+  </div>
+
+  <section class="panel" aria-label="교배 실험">
+    <div class="exp-head">
+      <div>
+        <h2>직접 교배해 보기</h2>
+        <p class="sub">생식세포를 무작위로 하나씩 골라 수정시킵니다. 자손 수가 많아질수록 실험 비율이 이론 비율에 가까워지는지 확인해 보세요.</p>
+      </div>
+      <div class="exp-btns">
+        <button class="btn" type="button" data-n="1">자손 1개</button>
+        <button class="btn" type="button" data-n="10">10개</button>
+        <button class="btn primary" type="button" data-n="100">100개</button>
+        <button class="btn" type="button" data-n="1000">1000개</button>
+        <button class="btn" type="button" id="clear">비우기</button>
+      </div>
+    </div>
+    <div class="res">
+      <div>
+        <div class="tbl-wrap">
+          <table class="rt">
+            <thead><tr><th>표현형</th><th>이론 비율</th><th>실험 개수</th><th>실험 비율</th><th style="width:30%">비교</th></tr></thead>
+            <tbody id="rtBody"></tbody>
+          </table>
+        </div>
+        <div class="legend"><span><span class="bar" style="width:24px;min-width:0"><i style="width:100%"></i></span>실험 비율</span><span><span style="display:inline-block;width:2px;height:14px;background:var(--ink)"></span>이론 비율</span></div>
+        <div class="total" id="total" style="margin-top:6px"></div>
+      </div>
+      <div>
+        <div class="field" id="field" aria-label="얻은 자손"></div>
+        <div class="cap" id="fieldCap"></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details><summary><span class="qnum">Q1</span>순종끼리 교배한 잡종 1대에서 주름진 완두가 나오지 않은 이유는?</summary>
+        <p>잡종 1대의 유전자형은 모두 Rr입니다. 둥근 모양(R)이 주름진 모양(r)에 대해 우성이라 표현형은 모두 둥글게 나타납니다. 열성 대립유전자 r은 사라진 것이 아니라 숨어 있습니다.</p></details>
+      <details><summary><span class="qnum">Q2</span>자손을 10개만 얻으면 정확히 3 : 1이 나올까?</summary>
+        <p>대부분 정확히 나오지 않습니다. 3 : 1은 확률이므로 자손 수가 적으면 차이가 큽니다. 100개, 1000개로 늘리면서 실험 비율이 이론 비율 막대에 가까워지는지 비교해 보세요.</p></details>
+      <details><summary><span class="qnum">Q3</span>둥근 완두의 유전자형이 RR인지 Rr인지 알아내려면?</summary>
+        <p>주름진 완두(rr)와 교배합니다. 자손이 모두 둥글면 RR, 둥근 것과 주름진 것이 1 : 1로 나오면 Rr입니다. 위의 [검정 교배]를 눌러 확인해 보세요.</p></details>
+    </div>
+  </section>
+
+  <footer>완두의 모양(R/r)과 색깔(Y/y) 유전자는 서로 다른 염색체에 있어 독립적으로 유전된다고 가정합니다.</footer>
+</div>
+
+<script>
+(() => {
+const $=id=>document.getElementById(id);
+const st={mode:1, A:{t1:'Rr',t2:'Yy'}, B:{t1:'Rr',t2:'Yy'}, kids:[], counts:{}, hl:null};
+
+const PRESETS={
+  1:[['순종 교배 (어버이 → 잡종 1대)',{t1:'RR'},{t1:'rr'}],['잡종 1대 자가 교배',{t1:'Rr'},{t1:'Rr'}],['검정 교배',{t1:'Rr'},{t1:'rr'}]],
+  2:[['순종 교배 (어버이 → 잡종 1대)',{t1:'RR',t2:'YY'},{t1:'rr',t2:'yy'}],['잡종 1대 자가 교배',{t1:'Rr',t2:'Yy'},{t1:'Rr',t2:'Yy'}],['검정 교배',{t1:'Rr',t2:'Yy'},{t1:'rr',t2:'yy'}]]
+};
+
+/* ---------- 완두 그리기 ---------- */
+function pea(shape,color,size){
+  const fill=color==='green'?'var(--pea-g)':'var(--pea-y)', edge=color==='green'?'var(--pea-g-edge)':'var(--pea-y-edge)';
+  const c=size/2, r=size*0.42;
+  if(shape==='round'){
+    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle cx="${c}" cy="${c}" r="${r}" fill="${fill}" stroke="${edge}" stroke-width="${Math.max(1,size/24)}"/><circle cx="${c-r*.35}" cy="${c-r*.35}" r="${r*.22}" fill="#fff" opacity=".35"/></svg>`;
+  }
+  let d='';
+  const n=11;
+  for(let i=0;i<=n*2;i++){
+    const a=i/(n*2)*Math.PI*2, rr=r*(i%2?0.80:0.97)*(1+0.05*Math.sin(a*3));
+    d+=(i?'L':'M')+(c+Math.cos(a)*rr).toFixed(2)+' '+(c+Math.sin(a)*rr*0.92).toFixed(2);
+  }
+  const sw=Math.max(1,size/24);
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true"><path d="${d}Z" fill="${fill}" stroke="${edge}" stroke-width="${sw}" stroke-linejoin="round"/>`+
+    (size>=24?`<path d="M${c-r*.45} ${c-r*.1} Q${c} ${c+r*.25} ${c+r*.45} ${c-r*.15} M${c-r*.2} ${c-r*.5} Q${c+r*.05} ${c-r*.25} ${c+r*.3} ${c-r*.45}" fill="none" stroke="${edge}" stroke-width="${sw}" stroke-linecap="round" opacity=".7"/>`:'')+`</svg>`;
+}
+
+/* ---------- 유전 계산 ---------- */
+const sortPair=p=>p[0]===p[0].toUpperCase()?p:p[1]+p[0];
+function gametes(P){
+  if(st.mode===1) return [P.t1[0],P.t1[1]];
+  const g=[]; for(const a of P.t1) for(const b of P.t2) g.push(a+b); return g;
+}
+function fuse(g1,g2){
+  if(st.mode===1) return sortPair(g1+g2);
+  return sortPair(g1[0]+g2[0])+sortPair(g1[1]+g2[1]);
+}
+function pheno(geno){
+  const shape=geno.slice(0,2).includes('R')?'round':'wrinkled';
+  const color=st.mode===2?(geno.slice(2,4).includes('Y')?'yellow':'green'):'yellow';
+  return {shape,color,key:shape+'-'+color};
+}
+const PH_ORDER={1:['round-yellow','wrinkled-yellow'],2:['round-yellow','round-green','wrinkled-yellow','wrinkled-green']};
+const PH_NAME={'round-yellow':'둥글고 노란','round-green':'둥글고 초록','wrinkled-yellow':'주름지고 노란','wrinkled-green':'주름지고 초록'};
+const phName=k=>st.mode===1?(k.startsWith('round')?'둥근':'주름진'):PH_NAME[k];
+function phenoOfParent(P){ return pheno(st.mode===1?P.t1:P.t1+P.t2); }
+function genoLabel(g){
+  return [...g].map((ch,i)=>`<span class="${i<2?'a1':'a2'}">${ch}</span>`).join('');
+}
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+function ratioText(nums){ const nz=nums.filter(n=>n>0); if(!nz.length) return ''; const g=nz.reduce(gcd); return nums.map(n=>n/g).join(' : '); }
+
+/* ---------- 화면 ---------- */
+function renderPresets(){
+  $('presets').innerHTML='<span class="lab">교과서 실험</span>'+PRESETS[st.mode].map((p,i)=>`<button class="btn" type="button" data-p="${i}">${p[0]}</button>`).join('');
+  $('presets').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    const [,a,bb]=PRESETS[st.mode][+b.dataset.p];
+    Object.assign(st.A,a); Object.assign(st.B,bb); resetKids(); renderAll(); run(100);
+  });
+}
+function renderParent(id,P,label){
+  const ph=phenoOfParent(P);
+  const seg=(key,opts)=>`<div class="seg small" role="group" aria-label="${label} ${key==='t1'?'모양':'색깔'} 유전자형">`+
+    opts.map(o=>`<button type="button" data-k="${key}" data-v="${o}" aria-pressed="${P[key]===o}">${o}</button>`).join('')+'</div>';
+  $(id).innerHTML=`<div class="peabox">${pea(ph.shape,ph.color,48)}</div>
+    <div><h3>${label} <span class="ph">${phName(ph.key)} 완두 · 유전자형 ${st.mode===1?P.t1:P.t1+P.t2}</span></h3>
+    <div class="trait"><span class="tn">모양</span>${seg('t1',['RR','Rr','rr'])}</div>
+    ${st.mode===2?`<div class="trait"><span class="tn">색깔</span>${seg('t2',['YY','Yy','yy'])}</div>`:''}</div>`;
+  $(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{ P[b.dataset.k]=b.dataset.v; resetKids(); renderAll(); });
+}
+function renderGametes(){
+  const chip=g=>`<span class="chip">${[...g].map((c,i)=>`<span class="${i===0?'a1':'a2'}">${c}</span>`).join('')}</span>`;
+  $('gamA').innerHTML=gametes(st.A).map(chip).join('');
+  $('gamB').innerHTML=gametes(st.B).map(chip).join('');
+}
+let cells=[];
+function renderPunnett(){
+  const gA=gametes(st.A), gB=gametes(st.B), size=st.mode===1?44:30;
+  const hdr=g=>[...g].map((c,i)=>`<span class="${i===0?'a1':'a2'}">${c}</span>`).join('');
+  let h=`<tr><th class="corner">어버이 1 ↓<br>어버이 2 →</th>`+gB.map(g=>`<th>${hdr(g)}</th>`).join('')+'</tr>';
+  cells=[];
+  gA.forEach(a=>{
+    h+=`<tr><th>${hdr(a)}</th>`;
+    gB.forEach(b=>{ const g=fuse(a,b), p=pheno(g); cells.push({g,p}); h+=`<td data-ph="${p.key}">${pea(p.shape,p.color,size)}<span class="g">${genoLabel(g)}</span></td>`; });
+    h+='</tr>';
+  });
+  $('pq').className='pq'+(st.mode===2?' two':''); $('pq').innerHTML=h;
+  // 비율
+  const total=cells.length, phc={};
+  PH_ORDER[st.mode].forEach(k=>phc[k]=0); cells.forEach(c=>phc[c.p.key]++);
+  const order=PH_ORDER[st.mode];
+  let html=`<span>표현형 ${order.map(phName).join(' : ')} = <b>${ratioText(order.map(k=>phc[k]))}</b></span>`;
+  if(st.mode===1){
+    const gc={RR:0,Rr:0,rr:0}; cells.forEach(c=>gc[c.g]++);
+    html+=`<span>유전자형 RR : Rr : rr = <b>${ratioText([gc.RR,gc.Rr,gc.rr])}</b></span>`;
+  }
+  $('ratio').innerHTML=html;
+  st.expected=phc; st.cellTotal=total;
+}
+function renderResults(){
+  const n=st.n, order=PH_ORDER[st.mode];
+  $('rtBody').innerHTML=order.map(k=>{
+    const e=st.expected[k]/st.cellTotal, c=st.counts[k]||0, o=n?c/n:0;
+    return `<tr tabindex="0" data-ph="${k}"><td><span class="phn">${pea(k.split('-')[0],k.split('-')[1],22)}${phName(k)}</span></td>
+      <td>${st.expected[k]}/${st.cellTotal}</td><td>${c}</td><td>${n?(o*100).toFixed(1)+'%':'–'}</td>
+      <td><span class="bar"><i style="width:${o*100}%"></i><s style="left:calc(${e*100}% - 1px)"></s></span></td></tr>`;
+  }).join('');
+  const nz=order.map(k=>st.counts[k]||0);
+  $('total').textContent=n?`자손 ${n}개 · 실험 비율 ${order.map(phName).join(' : ')} ≈ ${approxRatio(nz)}`:'아직 얻은 자손이 없습니다.';
+  $('rtBody').querySelectorAll('tr').forEach(tr=>{
+    const on=()=>highlight(tr.dataset.ph), off=()=>highlight(null);
+    tr.onmouseenter=on; tr.onfocus=on; tr.onmouseleave=off; tr.onblur=off;
+  });
+  // 밭
+  const show=st.kids;
+  $('field').innerHTML=show.length?show.map(k=>pea(k.shape,k.color,18)).join(''):'<span class="empty">위의 버튼을 눌러 자손을 얻어 보세요.</span>';
+  $('fieldCap').textContent=n>400?`최근 400개만 표시합니다 (전체 ${n}개).`:n?`얻은 자손 ${n}개`:'';
+}
+function approxRatio(nums){
+  // 가장 작은 0이 아닌 값을 1로 맞춘 근사 비율
+  const nz=nums.filter(x=>x>0); if(!nz.length) return '–';
+  const m=Math.min(...nz); return nums.map(x=>(x/m).toFixed(1).replace(/\.0$/,'')).join(' : ');
+}
+function highlight(k){
+  $('pq').querySelectorAll('td').forEach(td=>{ td.classList.toggle('dim',!!k&&td.dataset.ph!==k); td.classList.toggle('hit',!!k&&td.dataset.ph===k); });
+}
+
+/* ---------- 실험 ---------- */
+function resetKids(){ st.kids=[]; st.counts={}; st.n=0; }
+function run(n){
+  const gA=gametes(st.A), gB=gametes(st.B);
+  for(let i=0;i<n;i++){
+    const g=fuse(gA[Math.floor(Math.random()*gA.length)], gB[Math.floor(Math.random()*gB.length)]);
+    const p=pheno(g); st.kids.push(p); st.counts[p.key]=(st.counts[p.key]||0)+1;
+  }
+  st.n+=n;
+  if(st.kids.length>400){ st.kids=st.kids.slice(-400); }
+  renderResults();
+}
+document.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>run(+b.dataset.n));
+$('clear').onclick=()=>{ resetKids(); renderResults(); };
+
+function renderAll(){
+  $('legend2').hidden=st.mode!==2;
+  renderParent('parentA',st.A,'어버이 1');
+  renderParent('parentB',st.B,'어버이 2');
+  renderGametes(); renderPunnett(); renderResults();
+}
+function setMode(m){
+  st.mode=m;
+  document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.mode===m));
+  const [,a,b]=PRESETS[m][1]; st.A={t1:'Rr',t2:'Yy',...a}; st.B={t1:'Rr',t2:'Yy',...b};
+  renderPresets(); resetKids(); renderAll(); run(100);
+}
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setMode(+b.dataset.mode));
+setMode(1);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>입자 모형 실험실 · 중1 물질의 상태 변화</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<style>
+table.cmp{border-collapse:collapse;width:100%;font-size:13px}
+.cmp th,.cmp td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:center;vertical-align:middle}
+.cmp th{font-weight:500;color:var(--muted);font-size:12px}
+.cmp td:first-child,.cmp th:first-child{text-align:left;color:var(--muted);font-size:12px;white-space:nowrap}
+.cmp .on{background:var(--soft);font-weight:700;color:var(--ink)}
+.cmp thead .on{color:var(--area)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--muted)}
+.chip.on{background:var(--area);border-color:var(--area);color:var(--surface)}
+</style>
+</head>
+<body data-root="../../" class="area-chem">
+<div class="wrap">
+  <nav class="topbar" data-topbar="1학년|04 물질의 상태 변화" data-ws="worksheet.html"></nav>
+
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 1 · 04 물질의 상태 변화 <span class="code">9과04-01</span><span class="code">9과04-02</span><span class="code">9과04-03</span><span class="code">9과04-04</span></div>
+      <h1>입자 모형 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="실험 고르기">
+      <button type="button" data-mode="diff">1. 확산과 증발</button>
+      <button type="button" data-mode="states">2. 세 가지 상태</button>
+      <button type="button" data-mode="curve">3. 가열·냉각 곡선</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="입자 모형"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <div class="field" data-only="diff">
+          <div class="seg" role="group" aria-label="현상" id="sub">
+            <button type="button" data-sub="diffuse">확산</button><button type="button" data-sub="evap">증발</button></div></div>
+        <button class="btn" type="button" id="divider" data-only="diff">칸막이 열기</button>
+        <button class="btn" type="button" id="refill" data-only="diff" hidden>다시 채우기</button>
+        <label class="field" data-only="diff" for="temp">온도
+          <input type="range" id="temp" min="10" max="80" step="5" value="25"><output id="tempOut">25 °C</output></label>
+        <div class="field" data-only="states">
+          <div class="seg" role="group" aria-label="상태" id="phaseSeg">
+            <button type="button" data-ph="S">고체 (얼음)</button><button type="button" data-ph="L">액체 (물)</button><button type="button" data-ph="G">기체 (수증기)</button></div></div>
+        <div class="field" data-only="curve">
+          <div class="seg" role="group" aria-label="가열 장치" id="heatSeg">
+            <button type="button" data-h="1">가열</button><button type="button" data-h="0">멈춤</button><button type="button" data-h="-1">냉각</button></div></div>
+        <button class="btn" type="button" id="restart" data-only="curve">얼음부터 다시</button>
+        <label class="field" data-only="curve" for="speed">빠르기
+          <select id="speed"><option value="1">1배</option><option value="2" selected>2배</option><option value="4">4배</option></select></label>
+      </div>
+    </section>
+
+    <aside class="panel ledger" aria-label="관찰 결과">
+      <div class="stats">
+        <div class="stat"><div class="k" id="s1k">온도</div><div class="v" id="s1v">25<small>°C</small></div></div>
+        <div class="stat"><div class="k" id="s2k">상태</div><div class="v" id="s2v">기체</div></div>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div id="meterWrap">
+        <div class="headrow"><span class="note" id="meterK">섞인 정도</span><span class="note" style="font-family:var(--f-mono)" id="meterV">0%</span></div>
+        <div class="meter" style="margin-top:6px"><i id="meterBar" style="width:0%"></i></div>
+      </div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="graphTitle">그래프</h2>
+      <p class="sub" id="graphSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="시간에 따른 변화 그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2>세 가지 상태의 입자 모형 비교</h2>
+      <div class="tbl-wrap">
+        <table class="cmp" id="cmp">
+          <thead><tr><th></th><th data-c="S">고체</th><th data-c="L">액체</th><th data-c="G">기체</th></tr></thead>
+          <tbody>
+            <tr><td>입자 사이 거리</td><td data-c="S">매우 가깝다</td><td data-c="L">가깝다</td><td data-c="G">매우 멀다</td></tr>
+            <tr><td>입자 배열</td><td data-c="S">규칙적</td><td data-c="L">불규칙적</td><td data-c="G">매우 불규칙적</td></tr>
+            <tr><td>입자 운동</td><td data-c="S">제자리 진동</td><td data-c="L">자리를 바꾸며 움직임</td><td data-c="G">매우 활발, 자유롭게 이동</td></tr>
+            <tr><td>모양</td><td data-c="S">일정</td><td data-c="L">그릇에 따라 변함</td><td data-c="G">그릇을 가득 채움</td></tr>
+            <tr><td>부피</td><td data-c="S">일정</td><td data-c="L">일정</td><td data-c="G">쉽게 변함</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>잉크 한 방울이 물 전체로 퍼지는 까닭은?</summary>
+        <p>물 입자와 잉크 입자가 스스로 끊임없이 움직이기 때문입니다. 아무도 젓지 않아도 입자들이 퍼져 나가는 현상이 확산이고, 이것이 입자가 운동한다는 증거입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>얼음이 녹는 동안 열을 계속 가하는데 왜 온도가 그대로일까?</summary>
+        <p>가한 열에너지가 입자의 규칙적인 배열을 무너뜨리는 데 쓰이기 때문입니다. 상태 변화가 모두 끝나야 다시 온도가 올라갑니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>물이 수증기가 되면 부피가 커지는데 질량도 커질까?</summary>
+        <p>질량은 변하지 않습니다. 입자의 수와 종류는 그대로이고 입자 사이의 거리만 멀어지기 때문입니다.</p></details>
+    </div>
+  </section>
+
+  <footer class="site" data-footer data-extra="가열·냉각 곡선은 물 10 g을 일정한 세기로 가열한다고 보고 계산했습니다."></footer>
+</div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const cv = $('scene'), ctx = cv.getContext('2d'), gcv = $('graph'), gctx = gcv.getContext('2d');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const N = 48, D = 0.075;                       // 입자 수, 응축 상태 입자 지름(화면 단위)
+const PH_NAME = {S:'고체', L:'액체', G:'기체'};
+
+/* ---------- 물 10 g 가열 곡선 ---------- */
+const M = 10, SEG = [M * 2.1 * 20, M * 334, M * 4.2 * 100, M * 2260, M * 2.0 * 20];  // J
+const QMAX = SEG.reduce((a, b) => a + b);
+function stateOfQ(Q){
+  let q = Math.max(0, Math.min(QMAX, Q));
+  if (q <= SEG[0]) return {T: -20 + 20 * q / SEG[0], s: 1, g: 0, stage: 'ice'};
+  q -= SEG[0];
+  if (q <= SEG[1]) return {T: 0, s: 1 - q / SEG[1], g: 0, stage: 'melt'};
+  q -= SEG[1];
+  if (q <= SEG[2]) return {T: 100 * q / SEG[2], s: 0, g: 0, stage: 'water'};
+  q -= SEG[2];
+  if (q <= SEG[3]) return {T: 100, s: 0, g: q / SEG[3], stage: 'boil'};
+  q -= SEG[3];
+  return {T: 100 + 20 * q / SEG[4], s: 0, g: 1, stage: 'steam'};
+}
+const STAGE = {
+  ice:   {up:'고체(얼음)의 온도가 올라갑니다. 입자는 제자리에서 점점 더 크게 진동합니다.', down:'얼음의 온도가 내려갑니다. 입자의 진동이 점점 약해집니다.'},
+  melt:  {up:'<b>융해</b> 중: 얼음이 녹는 동안 온도가 0 °C로 일정합니다. 가한 열에너지가 입자의 규칙적인 배열을 무너뜨리는 데 쓰입니다.',
+          down:'<b>응고</b> 중: 물이 어는 동안 온도가 0 °C로 일정합니다. 입자가 규칙적으로 배열되며 열에너지를 내보냅니다.'},
+  water: {up:'액체(물)의 온도가 올라갑니다. 입자가 자리를 바꾸며 더 활발하게 움직입니다.', down:'물의 온도가 내려갑니다. 입자의 운동이 느려집니다.'},
+  boil:  {up:'<b>기화</b> 중: 물이 끓는 동안 온도가 100 °C로 일정합니다. 열에너지가 입자 사이를 멀리 떼어 놓는 데 쓰입니다.',
+          down:'<b>액화</b> 중: 수증기가 물로 바뀌는 동안 온도가 100 °C로 일정합니다. 입자가 모이며 열에너지를 내보냅니다.'},
+  steam: {up:'기체(수증기)의 온도가 올라갑니다. 입자가 매우 빠르게 날아다닙니다.', down:'수증기의 온도가 내려갑니다.'}
+};
+
+/* ---------- 상태 ---------- */
+const st = {mode:'curve', run:!reduce, sub:'diffuse', T:25, open:false, phase:'L', heat:1, speed:2, Q:0, t:0,
+            parts:[], hist:[], gone:0, mixHist:[], evapHist:[], lastDir:1};
+
+function site(i){ const cols = 8, row = Math.floor(i / cols), col = i % cols;
+  return {x: 0.5 - (cols - 1) * D / 2 + col * D, y: 0.04 + row * D * 0.95}; }
+function makeWater(){
+  st.parts = [];
+  for (let i = 0; i < N; i++) { const s = site(i); st.parts.push({x: s.x, y: s.y, vx: 0, vy: 0, ph: 'S', i}); }
+}
+function makeDiffusion(){
+  st.parts = [];
+  for (let i = 0; i < 60; i++) {
+    const left = i < 30, a = Math.random() * 6.28, sp = gasSpeed(st.T);
+    st.parts.push({x: left ? 0.03 + Math.random() * 0.44 : 0.53 + Math.random() * 0.44, y: 0.03 + Math.random() * 0.94,
+                   vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, ph: 'G', kind: left ? 'A' : 'B'});
+  }
+  st.open = false; st.mixHist = []; st.t = 0; $('divider').textContent = '칸막이 열기';
+}
+function makePool(){
+  st.parts = [];
+  for (let i = 0; i < N; i++) st.parts.push({x: 0.04 + (i % 12) * 0.08, y: 0.04 + Math.floor(i / 12) * 0.07, vx: 0, vy: 0, ph: 'L', i});
+  st.gone = 0; st.evapHist = []; st.t = 0;
+}
+const gasSpeed = T => 0.75 * Math.sqrt((T + 273) / 373);
+
+function assignPhases(fs, fg){
+  const nS = Math.round(fs * N), nG = Math.round(fg * N);
+  st.parts.forEach(p => {
+    const want = p.i < nS ? 'S' : (p.i >= N - nG ? 'G' : 'L');
+    if (want === p.ph) return;
+    if (want === 'G') { const a = Math.PI * (0.25 + Math.random() * 0.5), sp = gasSpeed(st.T); p.vx = Math.cos(a) * sp; p.vy = Math.sin(a) * sp; }
+    if (want === 'L' && p.ph === 'G') { p.vx *= 0.2; p.vy *= 0.2; }
+    p.ph = want;
+  });
+}
+
+/* ---------- 입자 움직임 ---------- */
+function randn(){ return (Math.random() + Math.random() + Math.random() - 1.5) * 1.4; }
+function step(dt, openTop){
+  const T = st.T, P = st.parts;
+  const kick = 0.5 + 0.7 * Math.max(0, Math.min(100, T)) / 100;
+  for (const p of P) {
+    if (p.ph === 'S') {
+      const s = site(p.i); p.x += (s.x - p.x) * Math.min(1, dt * 6); p.y += (s.y - p.y) * Math.min(1, dt * 6);
+    } else if (p.ph === 'L') {
+      p.vy -= 2.2 * dt;
+      p.vx += randn() * kick * Math.sqrt(dt); p.vy += randn() * kick * Math.sqrt(dt) * 0.8;
+      p.vx *= 0.92; p.vy *= 0.92;
+      p.x += p.vx * dt; p.y += p.vy * dt;
+    } else {
+      p.x += p.vx * dt; p.y += p.vy * dt;
+    }
+    const r = D / 2;
+    if (p.x < r) { p.x = r; p.vx = Math.abs(p.vx) * (p.ph === 'G' ? 1 : .5); }
+    if (p.x > 1 - r) { p.x = 1 - r; p.vx = -Math.abs(p.vx) * (p.ph === 'G' ? 1 : .5); }
+    if (p.y < r) { p.y = r; p.vy = Math.abs(p.vy) * (p.ph === 'G' ? 1 : .3); }
+    if (p.y > 1 - r && !(openTop && p.ph === 'G')) { p.y = 1 - r; p.vy = -Math.abs(p.vy); }
+    if (st.mode === 'diff' && st.sub === 'diffuse' && !st.open) {           // 칸막이
+      if (p.kind === 'A' && p.x > 0.5 - r) { p.x = 0.5 - r; p.vx = -Math.abs(p.vx); }
+      if (p.kind === 'B' && p.x < 0.5 + r) { p.x = 0.5 + r; p.vx = Math.abs(p.vx); }
+    }
+  }
+  // 응축 상태 입자끼리 겹치지 않게, 기체는 튕겨 나가게
+  for (let a = 0; a < P.length; a++) for (let b = a + 1; b < P.length; b++) {
+    const p = P[a], q = P[b];
+    const dx = q.x - p.x, dy = q.y - p.y, d2 = dx * dx + dy * dy;
+    const lim = (p.ph === 'G' && q.ph === 'G') ? (st.mode === 'diff' ? 0 : 0) : D * 0.98;
+    if (!lim || d2 >= lim * lim || d2 === 0) continue;
+    const d = Math.sqrt(d2), nx = dx / d, ny = dy / d, ov = lim - d;
+    const gp = p.ph === 'G', gq = q.ph === 'G';
+    if (gp || gq) {                                         // 기체 입자는 반사
+      const g = gp ? p : q, sgn = gp ? -1 : 1, vn = g.vx * nx * sgn + g.vy * ny * sgn;
+      if (vn < 0) { g.vx -= 2 * vn * nx * sgn; g.vy -= 2 * vn * ny * sgn; }
+      g.x += nx * sgn * ov; g.y += ny * sgn * ov;
+      continue;
+    }
+    const mp = p.ph === 'S' ? 0 : (q.ph === 'S' ? 1 : .5), mq = 1 - mp;
+    p.x -= nx * ov * mp; p.y -= ny * ov * mp; q.x += nx * ov * mq; q.y += ny * ov * mq;
+  }
+  if (openTop) {
+    const before = P.length;
+    st.parts = P.filter(p => !(p.ph === 'G' && p.y > 1.05));
+    st.gone += before - st.parts.length;
+  }
+}
+function evaporate(dt){
+  const L = st.parts.filter(p => p.ph === 'L'); if (!L.length) return;
+  const top = Math.max(...L.map(p => p.y));
+  const rate = 0.25 * Math.exp((st.T - 25) / 22);           // 표면 입자 하나가 1초에 날아갈 확률
+  for (const p of L) if (p.y > top - 0.045 && Math.random() < rate * dt) {
+    p.ph = 'G'; const a = Math.PI * (0.3 + Math.random() * 0.4), sp = gasSpeed(st.T) * 1.2; p.vx = Math.cos(a) * sp; p.vy = Math.sin(a) * sp;
+  }
+}
+
+/* ---------- 그리기 ---------- */
+let W = 0, H = 0, GW = 0, GH = 0, C = {};
+function fit(c){ const r = c.parentElement.getBoundingClientRect(), d = devicePixelRatio || 1;
+  c.width = Math.round(r.width * d); c.height = Math.round(r.height * d); c.getContext('2d').setTransform(d, 0, 0, d, 0, 0); return r; }
+function resize(){ const a = fit(cv); W = a.width; H = a.height; const b = fit(gcv); GW = b.width; GH = b.height; }
+new ResizeObserver(resize).observe(cv.parentElement); new ResizeObserver(resize).observe(gcv.parentElement);
+function colors(){ const cs = getComputedStyle(document.documentElement);
+  ['surface','ink','muted','line','soft','grid','chem','hot','cold','warn','accent'].forEach(k => C[k] = cs.getPropertyValue('--' + k).trim()); }
+const font = (s, w) => `${w || 400} ${s}px ${getComputedStyle(document.body).fontFamily}`;
+
+function drawScene(){
+  const g = ctx; g.fillStyle = C.surface; g.fillRect(0, 0, W, H);
+  const s = Math.min(W - 80, H - 70), x0 = (W - s) / 2, y0 = 24;
+  const X = x => x0 + x * s, Y = y => y0 + (1 - y) * s;
+  const openTop = st.mode === 'diff' && st.sub === 'evap';
+  g.fillStyle = C.soft; g.fillRect(x0, y0, s, s);
+  g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath();
+  if (openTop) { g.moveTo(x0, y0); g.lineTo(x0, y0 + s); g.lineTo(x0 + s, y0 + s); g.lineTo(x0 + s, y0); }
+  else g.rect(x0, y0, s, s);
+  g.stroke();
+  if (st.mode === 'diff' && st.sub === 'diffuse' && !st.open) {
+    g.strokeStyle = C.muted; g.lineWidth = 3; g.setLineDash([8, 5]); g.beginPath(); g.moveTo(X(0.5), y0); g.lineTo(X(0.5), y0 + s); g.stroke(); g.setLineDash([]);
+  }
+  // 가열 장치 표시
+  if (st.mode === 'curve' || st.mode === 'states' || openTop) {
+    const hotness = st.mode === 'curve' ? st.heat : (st.mode === 'states' ? 0 : (st.T - 10) / 70);
+    g.fillStyle = hotness > 0 ? C.hot : hotness < 0 ? C.cold : C.line;
+    g.globalAlpha = hotness === 0 ? 1 : 0.25 + 0.6 * Math.abs(hotness);
+    if (st.mode !== 'states') g.fillRect(x0, y0 + s + 8, s, 10);
+    g.globalAlpha = 1;
+    if (st.mode === 'curve') { g.fillStyle = C.muted; g.font = font(11); g.textAlign = 'center'; g.textBaseline = 'top';
+      g.fillText(st.heat > 0 ? '가열 중' : st.heat < 0 ? '냉각 중' : '멈춤', x0 + s / 2, y0 + s + 22); }
+  }
+  const r = Math.max(3, D * s * 0.44 * (st.mode === 'diff' && st.sub === 'diffuse' ? 0.6 : 1));
+  const vib = 0.002 + 0.006 * Math.max(0, st.T + 20) / 20;
+  for (const p of st.parts) {
+    let x = p.x, y = p.y;
+    if (p.ph === 'S') { x += (Math.random() - .5) * vib * 2; y += (Math.random() - .5) * vib * 2; }
+    g.fillStyle = p.kind === 'A' ? C.chem : p.kind === 'B' ? C.warn : C.cold;
+    g.beginPath(); g.arc(X(x), Y(y), r, 0, 7); g.fill();
+  }
+  if (openTop) { g.fillStyle = C.muted; g.font = font(11); g.textAlign = 'center'; g.textBaseline = 'bottom'; g.fillText('뚜껑이 없는 그릇', x0 + s / 2, y0 - 4); }
+}
+
+function drawGraph(){
+  const g = gctx, L = 46, R = 12, T = 10, B = 30, w = GW - L - R, h = GH - T - B;
+  g.fillStyle = C.surface; g.fillRect(0, 0, GW, GH);
+  let xr, yr, xl, yl, pts, yt;
+  if (st.mode === 'curve') {
+    xr = [0, Math.max(20, Math.ceil((st.hist.length ? st.hist[st.hist.length - 1].t : 0) / 10) * 10)]; yr = [-40, 140]; yt = 20;
+    xl = '가열 시간'; yl = '온도 (°C)'; pts = st.hist.map(d => [d.t, d.T]);
+  } else if (st.mode === 'diff' && st.sub === 'diffuse') {
+    xr = [0, Math.max(20, Math.ceil(st.t / 10) * 10)]; yr = [0, 100]; yt = 25; xl = '칸막이를 연 뒤 시간 (초)'; yl = '섞인 정도 (%)';
+    pts = st.mixHist.map(d => [d.t, d.v]);
+  } else if (st.mode === 'diff') {
+    xr = [0, Math.max(20, Math.ceil(st.t / 10) * 10)]; yr = [0, N]; yt = 12; xl = '시간 (초)'; yl = '남은 물 입자 (개)';
+    pts = st.evapHist.map(d => [d.t, d.v]);
+  } else { g.fillStyle = C.muted; g.font = font(13); g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('상태 버튼을 눌러 입자의 배열과 운동을 비교해 보세요.', GW / 2, GH / 2); return; }
+  const X = x => L + (x - xr[0]) / (xr[1] - xr[0]) * w, Y = y => T + h - (y - yr[0]) / (yr[1] - yr[0]) * h;
+  g.font = font(11); g.fillStyle = C.muted; g.textAlign = 'right'; g.textBaseline = 'middle'; g.lineWidth = 1;
+  for (let v = yr[0]; v <= yr[1]; v += yt) { g.strokeStyle = v === 0 && st.mode === 'curve' ? C.line : C.grid; g.beginPath(); g.moveTo(L, Y(v) + .5); g.lineTo(L + w, Y(v) + .5); g.stroke(); g.fillText(v, L - 6, Y(v)); }
+  g.textAlign = 'center'; g.textBaseline = 'top';
+  const xs = xr[1] > 60 ? 20 : 10;
+  for (let v = 0; v <= xr[1]; v += xs) g.fillText(v, X(v), T + h + 5);
+  g.fillText(xl, L + w / 2, GH - 13);
+  g.save(); g.translate(11, T + h / 2); g.rotate(-Math.PI / 2); g.textBaseline = 'middle'; g.fillText(yl, 0, 0); g.restore();
+  g.strokeStyle = C.line; g.beginPath(); g.moveTo(L, T); g.lineTo(L, T + h); g.lineTo(L + w, T + h); g.stroke();
+  if (st.mode === 'curve') {          // 상태 변화 구간 이름
+    g.font = font(11, 500); g.textAlign = 'left'; g.textBaseline = 'bottom';
+    const seen = {};
+    st.hist.forEach(d => { if ((d.stage === 'melt' || d.stage === 'boil') && !seen[d.stage + d.dir]) { seen[d.stage + d.dir] = 1;
+      g.fillStyle = C.chem; const lab = d.stage === 'melt' ? (d.dir > 0 ? '융해 (0 °C 일정)' : '응고 (0 °C 일정)') : (d.dir > 0 ? '기화 (100 °C 일정)' : '액화 (100 °C 일정)');
+      g.fillText(lab, Math.min(X(d.t) + 4, L + w - 110), Y(d.T) - 4); } });
+  }
+  if (pts.length < 2) return;
+  g.strokeStyle = C.chem; g.lineWidth = 2.5; g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(X(p[0]), Y(p[1])) : g.moveTo(X(p[0]), Y(p[1]))); g.stroke();
+}
+
+/* ---------- 계기판 ---------- */
+function curPhase(){
+  if (st.mode === 'states') return st.phase;
+  if (st.mode === 'diff') return st.sub === 'diffuse' ? 'G' : 'L';
+  const s = stateOfQ(st.Q); return s.stage === 'ice' || s.stage === 'melt' && s.s > .5 ? 'S' : s.stage === 'steam' || s.stage === 'boil' && s.g > .5 ? 'G' : 'L';
+}
+function ledger(){
+  const ph = curPhase();
+  document.querySelectorAll('#cmp [data-c]').forEach(td => td.classList.toggle('on', td.dataset.c === ph));
+  if (st.mode === 'curve') {
+    const s = stateOfQ(st.Q);
+    $('s1k').textContent = '온도'; $('s1v').innerHTML = s.T.toFixed(0) + '<small>°C</small>';
+    $('s2k').textContent = '흡수한 열에너지'; $('s2v').innerHTML = Math.round(st.Q).toLocaleString() + '<small>J</small>';
+    const nS = Math.round(s.s * N), nG = Math.round(s.g * N);
+    $('chips').innerHTML = `<span class="chip ${nS ? 'on' : ''}">고체 ${nS}</span><span class="chip ${N - nS - nG ? 'on' : ''}">액체 ${N - nS - nG}</span><span class="chip ${nG ? 'on' : ''}">기체 ${nG}</span>`;
+    $('meterWrap').hidden = true;
+    $('explain').innerHTML = STAGE[s.stage][st.lastDir >= 0 ? 'up' : 'down'];
+    $('tip').textContent = st.Q >= QMAX - 1 && st.heat > 0 ? '모두 수증기가 되었습니다. [냉각]을 눌러 거꾸로 바꿔 보세요.' :
+                           st.Q <= 0 && st.heat < 0 ? '다시 얼음이 되었습니다. 가열과 냉각 그래프를 비교해 보세요.' : '물 10 g을 −20 °C 얼음에서부터 가열합니다.';
+  } else if (st.mode === 'states') {
+    const T = {S:-10, L:25, G:110}[st.phase];
+    $('s1k').textContent = '온도'; $('s1v').innerHTML = T + '<small>°C</small>';
+    $('s2k').textContent = '상태'; $('s2v').textContent = PH_NAME[st.phase];
+    $('chips').innerHTML = ''; $('meterWrap').hidden = true;
+    $('explain').innerHTML = {S:'<b>고체</b>: 입자가 규칙적으로 배열되어 제자리에서 진동합니다. 모양과 부피가 일정합니다.',
+      L:'<b>액체</b>: 입자가 가까이 있지만 자리를 바꾸며 움직입니다. 그릇에 따라 모양이 바뀌지만 부피는 일정합니다.',
+      G:'<b>기체</b>: 입자 사이가 매우 멀고 빠르게 날아다닙니다. 그릇을 가득 채우고 부피가 쉽게 변합니다.'}[st.phase];
+    $('tip').textContent = '아래 비교표에서 지금 상태의 칸이 강조됩니다.';
+  } else if (st.sub === 'diffuse') {
+    $('s1k').textContent = '온도'; $('s1v').innerHTML = st.T + '<small>°C</small>';
+    $('s2k').textContent = '칸막이'; $('s2v').textContent = st.open ? '열림' : '닫힘';
+    $('chips').innerHTML = ''; $('meterWrap').hidden = false;
+    const mix = mixing(); $('meterK').textContent = '섞인 정도'; $('meterV').textContent = Math.round(mix) + '%'; $('meterBar').style.width = mix + '%';
+    $('explain').innerHTML = '<b>확산</b>: 입자가 스스로 운동하여 퍼져 나가는 현상입니다. 아무도 섞지 않아도 두 기체가 고르게 섞입니다.';
+    $('tip').textContent = st.open ? '온도를 높이면 더 빨리 섞이는지 [칸막이 열기]를 다시 해 보며 비교해 보세요.' : '[칸막이 열기]를 눌러 보세요.';
+  } else {
+    const left = st.parts.filter(p => p.ph === 'L').length;
+    $('s1k').textContent = '온도'; $('s1v').innerHTML = st.T + '<small>°C</small>';
+    $('s2k').textContent = '날아간 입자'; $('s2v').innerHTML = st.gone + '<small>개</small>';
+    $('chips').innerHTML = ''; $('meterWrap').hidden = false;
+    $('meterK').textContent = '남은 물 입자'; $('meterV').textContent = left + '개'; $('meterBar').style.width = left / N * 100 + '%';
+    $('explain').innerHTML = '<b>증발</b>: 액체 표면의 입자가 기체가 되어 날아가는 현상입니다. 끓지 않아도 일어나며, 온도가 높을수록 빨라집니다.';
+    $('tip').textContent = '젖은 빨래가 마르는 것도 증발입니다. 온도를 바꾸며 그래프의 기울기를 비교해 보세요.';
+  }
+}
+function mixing(){
+  const A = st.parts.filter(p => p.kind === 'A'); if (!A.length) return 0;
+  const right = A.filter(p => p.x > 0.5).length / A.length;  // 완전히 섞이면 0.5
+  return Math.min(100, right / 0.5 * 100);
+}
+
+/* ---------- 조작 ---------- */
+function setMode(m){
+  st.mode = m;
+  document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
+  document.querySelectorAll('[data-only]').forEach(el => el.hidden = !el.dataset.only.split(' ').includes(m));
+  const G = {diff:['시간에 따른 변화','확산: 섞인 정도가 100%에 가까워질수록 고르게 섞인 것입니다.'],
+             states:['상태 비교',''], curve:['가열·냉각 곡선','온도가 일정한 구간은 상태 변화가 일어나는 동안입니다.']}[m];
+  $('graphTitle').textContent = G[0]; $('graphSub').textContent = G[1];
+  if (m === 'diff') setSub(st.sub);
+  if (m === 'states') setPhase(st.phase);
+  if (m === 'curve') restartCurve();
+  try { history.replaceState(null, '', '#' + m); } catch (e) {}
+}
+function setSub(s){
+  st.sub = s; $('sub').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.sub === s));
+  $('divider').hidden = s !== 'diffuse'; $('refill').hidden = s !== 'evap';
+  $('graphSub').textContent = s === 'diffuse' ? '섞인 정도가 100%에 가까워질수록 고르게 섞인 것입니다.' : '남은 물 입자 수가 줄어드는 빠르기를 온도별로 비교해 보세요.';
+  if (s === 'diffuse') makeDiffusion(); else makePool();
+}
+function setPhase(ph){
+  st.phase = ph; $('phaseSeg').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.ph === ph));
+  st.T = {S:-10, L:25, G:110}[ph];
+  if (st.parts.length !== N || st.parts[0].kind) makeWater();
+  assignPhases(ph === 'S' ? 1 : 0, ph === 'G' ? 1 : 0);
+}
+function restartCurve(){ makeWater(); st.Q = 0; st.hist = []; st.t = 0; st.lastDir = 1; setHeat(1); }
+function setHeat(h){ st.heat = h; if (h) st.lastDir = h; $('heatSeg').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.h === h)); }
+
+$('play').onclick = () => { st.run = !st.run; $('play').textContent = st.run ? '일시정지' : '재생'; };
+document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+$('sub').querySelectorAll('button').forEach(b => b.onclick = () => setSub(b.dataset.sub));
+$('phaseSeg').querySelectorAll('button').forEach(b => b.onclick = () => setPhase(b.dataset.ph));
+$('heatSeg').querySelectorAll('button').forEach(b => b.onclick = () => setHeat(+b.dataset.h));
+$('restart').onclick = restartCurve;
+$('speed').onchange = e => st.speed = +e.target.value;
+$('divider').onclick = () => {
+  if (st.open) { makeDiffusion(); return; }
+  st.open = true; st.t = 0; st.mixHist = []; $('divider').textContent = '처음 상태로';
+};
+$('refill').onclick = makePool;
+$('temp').oninput = e => {
+  const T = +e.target.value, f = Math.sqrt((T + 273) / (st.T + 273));
+  st.parts.forEach(p => { if (p.ph === 'G') { p.vx *= f; p.vy *= f; } });
+  st.T = T; $('tempOut').textContent = T + ' °C';
+};
+
+/* ---------- 반복 ---------- */
+const POWER = 100;    // 가열 세기 (J/초)
+let last = performance.now(), acc = 0;
+function frame(now){
+  const dt = Math.max(0, Math.min(0.04, (now - last) / 1000)); last = now;
+  colors();
+  if (st.run) {
+    if (st.mode === 'curve') {
+      const dQ = st.heat * POWER * st.speed * dt * 4;
+      st.Q = Math.max(0, Math.min(QMAX, st.Q + dQ));
+      const s = stateOfQ(st.Q); st.T = s.T; assignPhases(s.s, s.g);
+      if (st.heat !== 0 && !(st.Q >= QMAX && st.heat > 0) && !(st.Q <= 0 && st.heat < 0)) {
+        st.t += dt * st.speed;
+        acc += dt; if (acc > 0.1) { acc = 0; st.hist.push({t: st.t, T: s.T, stage: s.stage, dir: st.heat}); if (st.hist.length > 3000) st.hist.shift(); }
+      }
+    }
+    const openTop = st.mode === 'diff' && st.sub === 'evap';
+    if (openTop) evaporate(dt);
+    for (let i = 0; i < 3; i++) step(dt / 3, openTop);
+    if (st.mode === 'diff') {
+      st.t += dt; acc += dt;
+      if (acc > 0.25) { acc = 0;
+        if (st.sub === 'diffuse' && st.open) st.mixHist.push({t: st.t, v: mixing()});
+        if (st.sub === 'evap') st.evapHist.push({t: st.t, v: st.parts.filter(p => p.ph === 'L').length});
+      }
+    }
+  }
+  drawScene(); drawGraph(); ledger();
+  requestAnimationFrame(frame);
+}
+
+colors();
+const start = (location.hash || '').slice(1);
+setMode(['diff', 'states', 'curve'].includes(start) ? start : 'curve');
+$('play').textContent = st.run ? '일시정지' : '재생';
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
