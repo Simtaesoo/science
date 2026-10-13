@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>전기장과 전위 실험실 · 전자기와 양자</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+<style>#scene{touch-action:none;cursor:crosshair}</style>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="전자기와 양자|01 전기장과 전위" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>전자기와 양자 · 01 전기장과 전위 <span class="code">전자기와 양자 Ⅰ</span></div>
+      <h1>전기장과 전위 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="field">1. 전기장과 전기력선</button>
+      <button type="button" data-mode="pot">2. 전위와 등전위선</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="전하 배치 화면. 전하를 끌어 옮기고, 빈 곳을 눌러 측정점을 정한다"></canvas></div>
+      <div class="controls">
+        <label class="field" for="qa">전하 A <input type="range" id="qa" min="-4" max="4" step="1" value="2"><output id="qaOut">+2 nC</output></label>
+        <label class="field" for="qb">전하 B <input type="range" id="qb" min="-4" max="4" step="1" value="-2"><output id="qbOut">−2 nC</output></label>
+        <div class="field"><div class="seg" id="preSeg"><button type="button" data-pre="dipole">쌍극자</button><button type="button" data-pre="same">같은 전하</button><button type="button" data-pre="plate">평행판</button></div></div>
+        <div class="field" data-only="field"><label><input type="checkbox" id="vec"> 격자 위 전기장 벡터</label></div>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>전기력선은 왜 서로 교차하지 않을까?</summary><p>전기력선의 접선 방향이 그 점의 전기장 방향이에요. 교차한다면 한 점에서 전기장 방향이 두 개가 되므로 모순이에요.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>등전위선과 전기력선은 항상 어떤 각도로 만날까?</summary><p>항상 수직이에요. 등전위선을 따라 전하를 옮기면 전위차가 0이라 전기력이 일을 하지 않아야 하므로, 전기력(전기장)이 이동 방향에 수직이어야 해요.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>평행판 사이의 전기장이 균일한 까닭은?</summary><p>판 위에 전하가 고르게 퍼져 있어 판 사이 모든 점에서 각 전하의 전기장이 합쳐져 같은 크기·방향이 돼요. 이때 E = V/d로 전위가 거리에 따라 일정하게 변해요. '평행판' 버튼으로 확인해 보세요.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="화면 가로 = 1 m, k = 9.0×10⁹ N·m²/C². 전하를 끌어 옮길 수 있어요."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2, kC = 9e9;
+const st = {mode: 'field', ch: [], pre: 'dipole', qa: 2, qb: -2, probe: [.5, .25], drag: -1, vec: false, img: null, imgKey: ''};
+const M = () => S.w; // 1 m = 화면 가로 픽셀
+function preset(p){ st.pre = p; const H = S.h / M();
+  if (p === 'plate') { st.ch = []; for (let i = 0; i < 13; i++) { const y = H * .2 + i * H * .6 / 12; st.ch.push({x: .3, y, q: st.qa / 3, g: 'A'}, {x: .7, y, q: st.qb / 3, g: 'B'}); } }
+  else { if (p === 'same') { st.qb = st.qa; $('qb').value = st.qb; $('qbOut').textContent = fmtQ(st.qb); } else if (p === 'dipole' && Math.sign(st.qb) === Math.sign(st.qa)) { st.qb = -st.qa; $('qb').value = st.qb; $('qbOut').textContent = fmtQ(st.qb); } st.ch = [{x: .35, y: H / 2, q: st.qa, g: 'A'}, {x: .65, y: H / 2, q: st.qb, g: 'B'}]; }
+  st.probe = [.5, H * .3]; st.imgKey = ''; render(); }
+const f1 = v => (Math.abs(v) < .05 ? 0 : v).toFixed(1);
+const fmtQ = v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v) + ' nC';
+function E(x, y){ let ex = 0, ey = 0; st.ch.forEach(c => { if (!c.q) return; const dx = x - c.x, dy = y - c.y, r2 = dx * dx + dy * dy + 1e-6, r = Math.sqrt(r2), e = kC * c.q * 1e-9 / r2; ex += e * dx / r; ey += e * dy / r; }); return [ex, ey]; }
+function V(x, y){ let v = 0; st.ch.forEach(c => { const r = Math.hypot(x - c.x, y - c.y) + 1e-4; v += kC * c.q * 1e-9 / r; }); return v; }
+let FL = {key: '', lines: []};
+function fieldLines(g){ const key = JSON.stringify(st.ch) + S.w + 'x' + S.h; if (key !== FL.key) { FL = {key, lines: traceLines()}; } FL.lines.forEach(({pts, mid}) => { g.strokeStyle = 'rgba(224,83,63,.75)'; g.lineWidth = 1.4; g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0] * M(), p[1] * M()) : g.moveTo(p[0] * M(), p[1] * M())); g.stroke(); if (mid) { const [mx, my, ux, uy] = mid; arrow(g, mx * M() - ux * 5, my * M() - uy * 5, mx * M() + ux * 5, my * M() + uy * 5, 'rgba(224,83,63,.9)', 1.4); } }); }
+function traceLines(){ const out = []; const pos = st.ch.filter(c => c.q > 0), src = pos.length ? pos : st.ch.filter(c => c.q < 0), sgn = pos.length ? 1 : -1, H = S.h / M(), nPer = st.pre === 'plate' ? 2 : 12;
+  src.forEach(c => { const n = Math.max(2, Math.round(Math.abs(c.q) * nPer / (st.pre === 'plate' ? 1 : 2))); for (let i = 0; i < n; i++) { let a = TAU * (i + .5) / n, x = c.x + .012 * Math.cos(a), y = c.y + .012 * Math.sin(a); if (st.pre === 'plate') { x = c.x + (c.q > 0 ? .012 : -.012) * (i ? 1 : -1); y = c.y; } const pts = [[x, y]]; let mid = null;
+    for (let s = 0; s < 1400; s++) { const [ex, ey] = E(x, y), m = Math.hypot(ex, ey); if (!m) break; const h = .003; x += sgn * ex / m * h; y += sgn * ey / m * h; pts.push([x, y]); if (s === 60) mid = [x, y, sgn * ex / m, sgn * ey / m]; if (x < -.05 || x > 1.05 || y < -.05 || y > H + .05) break; if (st.ch.some(d => d.q * c.q < 0 && Math.hypot(x - d.x, y - d.y) < .012)) break; }
+    out.push({pts, mid}); } }); return out; }
+function potImg(){ const W = S.w, H = S.h, key = JSON.stringify(st.ch) + W + 'x' + H + C.surface; if (key === st.imgKey && st.img) return st.img; const s = 3, cw = Math.ceil(W / s), chh = Math.ceil(H / s), off = document.createElement('canvas'); off.width = cw; off.height = chh; const og = off.getContext('2d'), im = og.createImageData(cw, chh), step = 20; // 20 V 간격
+  for (let j = 0; j < chh; j++) for (let i = 0; i < cw; i++) { const v = V(i * s / M(), j * s / M()), f = Math.max(-1, Math.min(1, v / 300)), o = (j * cw + i) * 4, band = Math.floor(v / step), vr = V((i + 1) * s / M(), j * s / M()), vd = V(i * s / M(), (j + 1) * s / M()), edge = Math.floor(vr / step) !== band || Math.floor(vd / step) !== band;
+    if (f > 0) { im.data[o] = 224; im.data[o + 1] = 83; im.data[o + 2] = 63; } else { im.data[o] = 47; im.data[o + 1] = 111; im.data[o + 2] = 208; } im.data[o + 3] = edge && Math.abs(v) < 400 ? 200 : Math.round(Math.abs(f) * 90); }
+  og.putImageData(im, 0, 0); st.img = off; st.imgKey = key; return off; }
+function drawScene(){ const g = S.g, W = S.w, H = S.h;
+  if (st.mode === 'pot') { g.imageSmoothingEnabled = false; g.drawImage(potImg(), 0, 0, Math.ceil(W / 3) * 3, Math.ceil(H / 3) * 3); g.imageSmoothingEnabled = true; label(g, '진한 선: 등전위선 (20 V 간격) · 빨강: 높은 전위 · 파랑: 낮은 전위', W / 2, H - 12, {size: 11, weight: 700}); }
+  if (st.mode === 'field') { if (st.vec) { for (let x = 25; x < W; x += 40) for (let y = 25; y < H; y += 40) { const [ex, ey] = E(x / M(), y / M()), m = Math.hypot(ex, ey); if (!m) continue; const L = Math.min(16, 4 + Math.log10(m + 1) * 3); g.globalAlpha = Math.min(1, .2 + Math.log10(m + 1) / 5); arrow(g, x - ex / m * L / 2, y - ey / m * L / 2, x + ex / m * L / 2, y + ey / m * L / 2, C.muted, 1.2); g.globalAlpha = 1; } } fieldLines(g); }
+  st.ch.forEach(c => { const r = st.pre === 'plate' ? 6 : 13; g.fillStyle = c.q > 0 ? C.hot : c.q < 0 ? C.phy : C.muted; g.beginPath(); g.arc(c.x * M(), c.y * M(), r, 0, TAU); g.fill(); if (st.pre !== 'plate') { label(g, c.q > 0 ? '+' : c.q < 0 ? '−' : '0', c.x * M(), c.y * M(), {size: 15, weight: 700, color: '#fff'}); label(g, `${c.g} ${fmtQ(c.q)}`, c.x * M(), c.y * M() - 24, {size: 11, weight: 700}); } });
+  // 측정점
+  const [px, py] = st.probe, [ex, ey] = E(px, py), m = Math.hypot(ex, ey); g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.arc(px * M(), py * M(), 6, 0, TAU); g.stroke(); if (m) { const L = Math.min(60, 12 + Math.log10(m + 1) * 10); arrow(g, px * M(), py * M(), px * M() + ex / m * L, py * M() + ey / m * L, C.ink, 2.5); }
+  label(g, `P: E = ${m.toFixed(0)} N/C, V = ${f1(V(px, py))} V`, 12, 16, {size: 12, weight: 700, align: 'left'}); label(g, '전하는 끌어서 옮기고, 빈 곳을 누르면 측정점 P가 옮겨져요', W - 12, 16, {size: 10, color: C.muted, align: 'right'}); }
+/* 끌기 */
+const evPos = e => { const r = S.cv.getBoundingClientRect(); return [(e.clientX - r.left) / M(), (e.clientY - r.top) / M()]; };
+S.cv.addEventListener('pointerdown', e => { const [x, y] = evPos(e); const i = st.ch.findIndex(c => Math.hypot(c.x - x, c.y - y) < .03); if (i >= 0 && st.pre !== 'plate') { st.drag = i; S.cv.setPointerCapture(e.pointerId); } else { st.probe = [x, y]; st.drag = -2; S.cv.setPointerCapture(e.pointerId); render(); } });
+S.cv.addEventListener('pointermove', e => { const [x, y] = evPos(e); if (st.drag >= 0) { st.ch[st.drag].x = Math.max(.03, Math.min(.97, x)); st.ch[st.drag].y = Math.max(.03, Math.min(S.h / M() - .03, y)); render(); } else if (st.drag === -2) { st.probe = [x, y]; render(); } });
+S.cv.addEventListener('pointerup', () => { st.drag = -1; });
+/* 그래프·표 */
+function drawGraph(){ const g = G.g, H = S.h / M(), yl = st.pre === 'plate' ? H / 2 : (st.ch[0].y + st.ch[1].y) / 2;
+  if (st.mode === 'field') { const m = axes(G, {x: [0, 1, .1, '가로 위치 (m) — 측정점 높이를 지나는 선'], y: [0, 2000, 500, '전기장 세기 (N/C)']}); const P = []; for (let x = 0; x <= 1; x += .002) { const [ex, ey] = E(x, st.probe[1]); P.push([x, Math.min(2000, Math.hypot(ex, ey))]); } line(G, P, m, C.accent, 2.2); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.probe[0]), m.Y(Math.min(2000, Math.hypot(...E(...st.probe)))), 5, 0, TAU); g.fill(); }
+  else { const m = axes(G, {x: [0, 1, .1, '가로 위치 (m) — 측정점 높이를 지나는 선'], y: [-400, 400, 100, '전위 (V)']}); const P = []; for (let x = 0; x <= 1; x += .002) P.push([x, Math.max(-400, Math.min(400, V(x, st.probe[1])))]); line(G, P, m, C.accent, 2.2); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.probe[0]), m.Y(Math.max(-400, Math.min(400, V(...st.probe)))), 5, 0, TAU); g.fill(); label(g, '기울기가 가파를수록 전기장이 세다 (E = −ΔV/Δx)', m.X(.5), m.Y(350), {size: 10, color: C.muted}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody'), [ex, ey] = E(...st.probe), m = Math.hypot(ex, ey), v = V(...st.probe), set = (gt, gs, tt) => { $('gTitle').textContent = gt; $('gSub').textContent = gs; $('tTitle').textContent = tt; };
+  if (st.mode === 'field') { s.innerHTML = `<div><b>${m.toFixed(0)} N/C</b><span>P의 전기장 세기</span></div><div><b>${(m * 1e-9 * 1e6).toFixed(2)} μN</b><span>P에 둔 +1 nC가 받는 힘</span></div>`;
+    $('explain').innerHTML = '<b>전기장</b>: 전하 주위에서 다른 전하에 전기력이 작용하는 공간. 전기장 E = F/q (단위 N/C)이고, 점전하가 만드는 전기장의 세기는 E = kQ/r². <b>전기력선</b>은 (+)전하에서 나와 (−)전하로 들어가며, 접선 방향이 전기장 방향, 촘촘한 곳일수록 전기장이 세요.'; $('tip').textContent = '전하를 끌어 옮기거나 크기를 바꿔 보세요. 같은 전하끼리는 전기력선이 서로 밀어내는 모양이 돼요.';
+    th.innerHTML = '<tr><th>거리 (m)</th><th>+2 nC의 전기장 (N/C)</th></tr>'; tb.innerHTML = [.05, .1, .2, .4].map(r => `<tr><td>${r}</td><td>${(kC * 2e-9 / (r * r)).toFixed(0)}</td></tr>`).join(''); set('전기장 세기 분포', '측정점 P를 지나는 가로선 위', '점전하의 전기장 (E = kQ/r²)'); }
+  else { s.innerHTML = `<div><b>${f1(v)} V</b><span>P의 전위</span></div><div><b>${f1(v)} nJ</b><span>+1 nC를 무한히 먼 곳에서 P까지 옮기는 일</span></div>`;
+    $('explain').innerHTML = '<b>전위</b>: 단위 양전하가 갖는 전기 퍼텐셜 에너지(V = kQ/r, 단위 V). 전위가 같은 점을 이은 선이 <b>등전위선</b>이고, 전기력선과 항상 수직이에요. 전하 q를 전위차 ΔV만큼 옮길 때 전기력이 하는 일 W = qΔV. 전기장은 전위가 높은 곳에서 낮은 곳을 향해요.'; $('tip').textContent = '평행판 가운데 부분에서는 등전위선이 같은 간격으로 나란해요 → 균일한 전기장, E = V/d. (판 가장자리에서는 휘어져요)';
+    th.innerHTML = '<tr><th>구분</th><th>전기장</th><th>전위</th></tr>'; tb.innerHTML = [['정의', '단위 양전하가 받는 힘', '단위 양전하의 퍼텐셜 에너지'], ['점전하', 'kQ/r²', 'kQ/r'], ['종류', '벡터 (방향 있음)', '스칼라'], ['단위', 'N/C = V/m', 'V = J/C']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); set('전위 분포', '측정점 P를 지나는 가로선 위', '전기장과 전위 비교'); } }
+const bindQ = (id, k) => { $(id).oninput = e => { st[k] = +e.target.value; $(id + 'Out').textContent = fmtQ(st[k]); if (st.pre === 'plate') preset('plate'); else { st.ch[k === 'qa' ? 0 : 1].q = st[k]; st.imgKey = ''; render(); } }; };
+bindQ('qa', 'qa'); bindQ('qb', 'qb'); $('vec').onchange = e => { st.vec = e.target.checked; };
+const setPre = Kit.seg($('preSeg'), 'pre', preset);
+Kit.tabs(m => { st.mode = m; render(); }, ['field', 'pot']);
+setTimeout(() => setPre('dipole'), 30);
+Kit.loop(() => {}, () => { if (!st.ch.length) return; S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); drawScene(); drawGraph(); });
+})();
+</script>
+</body>
+</html>
