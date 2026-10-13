@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>생식과 유전 실험실 · 중3 생식과 유전</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-bio">
+<div class="wrap">
+  <nav class="topbar" data-topbar="3학년|21 생식과 유전" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 3 · 21 생식과 유전 <span class="code">9과21</span></div>
+      <h1>생식과 유전 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="size">1. 세포 분열의 필요성</button>
+      <button type="button" data-mode="mitosis">2. 체세포 분열</button>
+      <button type="button" data-mode="meiosis">3. 감수 분열</button>
+      <button type="button" data-mode="develop">4. 발생</button>
+      <button type="button" data-mode="mendel">5. 멘델의 유전</button>
+      <button type="button" data-mode="human">6. 사람의 유전</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="모형">
+      <div class="canvas-box"><canvas id="scene" aria-label="세포 분열과 유전 모형"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <label class="field" data-only="size" for="side">한 변 <input type="range" id="side" min="1" max="4" step="1" value="2"><output id="sideOut">2 cm</output></label>
+        <button class="btn" type="button" id="dye" data-only="size">색소 용액에 담그기</button>
+        <label class="field" data-only="mitosis meiosis develop" for="stage">단계 <input type="range" id="stage" min="0" max="5" step="0.05" value="0"><output id="stageOut"></output></label>
+        <button class="btn" type="button" id="auto" data-only="mitosis meiosis develop">자동 진행</button>
+        <div class="field" data-only="mitosis"><div class="seg" id="cellSeg"><button type="button" data-cell="animal">동물 세포</button><button type="button" data-cell="plant">식물 세포</button></div></div>
+        <div class="field" data-only="mendel"><div class="seg" id="mdSeg"><button type="button" data-md="one">한 쌍의 대립 형질</button><button type="button" data-md="two">두 쌍의 대립 형질</button></div></div>
+        <div class="field" data-only="mendel" id="p1F">어버이 1 <div class="seg" id="p1Seg"><button type="button" data-p1="RR">RR</button><button type="button" data-p1="Rr">Rr</button><button type="button" data-p1="rr">rr</button></div></div>
+        <div class="field" data-only="mendel" id="p2F">어버이 2 <div class="seg" id="p2Seg"><button type="button" data-p2="RR">RR</button><button type="button" data-p2="Rr">Rr</button><button type="button" data-p2="rr">rr</button></div></div>
+        <button class="btn" type="button" id="breed" data-only="mendel">자손 100개 얻기</button>
+        <div class="field" data-only="human"><div class="seg" id="huSeg"><button type="button" data-hu="abo">ABO식 혈액형</button><button type="button" data-hu="color">적록 색맹</button><button type="button" data-hu="ped">가계도 분석</button></div></div>
+        <div class="field" data-only="human" id="faF">아버지 <select id="fa"></select></div>
+        <div class="field" data-only="human" id="moF">어머니 <select id="mo"></select></div>
+        <div class="field" data-only="human" id="gtF"><label for="gt"><input type="checkbox" id="gt"> 유전자형 보기</label></div>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">정리</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>코끼리가 생쥐보다 큰 것은 세포가 커서일까?</summary>
+        <p>아닙니다. 코끼리와 생쥐의 세포 크기는 비슷하고, 코끼리는 세포의 수가 훨씬 많습니다. 세포는 일정 크기 이상 커지면 물질 교환이 어려워지므로 분열하여 수를 늘립니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>감수 분열로 염색체 수가 절반이 되는 것은 왜 중요할까?</summary>
+        <p>정자와 난자의 염색체 수가 체세포의 절반이어야, 수정하여 생긴 자손의 염색체 수가 어버이와 같게 유지됩니다. 그렇지 않으면 세대마다 염색체 수가 2배씩 늘어납니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>사람의 유전은 왜 완두처럼 연구하기 어려울까?</summary>
+        <p>한 세대가 길고 자손의 수가 적으며, 자유롭게 교배 실험을 할 수 없고 환경의 영향도 많이 받기 때문입니다. 그래서 가계도 조사, 쌍둥이 연구, 집단 조사 등의 방법을 씁니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="염색체 수는 보기 쉽게 4개(2쌍)로 줄인 모형입니다. 사람의 체세포 염색체는 46개(23쌍)입니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+const st = {mode:'size', t:0, side:2, dye:0, dyeing:false, stage:0, auto:false, cell:'animal', md:'one', p1:'Rr', p2:'Rr', kids:null, hu:'abo', fa:'AO', mo:'BO', gt:false};
+const COL = {aL: '#d8483a', bL: '#3a6ad8', aS: '#e89a3a', bS: '#3aa0a0'};
+const lerp = (a, b, f) => a + (b - a) * f, cl = v => Math.max(0, Math.min(1, v)), ease = f => f < .5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2;
+
+/* ===== 1. 세포 크기 ===== */
+function drawSize(){
+  const g = S.g, L = st.side, d = Math.min(.5, st.dye * .5), px = Math.min(S.h * .6 / 4, 60), cx = S.w * .3, cy = S.h * .48, s = L * px;
+  // 정육면체(사선 투영)
+  const o = s * .35; g.fillStyle = '#f5f0dc'; g.strokeStyle = '#a89a6a'; g.lineWidth = 1.5;
+  g.beginPath(); g.moveTo(cx - s / 2, cy - s / 2); g.lineTo(cx - s / 2 + o, cy - s / 2 - o); g.lineTo(cx + s / 2 + o, cy - s / 2 - o); g.lineTo(cx + s / 2, cy - s / 2); g.closePath(); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(cx + s / 2, cy - s / 2); g.lineTo(cx + s / 2 + o, cy - s / 2 - o); g.lineTo(cx + s / 2 + o, cy + s / 2 - o); g.lineTo(cx + s / 2, cy + s / 2); g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = d > 0 ? `rgba(200,60,120,${.25 + d})` : '#f5f0dc'; g.fillRect(cx - s / 2, cy - s / 2, s, s); g.strokeRect(cx - s / 2, cy - s / 2, s, s);
+  label(g, '우무 조각 (겉모습)', cx, cy + s / 2 + 18, {size: 11, color: C.muted});
+  // 단면
+  const sx = S.w * .68, inner = Math.max(0, s - 2 * d * px); g.fillStyle = 'rgba(200,60,120,.75)'; g.fillRect(sx - s / 2, cy - s / 2, s, s); g.fillStyle = '#f5f0dc'; g.fillRect(sx - inner / 2, cy - inner / 2, inner, inner); g.strokeStyle = '#a89a6a'; g.strokeRect(sx - s / 2, cy - s / 2, s, s);
+  label(g, '자른 단면', sx, cy + s / 2 + 18, {size: 11, color: C.muted});
+  const frac = 1 - Math.pow(Math.max(0, L - 2 * d) / L, 3);
+  label(g, `표면적 ${6 * L * L} cm² · 부피 ${L * L * L} cm³ · 표면적/부피 = ${(6 / L).toFixed(1)}`, S.w / 2, 24, {weight: 700, size: 14});
+  label(g, `색소가 스며든 부분: 전체 부피의 ${Math.round(frac * 100)}%`, S.w / 2, S.h - 22, {weight: 700, size: 14, color: '#b03a78'});
+}
+
+/* ===== 염색체 그리기 ===== */
+function chromo(g, x, y, len, col, ang, dbl, open){ const dx = Math.cos(ang) * len / 2, dy = Math.sin(ang) * len / 2, nx = -Math.sin(ang), ny = Math.cos(ang);
+  g.strokeStyle = col; g.lineWidth = 6; g.lineCap = 'round';
+  if (dbl) { const sp = 3.5 + (open || 0) * 6; [-1, 1].forEach(k => { g.beginPath(); g.moveTo(x - dx + nx * sp * k, y - dy + ny * sp * k); g.quadraticCurveTo(x + nx * 1.5 * k, y + ny * 1.5 * k, x + dx + nx * sp * k, y + dy + ny * sp * k); g.stroke(); }); g.fillStyle = '#333'; g.beginPath(); g.arc(x, y, 3, 0, TAU); g.fill(); }
+  else { g.beginPath(); g.moveTo(x - dx, y - dy); g.lineTo(x + dx, y + dy); g.stroke(); }
+  g.lineCap = 'butt'; }
+function cellBody(g, x, y, rx, ry, plant, pinch){ g.fillStyle = 'rgba(200,230,200,.35)'; g.strokeStyle = plant ? '#4a8a3a' : '#7a9a7a'; g.lineWidth = plant ? 4 : 2;
+  if (plant) { g.beginPath(); g.rect(x - rx, y - ry, rx * 2, ry * 2); g.fill(); g.stroke(); if (pinch > 0) { g.strokeStyle = '#4a8a3a'; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y - ry * pinch); g.lineTo(x, y + ry * pinch); g.stroke(); } return; }
+  const w = rx * (1 - pinch * .7); g.beginPath(); g.moveTo(x, y - ry); g.bezierCurveTo(x + w, y - ry, x + rx * 1.1, y - ry * .9, x + rx, y); g.bezierCurveTo(x + rx * 1.1, y + ry * .9, x + w, y + ry, x, y + ry); g.bezierCurveTo(x - w, y + ry, x - rx * 1.1, y + ry * .9, x - rx, y); g.bezierCurveTo(x - rx * 1.1, y - ry * .9, x - w, y - ry, x, y - ry);
+  g.lineTo(x, y - ry * (1 - pinch)); g.fill(); g.stroke();
+  if (pinch > 0) { g.fillStyle = C.surface; g.beginPath(); g.ellipse(x, y - ry, 8 * pinch, ry * pinch, 0, 0, TAU); g.ellipse(x, y + ry, 8 * pinch, ry * pinch, 0, 0, TAU); g.fill(); } }
+const CHR = [['aL', 70], ['bL', 70], ['aS', 44], ['bS', 44]];
+const MIT = ['간기', '전기', '중기', '후기', '말기', '세포질 분열 완료'];
+function drawMitosis(){
+  const g = S.g, p = st.stage, cx = S.w * .42, cy = S.h * .5, rx = Math.min(S.w * .3, 200), ry = S.h * .36, plant = st.cell === 'plant';
+  const ph = Math.floor(Math.min(4.999, p)), f = p - ph, pinch = p >= 4 ? cl((p - 4)) : 0;
+  cellBody(g, cx, cy, rx, ry, plant, pinch);
+  // 방추사
+  if (p > 1.3 && p < 4.6) { const a = cl((p - 1.3) / .7) * (p > 4 ? 1 - (p - 4) / .6 : 1); g.strokeStyle = `rgba(120,120,120,${.5 * a})`; g.lineWidth = 1; for (let k = -4; k <= 4; k++) { g.beginPath(); g.moveTo(cx - rx * .8, cy); g.quadraticCurveTo(cx, cy + k * 22, cx + rx * .8, cy); g.stroke(); } if (!plant) { g.fillStyle = '#555'; [cx - rx * .8, cx + rx * .8].forEach(x => { g.beginPath(); g.arc(x, cy, 4, 0, TAU); g.fill(); }); } }
+  // 핵막
+  if (p < 1.5) { const a = 1 - cl((p - .8) / .7); g.strokeStyle = `rgba(90,60,140,${a})`; g.lineWidth = 2; g.setLineDash(p > .8 ? [4, 4] : []); g.beginPath(); g.arc(cx, cy, 70, 0, TAU); g.stroke(); g.setLineDash([]); }
+  if (p > 4.2) { const a = cl((p - 4.2) / .5); g.strokeStyle = `rgba(90,60,140,${a})`; g.lineWidth = 2; [cx - rx * .55, cx + rx * .55].forEach(x => { g.beginPath(); g.arc(x, cy, 46, 0, TAU); g.stroke(); }); }
+  CHR.forEach(([k, len], i) => {
+    if (p < 1) { const thick = p; if (thick < .3) { g.strokeStyle = COL[k]; g.globalAlpha = .55; g.lineWidth = 1.5; g.beginPath(); for (let s = 0; s < 40; s++) { const a = s * .7 + i * 2, r = 20 + ((s * 13 + i * 7) % 40); g.lineTo(cx + Math.cos(a) * r * .9, cy + Math.sin(a) * r * .9); } g.stroke(); g.globalAlpha = 1; }
+      else chromo(g, cx - 40 + i * 26, cy - 10 + (i % 2) * 20, len * thick, COL[k], 1.2 + i, p > .6); return; }
+    const scat = [cx - 40 + i * 26, cy - 10 + (i % 2) * 20], eq = [cx, cy - 75 + i * 50];
+    if (p < 2) { const e = ease(cl(p - 1)); chromo(g, lerp(scat[0], eq[0], e), lerp(scat[1], eq[1], e), len, COL[k], lerp(1.2 + i, Math.PI / 2 + .0, e) + (e > .99 ? 0 : 0), true); return; }
+    if (p < 3) { chromo(g, eq[0], eq[1], len, COL[k], 0, true); return; }
+    const e = ease(cl((p - 3) * 1.2)), sep = lerp(0, rx * .55, e), ret = p > 4 ? 1 : 0;
+    [-1, 1].forEach(s => chromo(g, eq[0] + s * sep, lerp(eq[1], cy - 45 + i * 30, ret ? cl(p - 4) : 0), len, COL[k], s * .25 * (1 - ret), false)); });
+  if (p >= 5) label(g, '염색체 4개인 딸세포 2개 (어버이 세포와 같음)', S.w / 2, S.h - 14, {weight: 700, color: C.bio});
+  label(g, MIT[Math.min(5, Math.round(p - .49 < 0 ? 0 : Math.floor(p + .001)))], 30, 26, {weight: 700, size: 18, align: 'left', color: C.bio});
+  if (plant && p > 4) label(g, '세포판 형성 (안 → 밖)', cx, cy + ry + 18, {size: 11, color: '#4a8a3a'}); if (!plant && p > 4) label(g, '세포막이 바깥에서 안으로 잘록해짐', cx, cy + ry + 18, {size: 11, color: C.muted});
+}
+const MEI = ['간기 (DNA 복제)', '감수 1분열 전기 (2가 염색체)', '감수 1분열 중기', '감수 1분열 후기·말기 (상동 염색체 분리)', '감수 2분열 (염색 분체 분리)', '생식세포 4개'];
+function drawMeiosis(){
+  const g = S.g, p = st.stage, ph = Math.min(5, Math.floor(p));
+  label(g, MEI[ph], 30, 26, {weight: 700, size: 16, align: 'left', color: C.bio});
+  const cx = S.w * .42, cy = S.h * .52;
+  if (p < 3) { cellBody(g, cx, cy, 170, S.h * .34, false, 0);
+    CHR.forEach(([k, len], i) => { const pair = i < 2 ? 0 : 1, start = [cx - 50 + i * 30, cy - 20 + (i % 2) * 30];
+      const bivalent = [cx - 12 + (i % 2) * 24, cy - 50 + pair * 90], eq = [cx + (i % 2 ? 14 : -14), cy - 50 + pair * 90];
+      let pos = start, ang = 1 + i; if (p >= 1 && p < 2) { const e = ease(cl(p - 1)); pos = [lerp(start[0], bivalent[0], e), lerp(start[1], bivalent[1], e)]; ang = lerp(1 + i, Math.PI / 2, e); } else if (p >= 2) { pos = eq; ang = Math.PI / 2; }
+      chromo(g, pos[0], pos[1], len, COL[k], ang, p > .5); });
+    if (p >= 1 && p < 3) label(g, '상동 염색체끼리 짝을 지음 (2가 염색체)', cx, cy + S.h * .34 + 18, {size: 11, color: C.muted}); return; }
+  if (p < 4) { const e = ease(cl(p - 3)); const ofs = lerp(0, 110, e);
+    [-1, 1].forEach(s => { cellBody(g, cx + s * ofs, cy, lerp(170, 100, e), S.h * .3, false, 0); });
+    CHR.forEach(([k, len], i) => { const s = i % 2 ? 1 : -1, pair = i < 2 ? 0 : 1; chromo(g, cx + s * (14 + ofs), cy - 50 + pair * 90, len, COL[k], Math.PI / 2, true); });
+    label(g, '염색체 수 4 → 2 (절반)', cx, S.h - 14, {weight: 700, color: C.hot}); return; }
+  const e = ease(cl(p - 4)), cells = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+  cells.forEach(([sx, sy], j) => { const x = cx + sx * 110 + sy * lerp(0, 0, e), y = cy + sy * lerp(0, 90, e); cellBody(g, x, y, lerp(100, 70, e), lerp(S.h * .3, 70, e), false, 0); });
+  CHR.forEach(([k, len], i) => { const sx = i % 2 ? 1 : -1, pair = i < 2 ? 0 : 1; [-1, 1].forEach(sy => { const x = cx + sx * 110 + (pair ? 18 : -18), y = cy + sy * lerp(0, 90, e) * (e > 0 ? 1 : 0); chromo(g, x, y + (e === 0 ? sy * 6 : 0), len, COL[k], Math.PI / 2, e < .05); }); });
+  if (p >= 5) label(g, '염색체 2개인 생식세포 4개 (어버이 세포의 절반)', cx, S.h - 14, {weight: 700, color: C.bio});
+}
+
+/* ===== 4. 발생 ===== */
+const DEV = ['수정 (수란관)', '수정란', '난할: 2세포', '난할: 4세포 → 8세포', '포배 (자궁으로 이동)', '착상 (자궁 안쪽 벽)'];
+function drawDevelop(){
+  const g = S.g, p = st.stage, ph = Math.min(5, Math.floor(p));
+  // 생식 기관 모식도
+  const ux = S.w * .22, uy = S.h * .62, sc = Math.min(1, S.w * .2 / 150); g.fillStyle = 'rgba(240,170,180,.35)'; g.strokeStyle = '#c87a8a'; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(ux - 50, uy - 40); g.quadraticCurveTo(ux, uy + 90, ux + 50, uy - 40); g.closePath(); g.fill(); g.stroke();
+  [-1, 1].forEach(s => { g.beginPath(); g.moveTo(ux + s * 50, uy - 40); g.quadraticCurveTo(ux + s * 100 * sc, uy - 110, ux + s * 130 * sc, uy - 60); g.stroke(); g.fillStyle = '#f0c0a0'; g.beginPath(); g.ellipse(ux + s * 136 * sc, uy - 40, 14, 9, 0, 0, TAU); g.fill(); });
+  label(g, '난소', ux + 136 * sc, uy - 22, {size: 10}); label(g, '수란관', ux + 100 * sc, uy - 108, {size: 10}); label(g, '자궁', ux, uy + 10, {size: 10});
+  const path = [[ux + 130 * sc, uy - 60], [ux + 100 * sc, uy - 100], [ux + 60, uy - 60], [ux + 20, uy - 20], [ux + 4, uy + 20]], k = cl(p / 5) * (path.length - 1), i0 = Math.min(path.length - 2, Math.floor(k)), f0 = k - i0;
+  const mx = lerp(path[i0][0], path[i0 + 1][0], f0), my = lerp(path[i0][1], path[i0 + 1][1], f0); g.fillStyle = C.hot; g.beginPath(); g.arc(mx, my, 5, 0, TAU); g.fill();
+  // 확대
+  const ex = S.w * .64, ey = S.h * .46, R = Math.min(S.h * .3, 120);
+  g.strokeStyle = '#d8c8a0'; g.lineWidth = 6; g.beginPath(); g.arc(ex, ey, R + 6, 0, TAU); g.stroke();
+  if (p < 1) { g.fillStyle = '#fbe8d0'; g.beginPath(); g.arc(ex, ey, R, 0, TAU); g.fill(); for (let j = 0; j < 6; j++) { const a = j * TAU / 6 + st.t * .3, r = R + 40 - p * 40 * (j === 0 ? 1 : .2); g.fillStyle = '#5a6a9a'; g.beginPath(); g.arc(ex + Math.cos(a) * r, ey + Math.sin(a) * r, 5, 0, TAU); g.fill(); g.strokeStyle = '#5a6a9a'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(ex + Math.cos(a) * r, ey + Math.sin(a) * r); g.lineTo(ex + Math.cos(a) * (r + 20), ey + Math.sin(a) * (r + 20) + Math.sin(st.t * 10 + j) * 4); g.stroke(); } label(g, '난자', ex, ey, {weight: 700}); label(g, '정자', ex + R + 46, ey - 30, {size: 11}); }
+  else { const n = p < 2 ? 1 : p < 3 ? 2 : p < 4 ? (p < 3.5 ? 4 : 8) : 32, r = R * Math.pow(1 / n, 1 / 3) * .95;
+    if (n <= 8) { const pos = {1: [[0, 0]], 2: [[-.5, 0], [.5, 0]], 4: [[-.5, -.5], [.5, -.5], [-.5, .5], [.5, .5]], 8: [[-.5, -.5], [.5, -.5], [-.5, .5], [.5, .5], [-.2, -.2], [.2, -.2], [-.2, .2], [.2, .2]]}[n];
+      pos.forEach(([u, v]) => { g.fillStyle = '#fbe8d0'; g.strokeStyle = '#c8a070'; g.lineWidth = 1.5; g.beginPath(); g.arc(ex + u * R * .9, ey + v * R * .9, n === 1 ? R : r * 1.05, 0, TAU); g.fill(); g.stroke(); }); }
+    else { g.fillStyle = 'rgba(250,232,208,.5)'; g.beginPath(); g.arc(ex, ey, R, 0, TAU); g.fill(); for (let j = 0; j < 26; j++) { const a = j * TAU / 26; g.fillStyle = '#fbe8d0'; g.strokeStyle = '#c8a070'; g.beginPath(); g.arc(ex + Math.cos(a) * R * .85, ey + Math.sin(a) * R * .85, R * .13, 0, TAU); g.fill(); g.stroke(); } for (let j = 0; j < 6; j++) { g.beginPath(); g.arc(ex - R * .45 + (j % 3) * R * .14, ey - R * .2 + Math.floor(j / 3) * R * .16, R * .1, 0, TAU); g.fill(); g.stroke(); } if (p < 5) label(g, '속이 빈 공 모양 (포배)', ex, ey + R + 22, {size: 11}); }
+    if (p >= 5) { g.fillStyle = 'rgba(220,120,140,.35)'; g.fillRect(ex - R - 30, ey + R + 8, 2 * R + 60, 24); label(g, '자궁 안쪽 벽에 파묻힘 → 태반 형성', ex, ey + R + 20, {size: 11, weight: 700}); }
+    label(g, `세포 수 ${n}개`, ex, 26, {weight: 700, size: 14}); }
+  label(g, DEV[ph], 30, 26, {weight: 700, size: 16, align: 'left', color: C.bio});
+}
+
+/* ===== 5. 멘델 ===== */
+const gam = g2 => [g2[0], g2[1]];
+function phen(gt){ return gt.includes('R') ? '둥근 모양' : '주름진 모양'; }
+function drawMendel(){
+  const g = S.g;
+  if (st.md === 'one') { const a = gam(st.p1), b = gam(st.p2), x0 = S.w * .3, y0 = S.h * .28, cw = Math.min(110, S.w * .16), chh = Math.min(80, S.h * .22);
+    label(g, `${st.p1} (${phen(st.p1)}) × ${st.p2} (${phen(st.p2)})`, S.w / 2, 22, {weight: 700, size: 15});
+    label(g, '어버이 1의 생식세포', x0 + cw, y0 - 36, {size: 11, color: C.muted}); label(g, '어버이 2', x0 - 50, y0 + chh, {size: 11, color: C.muted});
+    a.forEach((ga, i) => label(g, ga, x0 + cw * (i + .5), y0 - 14, {weight: 700, size: 16, color: C.hot})); b.forEach((gb, j) => label(g, gb, x0 - 16, y0 + chh * (j + .5), {weight: 700, size: 16, color: C.phy}));
+    const cnt = {}; for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) { const gt = [a[i], b[j]].sort((p, q) => p === 'R' ? -1 : 1).join(''); cnt[gt] = (cnt[gt] || 0) + 1; const x = x0 + cw * i, y = y0 + chh * j;
+      g.fillStyle = gt.includes('R') ? 'rgba(230,200,90,.35)' : 'rgba(150,170,90,.35)'; g.fillRect(x, y, cw, chh); g.strokeStyle = C.line; g.strokeRect(x, y, cw, chh);
+      pea(g, x + cw / 2, y + chh / 2 - 8, gt.includes('R')); label(g, gt, x + cw / 2, y + chh - 14, {weight: 700}); }
+    const R = Object.entries(cnt).filter(([k]) => k.includes('R')).reduce((s, [, v]) => s + v, 0);
+    label(g, `유전자형 비 ${Object.entries(cnt).map(([k, v]) => k + ' ' + v).join(' : ')}`, S.w * .8, S.h * .4, {size: 13, weight: 700}); label(g, `표현형 비 둥근 : 주름진 = ${R} : ${4 - R}`, S.w * .8, S.h * .4 + 26, {size: 13, weight: 700, color: C.bio});
+    if (st.kids) label(g, `실제 자손 100개: 둥근 ${st.kids[0]}개, 주름진 ${st.kids[1]}개`, S.w * .8, S.h * .4 + 60, {size: 12, color: C.hot});
+    return; }
+  // 두 쌍
+  const G4 = ['RY', 'Ry', 'rY', 'ry'], x0 = S.w * .14, y0 = 46, cw = Math.min(70, (S.w * .6) / 4), chh = Math.min(70, (S.h - 80) / 4);
+  label(g, 'RrYy × RrYy (둥글고 노란 완두끼리)', S.w / 2, 18, {weight: 700, size: 14});
+  G4.forEach((ga, i) => { label(g, ga, x0 + cw * (i + .5), y0 - 12, {weight: 700, color: C.hot}); label(g, ga, x0 - 16, y0 + chh * (i + .5), {weight: 700, color: C.phy}); });
+  const cnt = {RY: 0, Ry: 0, rY: 0, ry: 0};
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { const R = (G4[i][0] + G4[j][0]).includes('R'), Y = (G4[i][1] + G4[j][1]).includes('Y'), key = (R ? 'R' : 'r') + (Y ? 'Y' : 'y'); cnt[key]++;
+    const x = x0 + cw * i, y = y0 + chh * j; g.fillStyle = C.surface; g.fillRect(x, y, cw, chh); g.strokeStyle = C.line; g.strokeRect(x, y, cw, chh); pea(g, x + cw / 2, y + chh / 2 - 6, R, Y ? '#e8c840' : '#8ab040', .8); const srt = (a, b) => (a < b ? a + b : b + a); label(g, srt(G4[i][0], G4[j][0]) + srt(G4[i][1], G4[j][1]), x + cw / 2, y + chh - 10, {size: 10}); }
+  const rx = S.w * .82; [['둥글고 노란색', 'RY'], ['둥글고 초록색', 'Ry'], ['주름지고 노란색', 'rY'], ['주름지고 초록색', 'ry']].forEach(([n, k], i) => label(g, `${n}: ${cnt[k]}`, rx, S.h * .3 + i * 24, {size: 13, weight: 700}));
+  label(g, '= 9 : 3 : 3 : 1', rx, S.h * .3 + 104, {size: 15, weight: 700, color: C.bio}); label(g, '모양 둥근 : 주름진 = 3 : 1, 색 노랑 : 초록 = 3 : 1', rx, S.h * .3 + 132, {size: 11, color: C.muted});
+  if (st.kids) label(g, `실제 자손 100개: ${st.kids.join(' : ')}`, rx, S.h * .3 + 160, {size: 12, color: C.hot});
+}
+function pea(g, x, y, round, col, s){ s = s || 1; g.fillStyle = col || '#e8c840'; g.strokeStyle = '#8a7a30'; g.lineWidth = 1.5; g.beginPath();
+  if (round) g.arc(x, y, 14 * s, 0, TAU); else for (let a = 0; a <= TAU + .01; a += .2) { const r = (12 + Math.sin(a * 6) * 2.5) * s; a ? g.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r) : g.moveTo(x + r, y); }
+  g.fill(); g.stroke(); }
+
+/* ===== 6. 사람의 유전 ===== */
+const ABO = {AA: 'A형', AO: 'A형', BB: 'B형', BO: 'B형', AB: 'AB형', OO: 'O형'};
+const CB = {fa: {XY: '정상 (XY)', "X'Y": '색맹 (X\'Y)'}, mo: {XX: '정상 (XX)', "XX'": '정상 보인자 (XX\')', "X'X'": '색맹 (X\'X\')'}};
+function aboKids(){ const r = {}; for (const a of st.fa) for (const b of st.mo) { const gt = [a, b].sort().join('').replace('OA', 'AO').replace('OB', 'BO'); const ph = gt === 'AO' || gt === 'OA' ? 'A형' : gt === 'BO' || gt === 'OB' ? 'B형' : gt === 'OO' ? 'O형' : gt === 'AA' ? 'A형' : gt === 'BB' ? 'B형' : 'AB형'; r[ph] = (r[ph] || 0) + 25; } return r; }
+function cbKids(){ const fx = st.fa.startsWith("X'") ? "X'" : 'X', mx = st.mo === 'XX' ? ['X', 'X'] : st.mo === "XX'" ? ['X', "X'"] : ["X'", "X'"]; const out = {son: {n: 0, c: 0}, dau: {n: 0, c: 0, car: 0}};
+  mx.forEach(m => { out.son[m === "X'" ? 'c' : 'n'] += 50; const d = [fx, m]; const cnt = d.filter(v => v === "X'").length; if (cnt === 2) out.dau.c += 50; else if (cnt === 1) out.dau.car += 50; else out.dau.n += 50; }); return out; }
+function person(g, x, y, male, affected, carrier, txt){ g.fillStyle = affected ? '#3a4a6a' : C.surface; g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); if (male) g.rect(x - 14, y - 14, 28, 28); else g.arc(x, y, 14, 0, TAU); g.fill(); g.stroke();
+  if (carrier) { g.fillStyle = '#3a4a6a'; g.beginPath(); g.arc(x, y, 4, 0, TAU); g.fill(); } if (txt) label(g, txt, x, y + 26, {size: 11, color: C.accent, weight: 700}); }
+function drawHuman(){
+  const g = S.g;
+  if (st.hu === 'abo') { const k = aboKids(); label(g, `아버지 ${ABO[st.fa]}${st.gt ? ' (' + st.fa + ')' : ''} × 어머니 ${ABO[st.mo]}${st.gt ? ' (' + st.mo + ')' : ''}`, S.w / 2, 24, {weight: 700, size: 15});
+    const x0 = S.w * .3, y0 = S.h * .25, cw = 90, chh = 60; label(g, '아버지 유전자', x0 + cw, y0 - 30, {size: 11, color: C.muted});
+    [...st.fa].forEach((a, i) => label(g, a, x0 + cw * (i + .5), y0 - 12, {weight: 700, color: C.phy})); [...st.mo].forEach((b, j) => label(g, b, x0 - 14, y0 + chh * (j + .5), {weight: 700, color: C.hot}));
+    for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) { const gt = [st.fa[i], st.mo[j]].sort().join(''); const ph = gt.includes('A') && gt.includes('B') ? 'AB형' : gt.includes('A') ? 'A형' : gt.includes('B') ? 'B형' : 'O형'; g.strokeStyle = C.line; g.strokeRect(x0 + cw * i, y0 + chh * j, cw, chh); label(g, ph, x0 + cw * (i + .5), y0 + chh * j + 22, {weight: 700}); label(g, gt.replace('OA', 'AO').replace('OB', 'BO'), x0 + cw * (i + .5), y0 + chh * j + 42, {size: 11, color: C.muted}); }
+    const rx = S.w * .78; label(g, '자녀의 혈액형 확률', rx, S.h * .3, {weight: 700}); Object.entries(k).forEach(([p, v], i) => label(g, `${p}: ${v}%`, rx, S.h * .3 + 26 + i * 22, {size: 13, color: C.bio}));
+    label(g, 'A와 B는 O에 대해 우성, A와 B 사이에는 우열 없음', S.w / 2, S.h - 16, {size: 12, color: C.muted}); return; }
+  if (st.hu === 'color') { const k = cbKids(); label(g, `아버지 ${CB.fa[st.fa]} × 어머니 ${CB.mo[st.mo]}`, S.w / 2, 24, {weight: 700, size: 15});
+    person(g, S.w * .3, S.h * .25, true, st.fa.startsWith("X'"), false); person(g, S.w * .5, S.h * .25, false, st.mo === "X'X'", st.mo === "XX'"); g.strokeStyle = C.ink; g.beginPath(); g.moveTo(S.w * .3 + 14, S.h * .25); g.lineTo(S.w * .5 - 14, S.h * .25); g.moveTo(S.w * .4, S.h * .25); g.lineTo(S.w * .4, S.h * .4); g.moveTo(S.w * .25, S.h * .4); g.lineTo(S.w * .55, S.h * .4); g.stroke();
+    [[S.w * .25, true, k.son.c >= 50, false, `아들 색맹 ${k.son.c}%`], [S.w * .55, false, k.dau.c >= 50, k.dau.car > 0, `딸 색맹 ${k.dau.c}% · 보인자 ${k.dau.car}%`]].forEach(([x, m, a, c, t]) => { g.beginPath(); g.moveTo(x, S.h * .4); g.lineTo(x, S.h * .5); g.stroke(); person(g, x, S.h * .55, m, a, c); label(g, t, x, S.h * .55 + 30, {size: 12, weight: 700, color: C.hot}); });
+    label(g, '색맹 유전자(X\')는 X 염색체에 있고 정상에 대해 열성 → 남자에게 더 많이 나타남 (반성 유전)', S.w / 2, S.h - 16, {size: 12, color: C.muted});
+    label(g, '■ 남자 ● 여자 · 진한 색: 색맹 · 점: 보인자', S.w * .82, S.h * .25, {size: 11, color: C.muted}); return; }
+  // 가계도 (미맹: 열성)
+  label(g, '미맹 가계도 (진한 색: 미맹)', S.w / 2, 22, {weight: 700, size: 15});
+  const P = [[.3, .2, 1, 0, 'Tt'], [.45, .2, 0, 0, 'Tt'], [.6, .2, 1, 0, 'TT 또는 Tt'], [.75, .2, 0, 1, 'tt']], g1 = S.h * .2, g2y = S.h * .5, g3y = S.h * .8;
+  const draw = (u, y, m, a, t, id) => { person(g, S.w * u, y, m, a, false, st.gt ? t : ''); label(g, id, S.w * u - 22, y - 16, {size: 10, color: C.muted}); };
+  g.strokeStyle = C.ink; g.lineWidth = 1.5; [[.3, .45], [.6, .75]].forEach(([a, b]) => { g.beginPath(); g.moveTo(S.w * a + 14, g1); g.lineTo(S.w * b - 14, g1); g.moveTo(S.w * (a + b) / 2, g1); g.lineTo(S.w * (a + b) / 2, g1 + 50); g.stroke(); });
+  g.beginPath(); g.moveTo(S.w * .3, g1 + 50); g.lineTo(S.w * .45, g1 + 50); g.moveTo(S.w * .3, g1 + 50); g.lineTo(S.w * .3, g2y - 14); g.moveTo(S.w * .45, g1 + 50); g.lineTo(S.w * .45, g2y - 14); g.moveTo(S.w * .6, g1 + 50); g.lineTo(S.w * .75, g1 + 50); g.moveTo(S.w * .6, g1 + 50); g.lineTo(S.w * .6, g2y - 14); g.moveTo(S.w * .75, g1 + 50); g.lineTo(S.w * .75, g2y - 14); g.stroke();
+  g.beginPath(); g.moveTo(S.w * .45 + 14, g2y); g.lineTo(S.w * .6 - 14, g2y); g.moveTo(S.w * .525, g2y); g.lineTo(S.w * .525, g3y - 40); g.moveTo(S.w * .45, g3y - 40); g.lineTo(S.w * .6, g3y - 40); g.moveTo(S.w * .45, g3y - 40); g.lineTo(S.w * .45, g3y - 14); g.moveTo(S.w * .6, g3y - 40); g.lineTo(S.w * .6, g3y - 14); g.stroke();
+  P.forEach(([u, , m, a, t], i) => draw(u, g1, m, a, t, i + 1));
+  draw(.3, g2y, 0, 1, 'tt', 5); draw(.45, g2y, 1, 0, 'Tt', 6); draw(.6, g2y, 0, 0, 'Tt', 7); draw(.75, g2y, 1, 0, 'Tt', 8);
+  draw(.45, g3y, 1, 1, 'tt', 9); draw(.6, g3y, 0, 0, 'TT 또는 Tt', 10);
+  label(g, '정상인 부모(1, 2) 사이에서 미맹(5)이 태어남 → 미맹은 열성', S.w / 2, S.h - 12, {size: 12, weight: 700, color: C.bio});
+}
+
+/* ===== 그래프 ===== */
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'size') { const m = axes(G, {x: [0, 4, 1, '한 변의 길이 (cm)'], y: [0, 6, 1, '표면적 ÷ 부피']}); const p = []; for (let L = 1; L <= 4; L += .05) p.push([L, 6 / L]); line(G, p, m, C.bio, 2.5); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.side), m.Y(6 / st.side), 5, 0, TAU); g.fill(); label(g, '세포가 클수록 부피에 비해 표면적이 작아짐', m.X(2.5), m.Y(5), {size: 11, color: C.muted}); }
+  else if (st.mode === 'mitosis' || st.mode === 'meiosis') { const m = axes(G, {x: [0, 5, 1, '단계'], y: [0, 6, 1, '세포 1개의 DNA 양 (상대값)']}); const mit = [[0, 2], [.5, 4], [3, 4], [4.6, 4], [4.7, 2], [5, 2]], mei = [[0, 2], [.5, 4], [3.5, 4], [3.6, 2], [4.5, 2], [4.6, 1], [5, 1]]; line(G, st.mode === 'mitosis' ? mit : mei, m, C.bio, 2.5); line(G, [[st.stage, 0], [st.stage, 6]], m, C.hot, 1.2, [4, 4]); }
+  else if (st.mode === 'develop') { const m = axes(G, {x: [0, 5, 1, '난할 횟수'], y: [0, 32, 8, '세포 수']}); const p = []; for (let n = 0; n <= 5; n++) p.push([n, Math.pow(2, n)]); line(G, p, m, C.bio, 2.5); label(g, '난할: 세포 수는 늘고, 세포 하나의 크기는 작아짐', m.X(2), m.Y(26), {size: 11, color: C.muted}); }
+  else if (st.mode === 'mendel') { const m = axes(G, {x: [0, st.md === 'one' ? 2 : 4, 1, ''], y: [0, 100, 25, '자손 수 (100개 중)']}); const labels = st.md === 'one' ? ['둥근', '주름진'] : ['둥·노', '둥·초', '주·노', '주·초'];
+    const exp = st.md === 'one' ? (() => { let R = 0; for (const a of st.p1) for (const b of st.p2) if (a === 'R' || b === 'R') R++; return [R * 25, (4 - R) * 25]; })() : [56.25, 18.75, 18.75, 6.25];
+    labels.forEach((n, i) => { g.fillStyle = C.line; g.fillRect(m.X(i + .15), m.Y(exp[i]), m.X(.3) - m.X(0), m.Y(0) - m.Y(exp[i])); if (st.kids) { g.fillStyle = C.bio; g.fillRect(m.X(i + .5), m.Y(st.kids[i]), m.X(.3) - m.X(0), m.Y(0) - m.Y(st.kids[i])); } label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 11}); }); }
+  else { if (st.hu === 'abo') { const k = aboKids(), m = axes(G, {x: [0, 4, 1, ''], y: [0, 100, 25, '확률 (%)']}); ['A형', 'B형', 'AB형', 'O형'].forEach((n, i) => { const v = k[n] || 0; g.fillStyle = C.bio; g.fillRect(m.X(i + .2), m.Y(v), m.X(.6) - m.X(0), m.Y(0) - m.Y(v)); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 11}); }); }
+    else if (st.hu === 'color') { const k = cbKids(), m = axes(G, {x: [0, 2, 1, ''], y: [0, 100, 25, '색맹일 확률 (%)']}); [['아들', k.son.c], ['딸', k.dau.c]].forEach(([n, v], i) => { g.fillStyle = C.hot; g.fillRect(m.X(i + .25), m.Y(v), m.X(.5) - m.X(0), m.Y(0) - m.Y(v)); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 11}); }); }
+    else { const m = axes(G, {x: [0, 2, 1, ''], y: [0, 100, 25, '확률 (%)']}); [['6과 7의 다음 자녀가 미맹', 25], ['10이 Tt일 확률', 67]].forEach(([n, v], i) => { g.fillStyle = C.bio; g.fillRect(m.X(i + .25), m.Y(v), m.X(.5) - m.X(0), m.Y(0) - m.Y(v)); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 10}); }); label(g, '6 (Tt) × 7 (Tt) → TT : Tt : tt = 1 : 2 : 1', m.X(1), m.Y(92), {size: 10, color: C.muted}); } }
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>'; $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
+function table(){
+  if (st.mode === 'size') setTable('우무 조각의 크기 비교', ['한 변 (cm)', '표면적 (cm²)', '부피 (cm³)', '표면적/부피'], [1, 2, 3, 4].map(L => [L, 6 * L * L, L * L * L, (6 / L).toFixed(1)]));
+  else if (st.mode === 'mitosis') setTable('체세포 분열 단계', ['단계', '특징'], [['간기', 'DNA 복제, 세포 성장 (핵막 뚜렷, 염색체 보이지 않음)'], ['전기', '염색체가 나타나고 핵막이 사라짐, 방추사 형성'], ['중기', '염색체가 세포 중앙에 배열 (관찰하기 가장 좋음)'], ['후기', '염색 분체가 분리되어 양쪽 끝으로 이동'], ['말기', '핵막이 다시 나타나고 세포질 분열 시작']]);
+  else if (st.mode === 'meiosis') setTable('체세포 분열과 감수 분열', ['구분', '체세포 분열', '감수 분열'], [['분열 횟수', '1회', '연속 2회'], ['딸세포 수', '2개', '4개'], ['염색체 수', '변화 없음', '절반으로 줄어듦'], ['2가 염색체', '형성 안 함', '형성함'], ['일어나는 곳', '몸의 생장 부위', '생식 기관 (정소, 난소)']]);
+  else if (st.mode === 'develop') setTable('사람의 발생 과정', ['과정', '일어나는 곳·내용'], [['수정', '수란관에서 정자와 난자의 핵이 결합'], ['난할', '수정란의 체세포 분열 (세포 크기 작아짐)'], ['착상', '포배가 수정 후 약 1주일 만에 자궁 안쪽 벽에 파묻힘'], ['태반 형성', '모체와 태아 사이 물질 교환'], ['출산', '수정 후 약 266일(38주)']]);
+  else if (st.mode === 'mendel') setTable('멘델의 유전 원리', ['원리', '내용'], [['우열의 원리', '대립 형질이 다른 순종끼리 교배하면 잡종 1대에서 우성 형질만 나타남'], ['분리의 법칙', '생식세포를 만들 때 쌍을 이룬 유전자가 분리되어 서로 다른 생식세포로 들어감 (잡종 2대 3 : 1)'], ['독립의 법칙', '두 쌍 이상의 대립 형질이 서로 영향을 주지 않고 독립적으로 유전됨 (9 : 3 : 3 : 1)']]);
+  else setTable('사람의 유전 형질', ['형질', '유전자 위치', '특징'], [['미맹, 귓불 모양, 보조개', '상염색체', '남녀에 관계없이 나타남'], ['ABO식 혈액형', '상염색체', '대립유전자 A, B, O 세 가지 (복대립 유전)'], ['적록 색맹', 'X 염색체', '남자에게 더 많이 나타남 (반성 유전)']]);
+}
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'size') { s = stat('표면적/부피', (6 / st.side).toFixed(1)) + stat('한 변', st.side, ' cm');
+    e = '세포가 커질수록 부피에 비해 <b>표면적</b>이 상대적으로 작아져, 세포막을 통한 물질 교환이 효율적으로 일어나기 어렵습니다. 그래서 세포는 어느 정도 커지면 <b>분열</b>하여 수를 늘립니다. 생물이 자라는 것은 세포 수가 늘어나기 때문입니다.';
+    t = '크기를 바꾸고 [색소 용액에 담그기]를 눌러, 색소가 스며든 비율을 비교하세요.'; }
+  else if (st.mode === 'mitosis') { s = stat('단계', MIT[Math.min(5, Math.floor(st.stage))]) + stat('염색체 수', '4 → 4');
+    e = '<b>염색체</b>는 DNA와 단백질로 이루어지며, 분열할 때 두 가닥의 <b>염색 분체</b>로 보입니다. <b>체세포 분열</b>은 핵분열(전기·중기·후기·말기)과 세포질 분열로 이루어지며, 딸세포의 염색체 수는 어버이 세포와 같습니다. 생장과 재생이 일어납니다.';
+    t = st.cell === 'plant' ? '식물 세포는 세포판이 안에서 바깥쪽으로 만들어지며 세포질이 나뉩니다.' : '동물 세포는 세포막이 바깥에서 안쪽으로 잘록하게 들어가며 세포질이 나뉩니다.'; }
+  else if (st.mode === 'meiosis') { s = stat('단계', MEI[Math.min(5, Math.floor(st.stage))].split(' (')[0]) + stat('염색체 수', st.stage >= 3 ? '2' : '4');
+    e = '<b>감수 분열</b>은 생식세포를 만들 때 일어나며, 연속 2회 분열하여 염색체 수가 절반인 생식세포 4개가 생깁니다. 감수 1분열에서 <b>상동 염색체</b>가 짝을 지어 <b>2가 염색체</b>를 이루었다가 분리되고, 감수 2분열에서 염색 분체가 분리됩니다.';
+    t = '감수 1분열에서 염색체 수가 줄어드는 순간을 찾아보세요.'; }
+  else if (st.mode === 'develop') { s = stat('과정', DEV[Math.min(5, Math.floor(st.stage))].split(' (')[0]) + stat('세포 수', st.stage < 2 ? 1 : st.stage < 3 ? 2 : st.stage < 4 ? (st.stage < 3.5 ? 4 : 8) : '많음');
+    e = '<b>수정</b>: 정자와 난자가 만나 수정란이 되는 과정. <b>발생</b>: 수정란이 세포 분열을 거쳐 개체가 되는 과정. 초기의 빠른 체세포 분열을 <b>난할</b>이라 하며, 세포 수는 늘지만 크기는 자라지 않아 세포 하나의 크기가 점점 작아집니다.';
+    t = '[자동 진행]으로 수정부터 착상까지 따라가 보세요.'; }
+  else if (st.mode === 'mendel') { s = st.md === 'one' ? stat('교배', st.p1 + ' × ' + st.p2) + stat('우성', 'R (둥근 모양)') : stat('교배', 'RrYy × RrYy') + stat('표현형 비', '9:3:3:1');
+    e = '멘델은 완두의 대립 형질을 연구하여 <b>우열의 원리</b>, <b>분리의 법칙</b>, <b>독립의 법칙</b>을 밝혔습니다. 대립 형질을 결정하는 유전자는 쌍으로 존재하며, 생식세포를 만들 때 분리되어 하나씩 들어갑니다.';
+    t = '[자손 100개 얻기]를 여러 번 눌러, 실제 비율이 예상 비율과 얼마나 비슷한지 확인하세요.'; }
+  else { s = st.hu === 'abo' ? stat('아버지', ABO[st.fa]) + stat('어머니', ABO[st.mo]) : st.hu === 'color' ? stat('아들 색맹', cbKids().son.c, ' %') + stat('딸 색맹', cbKids().dau.c, ' %') : stat('형질', '미맹') + stat('우열', '열성');
+    e = st.hu === 'abo' ? '<b>ABO식 혈액형</b>은 대립유전자 A, B, O에 의해 결정되며, A와 B는 O에 대해 우성이고 A와 B 사이에는 우열이 없습니다.' : st.hu === 'color' ? '<b>적록 색맹</b> 유전자는 <b>X 염색체</b>에 있고 정상에 대해 열성입니다. 남자는 X 염색체가 하나라서 색맹 유전자가 하나만 있어도 색맹이 되므로 여자보다 많이 나타납니다(<b>반성 유전</b>).' : '<b>가계도</b>: 한 집안의 형질이 어떻게 유전되는지 나타낸 그림. 정상인 부모에게서 형질이 나타난 자녀가 태어나면, 그 형질은 열성입니다.';
+    t = st.hu === 'ped' ? '[유전자형 보기]를 켜고 각 사람의 유전자형을 확인하세요.' : '부모의 유전자형을 바꾸며 자녀의 확률을 비교하세요.'; }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 조작 ===== */
+$('side').oninput = e => { st.side = +e.target.value; $('sideOut').textContent = st.side + ' cm'; st.dye = 0; st.dyeing = false; };
+$('dye').onclick = () => { st.dye = 0; st.dyeing = true; };
+function stageLabel(){ $('stageOut').textContent = (st.mode === 'mitosis' ? MIT : st.mode === 'meiosis' ? MEI : DEV)[Math.min(5, Math.floor(st.stage))].split(' (')[0]; }
+$('stage').oninput = e => { st.stage = +e.target.value; st.auto = false; stageLabel(); };
+$('auto').onclick = () => { if (st.stage >= 5) st.stage = 0; st.auto = true; };
+Kit.seg($('cellSeg'), 'cell', v => st.cell = v)('animal');
+function syncMd(){ const on = st.mode === 'mendel', one = st.md === 'one'; $('p1F').hidden = !on || !one; $('p2F').hidden = !on || !one; }
+Kit.seg($('mdSeg'), 'md', v => { st.md = v; st.kids = null; syncMd(); })('one');
+Kit.seg($('p1Seg'), 'p1', v => { st.p1 = v; st.kids = null; })('Rr'); Kit.seg($('p2Seg'), 'p2', v => { st.p2 = v; st.kids = null; })('Rr');
+$('breed').onclick = () => { if (st.md === 'one') { let R = 0; for (let i = 0; i < 100; i++) { const a = st.p1[Math.random() < .5 ? 0 : 1], b = st.p2[Math.random() < .5 ? 0 : 1]; if (a === 'R' || b === 'R') R++; } st.kids = [R, 100 - R]; }
+  else { const c = [0, 0, 0, 0]; for (let i = 0; i < 100; i++) { const R = Math.random() < .75, Y = Math.random() < .75; c[(R ? 0 : 2) + (Y ? 0 : 1)]++; } st.kids = c; } };
+function fillSel(){ const opts = st.hu === 'abo' ? [Object.keys(ABO), Object.keys(ABO)] : [Object.keys(CB.fa), Object.keys(CB.mo)], names = st.hu === 'abo' ? [k => `${ABO[k]} (${k})`, k => `${ABO[k]} (${k})`] : [k => CB.fa[k], k => CB.mo[k]];
+  $('fa').innerHTML = opts[0].map(k => `<option value="${k}">${names[0](k)}</option>`).join(''); $('mo').innerHTML = opts[1].map(k => `<option value="${k}">${names[1](k)}</option>`).join('');
+  if (st.hu === 'abo') { st.fa = 'AO'; st.mo = 'BO'; } else { st.fa = 'XY'; st.mo = "XX'"; } $('fa').value = st.fa; $('mo').value = st.mo; }
+function syncHu(){ const on = st.mode === 'human', ped = st.hu === 'ped'; $('faF').hidden = !on || ped; $('moF').hidden = !on || ped; $('gtF').hidden = !on || !(ped || st.hu === 'abo'); if (on) $('gTitle').textContent = {abo: '자녀의 혈액형 확률', color: '자녀가 색맹일 확률', ped: '확률 따져 보기'}[st.hu]; }
+Kit.seg($('huSeg'), 'hu', v => { st.hu = v; if (v !== 'ped') fillSel(); syncHu(); })('abo');
+$('fa').onchange = e => st.fa = e.target.value; $('mo').onchange = e => st.mo = e.target.value; $('gt').onchange = e => st.gt = e.target.checked;
+Kit.tabs(m => { st.mode = m; st.stage = 0; st.auto = false; $('stage').value = 0; stageLabel(); table(); syncMd(); syncHu();
+  if (m !== 'human') $('gTitle').textContent = {size: '세포 크기와 표면적/부피', mitosis: '분열 과정에서 세포 1개의 DNA 양', meiosis: '분열 과정에서 세포 1개의 DNA 양', develop: '난할 횟수와 세포 수', mendel: '자손의 표현형 (회색: 예상, 색: 실제)'}[m];
+  $('gSub').textContent = {size: '', mitosis: '점선: 현재 단계', meiosis: '점선: 현재 단계 · 마지막에 처음의 절반', develop: '', mendel: '', human: ''}[m]; }, ['size', 'mitosis', 'meiosis', 'develop', 'mendel', 'human']);
+Kit.loop(dt => { st.t += dt; if (st.dyeing) { st.dye = Math.min(1, st.dye + dt * .35); if (st.dye >= 1) st.dyeing = false; }
+    if (st.auto) { st.stage = Math.min(5, st.stage + dt * .45); $('stage').value = st.stage; stageLabel(); if (st.stage >= 5) st.auto = false; } },
+  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({size: drawSize, mitosis: drawMitosis, meiosis: drawMeiosis, develop: drawDevelop, mendel: drawMendel, human: drawHuman})[st.mode](); drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>
