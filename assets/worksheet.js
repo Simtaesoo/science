@@ -76,7 +76,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.simlink').forEach(box => {
     const url = new URL(box.dataset.sim, location.href).href;
     const u = box.querySelector('.url'); if (u) u.textContent = url;
-    const q = box.querySelector('.qr');
+    const q = box.querySelector('.qr'); if (!q) return;
     try {
       const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
       q.innerHTML = qr.createSvgTag({ cellSize: 3, margin: 0, scalable: true });

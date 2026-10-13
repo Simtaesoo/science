@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>힘 실험실 · 중1 힘의 작용</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="1학년|05 힘의 작용" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 1 · 05 힘의 작용 <span class="code">9과05-01</span><span class="code">9과05-02</span><span class="code">9과05-03</span><span class="code">9과05-04</span></div>
+      <h1>힘 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="bal">1. 힘의 표현과 평형</button>
+      <button type="button" data-mode="kinds">2. 여러 가지 힘</button>
+      <button type="button" data-mode="net">3. 알짜힘과 운동</button>
+      <button type="button" data-mode="design">4. 힘의 평형과 설계</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="실험 장치 그림"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <button class="btn" id="reset" type="button">처음부터</button>
+        <!-- 1 -->
+        <div class="field" data-only="bal">두 힘의 방향 <div class="seg" id="dirSeg"><button type="button" data-dir="opp">반대 방향</button><button type="button" data-dir="same">같은 방향</button></div></div>
+        <label class="field" data-only="bal" for="f1">힘 ① <input type="range" id="f1" min="0" max="50" step="5" value="30"><output id="f1Out">30 N</output></label>
+        <label class="field" data-only="bal" for="f2">힘 ② <input type="range" id="f2" min="0" max="50" step="5" value="20"><output id="f2Out">20 N</output></label>
+        <label class="field" data-only="bal" for="vert"><input type="checkbox" id="vert"> 위아래로 작용하는 힘 보기</label>
+        <!-- 2 -->
+        <div class="field" data-only="kinds"><div class="seg" id="kSeg"><button type="button" data-k="grav">중력</button><button type="button" data-k="spring">탄성력</button><button type="button" data-k="fric">마찰력</button><button type="button" data-k="buoy">부력</button></div></div>
+        <div class="field" data-only="kinds" id="placeWrap">장소 <div class="seg" id="plSeg"><button type="button" data-pl="earth">지구</button><button type="button" data-pl="moon">달</button></div></div>
+        <label class="field" data-only="kinds" for="mass" id="massWrap">질량 <input type="range" id="mass" min="1" max="6" step="1" value="3"><output id="massOut">3 kg</output></label>
+        <label class="field" data-only="kinds" for="nw" id="nwWrap">추의 개수 (1개 1 N) <input type="range" id="nw" min="0" max="6" step="1" value="2"><output id="nwOut">2개</output></label>
+        <div class="field" data-only="kinds" id="surfWrap">바닥 <div class="seg" id="sfSeg"><button type="button" data-sf="glass">유리</button><button type="button" data-sf="wood">나무</button><button type="button" data-sf="sand">사포</button></div></div>
+        <div class="field" data-only="kinds" id="brickWrap">나무 도막 <div class="seg" id="brSeg"><button type="button" data-br="1">1개</button><button type="button" data-br="2">2개 쌓기</button></div></div>
+        <label class="field" data-only="kinds" for="pull" id="pullWrap">당기는 힘 <input type="range" id="pull" min="0" max="20" step="0.5" value="0"><output id="pullOut">0 N</output></label>
+        <label class="field" data-only="kinds" for="depth" id="depthWrap">잠긴 정도 <input type="range" id="depth" min="0" max="100" step="10" value="0"><output id="depthOut">0%</output></label>
+        <div class="field" data-only="kinds" id="liqWrap">액체 <div class="seg" id="lqSeg"><button type="button" data-lq="water">물</button><button type="button" data-lq="salt">진한 소금물</button></div></div>
+        <!-- 3 -->
+        <div class="field" data-only="net">운동 방향에 대한 힘의 방향 <select id="fdir">
+          <option value="none">힘이 작용하지 않음</option><option value="same">운동 방향과 같은 방향</option><option value="opp">운동 방향과 반대 방향</option>
+          <option value="perp">운동 방향과 수직 (항상)</option><option value="slant">운동 방향과 비스듬히 (아래쪽, 일정)</option></select></div>
+        <!-- 4 -->
+        <label class="field" data-only="design" for="tank">물탱크에 채운 물 <input type="range" id="tank" min="0" max="100" step="5" value="20"><output id="tankOut">20%</output></label>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="측정값">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <div class="headrow"><h2 id="tTitle">관찰 기록</h2><button class="btn" id="record" type="button">기록</button></div>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>책상 위에 가만히 놓인 책에는 힘이 작용하지 않을까?</summary>
+        <p>책에는 아래로 중력이, 위로 책상이 떠받치는 힘이 작용합니다. 두 힘의 크기가 같고 방향이 반대라 알짜힘이 0이므로 책은 움직이지 않습니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>달에 가면 몸무게가 줄어들까, 질량이 줄어들까?</summary>
+        <p>무게는 약 1/6로 줄지만 질량은 그대로입니다. 무게는 중력의 크기이고, 질량은 물체가 가진 고유한 양이기 때문입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>놀이터 회전 그네는 속력이 일정한데도 운동 상태가 변하는 걸까?</summary>
+        <p>네. 운동 방향이 계속 바뀌므로 운동 상태가 변하는 것입니다. 이때 그네에는 운동 방향과 수직으로 알짜힘이 작용합니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="중력 가속도는 지구 9.8, 달 1.6으로 계산했습니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const st = {mode:'bal', t:0, hist:[], rows:{bal:[], grav:[], spring:[], fric:[], buoy:[], net:[], design:[]},
+  dir:'opp', f1:30, f2:20, vert:false, bx:0, bv:0,
+  k:'grav', pl:'earth', mass:3, nw:2, sf:'wood', br:1, pull:0, sliding:false, bpos:0, bvel:0, depth:0, lq:'water',
+  fdir:'none', puck:null, trail:[],
+  tank:20, sy:0, svy:0};
+const FS = 4;  // 화살표: 1 N당 픽셀
+
+/* ===== 1. 힘의 표현과 평형 ===== */
+function netBal(){ return st.dir === 'opp' ? st.f1 - st.f2 : st.f1 + st.f2; }
+function stepBal(dt){
+  const F = netBal(), m = 10;
+  st.bv += F / m * dt * 6; st.bx += st.bv * dt * 20;
+  if (F === 0) st.bv *= 0.9;
+  if (Math.abs(st.bx) > S.w * 0.32) { st.bx = 0; st.bv = 0; }
+  st.t += dt;
+}
+function drawBal(){
+  const g = S.g, gy = S.h * 0.58, cx = S.w / 2 + st.bx, bw = 110, bh = 84;
+  g.fillStyle = C.soft; g.fillRect(0, gy, S.w, S.h - gy); g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(0, gy); g.lineTo(S.w, gy); g.stroke();
+  g.fillStyle = C.line; g.fillRect(cx - bw / 2, gy - bh, bw, bh); g.strokeStyle = C.ink; g.strokeRect(cx - bw / 2, gy - bh, bw, bh);
+  label(g, '상자', cx, gy - bh / 2, {weight: 600});
+  const y = gy - bh / 2;
+  // 힘 ①: 오른쪽, 상자 왼쪽 면에서 시작
+  if (st.f1) { arrow(g, cx - bw / 2 - st.f1 * FS - 4, y - 12, cx - bw / 2 - 4, y - 12, C.phy, 4); label(g, `① ${st.f1} N`, cx - bw / 2 - st.f1 * FS / 2 - 4, y - 28, {color: C.phy, weight: 600}); }
+  if (st.f2) {
+    if (st.dir === 'opp') { arrow(g, cx + bw / 2 + st.f2 * FS + 4, y + 12, cx + bw / 2 + 4, y + 12, C.hot, 4); label(g, `② ${st.f2} N`, cx + bw / 2 + st.f2 * FS / 2 + 4, y + 30, {color: C.hot, weight: 600}); }
+    else { arrow(g, cx - bw / 2 - st.f2 * FS - 4, y + 12, cx - bw / 2 - 4, y + 12, C.hot, 4); label(g, `② ${st.f2} N`, cx - bw / 2 - st.f2 * FS / 2 - 4, y + 30, {color: C.hot, weight: 600}); }
+  }
+  // 알짜힘
+  const F = netBal(), ny = gy + 40;
+  label(g, '알짜힘 (합력)', S.w / 2, ny - 16, {size: 12, color: C.muted});
+  if (F) arrow(g, S.w / 2, ny, S.w / 2 + F * FS, ny, C.ink, 4);
+  label(g, F ? `${Math.abs(F)} N, ${F > 0 ? '오른쪽' : '왼쪽'}` : '0 N → 힘의 평형', S.w / 2, ny + 22, {weight: 700, color: F ? C.ink : C.phy});
+  if (st.vert) {
+    arrow(g, cx + 30, gy - bh / 2, cx + 30, gy - bh / 2 + 60, C.earth, 3); label(g, '중력', cx + 58, gy - bh / 2 + 40, {color: C.earth, size: 12});
+    arrow(g, cx - 30, gy, cx - 30, gy - 60, C.bio, 3); label(g, '떠받치는 힘', cx - 74, gy - 50, {color: C.bio, size: 12});
+  }
+}
+
+/* ===== 2. 여러 가지 힘 ===== */
+const MU = {glass:0.15, wood:0.35, sand:0.7}, SURF = {glass:'유리', wood:'나무', sand:'사포'};
+function weightN(){ return st.mass * (st.pl === 'earth' ? 9.8 : 1.6); }
+function frictionNow(){
+  const N = 6 * st.br, max = MU[st.sf] * N;
+  if (!st.sliding && st.pull <= max) return {f: st.pull, max, kind: '정지 마찰'};
+  return {f: max * 0.85, max, kind: '운동 마찰'};
+}
+function buoyNow(){ const full = st.lq === 'water' ? 4 : 4.8; return full * st.depth / 100; }
+function stepKinds(dt){
+  if (st.k === 'fric') {
+    const fr = frictionNow();
+    if (!st.sliding && st.pull > fr.max) st.sliding = true;
+    if (st.sliding) { const a = (st.pull - fr.f) / (0.6 * st.br); st.bvel = Math.max(0, st.bvel + a * dt); if (st.bvel === 0 && st.pull <= fr.max) st.sliding = false; st.bpos += st.bvel * dt * 40; if (st.bpos > S.w * 0.4) st.bpos = 0; }
+  }
+  st.t += dt;
+}
+function springScale(g, x, top, readN, maxN, labelTxt){
+  const h = 120, frac = Math.min(1, readN / maxN);
+  g.fillStyle = C.soft; g.strokeStyle = C.ink; g.lineWidth = 1.5; g.fillRect(x - 16, top, 32, h); g.strokeRect(x - 16, top, 32, h);
+  for (let i = 0; i <= 10; i++) { const y = top + 8 + i * (h - 16) / 10; g.beginPath(); g.moveTo(x - 16, y); g.lineTo(x - (i % 5 ? 10 : 6), y); g.stroke(); }
+  g.fillStyle = C.hot; g.fillRect(x - 12, top + 8 + frac * (h - 16) - 2, 24, 4);
+  label(g, labelTxt, x, top - 10, {size: 11, color: C.muted});
+  return top + h;
+}
+function drawKinds(){
+  const g = S.g;
+  if (st.k === 'grav') {
+    const W = weightN(), cx1 = S.w * 0.3, cx2 = S.w * 0.7, top = 50;
+    // 용수철저울
+    g.fillStyle = C.ink; g.fillRect(cx1 - 40, top - 30, 80, 6);
+    const b = springScale(g, cx1, top, W, 60, '용수철저울 (무게)');
+    g.strokeStyle = C.ink; g.beginPath(); g.moveTo(cx1, b); g.lineTo(cx1, b + 20); g.stroke();
+    g.fillStyle = C.muted; g.fillRect(cx1 - 22, b + 20, 44, 34); label(g, st.mass + ' kg', cx1, b + 37, {color: C.surface, weight: 700});
+    label(g, `${W.toFixed(1)} N`, cx1, b + 76, {size: 16, weight: 700});
+    // 윗접시저울
+    const by = S.h * 0.62;
+    g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.moveTo(cx2 - 90, by); g.lineTo(cx2 + 90, by); g.stroke();
+    g.fillStyle = C.ink; g.beginPath(); g.moveTo(cx2, by); g.lineTo(cx2 - 14, by + 40); g.lineTo(cx2 + 14, by + 40); g.closePath(); g.fill();
+    g.fillStyle = C.muted; g.fillRect(cx2 - 82, by - 30, 44, 30); label(g, st.mass + ' kg', cx2 - 60, by - 15, {color: C.surface, weight: 700});
+    g.fillStyle = C.warn; g.fillRect(cx2 + 40, by - 24, 40, 24); label(g, `분동 ${st.mass} kg`, cx2 + 60, by - 36, {size: 11});
+    label(g, '윗접시저울 (질량): 수평', cx2, by + 58, {size: 12, color: C.muted});
+    label(g, `${st.mass} kg`, cx2, by + 80, {size: 16, weight: 700});
+    label(g, st.pl === 'earth' ? '지구' : '달', S.w / 2, 18, {weight: 700, color: C.earth});
+  } else if (st.k === 'spring') {
+    const x = S.w * 0.35, top = 30, L0 = 60, ext = st.nw * 18;
+    g.fillStyle = C.ink; g.fillRect(x - 50, top - 6, 100, 6);
+    g.strokeStyle = C.phy; g.lineWidth = 2; g.beginPath(); g.moveTo(x, top);
+    const L = L0 + ext, turns = 14;
+    for (let i = 0; i <= turns * 2; i++) g.lineTo(x + (i % 2 ? 12 : -12) * (i && i < turns * 2 ? 1 : 0), top + L * i / (turns * 2));
+    g.stroke();
+    for (let i = 0; i < st.nw; i++) { g.fillStyle = C.muted; g.fillRect(x - 14, top + L + i * 14, 28, 12); }
+    // 자
+    const rx = x + 60; g.strokeStyle = C.ink; g.lineWidth = 1; g.strokeRect(rx, top, 18, 230);
+    for (let i = 0; i <= 12; i++) { g.beginPath(); g.moveTo(rx, top + i * 18 + L0 - 0); g.lineTo(rx + 8, top + i * 18 + L0); g.stroke(); }
+    label(g, '0', rx + 26, top + L0, {size: 10, align: 'left'}); label(g, `${st.nw * 2} cm`, rx + 26, top + L, {size: 11, align: 'left', color: C.hot, weight: 600});
+    g.strokeStyle = C.hot; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(x + 14, top + L); g.lineTo(rx, top + L); g.stroke(); g.setLineDash([]);
+    if (st.nw) { arrow(g, x - 40, top + L + 30, x - 40, top + L - 20, C.phy, 3); label(g, `탄성력 ${st.nw} N`, x - 50, top + L - 34, {color: C.phy, size: 12, align: 'right'});
+      arrow(g, x + 30, top + L + 6, x + 30, top + L + 56, C.earth, 3); label(g, `추의 무게 ${st.nw} N`, x + 120, top + L + 70, {color: C.earth, size: 12}); }
+  } else if (st.k === 'fric') {
+    const gy = S.h * 0.6, bx = 80 + st.bpos, bw = 80, bh = 34 * st.br;
+    g.fillStyle = st.sf === 'glass' ? 'rgba(120,180,230,.35)' : st.sf === 'wood' ? 'rgba(190,140,80,.45)' : 'rgba(150,120,90,.7)';
+    g.fillRect(20, gy, S.w - 40, 16); g.strokeStyle = C.ink; g.lineWidth = 1.5; g.strokeRect(20, gy, S.w - 40, 16);
+    for (let i = 0; i < st.br; i++) { g.fillStyle = '#c9a26b'; g.fillRect(bx, gy - 34 * (i + 1), bw, 34); g.strokeStyle = C.ink; g.strokeRect(bx, gy - 34 * (i + 1), bw, 34); }
+    const fr = frictionNow();
+    if (st.pull) { arrow(g, bx + bw, gy - 17, bx + bw + st.pull * 8, gy - 17, C.phy, 3); label(g, `당기는 힘 ${st.pull} N`, bx + bw + st.pull * 4 + 4, gy - 34 - 6, {color: C.phy, size: 12}); }
+    if (fr.f > 0.01) { arrow(g, bx, gy - 4, bx - fr.f * 8, gy - 4, C.hot, 3); label(g, `마찰력 ${fr.f.toFixed(1)} N`, bx - fr.f * 4, gy + 30, {color: C.hot, size: 12}); }
+    label(g, st.sliding ? '미끄러지는 중' : '정지', S.w / 2, 24, {weight: 700, color: st.sliding ? C.hot : C.ink});
+  } else {
+    const x = S.w * 0.4, top = 26, sb = springScale(g, x, top, 10 - buoyNow(), 12, '용수철저울');
+    const ow = 60, oh = 70, wy = S.h * 0.5, oy = sb + 20 + (wy - sb - 20 - oh) + oh * st.depth / 100;
+    g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x, sb); g.lineTo(x, oy); g.stroke();
+    // 수조
+    g.fillStyle = st.lq === 'water' ? 'rgba(80,150,230,.3)' : 'rgba(80,150,230,.5)'; g.fillRect(x - 110, wy, 220, S.h - wy - 20);
+    g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(x - 110, wy - 30); g.lineTo(x - 110, S.h - 20); g.lineTo(x + 110, S.h - 20); g.lineTo(x + 110, wy - 30); g.stroke();
+    g.fillStyle = C.muted; g.fillRect(x - ow / 2, oy, ow, oh); g.strokeStyle = C.ink; g.strokeRect(x - ow / 2, oy, ow, oh);
+    const B = buoyNow();
+    arrow(g, x + 50, oy + oh / 2, x + 50, oy + oh / 2 + 10 * FS * 1.5, C.earth, 3); label(g, '중력 10 N', x + 60, oy + oh / 2 + 50, {color: C.earth, size: 12, align: 'left'});
+    if (B > 0.01) { arrow(g, x - 50, oy + oh, x - 50, oy + oh - B * FS * 1.5 - 8, C.phy, 3); label(g, `부력 ${B.toFixed(1)} N`, x - 60, oy + oh - 30, {color: C.phy, size: 12, align: 'right'}); }
+    label(g, `눈금 ${(10 - B).toFixed(1)} N`, x + 140, top + 60, {size: 16, weight: 700, align: 'left'});
+  }
+}
+
+/* ===== 3. 알짜힘과 운동 ===== */
+function resetPuck(){ st.puck = {x: 0.12, y: 0.5, vx: 0.18, vy: 0}; st.trail = []; st.t = 0; st.hist = []; st.netLogged = false; }
+function forceVec(){
+  const p = st.puck, sp = Math.hypot(p.vx, p.vy) || 1, ux = p.vx / sp, uy = p.vy / sp, F = 0.12;
+  return {none:[0, 0], same:[ux * F, uy * F], opp:[-ux * F, -uy * F], perp:[-uy * F * 1.6, ux * F * 1.6], slant:[0, -F * 0.8]}[st.fdir];
+}
+function stepNet(dt){
+  const p = st.puck, [fx, fy] = forceVec();
+  p.vx += fx * dt; p.vy += fy * dt;
+  if (st.fdir === 'opp' && Math.hypot(p.vx, p.vy) < 0.004) { p.vx = 0; p.vy = 0; }
+  p.x += p.vx * dt; p.y += p.vy * dt; st.t += dt;
+  st.trail.push([p.x, p.y]); if (st.trail.length > 600) st.trail.shift();
+  if (p.x > 1.05 || p.x < -0.05 || p.y > 1.05 || p.y < -0.05 || st.t > 14) {
+    logNet(); resetPuck();
+  }
+}
+const NETCLS = {none:['변하지 않음', '변하지 않음', '운동 상태 변화 없음'], same:['빨라짐', '변하지 않음', '속력만 변함'], opp:['느려짐', '변하지 않음', '속력만 변함'], perp:['변하지 않음', '계속 변함', '방향만 변함'], slant:['변함', '변함', '속력과 방향 모두 변함']};
+const DIRNAME = {none:'작용하지 않음', same:'운동 방향과 같음', opp:'운동 방향과 반대', perp:'운동 방향과 수직', slant:'비스듬히'};
+function logNet(){ if (st.netLogged) return; st.netLogged = true; const r = st.rows.net; if (!r.some(x => x[0] === DIRNAME[st.fdir])) { r.push([DIRNAME[st.fdir], ...NETCLS[st.fdir]]); table(); } }
+function drawNet(){
+  const g = S.g, s = Math.min(S.w - 40, (S.h - 30) * 1.6), x0 = (S.w - s) / 2, h = s / 1.6, y0 = (S.h - h) / 2;
+  const X = x => x0 + x * s, Y = y => y0 + (1 - y) * h;
+  g.fillStyle = C.soft; g.fillRect(x0, y0, s, h); g.strokeStyle = C.line; g.strokeRect(x0, y0, s, h);
+  label(g, '마찰이 없는 얼음판 (위에서 본 모습)', x0 + 8, y0 + 12, {align: 'left', size: 11, color: C.muted});
+  g.fillStyle = C.muted; st.trail.forEach((p, i) => { if (i % 12 === 0) { g.beginPath(); g.arc(X(p[0]), Y(p[1]), 2.4, 0, 7); g.fill(); } });
+  const p = st.puck; g.fillStyle = C.ink; g.beginPath(); g.arc(X(p.x), Y(p.y), 12, 0, 7); g.fill();
+  const sp = Math.hypot(p.vx, p.vy);
+  if (sp > 0.002) arrow(g, X(p.x), Y(p.y), X(p.x) + p.vx / sp * 46, Y(p.y) - p.vy / sp * 46, C.muted, 2);
+  const [fx, fy] = forceVec(), fm = Math.hypot(fx, fy);
+  if (fm) { arrow(g, X(p.x), Y(p.y), X(p.x) + fx / fm * 56, Y(p.y) - fy / fm * 56, C.hot, 3.5); label(g, '알짜힘', X(p.x) + fx / fm * 56 + 6, Y(p.y) - fy / fm * 56 - 12, {color: C.hot, size: 12, align: 'left'}); }
+  label(g, '회색 화살표: 운동 방향   빨간 화살표: 알짜힘', S.w / 2, S.h - 10, {size: 11, color: C.muted});
+}
+
+/* ===== 4. 힘의 평형과 설계: 잠수정 ===== */
+function subForces(){
+  const subFrac = Math.max(0, Math.min(1, (0.5 - st.sy + 0.12) / 0.24));   // 수면 아래로 잠긴 비율
+  return {W: 8 + 4 * st.tank / 100, B: 10 * subFrac, frac: subFrac};
+}
+function stepDesign(dt){
+  const f = subForces(), m = 1.2, drag = 2.2 * st.svy;
+  st.svy += ((f.B - f.W) / m * 0.08 - drag) * dt; st.sy += st.svy * dt;
+  if (st.sy < -0.42) { st.sy = -0.42; st.svy = 0; }
+  st.t += dt;
+}
+function drawDesign(){
+  const g = S.g, sea = S.h * 0.18, Y = y => sea + (0.5 - y) * 0 + (0.5 + (-st.sy)) * 0, cx = S.w / 2;
+  g.fillStyle = 'rgba(80,150,230,.25)'; g.fillRect(0, sea, S.w, S.h - sea);
+  g.strokeStyle = C.cold; g.lineWidth = 2; g.beginPath(); g.moveTo(0, sea); g.lineTo(S.w, sea); g.stroke();
+  const depthPx = (S.h - sea - 30);
+  // 목표 구간
+  const tTop = sea + depthPx * 0.42, tBot = sea + depthPx * 0.58;
+  g.fillStyle = C.bio; g.globalAlpha = .12; g.fillRect(0, tTop, S.w, tBot - tTop); g.globalAlpha = 1;
+  label(g, '목표: 이 깊이에 머무르기', 12, tTop - 8, {align: 'left', size: 12, color: C.bio});
+  g.fillStyle = C.earth; g.fillRect(0, S.h - 30, S.w, 30);
+  // 잠수정 위치: sy=0.5 → 수면, sy=-0.42 → 바닥
+  const yPix = sea + (0.5 - st.sy) / 0.92 * depthPx, w = 150, h = 46;
+  g.fillStyle = C.warn; g.beginPath(); g.ellipse(cx, yPix, w / 2, h / 2, 0, 0, 7); g.fill(); g.strokeStyle = C.ink; g.lineWidth = 2; g.stroke();
+  g.fillStyle = C.surface; g.fillRect(cx - 40, yPix - 8, 80, 16); g.fillStyle = C.cold; g.fillRect(cx - 40, yPix - 8, 80 * st.tank / 100, 16);
+  g.strokeStyle = C.ink; g.lineWidth = 1; g.strokeRect(cx - 40, yPix - 8, 80, 16);
+  const f = subForces();
+  arrow(g, cx + 90, yPix, cx + 90, yPix + f.W * 5, C.earth, 3); label(g, `중력 ${f.W.toFixed(1)} N`, cx + 100, yPix + f.W * 5 - 4, {color: C.earth, size: 12, align: 'left'});
+  if (f.B > .05) { arrow(g, cx - 90, yPix, cx - 90, yPix - f.B * 5, C.phy, 3); label(g, `부력 ${f.B.toFixed(1)} N`, cx - 100, yPix - f.B * 5 + 4, {color: C.phy, size: 12, align: 'right'}); }
+  const ok = yPix > tTop && yPix < tBot && Math.abs(st.svy) < 0.01;
+  label(g, ok ? '성공! 중력과 부력이 평형을 이룹니다' : '', S.w / 2, S.h - 46, {weight: 700, color: C.bio});
+}
+
+/* ===== 그래프 ===== */
+function legend(items, m){ const g = G.g; let x = m.L + 8; g.font = font(11);
+  items.forEach(([n, c]) => { g.fillStyle = c; g.fillRect(x, m.T + 6, 14, 3); g.fillStyle = C.ink; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(n, x + 18, m.T + 8); x += g.measureText(n).width + 34; }); }
+function key(){ return st.mode === 'kinds' ? st.k : st.mode; }
+function drawGraph(){
+  const k = key(), g = G.g;
+  if (k === 'bal') {
+    const m = axes(G, {x: [-100, 100, 25, '힘의 크기와 방향 (N, 오른쪽 +)'], y: [0, 3, 1, '']}, {L: 70});
+    const rows = [['힘 ①', st.f1, C.phy], ['힘 ②', st.dir === 'opp' ? -st.f2 : st.f2, C.hot], ['알짜힘', netBal(), C.ink]];
+    rows.forEach(([n, v, c], i) => { const y = m.Y(2.5 - i); g.fillStyle = c; g.fillRect(Math.min(m.X(0), m.X(v)), y - 8, Math.abs(m.X(v) - m.X(0)), 16); label(g, n, m.L - 8, y, {align: 'right', size: 12}); });
+  } else if (k === 'grav') {
+    const m = axes(G, {x: [0, 6, 1, '질량 (kg)'], y: [0, 60, 10, '무게 (N)']});
+    line(G, [[0, 0], [6, 58.8]], m, C.earth, 2); line(G, [[0, 0], [6, 9.6]], m, C.muted, 2, [5, 4]);
+    g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.mass), m.Y(weightN()), 5, 0, 7); g.fill();
+    legend([['지구', C.earth], ['달', C.muted]], m);
+  } else if (k === 'spring') {
+    const m = axes(G, {x: [0, 6, 1, '추의 무게 (N)'], y: [0, 12, 2, '늘어난 길이 (cm)']});
+    const pts = st.rows.spring.map(r => [+r[0], +r[1]]).sort((a, b) => a[0] - b[0]);
+    line(G, pts, m, C.phy, 2); g.fillStyle = C.phy; pts.forEach(p => { g.beginPath(); g.arc(m.X(p[0]), m.Y(p[1]), 4.5, 0, 7); g.fill(); });
+    g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.nw), m.Y(st.nw * 2), 3, 0, 7); g.fill();
+  } else if (k === 'fric') {
+    const m = axes(G, {x: [0, 20, 5, '당기는 힘 (N)'], y: [0, 10, 2, '마찰력 (N)']});
+    const N = 6 * st.br, max = MU[st.sf] * N;
+    line(G, [[0, 0], [max, max]], m, C.hot, 2); line(G, [[max, max * .85], [20, max * .85]], m, C.hot, 2, [5, 4]);
+    g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.pull), m.Y(frictionNow().f), 5, 0, 7); g.fill();
+    label(g, '최대 정지 마찰력', m.X(max), m.Y(max) - 12, {size: 11, color: C.hot});
+  } else if (k === 'buoy') {
+    const m = axes(G, {x: [0, 100, 25, '물체가 잠긴 정도 (%)'], y: [0, 10, 2, '힘 (N)']});
+    const full = st.lq === 'water' ? 4 : 4.8;
+    line(G, [[0, 0], [100, full]], m, C.phy, 2); line(G, [[0, 10], [100, 10 - full]], m, C.ink, 2);
+    legend([['부력', C.phy], ['저울 눈금', C.ink]], m);
+  } else if (k === 'net') {
+    const tm = Math.max(10, Math.ceil(st.t / 5) * 5), m = axes(G, {x: [0, tm, tm / 5, '시간 (초)'], y: [0, 0.4, 0.1, '속력']});
+    line(G, st.hist.map(d => [d.t, d.v]), m, C.phy);
+  } else {
+    const tm = Math.max(20, Math.ceil(st.t / 10) * 10), m = axes(G, {x: [0, tm, tm / 5, '시간 (초)'], y: [0, 100, 25, '깊이 (%)']});
+    g.fillStyle = C.bio; g.globalAlpha = .12; g.fillRect(m.L, m.Y(58), m.w, m.Y(42) - m.Y(58)); g.globalAlpha = 1;
+    line(G, st.hist.map(d => [d.t, d.v]), m, C.warn);
+  }
+}
+
+/* ===== 계기판 ===== */
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  const k = key(); let s = '', e = '', t = '';
+  if (k === 'bal') {
+    const F = netBal();
+    s = stat('알짜힘', Math.abs(F), 'N') + stat('상자', F ? '움직임' : '정지');
+    e = st.dir === 'opp' ? '두 힘이 <b>반대 방향</b>이면 알짜힘은 큰 힘에서 작은 힘을 뺀 크기이고, 방향은 큰 힘의 방향입니다. 크기가 같으면 알짜힘이 0인 <b>힘의 평형</b>입니다.'
+                         : '두 힘이 <b>같은 방향</b>이면 알짜힘은 두 힘을 더한 크기이고, 방향은 두 힘의 방향과 같습니다.';
+    t = '힘은 화살표로 나타냅니다. 화살표의 시작점은 힘이 작용하는 점, 길이는 힘의 크기, 방향은 힘의 방향입니다.';
+  } else if (k === 'grav') {
+    s = stat('질량', st.mass, 'kg') + stat('무게', weightN().toFixed(1), 'N');
+    e = '<b>중력</b>: 지구가 물체를 지구 중심 방향으로 당기는 힘. <b>무게</b>는 물체에 작용하는 중력의 크기(단위 N)로 장소에 따라 달라지고, <b>질량</b>(단위 kg)은 장소가 바뀌어도 변하지 않습니다.';
+    t = '달에서는 중력이 지구의 약 1/6이라 무게도 약 1/6이 됩니다. 윗접시저울은 양쪽에 같은 중력이 작용하므로 달에서도 수평입니다.';
+  } else if (k === 'spring') {
+    s = stat('추의 무게', st.nw, 'N') + stat('늘어난 길이', st.nw * 2, 'cm');
+    e = '<b>탄성력</b>: 변형된 물체가 원래 모양으로 되돌아가려는 힘. 방향은 변형된 방향과 <b>반대</b>이고, 크기는 작용한 힘의 크기와 같습니다.';
+    t = '[기록]을 눌러 추의 개수별로 늘어난 길이를 모으면 그래프가 원점을 지나는 직선이 됩니다. 용수철저울은 이 성질을 이용합니다.';
+  } else if (k === 'fric') {
+    const fr = frictionNow();
+    s = stat('당기는 힘', st.pull, 'N') + stat('마찰력', fr.f.toFixed(1), 'N') + stat('바닥', SURF[st.sf]) + stat('누르는 힘', 6 * st.br, 'N');
+    e = '<b>마찰력</b>: 접촉한 두 물체 사이에서 운동을 방해하는 힘. 방향은 물체가 움직이려는 방향과 <b>반대</b>입니다. 접촉면이 거칠수록, 물체의 무게가 클수록 큽니다.';
+    t = '당기는 힘을 천천히 높여 보세요. 움직이기 직전까지는 마찰력이 당기는 힘과 같아 물체가 정지해 있습니다.';
+  } else if (k === 'buoy') {
+    const B = buoyNow();
+    s = stat('공기 중 무게', 10, 'N') + stat('물속 눈금', (10 - B).toFixed(1), 'N') + stat('부력', B.toFixed(1), 'N') + stat('액체', st.lq === 'water' ? '물' : '소금물');
+    e = '<b>부력</b>: 액체나 기체 속 물체를 위쪽으로 밀어 올리는 힘. 부력의 크기 = 공기 중 무게 − 액체 속 무게. 물체가 잠긴 부피가 클수록 부력이 큽니다.';
+    t = '완전히 잠긴 뒤에는 더 깊이 넣어도 부력이 변하지 않습니다. 진한 소금물에서는 부력이 더 큽니다.';
+  } else if (k === 'net') {
+    const p = st.puck, sp = Math.hypot(p.vx, p.vy);
+    s = stat('알짜힘', st.fdir === 'none' ? '0' : '있음') + stat('속력', (sp * 100).toFixed(1));
+    e = '<b>알짜힘이 0</b>이면 운동 상태가 변하지 않습니다. 알짜힘이 0이 아니면 <b>속력</b>이나 <b>운동 방향</b>, 또는 둘 다 변합니다.';
+    t = '힘의 방향을 바꾸며 관찰하면 기록표에 운동 변화가 자동으로 분류됩니다.';
+  } else {
+    const f = subForces();
+    s = stat('중력', f.W.toFixed(1), 'N') + stat('부력', f.B.toFixed(1), 'N') + stat('알짜힘', Math.abs(f.B - f.W).toFixed(1), 'N') + stat('상태', Math.abs(st.svy) < 0.01 ? '멈춤' : st.svy > 0 ? '떠오름' : '가라앉음');
+    e = '잠수정은 물탱크에 물을 넣거나 빼서 <b>중력</b>을 조절합니다. 중력이 부력보다 크면 가라앉고, 작으면 떠오르며, <b>같으면 평형</b>이 되어 그 깊이에 머무릅니다.';
+    t = '물탱크의 물을 조절해 잠수정을 초록색 목표 구간에 멈추게 해 보세요. 성공한 값을 [기록]하세요.';
+  }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 기록표 ===== */
+const HEAD = {bal:['방향','힘 ①','힘 ②','알짜힘'], grav:['장소','질량 (kg)','무게 (N)'], spring:['추의 무게 (N)','늘어난 길이 (cm)'],
+  fric:['바닥','누르는 힘 (N)','최대 정지 마찰력 (N)'], buoy:['액체','잠긴 정도','부력 (N)'], net:['알짜힘 방향','속력','운동 방향','분류'], design:['물탱크 물','중력 (N)','부력 (N)','결과']};
+const TITLE = {bal:'힘의 합성 기록', grav:'질량과 무게', spring:'탄성력 측정', fric:'마찰력 측정', buoy:'부력 측정', net:'운동 변화 분류', design:'잠수정 설계 기록'};
+function record(){
+  const k = key(), r = st.rows[k];
+  if (k === 'bal') r.push([st.dir === 'opp' ? '반대' : '같음', st.f1 + ' N', st.f2 + ' N', Math.abs(netBal()) + ' N']);
+  else if (k === 'grav') r.push([st.pl === 'earth' ? '지구' : '달', st.mass, weightN().toFixed(1)]);
+  else if (k === 'spring') { const i = r.findIndex(x => x[0] == st.nw); i >= 0 ? r[i] = [st.nw, st.nw * 2] : r.push([st.nw, st.nw * 2]); }
+  else if (k === 'fric') r.push([SURF[st.sf], 6 * st.br, (MU[st.sf] * 6 * st.br).toFixed(1)]);
+  else if (k === 'buoy') r.push([st.lq === 'water' ? '물' : '소금물', st.depth + '%', buoyNow().toFixed(1)]);
+  else if (k === 'net') logNet();
+  else { const f = subForces(); r.push([st.tank + '%', f.W.toFixed(1), f.B.toFixed(1), Math.abs(st.svy) < 0.01 && Math.abs(f.B - f.W) < 0.3 ? '머무름' : st.svy > 0 ? '떠오름' : '가라앉음']); }
+  if (r.length > 10) r.shift(); table();
+}
+function table(){
+  const k = key(); $('tTitle').textContent = TITLE[k];
+  $('thead').innerHTML = '<tr>' + HEAD[k].map(x => `<th>${x}</th>`).join('') + '</tr>';
+  const rows = st.rows[k];
+  $('tbody').innerHTML = rows.length ? rows.map(r => '<tr>' + r.map(x => `<td>${x}</td>`).join('') + '</tr>').join('')
+    : `<tr class="empty"><td colspan="${HEAD[k].length}">${k === 'net' ? '힘의 방향을 바꾸면 운동 변화가 자동으로 기록됩니다.' : '조건을 바꾸고 [기록]을 눌러 값을 모으세요.'}</td></tr>`;
+}
+$('record').onclick = record;
+
+/* ===== 조작 ===== */
+function showKindsControls(){
+  const on = (id, ks) => $(id).hidden = !(st.mode === 'kinds' && ks.includes(st.k));
+  on('placeWrap', ['grav']); on('massWrap', ['grav']); on('nwWrap', ['spring']); on('surfWrap', ['fric']); on('brickWrap', ['fric']); on('pullWrap', ['fric']); on('depthWrap', ['buoy']); on('liqWrap', ['buoy']);
+}
+function reset(){
+  st.t = 0; st.hist = []; st.bx = 0; st.bv = 0; st.bpos = 0; st.bvel = 0; st.sliding = false;
+  if (st.mode === 'net') resetPuck();
+  if (st.mode === 'design') { st.sy = 0.5; st.svy = 0; }
+  showKindsControls(); table();
+  const k = key();
+  $('gTitle').textContent = {bal:'힘의 크기 비교', grav:'질량과 무게', spring:'추의 무게와 늘어난 길이', fric:'당기는 힘과 마찰력', buoy:'잠긴 정도와 부력', net:'시간에 따른 속력', design:'잠수정의 깊이'}[k];
+  $('gSub').textContent = {bal:'막대 길이는 힘의 크기, 방향은 오른쪽(+)과 왼쪽(−)입니다.', grav:'지구와 달에서 질량에 따른 무게입니다.', spring:'[기록]한 점이 직선 위에 놓이는지 확인하세요.', fric:'물체가 움직이기 직전의 마찰력이 가장 큽니다.', buoy:'부력이 커질수록 저울 눈금이 작아집니다.', net:'힘의 방향에 따라 속력이 어떻게 변하나요?', design:'초록 띠가 목표 깊이입니다.'}[k];
+}
+$('reset').onclick = reset;
+Kit.seg($('dirSeg'), 'dir', v => { st.dir = v; })('opp');
+$('f1').oninput = e => { st.f1 = +e.target.value; $('f1Out').textContent = st.f1 + ' N'; };
+$('f2').oninput = e => { st.f2 = +e.target.value; $('f2Out').textContent = st.f2 + ' N'; };
+$('vert').onchange = e => st.vert = e.target.checked;
+Kit.seg($('kSeg'), 'k', v => { st.k = v; reset(); })('grav');
+Kit.seg($('plSeg'), 'pl', v => st.pl = v)('earth');
+$('mass').oninput = e => { st.mass = +e.target.value; $('massOut').textContent = st.mass + ' kg'; };
+$('nw').oninput = e => { st.nw = +e.target.value; $('nwOut').textContent = st.nw + '개'; };
+Kit.seg($('sfSeg'), 'sf', v => { st.sf = v; st.sliding = false; st.bvel = 0; })('wood');
+Kit.seg($('brSeg'), 'br', v => { st.br = +v; st.sliding = false; st.bvel = 0; })('1');
+$('pull').oninput = e => { st.pull = +e.target.value; $('pullOut').textContent = st.pull + ' N'; };
+$('depth').oninput = e => { st.depth = +e.target.value; $('depthOut').textContent = st.depth + '%'; };
+Kit.seg($('lqSeg'), 'lq', v => st.lq = v)('water');
+$('fdir').onchange = e => { st.fdir = e.target.value; resetPuck(); };
+$('tank').oninput = e => { st.tank = +e.target.value; $('tankOut').textContent = st.tank + '%'; };
+
+let acc = 0;
+function step(dt){
+  if (st.mode === 'bal') stepBal(dt);
+  else if (st.mode === 'kinds') stepKinds(dt);
+  else if (st.mode === 'net') stepNet(dt);
+  else stepDesign(dt);
+  acc += dt;
+  if (acc > 0.1) { acc = 0;
+    if (st.mode === 'net') st.hist.push({t: st.t, v: Math.hypot(st.puck.vx, st.puck.vy)});
+    if (st.mode === 'design') st.hist.push({t: st.t, v: (0.5 - st.sy) / 0.92 * 100});
+    if (st.hist.length > 2000) st.hist.shift();
+  }
+}
+resetPuck();
+Kit.tabs(m => { st.mode = m; reset(); }, ['bal', 'kinds', 'net', 'design']);
+Kit.loop(step, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h);
+  ({bal: drawBal, kinds: drawKinds, net: drawNet, design: drawDesign})[st.mode](); drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>

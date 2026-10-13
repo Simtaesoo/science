@@ -19,7 +19,9 @@ window.CATALOG = [
     {kind:'sim', title:'1차시 확산과 증발', href:'g1/state/sim.html#diff'}, {kind:'sim', title:'2차시 세 가지 상태와 상태 변화', href:'g1/state/sim.html#states'},
     {kind:'sim', title:'3차시 상태 변화와 열에너지 (가열·냉각 곡선)', href:'g1/state/sim.html#curve'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/state/worksheet.html'} ]},
   { no:5, area:'phy', title:'힘의 작용', code:'9과05', items:[
-    {kind:'sim', title:'힘의 합성과 평형'}, {kind:'sim', title:'탄성력·마찰력·부력 측정'}, {kind:'sim', title:'알짜힘과 운동 변화'} ]},
+    {kind:'sim', title:'1차시 힘의 표현과 힘의 평형', href:'g1/force/sim.html#bal'}, {kind:'sim', title:'2~3차시 중력·탄성력·마찰력·부력', href:'g1/force/sim.html#kinds'},
+    {kind:'sim', title:'4차시 알짜힘과 운동 상태의 변화', href:'g1/force/sim.html#net'}, {kind:'sim', title:'5차시 힘의 평형과 장치 설계 (잠수정)', href:'g1/force/sim.html#design'},
+    {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g1/force/worksheet.html'} ]},
   { no:6, area:'chem', title:'기체의 성질', code:'9과06', items:[
     {kind:'sim', title:'1차시 압력과 기체의 압력', href:'g1/gas/sim.html#p'}, {kind:'sim', title:'2차시 압력과 부피의 관계', href:'g1/gas/sim.html#pv'},
     {kind:'sim', title:'3차시 온도와 부피의 관계', href:'g1/gas/sim.html#tv'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/gas/worksheet.html'} ]},
