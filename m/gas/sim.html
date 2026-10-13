@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>열역학 실험실 · 역학과 에너지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="역학과 에너지|04 열역학" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>역학과 에너지 · 04 열역학 <span class="code">역학과 에너지 Ⅱ</span></div>
+      <h1>열역학 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="kinetic">1. 기체 분자 운동</button>
+      <button type="button" data-mode="cycle">2. 열역학 과정과 순환</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="기체 실험 장치"></canvas></div>
+      <div class="controls">
+        <label class="field" data-only="kinetic" for="kt">온도 <input type="range" id="kt" min="100" max="900" step="50" value="300"><output id="ktOut">300 K</output></label>
+        <label class="field" data-only="kinetic" for="kv">부피 <input type="range" id="kv" min="0.5" max="1" step="0.05" value="1"><output id="kvOut">1.00 V₀</output></label>
+        <label class="field" data-only="kinetic" for="kn">분자 수 <input type="range" id="kn" min="40" max="200" step="20" value="120"><output id="knOut">120 개</output></label>
+        <label class="field" data-only="cycle" for="p1">낮은 압력 <input type="range" id="p1" min="100" max="200" step="20" value="100"><output id="p1Out">100 kPa</output></label>
+        <label class="field" data-only="cycle" for="p2">높은 압력 <input type="range" id="p2" min="200" max="400" step="20" value="300"><output id="p2Out">300 kPa</output></label>
+        <label class="field" data-only="cycle" for="v2">최대 부피 <input type="range" id="v2" min="2" max="5" step="0.5" value="3"><output id="v2Out">3.0 L</output></label>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>온도가 2배가 되면 분자의 평균 속력도 2배가 될까?</summary><p>아니에요. 분자의 평균 운동 에너지 ½mv²가 절대 온도에 비례하므로, 제곱 평균 제곱근 속력 v_rms는 √T에 비례해요. 온도가 2배면 속력은 약 1.41배예요.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>순환 과정을 한 바퀴 돌면 기체의 내부 에너지 변화는?</summary><p>0이에요. 처음 상태로 되돌아오면 온도가 같아지므로 내부 에너지도 같아요. 그래서 한 순환 동안 흡수한 알짜 열 = 기체가 한 알짜 일 = P–V 그래프에서 닫힌 곡선의 넓이예요.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>순환을 반대 방향(시계 반대 방향)으로 돌리면 무엇이 될까?</summary><p>외부에서 일을 받아 저온에서 열을 빼앗아 고온으로 보내는 냉장고(열펌프)가 돼요. 시계 방향 순환은 열기관이에요.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="이상 기체. 분자 운동 화면은 2차원 모형이며 압력은 상대값. 순환 과정은 단원자 이상 기체."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+const st = {mode: 'kinetic', T: 300, V: 1, N: 120, parts: [], imp: 0, it: 0, Pm: 0, P1: 100, P2: 300, V1: 1, V2: 3, u: 0};
+/* ===== 1. 기체 분자 운동 (2차원 모형) ===== */
+const VS = 70; // 300 K에서 v_rms = 70√2 px/s 정도
+const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * v); };
+const box = () => { const W = S.w, H = S.h, bw = W * .62 * st.V; return {x0: W * .06, y0: H * .1, w: bw, h: H * .72}; };
+function spawn(){ const b = box(), s = VS * Math.sqrt(st.T / 300); st.parts = Array.from({length: st.N}, () => ({x: b.x0 + Math.random() * b.w, y: b.y0 + Math.random() * b.h, vx: gauss() * s, vy: gauss() * s})); st.imp = 0; st.it = 0; }
+function rescaleT(oldT){ const f = Math.sqrt(st.T / oldT); st.parts.forEach(p => { p.vx *= f; p.vy *= f; }); st.imp = 0; st.it = 0; }
+function stepK(dt){ const b = box(); st.parts.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt;
+  if (p.x < b.x0) { p.x = 2 * b.x0 - p.x; p.vx = -p.vx; st.imp += 2 * Math.abs(p.vx); } if (p.x > b.x0 + b.w) { p.x = 2 * (b.x0 + b.w) - p.x; p.vx = -p.vx; st.imp += 2 * Math.abs(p.vx); }
+  if (p.y < b.y0) { p.y = 2 * b.y0 - p.y; p.vy = -p.vy; st.imp += 2 * Math.abs(p.vy); } if (p.y > b.y0 + b.h) { p.y = 2 * (b.y0 + b.h) - p.y; p.vy = -p.vy; st.imp += 2 * Math.abs(p.vy); } });
+  st.it += dt; if (st.it > 3) { st.imp *= .5; st.it *= .5; } }
+// 압력 기준값: 300 K, V₀, 120개일 때의 이론값 → 1.00
+const Pth = () => (st.N / 120) * (st.T / 300) / st.V, Pmeas = () => { const b = box(), per = 2 * (b.w + b.h); if (st.it < .3) return null; const P = st.imp / (st.it * per); const b0w = S.w * .62, per0 = 2 * (b0w + S.h * .72); // 2차원: PA = NkT, m = 1, kT = VS²
+  return P / (120 * VS * VS / (b0w * S.h * .72)); };
+function drawKinetic(){ const g = S.g, W = S.w, H = S.h, b = box();
+  g.fillStyle = Kit.tempColor(st.T, 100, 900); g.globalAlpha = .08; g.fillRect(b.x0, b.y0, b.w, b.h); g.globalAlpha = 1; g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.moveTo(b.x0 + b.w, b.y0); g.lineTo(b.x0, b.y0); g.lineTo(b.x0, b.y0 + b.h); g.lineTo(b.x0 + b.w, b.y0 + b.h); g.stroke();
+  g.fillStyle = '#9aa6b8'; g.fillRect(b.x0 + b.w, b.y0 - 6, 12, b.h + 12); g.fillRect(b.x0 + b.w + 12, b.y0 + b.h / 2 - 5, W * .3, 10); label(g, '피스톤', b.x0 + b.w + 6, b.y0 - 14, {size: 10, color: C.muted});
+  const s0 = VS * Math.sqrt(st.T / 300); st.parts.forEach(p => { const sp = Math.hypot(p.vx, p.vy), f = Math.min(1, sp / (s0 * 2.4)); g.fillStyle = `hsl(${215 - 215 * f} 75% 52%)`; g.beginPath(); g.arc(p.x, p.y, 4, 0, TAU); g.fill(); });
+  label(g, '파랑: 느린 분자 · 빨강: 빠른 분자', b.x0, H * .9, {size: 11, color: C.muted, align: 'left'}); const pm = Pmeas(); label(g, `측정 압력 ${pm ? pm.toFixed(2) : '…'} · 이론 ${Pth().toFixed(2)} (상대값)`, b.x0, H * .9 + 18, {size: 12, weight: 700, align: 'left'}); }
+/* ===== 2. 순환 과정 (사각형 순환, 단원자 이상 기체) ===== */
+const corners = () => [[st.V1, st.P1], [st.V1, st.P2], [st.V2, st.P2], [st.V2, st.P1]]; // A→B 등적 가열, B→C 등압 팽창, C→D 등적 냉각, D→A 등압 압축
+const legs = () => { const [[Va, Pa], [Vb, Pb], [Vc, Pc], [Vd, Pd]] = corners(), U = (P, V) => 1.5 * P * V; // kPa·L = J
+  const L = [['A→B 등적 가열', 0, U(Pb, Vb) - U(Pa, Va)], ['B→C 등압 팽창', Pb * (Vc - Vb), U(Pc, Vc) - U(Pb, Vb)], ['C→D 등적 냉각', 0, U(Pd, Vd) - U(Pc, Vc)], ['D→A 등압 압축', Pd * (Va - Vd), U(Pa, Va) - U(Pd, Vd)]];
+  return L.map(([n, W, dU]) => ({n, W, dU, Q: W + dU})); };
+const Wnet = () => (st.P2 - st.P1) * (st.V2 - st.V1), Qin = () => legs().filter(l => l.Q > 0).reduce((s, l) => s + l.Q, 0), eff = () => Wnet() / Qin();
+function cpos(u){ const c = corners(), k = Math.floor(u * 4) % 4, f = u * 4 - Math.floor(u * 4), a = c[k], b = c[(k + 1) % 4]; return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, k]; }
+function drawCycle(){ const g = S.g, W = S.w, H = S.h, [V, P, k] = cpos(st.u), T = P * V / (1 * 8.314) * 1, cx = W * .3, base = H * .82, cw = 120, hh = 40 + V / 5 * (H * .55);
+  g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.moveTo(cx - cw / 2, base - H * .72); g.lineTo(cx - cw / 2, base); g.lineTo(cx + cw / 2, base); g.lineTo(cx + cw / 2, base - H * .72); g.stroke();
+  const Tmax = st.P2 * st.V2, tc = Kit.tempColor(P * V, st.P1 * st.V1, Tmax); g.fillStyle = tc; g.globalAlpha = .35; g.fillRect(cx - cw / 2, base - hh, cw, hh); g.globalAlpha = 1;
+  g.fillStyle = '#777'; g.fillRect(cx - cw / 2, base - hh - 10, cw, 10); g.fillRect(cx - 4, base - hh - 50, 8, 40); const wts = Math.round(P / 50); for (let i = 0; i < wts; i++) { g.fillStyle = '#555'; g.fillRect(cx - 24, base - hh - 60 - i * 9, 48, 8); }
+  label(g, `추 ${wts}개 → 압력 ${P.toFixed(0)} kPa`, cx + 34, base - hh - 60 - wts * 4.5, {size: 11, weight: 700, align: 'left'});
+  const heat = k === 0 || k === 1; label(g, heat ? '🔥 열 흡수' : '❄ 열 방출', cx, base + 20, {size: 14, weight: 700, color: heat ? C.hot : C.phy});
+  const L = legs()[k], rx = W * .72; label(g, L.n, rx, H * .2, {size: 16, weight: 700, color: C.accent}); label(g, `Q = ΔU + W`, rx, H * .2 + 30, {size: 13}); label(g, `${L.Q.toFixed(0)} = ${L.dU.toFixed(0)} + ${L.W.toFixed(0)} (J)`, rx, H * .2 + 54, {size: 15, weight: 700});
+  label(g, `부피 ${V.toFixed(2)} L · 압력 ${P.toFixed(0)} kPa`, rx, H * .2 + 84, {size: 12, color: C.muted}); label(g, `한 바퀴 알짜 일 = 넓이 = ${Wnet().toFixed(0)} J`, rx, H * .62, {size: 13, weight: 700}); label(g, `열효율 = W / Q흡수 = ${(eff() * 100).toFixed(1)} %`, rx, H * .62 + 24, {size: 13, weight: 700, color: C.accent}); }
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'kinetic') { const s0 = VS * Math.sqrt(st.T / 300), mx = VS * 4, bins = 20, h = new Array(bins).fill(0); st.parts.forEach(p => { const i = Math.floor(Math.hypot(p.vx, p.vy) / mx * bins); if (i < bins) h[i]++; }); const m = axes(G, {x: [0, 4, 1, '분자 속력 (300 K의 기준 속력 배)'], y: [0, .4, .1, '비율']}); h.forEach((c, i) => { g.fillStyle = 'rgba(47,111,208,.35)'; const x0 = m.X(i * 4 / bins), x1 = m.X((i + 1) * 4 / bins), y = m.Y(c / st.parts.length); g.fillRect(x0, y, x1 - x0 - 1, m.Y(0) - y); });
+    const P = []; for (let v = 0; v <= 4; v += .02) { const vv = v * VS, sig2 = s0 * s0, f = vv / sig2 * Math.exp(-vv * vv / (2 * sig2)) * VS * 4 / bins; P.push([v, f]); } line(G, P, m, C.hot, 2.5); label(g, '막대: 시뮬레이션 · 곡선: 이론 분포 (2차원 맥스웰 분포)', m.X(2.6), m.Y(.36), {size: 10, color: C.muted}); }
+  else { const m = axes(G, {x: [0, 6, 1, '부피 (L)'], y: [0, 450, 50, '압력 (kPa)']}); const c = corners(); g.fillStyle = 'rgba(80,120,220,.15)'; g.beginPath(); c.forEach((p, i) => i ? g.lineTo(m.X(p[0]), m.Y(p[1])) : g.moveTo(m.X(p[0]), m.Y(p[1]))); g.closePath(); g.fill(); c.forEach((p, i) => { const q = c[(i + 1) % 4]; arrow(g, m.X(p[0]), m.Y(p[1]), m.X(q[0]), m.Y(q[1]), C.accent, 2.2); label(g, 'ABCD'[i], m.X(p[0]) + (i < 2 ? -10 : 10), m.Y(p[1]) + (i % 3 ? -10 : 10), {size: 12, weight: 700}); });
+    const [V, P] = cpos(st.u); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(V), m.Y(P), 6, 0, TAU); g.fill(); label(g, '색칠한 넓이 = 한 순환 동안 기체가 한 알짜 일', m.X(4.2), m.Y(420), {size: 10, color: C.muted}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody'), set = (gt, gs, tt) => { $('gTitle').textContent = gt; $('gSub').textContent = gs; $('tTitle').textContent = tt; };
+  if (st.mode === 'kinetic') { s.innerHTML = `<div><b>${Pth().toFixed(2)}</b><span>이론 압력 (상대값) ∝ NT/V</span></div><div><b>${Math.sqrt(st.T / 300).toFixed(2)} 배</b><span>분자 속력 (300 K 대비)</span></div><div><b>${(1.5 * 1.381e-23 * st.T).toExponential(2).replace('e-21', '×10⁻²¹')} J</b><span>분자 1개의 평균 운동 에너지 (3/2)kT</span></div><div><b>${Math.sqrt(3 * 8.314 * st.T / .028).toFixed(0)} m/s</b><span>질소 분자의 v_rms</span></div>`;
+    $('explain').innerHTML = '<b>기체 분자 운동론</b>: 기체의 압력은 수많은 분자가 벽에 충돌하며 주는 충격량에서 생겨요. 분자의 평균 운동 에너지는 <b>절대 온도</b>에 비례: ½mv²(평균) = (3/2)kT. 이로부터 이상 기체 상태 방정식 PV = NkT = nRT가 나와요.'; $('tip').textContent = '온도를 올리면 분자가 빨라져 더 세게, 더 자주 충돌 → 압력 증가. 부피를 줄이면 벽에 더 자주 부딪혀 압력 증가(보일 법칙).';
+    th.innerHTML = '<tr><th>온도 (K)</th><th>질소 v_rms (m/s)</th><th>평균 운동 에너지 (×10⁻²¹ J)</th></tr>'; tb.innerHTML = [100, 300, 600, 900].map(T => `<tr><td>${T}</td><td>${Math.sqrt(3 * 8.314 * T / .028).toFixed(0)}</td><td>${(1.5 * 1.381e-23 * T * 1e21).toFixed(2)}</td></tr>`).join(''); set('분자 속력 분포', `T = ${st.T} K`, '온도와 분자의 운동'); }
+  else { const L = legs(); s.innerHTML = `<div><b>${Wnet().toFixed(0)} J</b><span>한 순환의 알짜 일</span></div><div><b>${Qin().toFixed(0)} J</b><span>흡수한 열</span></div><div><b>${(Qin() - Wnet()).toFixed(0)} J</b><span>방출한 열</span></div><div><b>${(eff() * 100).toFixed(1)} %</b><span>열효율</span></div>`;
+    $('explain').innerHTML = '<b>순환 과정</b>: 기체가 여러 과정을 거쳐 처음 상태로 돌아오는 과정. 한 순환 동안 ΔU = 0이므로 알짜 열 = 알짜 일 = P–V 그래프의 닫힌 넓이. 시계 방향으로 돌면 열기관이며, 열효율 e = W / Q흡수 = 1 − Q방출/Q흡수 (항상 1보다 작아요).'; $('tip').textContent = '각 과정에서 Q = ΔU + W를 확인하세요. 단원자 이상 기체: U = (3/2)PV. 1 kPa·L = 1 J.';
+    th.innerHTML = '<tr><th>과정</th><th>Q (J)</th><th>ΔU (J)</th><th>W (J)</th></tr>'; tb.innerHTML = L.map(l => `<tr><td>${l.n}</td><td>${l.Q.toFixed(0)}</td><td>${l.dU.toFixed(0)}</td><td>${l.W.toFixed(0)}</td></tr>`).join('') + `<tr><td><b>한 순환 합계</b></td><td>${L.reduce((s, l) => s + l.Q, 0).toFixed(0)}</td><td>${L.reduce((s, l) => s + l.dU, 0).toFixed(0)}</td><td>${L.reduce((s, l) => s + l.W, 0).toFixed(0)}</td></tr>`; set('압력–부피 그래프', 'A→B→C→D→A (시계 방향)', '과정별 에너지 출입'); } }
+const bind = (id, k, f, after) => { $(id).oninput = e => { const old = st[k]; st[k] = +e.target.value; $(id + 'Out').textContent = f(st[k]); if (after) after(old); render(); }; };
+bind('kt', 'T', v => v + ' K', old => rescaleT(old)); bind('kv', 'V', v => v.toFixed(2) + ' V₀', () => { st.imp = 0; st.it = 0; }); bind('kn', 'N', v => v + ' 개', spawn);
+bind('p1', 'P1', v => v + ' kPa'); bind('p2', 'P2', v => v + ' kPa'); bind('v2', 'V2', v => v.toFixed(1) + ' L');
+Kit.tabs(m => { st.mode = m; if (m === 'kinetic' && !st.parts.length) spawn(); render(); }, ['kinetic', 'cycle']);
+let tick = 0; Kit.loop(dt => { if (st.mode === 'kinetic') stepK(dt); else st.u = (st.u + dt / 12) % 1; }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); (st.mode === 'kinetic' ? drawKinetic : drawCycle)(); drawGraph(); if (++tick % 30 === 0) render(); });
+setTimeout(spawn, 50);
+})();
+</script>
+</body>
+</html>

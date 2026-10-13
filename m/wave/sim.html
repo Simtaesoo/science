@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>탄성파와 소리 실험실 · 역학과 에너지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="역학과 에너지|05 탄성파와 소리" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>역학과 에너지 · 05 탄성파와 소리 <span class="code">역학과 에너지 Ⅲ</span></div>
+      <h1>탄성파와 소리 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="doppler">1. 도플러 효과</button>
+      <button type="button" data-mode="stand">2. 정상파와 공명</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="파동 장면"></canvas></div>
+      <div class="controls">
+        <label class="field" data-only="doppler" for="vs">음원 속력 <input type="range" id="vs" min="0" max="500" step="10" value="100"><output id="vsOut">100 m/s</output></label>
+        <label class="field" data-only="doppler" for="f0">음원 진동수 <input type="range" id="f0" min="200" max="800" step="20" value="440"><output id="f0Out">440 Hz</output></label>
+        <button class="btn primary" type="button" id="listen" data-only="doppler">🔊 지나가는 소리 듣기</button>
+        <div class="field" data-only="stand"><div class="seg" id="kindSeg"><button type="button" data-kind="string">줄 (양끝 고정)</button><button type="button" data-kind="open">열린 관</button><button type="button" data-kind="closed">닫힌 관</button></div></div>
+        <label class="field" data-only="stand" for="hn">배수 n <input type="range" id="hn" min="1" max="6" step="1" value="1"><output id="hnOut">1</output></label>
+        <label class="field" data-only="stand" for="sL">길이 <input type="range" id="sL" min="0.3" max="1.2" step="0.05" value="0.65"><output id="sLOut">0.65 m</output></label>
+        <button class="btn primary" type="button" id="tone" data-only="stand">🔊 소리 듣기</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>구급차가 다가올 때와 멀어질 때 사이렌 소리가 다르게 들리는 까닭은?</summary><p>음원이 다가오면 앞쪽 파면 사이 간격(파장)이 짧아져 진동수가 높게, 멀어지면 파장이 길어져 낮게 들려요. 음원 자체의 진동수는 변하지 않아요.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>음원이 소리보다 빠르게 움직이면 어떤 일이 생길까?</summary><p>파면들이 겹쳐 원뿔 모양의 충격파(마하 원뿔)가 생겨요. 초음속 비행기가 지나갈 때 '쾅' 하는 소닉 붐이 들리는 까닭이에요. 음원 속력을 340 m/s 이상으로 올려 확인해 보세요.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>기타 줄을 손가락으로 누르면 음이 높아지는 까닭은?</summary><p>진동하는 줄의 길이 L이 짧아지면 기본 진동의 파장(2L)이 짧아져요. 줄의 파동 속력이 같으므로 진동수 f = v/2L이 커져 높은 음이 나요.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="공기 중 소리의 속력 340 m/s, 관찰자는 정지. 줄의 파동 속력 286 m/s(기타 줄 예시). 관 끝 보정은 무시."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2, VSND = 340, VSTR = 286;
+const st = {mode: 'doppler', vs: 100, f0: 440, kind: 'string', n: 1, L: .65, t: 0, fronts: [], last: 0, sx: 0};
+let AC = null; const ac = () => { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); return AC; };
+/* ===== 1. 도플러 효과 ===== */
+const fFront = () => st.vs < VSND ? st.f0 * VSND / (VSND - st.vs) : Infinity, fBack = () => st.f0 * VSND / (VSND + st.vs);
+function stepD(dt){ const W = S.w, sc = W / 700; // 1 px = 1/sc m... 화면 700 m
+  st.t += dt * .25; st.sx += st.vs * dt * .25; if (st.sx > 620) { st.sx = 60; st.fronts = []; }
+  if (st.t - st.last > .25) { st.last = st.t; st.fronts.push({x: st.sx, t: st.t}); } st.fronts = st.fronts.filter(f => (st.t - f.t) * VSND < 900); }
+function drawD(){ const g = S.g, W = S.w, H = S.h, sc = W / 700, cy = H * .5;
+  st.fronts.forEach(f => { const r = (st.t - f.t) * VSND * sc; g.strokeStyle = 'rgba(47,111,208,.55)'; g.lineWidth = 1.5; g.beginPath(); g.arc(f.x * sc, cy, r, 0, TAU); g.stroke(); });
+  if (st.vs > VSND && st.fronts.length > 2) { const ang = Math.asin(VSND / st.vs), x = st.sx * sc, Lc = W; g.strokeStyle = C.hot; g.lineWidth = 2.5; g.beginPath(); g.moveTo(x - Lc * Math.cos(ang), cy - Lc * Math.sin(ang)); g.lineTo(x, cy); g.lineTo(x - Lc * Math.cos(ang), cy + Lc * Math.sin(ang)); g.stroke(); label(g, `마하 원뿔 (반각 ${(ang * 180 / Math.PI).toFixed(0)}°)`, x - 80, cy - 70, {size: 12, weight: 700, color: C.hot}); }
+  g.fillStyle = '#e8b04a'; g.beginPath(); g.arc(st.sx * sc, cy, 10, 0, TAU); g.fill(); arrow(g, st.sx * sc + 12, cy, st.sx * sc + 12 + Math.min(80, st.vs * .25), cy, C.ink, 2);
+  // 관찰자
+  [[W - 26, '앞 관찰자', fFront()], [26, '뒤 관찰자', fBack()]].forEach(([x, n, f]) => { label(g, '🧍', x, cy + 40, {size: 26}); label(g, n, x, cy + 68, {size: 11, weight: 700, align: x > W / 2 ? 'right' : 'left'}); label(g, isFinite(f) ? `${f.toFixed(0)} Hz` : '충격파', x, cy + 86, {size: 12, weight: 700, color: C.accent, align: x > W / 2 ? 'right' : 'left'}); });
+  label(g, `음원 ${st.f0} Hz, ${st.vs} m/s (마하 ${(st.vs / VSND).toFixed(2)})`, W / 2, 18, {size: 13, weight: 700}); }
+function playPass(){ const a = ac(), o = a.createOscillator(), gn = a.createGain(), t0 = a.currentTime, dur = 3; o.type = 'triangle'; const v = Math.min(st.vs, VSND - 20);
+  // 관찰자 옆 10 m를 지나가는 음원: 시선 방향 속도 성분으로 진동수 계산
+  for (let i = 0; i <= 60; i++) { const tt = i / 60 * dur, x = (tt - dur / 2) * v, vr = -v * x / Math.hypot(x, 10), f = st.f0 * VSND / (VSND - vr); o.frequency.setValueAtTime(f, t0 + tt); const amp = .25 / (1 + Math.abs(x) / 60); gn.gain.setValueAtTime(amp, t0 + tt); }
+  gn.gain.setValueAtTime(0, t0 + dur); o.connect(gn).connect(a.destination); o.start(t0); o.stop(t0 + dur + .05); }
+/* ===== 2. 정상파 ===== */
+const vW = () => st.kind === 'string' ? VSTR : VSND, harm = () => st.kind === 'closed' ? 2 * st.n - 1 : st.n, lam = () => st.kind === 'closed' ? 4 * st.L / harm() : 2 * st.L / st.n, fr = () => vW() / lam();
+function yAt(x, t){ // x: 0..L, 반환: 변위(상대) — 줄은 변위, 관은 공기 변위
+  const k = TAU / lam(), w = TAU * 1.2; // 화면용 느린 진동
+  if (st.kind === 'string') return Math.sin(k * x) * Math.cos(w * t); if (st.kind === 'open') return Math.cos(k * x) * Math.cos(w * t); return Math.cos(k * x) * Math.cos(w * t); }
+function drawS(){ const g = S.g, W = S.w, H = S.h, x0 = W * .1, x1 = W * .9, cy = H * .45, A = H * .2, len = x1 - x0, t = st.t, X = x => x0 + x / st.L * len;
+  if (st.kind === 'string') { g.fillStyle = C.ink; g.fillRect(x0 - 8, cy - 40, 8, 80); g.fillRect(x1, cy - 40, 8, 80); }
+  else { g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.moveTo(x0, cy - A - 14); g.lineTo(x1, cy - A - 14); g.moveTo(x0, cy + A + 14); g.lineTo(x1, cy + A + 14); g.stroke(); if (st.kind === 'closed') { g.fillStyle = C.ink; g.fillRect(x1, cy - A - 16, 8, 2 * A + 32); } label(g, st.kind === 'closed' ? '열린 끝 · · · 닫힌 끝' : '열린 끝 · · · 열린 끝', W / 2, cy + A + 32, {size: 11, color: C.muted}); }
+  // 진행파 두 개 (흐리게)
+  if (st.kind === 'string') { const k = TAU / lam(), w = TAU * 1.2; [[1, 'rgba(47,111,208,.35)'], [-1, 'rgba(224,83,63,.35)']].forEach(([d, c]) => { g.strokeStyle = c; g.lineWidth = 1.5; g.beginPath(); for (let i = 0; i <= 200; i++) { const x = st.L * i / 200, y = .5 * Math.sin(k * x - d * w * t); i ? g.lineTo(X(x), cy - y * A) : g.moveTo(X(x), cy - y * A); } g.stroke(); }); }
+  // 포락선
+  g.strokeStyle = C.grid; g.setLineDash([3, 3]); [1, -1].forEach(s => { g.beginPath(); for (let i = 0; i <= 200; i++) { const x = st.L * i / 200, e = st.kind === 'string' ? Math.abs(Math.sin(TAU / lam() * x)) : Math.abs(Math.cos(TAU / lam() * x)); i ? g.lineTo(X(x), cy - s * e * A) : g.moveTo(X(x), cy - s * e * A); } g.stroke(); }); g.setLineDash([]);
+  g.strokeStyle = C.accent; g.lineWidth = 3; g.beginPath(); for (let i = 0; i <= 300; i++) { const x = st.L * i / 300, y = yAt(x, t); i ? g.lineTo(X(x), cy - y * A) : g.moveTo(X(x), cy - y * A); } g.stroke();
+  // 마디·배
+  const nodes = []; for (let m = 0; m <= 12; m++) { const xn = st.kind === 'string' ? m * lam() / 2 : (m + .5) * lam() / 2; if (xn <= st.L + 1e-9) nodes.push(xn); } nodes.forEach(xn => { g.fillStyle = C.hot; g.beginPath(); g.arc(X(xn), cy, 5, 0, TAU); g.fill(); });
+  label(g, '● 마디 (진동하지 않는 곳)', x0, H * .9, {size: 11, color: C.hot, align: 'left', weight: 700}); label(g, `파장 λ = ${lam().toFixed(3)} m · 진동수 ${fr().toFixed(0)} Hz`, x1, H * .9, {size: 12, weight: 700, align: 'right'});
+  if (st.kind !== 'string') label(g, '관: 그림은 공기 분자의 변위(열린 끝은 배, 닫힌 끝은 마디)', W / 2, 16, {size: 11, color: C.muted}); else label(g, '파랑·빨강: 반대로 진행하는 두 파동 → 굵은 선: 합성파(정상파)', W / 2, 16, {size: 11, color: C.muted}); }
+function playTone(){ const a = ac(), o = a.createOscillator(), gn = a.createGain(), t0 = a.currentTime; o.type = 'sine'; o.frequency.value = fr(); gn.gain.setValueAtTime(0, t0); gn.gain.linearRampToValueAtTime(.25, t0 + .05); gn.gain.exponentialRampToValueAtTime(.001, t0 + 1.6); o.connect(gn).connect(a.destination); o.start(t0); o.stop(t0 + 1.7); }
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'doppler') { const m = axes(G, {x: [0, 330, 30, '음원 속력 (m/s)'], y: [0, 3000, 500, '들리는 진동수 (Hz)']}); const P1 = [], P2 = []; for (let v = 0; v <= 330; v += 2) { P1.push([v, Math.min(3000, st.f0 * VSND / (VSND - v))]); P2.push([v, st.f0 * VSND / (VSND + v)]); } line(G, P1, m, C.hot, 2.5); line(G, P2, m, C.phy, 2.5); label(g, '빨강: 앞(다가옴) · 파랑: 뒤(멀어짐)', m.X(110), m.Y(2700), {size: 10, color: C.muted}); if (st.vs <= 330) { g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.vs), m.Y(Math.min(3000, fFront())), 5, 0, TAU); g.fill(); g.fillStyle = C.phy; g.beginPath(); g.arc(m.X(st.vs), m.Y(fBack()), 5, 0, TAU); g.fill(); } }
+  else { const m = axes(G, {x: [0, 6.5, 1, '배수 n'], y: [0, 2000, 250, '진동수 (Hz)']}); for (let n = 1; n <= 6; n++) { const h = st.kind === 'closed' ? 2 * n - 1 : n, f = vW() * h / (st.kind === 'closed' ? 4 * st.L : 2 * st.L); g.fillStyle = n === st.n ? C.accent : 'rgba(47,111,208,.35)'; g.fillRect(m.X(n) - 12, m.Y(Math.min(2000, f)), 24, m.Y(0) - m.Y(Math.min(2000, f))); label(g, f.toFixed(0), m.X(n), m.Y(Math.min(2000, f)) - 8, {size: 10}); } } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody'), set = (gt, gs, tt) => { $('gTitle').textContent = gt; $('gSub').textContent = gs; $('tTitle').textContent = tt; };
+  if (st.mode === 'doppler') { s.innerHTML = `<div><b>${isFinite(fFront()) ? fFront().toFixed(0) + ' Hz' : '충격파'}</b><span>앞 관찰자 (다가옴)</span></div><div><b>${fBack().toFixed(0)} Hz</b><span>뒤 관찰자 (멀어짐)</span></div><div><b>${(VSND / st.f0).toFixed(3)} m</b><span>원래 파장</span></div><div><b>${((VSND - st.vs) / st.f0).toFixed(3)} m</b><span>앞쪽 파장</span></div>`;
+    $('explain').innerHTML = '<b>도플러 효과</b>: 음원이나 관찰자가 움직이면 관찰되는 진동수가 달라지는 현상. 음원이 다가오면 f′ = f·v/(v − vₛ)로 높아지고, 멀어지면 f′ = f·v/(v + vₛ)로 낮아져요. 음원 앞쪽은 파면이 촘촘해져(파장이 짧아져) 높은 소리가 나요.'; $('tip').textContent = '[지나가는 소리 듣기]: 음원이 내 옆을 지나갈 때 실제로 들리는 소리를 재생해요 (음속보다 느릴 때). 스피드건, 도플러 초음파, 별의 적색 편이도 같은 원리예요.';
+    th.innerHTML = '<tr><th>음원 속력 (m/s)</th><th>앞 (Hz)</th><th>뒤 (Hz)</th></tr>'; tb.innerHTML = [0, 20, 40, 85, 170].map(v => `<tr><td>${v}</td><td>${(st.f0 * VSND / (VSND - v)).toFixed(0)}</td><td>${(st.f0 * VSND / (VSND + v)).toFixed(0)}</td></tr>`).join(''); set('음원 속력과 들리는 진동수', `음원 ${st.f0} Hz, 음속 340 m/s`, `음원 속력에 따른 진동수 (${st.f0} Hz)`); }
+  else { const kn = {string: '줄 (양끝 고정)', open: '열린 관', closed: '닫힌 관 (한쪽 막힘)'}[st.kind]; s.innerHTML = `<div><b>${fr().toFixed(0)} Hz</b><span>${harm()}배 진동의 진동수</span></div><div><b>${lam().toFixed(3)} m</b><span>파장</span></div><div><b>${vW()} m/s</b><span>파동 속력</span></div><div><b>${(vW() / (st.kind === 'closed' ? 4 * st.L : 2 * st.L)).toFixed(0)} Hz</b><span>기본 진동수</span></div>`;
+    $('explain').innerHTML = '<b>정상파</b>: 진폭과 진동수가 같은 두 파동이 반대 방향으로 진행하며 겹쳐, 제자리에서 진동하는 것처럼 보이는 파동. 진동하지 않는 <b>마디</b>와 크게 진동하는 <b>배</b>가 생겨요. 양끝 고정 줄과 열린 관: λₙ = 2L/n, fₙ = nv/2L. 닫힌 관: 홀수배만 생겨 fₙ = (2n−1)v/4L.'; $('tip').textContent = '관악기·현악기는 정상파의 공명으로 소리를 내요. 같은 길이에서 닫힌 관의 기본음은 열린 관보다 한 옥타브(진동수 1/2) 낮아요.';
+    th.innerHTML = '<tr><th>배수</th><th>파장 (m)</th><th>진동수 (Hz)</th></tr>'; tb.innerHTML = [1, 2, 3, 4].map(n => { const h = st.kind === 'closed' ? 2 * n - 1 : n, l = st.kind === 'closed' ? 4 * st.L / h : 2 * st.L / h; return `<tr><td>${h}배</td><td>${l.toFixed(3)}</td><td>${(vW() / l).toFixed(0)}</td></tr>`; }).join(''); set('배수와 진동수', `${kn}, L = ${st.L.toFixed(2)} m`, `${kn}의 정상파`); } }
+const bind = (id, k, f) => { $(id).oninput = e => { st[k] = +e.target.value; $(id + 'Out').textContent = f(st[k]); if (k === 'vs') { st.fronts = []; st.sx = 60; } render(); }; };
+bind('vs', 'vs', v => v + ' m/s'); bind('f0', 'f0', v => v + ' Hz'); bind('hn', 'n', v => v); bind('sL', 'L', v => v.toFixed(2) + ' m');
+Kit.seg($('kindSeg'), 'kind', v => { st.kind = v; $('hnOut').textContent = st.n; render(); })('string');
+$('listen').onclick = playPass; $('tone').onclick = playTone;
+st.sx = 60; Kit.tabs(m => { st.mode = m; render(); }, ['doppler', 'stand']);
+Kit.loop(dt => { if (st.mode === 'doppler') stepD(dt); else st.t += dt; }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); (st.mode === 'doppler' ? drawD : drawS)(); drawGraph(); });
+})();
+</script>
+</body>
+</html>
