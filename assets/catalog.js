@@ -42,7 +42,10 @@ window.CATALOG = [
     {kind:'sim', title:'1차시 지구계와 지권의 층상 구조', href:'g2/earth/sim.html#layer'}, {kind:'sim', title:'2차시 광물의 특성과 활용', href:'g2/earth/sim.html#mineral'},
     {kind:'sim', title:'3차시 암석의 분류와 순환', href:'g2/earth/sim.html#rock'}, {kind:'sim', title:'4차시 풍화 작용과 토양', href:'g2/earth/sim.html#weather'},
     {kind:'sim', title:'5차시 대륙 이동과 판의 경계', href:'g2/earth/sim.html#plate'}, {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g2/earth/worksheet.html'} ]},
-  { no:10, area:'phy', title:'빛과 파동', code:'9과10', items:[{kind:'sim', title:'거울과 렌즈의 상'}, {kind:'sim', title:'빛의 합성과 물체의 색'}, {kind:'sim', title:'소리의 진폭·진동수'}]},
+  { no:10, area:'phy', title:'빛과 파동', code:'9과10', items:[
+    {kind:'sim', title:'1차시 빛의 반사와 굴절', href:'g2/light/sim.html#refl'}, {kind:'sim', title:'2차시 거울과 렌즈에 의한 상', href:'g2/light/sim.html#image'},
+    {kind:'sim', title:'3차시 빛의 합성과 물체의 색', href:'g2/light/sim.html#color'}, {kind:'sim', title:'4차시 파동과 소리 (소리 듣기)', href:'g2/light/sim.html#wave'},
+    {kind:'ws', title:'학습지 1~4차시 (8쪽)', href:'g2/light/worksheet.html'} ]},
   { no:11, area:'chem', title:'물질의 구성', code:'9과11', items:[{kind:'sim', title:'원자 모형과 이온 만들기'}]},
   { no:12, area:'bio', title:'식물과 에너지', code:'9과12', items:[{kind:'sim', title:'광합성에 영향을 주는 요인'}]},
   { no:13, area:'bio', title:'동물과 에너지', code:'9과13', items:[{kind:'sim', title:'소화·순환·호흡·배설 연결 지도'}]},

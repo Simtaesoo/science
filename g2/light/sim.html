@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>빛과 소리 실험실 · 중2 빛과 파동</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="2학년|10 빛과 파동" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 2 · 10 빛과 파동 <span class="code">9과10-01</span><span class="code">9과10-02</span><span class="code">9과10-03</span><span class="code">9과10-04</span></div>
+      <h1>빛과 소리 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="refl">1. 반사와 굴절</button>
+      <button type="button" data-mode="image">2. 거울과 렌즈</button>
+      <button type="button" data-mode="color">3. 빛의 합성과 색</button>
+      <button type="button" data-mode="wave">4. 파동과 소리</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="빛의 경로"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <div class="field" data-only="refl"><div class="seg" id="rfSeg"><button type="button" data-rf="reflect">반사</button><button type="button" data-rf="refract">굴절</button><button type="button" data-rf="coin">물속 동전</button></div></div>
+        <label class="field" data-only="refl" for="ang" id="angWrap">빛을 비추는 각도 <input type="range" id="ang" min="10" max="80" step="5" value="40"><output id="angOut">40°</output></label>
+        <div class="field" data-only="refl" id="medWrap">아래 물질 <div class="seg" id="mdSeg"><button type="button" data-md="water">물</button><button type="button" data-md="glass">유리</button></div></div>
+        <div class="field" data-only="image"><select id="optic"><option value="plane">평면거울</option><option value="convexM">볼록 거울</option><option value="concaveM">오목 거울</option><option value="convexL">볼록 렌즈</option><option value="concaveL">오목 렌즈</option></select></div>
+        <label class="field" data-only="image" for="dist">물체의 거리 <input type="range" id="dist" min="20" max="100" step="5" value="70"><output id="distOut">70</output></label>
+        <div class="field" data-only="color"><div class="seg" id="cSeg"><button type="button" data-c="mix">빛의 합성</button><button type="button" data-c="obj">물체의 색</button><button type="button" data-c="pixel">영상 장치</button></div></div>
+        <div class="field" data-only="color" id="rgbWrap"><label for="lr"><input type="checkbox" id="lr" checked> 빨강</label><label for="lg"><input type="checkbox" id="lg" checked> 초록</label><label for="lb"><input type="checkbox" id="lb" checked> 파랑</label></div>
+        <div class="field" data-only="color" id="objWrap">물체 <select id="obj"><option value="apple">빨간 사과</option><option value="leaf">초록 잎</option><option value="banana">노란 바나나</option><option value="paper">흰 종이</option></select></div>
+        <label class="field" data-only="wave" for="amp">진폭 <input type="range" id="amp" min="0.2" max="1" step="0.1" value="0.6"><output id="ampOut">0.6</output></label>
+        <label class="field" data-only="wave" for="freq">진동수 <input type="range" id="freq" min="220" max="880" step="20" value="440"><output id="freqOut">440 Hz</output></label>
+        <div class="field" data-only="wave">파형 <select id="timbre"><option value="sine">소리굽쇠</option><option value="flute">플루트</option><option value="violin">바이올린</option><option value="piano">피아노</option></select></div>
+        <button class="btn" type="button" id="sound" data-only="wave">소리 듣기</button>
+        <label class="field" data-only="wave" for="air">유리종 속 공기 <input type="range" id="air" min="0" max="100" step="10" value="100"><output id="airOut">100%</output></label>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">정리</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>깜깜한 방에서는 왜 물체가 보이지 않을까?</summary>
+        <p>물체를 보려면 광원에서 나온 빛이 물체에서 반사되어 눈에 들어와야 합니다. 빛이 없으면 반사될 빛도 없어 물체를 볼 수 없습니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>파란 조명 아래에서 빨간 사과는 무슨 색으로 보일까?</summary>
+        <p>빨간 사과는 빨간빛만 반사하고 나머지는 흡수합니다. 파란빛만 비추면 반사할 빨간빛이 없어 검게 보입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>우주에서 폭발이 일어나면 소리가 들릴까?</summary>
+        <p>들리지 않습니다. 소리는 공기 같은 매질의 진동으로 전달되는 파동인데, 우주 공간에는 소리를 전달할 매질이 거의 없기 때문입니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="렌즈와 거울의 상은 크기와 모양의 특징을 비교하기 위한 모형입니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2, R2D = 180 / Math.PI;
+const st = {mode:'refl', t:0, rf:'reflect', ang:40, md:'water', optic:'plane', dist:70, c:'mix', obj:'apple', amp:.6, freq:440, timbre:'sine', air:100};
+const N = {water: 1.33, glass: 1.5};
+
+/* ===== 1. 반사와 굴절 ===== */
+function drawRefl(){
+  const g = S.g, cx = S.w / 2, cy = S.h * .55, L = Math.min(S.w, S.h) * .45, a = st.ang * Math.PI / 180;
+  if (st.rf === 'coin') return drawCoin();
+  if (st.rf === 'reflect') {
+    g.fillStyle = C.soft; g.fillRect(cx - L * 1.2, cy, L * 2.4, 14); g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - L * 1.2, cy); g.lineTo(cx + L * 1.2, cy); g.stroke();
+    for (let x = cx - L * 1.2; x < cx + L * 1.2; x += 12) { g.beginPath(); g.moveTo(x, cy); g.lineTo(x - 8, cy + 10); g.stroke(); }
+    label(g, '평면거울', cx + L, cy + 26, {size: 12, color: C.muted});
+  } else {
+    g.fillStyle = st.md === 'water' ? 'rgba(80,150,230,.25)' : 'rgba(150,200,210,.35)'; g.fillRect(0, cy, S.w, S.h - cy);
+    g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath(); g.moveTo(0, cy); g.lineTo(S.w, cy); g.stroke();
+    label(g, '공기', 16, cy - 16, {align: 'left', size: 12, color: C.muted}); label(g, st.md === 'water' ? '물' : '유리', 16, cy + 18, {align: 'left', size: 12, color: C.muted});
+  }
+  g.setLineDash([5, 5]); g.strokeStyle = C.muted; g.lineWidth = 1; g.beginPath(); g.moveTo(cx, cy - L); g.lineTo(cx, cy + L * .9); g.stroke(); g.setLineDash([]);
+  label(g, '법선', cx + 6, cy - L + 8, {align: 'left', size: 11, color: C.muted});
+  // 입사 광선
+  const sx = cx - Math.sin(a) * L, sy = cy - Math.cos(a) * L;
+  g.fillStyle = C.ink; g.fillRect(sx - 10, sy - 6, 20, 12);
+  const k = (st.t * .6) % 1;
+  arrow(g, sx, sy, cx, cy, C.hot, 3);
+  g.strokeStyle = C.hot; g.beginPath(); g.arc(cx, cy, 46, -Math.PI / 2 - a, -Math.PI / 2); g.stroke(); label(g, `입사각 ${st.ang}°`, cx - 56, cy - 62, {align: 'right', size: 12, color: C.hot, weight: 600});
+  if (st.rf === 'reflect') {
+    const ex = cx + Math.sin(a) * L, ey = cy - Math.cos(a) * L;
+    arrow(g, cx, cy, ex, ey, C.warn, 3);
+    g.strokeStyle = C.warn; g.beginPath(); g.arc(cx, cy, 56, -Math.PI / 2, -Math.PI / 2 + a); g.stroke(); label(g, `반사각 ${st.ang}°`, cx + 66, cy - 62, {align: 'left', size: 12, color: C.warn, weight: 600});
+  } else {
+    const b = Math.asin(Math.sin(a) / N[st.md]), ex = cx + Math.sin(b) * L * .9, ey = cy + Math.cos(b) * L * .9;
+    arrow(g, cx, cy, ex, ey, C.phy, 3);
+    const ra = Math.asin(Math.sin(a)), rx = cx + Math.sin(a) * L * .5, ry = cy - Math.cos(a) * L * .5;
+    g.globalAlpha = .35; arrow(g, cx, cy, rx, ry, C.warn, 2); g.globalAlpha = 1;
+    g.strokeStyle = C.phy; g.beginPath(); g.arc(cx, cy, 52, Math.PI / 2 - b, Math.PI / 2); g.stroke(); label(g, `굴절각 ${(b * R2D).toFixed(0)}°`, cx + 60, cy + 60, {align: 'left', size: 12, color: C.phy, weight: 600});
+    label(g, '경계면에서 일부는 반사되기도 한다 (흐린 화살표)', S.w - 12, 16, {align: 'right', size: 11, color: C.muted});
+  }
+}
+function drawCoin(){
+  const g = S.g, wy = S.h * .4, by = S.h - 30, cx = S.w * .55;
+  g.fillStyle = 'rgba(80,150,230,.25)'; g.fillRect(S.w * .2, wy, S.w * .6, by - wy);
+  g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(S.w * .2, wy - 60); g.lineTo(S.w * .2, by); g.lineTo(S.w * .8, by); g.lineTo(S.w * .8, wy - 60); g.stroke();
+  // 동전 (실제 위치)
+  g.fillStyle = '#d6b84a'; g.beginPath(); g.ellipse(cx, by - 6, 16, 5, 0, 0, TAU); g.fill();
+  // 떠 보이는 위치는 실제 동전 바로 위쪽(더 얕은 곳). 눈-수면-떠 보이는 위치가 한 직선이 되도록 수면의 지점을 정한다
+  const eye = [S.w * .12, wy - 110], D = by - 6 - wy, img = [cx, wy + D * .6];
+  const hit = [eye[0] + (wy - eye[1]) * (img[0] - eye[0]) / (img[1] - eye[1]), wy];
+  arrow(g, cx, by - 8, hit[0], hit[1], C.hot, 2.5); arrow(g, hit[0], hit[1], eye[0] + 8, eye[1] + 4, C.hot, 2.5);
+  g.setLineDash([5, 4]); g.strokeStyle = C.muted; g.beginPath(); g.moveTo(hit[0], hit[1]); g.lineTo(img[0], img[1]); g.stroke(); g.setLineDash([]);
+  g.globalAlpha = .5; g.fillStyle = '#d6b84a'; g.beginPath(); g.ellipse(img[0], img[1], 16, 5, 0, 0, TAU); g.fill(); g.globalAlpha = 1;
+  g.fillStyle = C.ink; g.beginPath(); g.ellipse(eye[0], eye[1], 14, 8, 0, 0, TAU); g.fill(); g.fillStyle = C.surface; g.beginPath(); g.arc(eye[0] + 4, eye[1], 4, 0, TAU); g.fill();
+  label(g, '실제 동전', cx + 22, by - 8, {align: 'left', size: 12}); label(g, '떠 보이는 동전', img[0] + 22, img[1], {align: 'left', size: 12, color: C.muted});
+  label(g, '빛은 물에서 공기로 나올 때 꺾이는데, 눈은 빛이 곧게 들어왔다고 느낀다', S.w / 2, 18, {size: 12});
+}
+
+/* ===== 2. 거울과 렌즈 ===== */
+const F = 40;   // 초점 거리 (모형 단위)
+function imageOf(){
+  const d = st.dist, o = st.optic;
+  if (o === 'plane') return {di: -d, m: 1};
+  const f = (o === 'concaveM' || o === 'convexL') ? F : -F;
+  if (Math.abs(d - f) < 0.5) return {di: Infinity, m: Infinity};
+  const di = 1 / (1 / f - 1 / d); return {di, m: -di / d};
+}
+function describe(){
+  const {m} = imageOf();
+  if (!isFinite(m)) return '상이 생기지 않는다 (빛이 나란하게 나아감)';
+  const size = Math.abs(m) > 1.05 ? '크고' : Math.abs(m) < .95 ? '작고' : '같은 크기이고';
+  return `물체보다 ${size} ${m > 0 ? '바로 선' : '거꾸로 선'} 상`;
+}
+function drawImage(){
+  const g = S.g, cx = S.w * .55, cy = S.h * .55, sc = Math.min(S.w, S.h) / 260, o = st.optic, mirror = o.endsWith('M') || o === 'plane';
+  const X = v => cx + v * sc, H = 28;
+  g.strokeStyle = C.line; g.lineWidth = 1; g.beginPath(); g.moveTo(0, cy); g.lineTo(S.w, cy); g.stroke();
+  // 광학 기구
+  g.strokeStyle = C.phy; g.lineWidth = 4; g.beginPath();
+  if (o === 'plane') { g.moveTo(cx, cy - 90); g.lineTo(cx, cy + 90); }
+  else if (o === 'convexM') g.arc(cx - 260, cy, 260, -0.35, 0.35);
+  else if (o === 'concaveM') g.arc(cx + 260, cy, 260, Math.PI - 0.35, Math.PI + 0.35);
+  g.stroke();
+  if (!mirror) { g.fillStyle = 'rgba(80,150,230,.25)'; g.strokeStyle = C.phy; g.lineWidth = 2; g.beginPath();
+    if (o === 'convexL') { g.ellipse(cx, cy, 12, 90, 0, 0, TAU); }
+    else { g.moveTo(cx - 14, cy - 90); g.quadraticCurveTo(cx - 2, cy, cx - 14, cy + 90); g.lineTo(cx + 14, cy + 90); g.quadraticCurveTo(cx + 2, cy, cx + 14, cy - 90); g.closePath(); }
+    g.fill(); g.stroke(); }
+  if (o !== 'plane') { [F, -F].forEach(f => { g.fillStyle = C.ink; g.beginPath(); g.arc(X(f), cy, 3, 0, TAU); g.fill(); }); label(g, '초점', X(-F), cy + 14, {size: 10, color: C.muted}); }
+  // 물체 (화살표)
+  const ox = X(-st.dist), oy = cy - H * sc;
+  arrow(g, ox, cy, ox, oy, C.hot, 4); label(g, '물체', ox, cy + 16, {size: 12});
+  const {di, m} = imageOf();
+  if (isFinite(m) && Math.abs(m) < 6) {
+    // 렌즈: 상이 오른쪽(di>0) 또는 왼쪽(di<0). 거울: 앞쪽(di>0, 왼쪽) 또는 뒤쪽(di<0, 오른쪽)
+    const ix = mirror ? cx - di * sc : cx + di * sc, iy = cy - H * m * sc, behindOrVirtual = mirror ? di < 0 : di < 0;
+    g.globalAlpha = .6; arrow(g, ix, cy, ix, iy, C.warn, 4); g.globalAlpha = 1;
+    label(g, '상', ix, m > 0 ? cy + 16 : cy - 14, {size: 12, color: C.warn});
+    [[cx, oy], [cx, cy]].forEach(([px, py]) => {
+      g.strokeStyle = 'rgba(210,65,47,.7)'; g.lineWidth = 1.3; g.beginPath(); g.moveTo(ox, oy); g.lineTo(px, py); g.stroke();
+      const dx = px - ix, dy = py - iy, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, out = S.w;
+      if (behindOrVirtual) {
+        // 실제 빛은 상에서 나온 것처럼 퍼져 나간다
+        const dir = mirror ? -1 : 1, sx = Math.sign(ux) === dir ? ux : -ux, sy = Math.sign(ux) === dir ? uy : -uy;
+        g.beginPath(); g.moveTo(px, py); g.lineTo(px + sx * out, py + sy * out); g.stroke();
+        g.setLineDash([4, 4]); g.strokeStyle = 'rgba(120,130,140,.8)'; g.beginPath(); g.moveTo(px, py); g.lineTo(ix, iy); g.stroke(); g.setLineDash([]);
+      } else {
+        g.beginPath(); g.moveTo(px, py); g.lineTo(ix, iy); g.lineTo(ix - ux * 60, iy - uy * 60); g.stroke();
+      }
+    });
+  }
+  label(g, describe(), S.w / 2, 18, {weight: 700, color: C.phy});
+  label(g, mirror ? '거울 앞에서 본 모습 (왼쪽: 물체, 상은 거울 쪽에 그림)' : '렌즈를 통해 본 모습', S.w / 2, S.h - 12, {size: 11, color: C.muted});
+}
+
+/* ===== 3. 빛의 합성과 색 ===== */
+const OBJ = {apple:{n:'빨간 사과', r:1, g:0, b:0}, leaf:{n:'초록 잎', r:0, g:1, b:0}, banana:{n:'노란 바나나', r:1, g:1, b:0}, paper:{n:'흰 종이', r:1, g:1, b:1}};
+const lights = () => ({r: $('lr').checked ? 1 : 0, g: $('lg').checked ? 1 : 0, b: $('lb').checked ? 1 : 0});
+function colorName(r, g, b){ const k = `${r}${g}${b}`; return {'000':'검은색', '100':'빨간색', '010':'초록색', '001':'파란색', '110':'노란색', '011':'청록색', '101':'자홍색', '111':'흰색'}[k]; }
+function drawColor(){
+  const g = S.g, L = lights();
+  if (st.c === 'mix') {
+    g.fillStyle = '#05070a'; g.fillRect(0, 0, S.w, S.h);
+    const cx = S.w / 2, cy = S.h / 2, r = Math.min(S.w, S.h) * .24, off = r * .55;
+    g.globalCompositeOperation = 'lighter';
+    [['r', '#ff0000', cx, cy - off * .7], ['g', '#00ff00', cx - off * .8, cy + off * .5], ['b', '#0000ff', cx + off * .8, cy + off * .5]].forEach(([k, col, x, y]) => { if (!L[k]) return; g.fillStyle = col; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill(); });
+    g.globalCompositeOperation = 'source-over';
+    label(g, '스크린에 비춘 빛 (검은 배경)', 12, 16, {align: 'left', size: 11, color: 'rgba(255,255,255,.8)'});
+  } else if (st.c === 'obj') {
+    const O = OBJ[st.obj], seen = [O.r & L.r, O.g & L.g, O.b & L.b];
+    const bg = `rgb(${L.r * 40},${L.g * 40},${L.b * 40})`; g.fillStyle = bg; g.fillRect(0, 0, S.w, S.h);
+    const cx = S.w * .45, cy = S.h * .55, col = `rgb(${seen[0] * 230 + 15},${seen[1] * 210 + 15},${seen[2] * 230 + 15})`;
+    g.fillStyle = col; g.beginPath();
+    if (st.obj === 'apple') g.arc(cx, cy, 60, 0, TAU); else if (st.obj === 'leaf') g.ellipse(cx, cy, 80, 36, -.4, 0, TAU); else if (st.obj === 'banana') { g.ellipse(cx, cy, 90, 26, .3, 0, Math.PI); } else g.rect(cx - 70, cy - 50, 140, 100);
+    g.fill(); g.strokeStyle = 'rgba(255,255,255,.3)'; g.lineWidth = 1; g.stroke();
+    // 조명
+    g.fillStyle = `rgb(${L.r * 255},${L.g * 255},${L.b * 255})`; g.beginPath(); g.arc(S.w * .82, 40, 16, 0, TAU); g.fill(); g.strokeStyle = 'rgba(255,255,255,.5)'; g.stroke();
+    label(g, `조명: ${colorName(L.r, L.g, L.b)}빛 → ${O.n}이(가) ${colorName(...seen)}으로 보임`, S.w / 2, S.h - 14, {weight: 700, color: '#fff'});
+  } else {
+    g.fillStyle = '#111'; g.fillRect(0, 0, S.w, S.h);
+    const cell = Math.min(S.w, S.h) / 9, show = [L.r, L.g, L.b];
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) { const x = S.w / 2 - 3 * cell + i * cell, y = S.h / 2 - 3 * cell + j * cell;
+      ['#ff2020', '#20ff20', '#2050ff'].forEach((c, k) => { g.fillStyle = show[k] ? c : '#262626'; g.fillRect(x + k * cell / 3 + 2, y + 4, cell / 3 - 4, cell - 8); }); }
+    label(g, '화면을 크게 확대한 모습: 빨강·초록·파랑 점(화소)', S.w / 2, 16, {size: 12, color: '#fff'});
+    label(g, `멀리서 보면 ${colorName(L.r, L.g, L.b)}으로 보인다`, S.w / 2, S.h - 14, {weight: 700, color: '#fff'});
+  }
+}
+
+/* ===== 4. 파동과 소리 ===== */
+function waveShape(ph){
+  const s = Math.sin;
+  if (st.timbre === 'sine') return s(ph);
+  if (st.timbre === 'flute') return .8 * s(ph) + .2 * s(2 * ph);
+  if (st.timbre === 'violin') return .6 * s(ph) + .3 * s(2 * ph) + .2 * s(3 * ph) + .12 * s(4 * ph) + .08 * s(5 * ph);
+  return .7 * s(ph) + .35 * s(2 * ph) * Math.exp(-((ph % TAU) / 6)) + .15 * s(4 * ph);
+}
+function drawWave(){
+  const g = S.g, cy = S.h * .4, A = st.amp * S.h * .22 * (st.air / 100 * .8 + .2), lam = S.w * 0.55 * 440 / st.freq, k = TAU / lam;
+  g.strokeStyle = C.line; g.lineWidth = 1; g.beginPath(); g.moveTo(20, cy); g.lineTo(S.w - 20, cy); g.stroke();
+  g.strokeStyle = C.phy; g.lineWidth = 3; g.beginPath();
+  for (let x = 20; x <= S.w - 20; x += 2) { const y = cy - A * waveShape(k * x - st.t * 4); x === 20 ? g.moveTo(x, y) : g.lineTo(x, y); } g.stroke();
+  // 진폭과 파장 표시 (사인일 때 정확)
+  const x0 = 20 + ((st.t * 4 + Math.PI / 2) / k) % lam;
+  g.strokeStyle = C.hot; g.lineWidth = 1.5; g.setLineDash([4, 3]);
+  g.beginPath(); g.moveTo(x0, cy); g.lineTo(x0, cy - A); g.stroke(); g.setLineDash([]); label(g, '진폭', x0 + 6, cy - A / 2, {align: 'left', size: 12, color: C.hot});
+  if (x0 + lam < S.w - 20) { g.strokeStyle = C.warn; g.beginPath(); g.moveTo(x0, cy - A - 12); g.lineTo(x0 + lam, cy - A - 12); g.stroke(); label(g, '파장', x0 + lam / 2, cy - A - 24, {size: 12, color: C.warn}); }
+  // 유리종 속 종
+  const bx = S.w * .5, by = S.h * .82;
+  g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.arc(bx, by, 60, Math.PI, 0); g.lineTo(bx + 60, by + 10); g.lineTo(bx - 60, by + 10); g.closePath(); g.stroke();
+  g.fillStyle = `rgba(160,200,240,${st.air / 250})`; g.fill();
+  g.fillStyle = C.warn; g.beginPath(); g.arc(bx + Math.sin(st.t * 30) * 2, by - 18, 12, 0, TAU); g.fill();
+  label(g, `유리종 속 공기 ${st.air}% → 들리는 소리 ${st.air > 70 ? '크다' : st.air > 20 ? '작다' : '거의 안 들린다'}`, bx, by + 28, {size: 12, weight: 600});
+}
+let ac = null, osc = null, gain = null;
+function sound(on){
+  if (!on) { if (osc) { try { osc.stop(); } catch (e) {} osc = null; } $('sound').textContent = '소리 듣기'; return; }
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    osc = ac.createOscillator(); gain = ac.createGain();
+    const H = {sine: [0, 1], flute: [0, .8, .2], violin: [0, .6, .3, .2, .12, .08], piano: [0, .7, .35, 0, .15]}[st.timbre];
+    osc.setPeriodicWave(ac.createPeriodicWave(new Float32Array(H.length), new Float32Array(H)));
+    osc.frequency.value = st.freq; gain.gain.value = st.amp * .25 * st.air / 100;
+    osc.connect(gain).connect(ac.destination); osc.start(); $('sound').textContent = '소리 끄기';
+  } catch (e) { $('tip').textContent = '이 화면에서는 소리를 낼 수 없습니다.'; }
+}
+function updSound(){ if (osc) { osc.frequency.value = st.freq; gain.gain.value = st.amp * .25 * st.air / 100; } }
+
+/* ===== 그래프·표·설명 ===== */
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'refl') {
+    const m = axes(G, {x: [0, 90, 15, '입사각 (°)'], y: [0, 90, 15, st.rf === 'reflect' ? '반사각 (°)' : '굴절각 (°)']});
+    if (st.rf === 'reflect') line(G, [[0, 0], [90, 90]], m, C.warn); else { const p = []; for (let a = 0; a <= 89; a += 1) p.push([a, Math.asin(Math.sin(a / R2D) / N[st.md]) * R2D]); line(G, p, m, C.phy); line(G, [[0, 0], [90, 90]], m, C.line, 1, [4, 4]); }
+    const y = st.rf === 'reflect' ? st.ang : Math.asin(Math.sin(st.ang / R2D) / N[st.md]) * R2D; g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.ang), m.Y(y), 6, 0, TAU); g.fill();
+  } else if (st.mode === 'image') {
+    const m = axes(G, {x: [20, 100, 20, '물체의 거리'], y: [0, 4, 1, '상의 크기 (물체 = 1)']});
+    const p = []; const keep = st.dist; for (let d = 20; d <= 100; d += 1) { st.dist = d; const {m: mm} = imageOf(); if (isFinite(mm) && Math.abs(mm) < 4) p.push([d, Math.abs(mm)]); } st.dist = keep;
+    line(G, p, m, C.phy); const {m: mm} = imageOf(); if (isFinite(mm) && Math.abs(mm) < 4) { g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.dist), m.Y(Math.abs(mm)), 6, 0, TAU); g.fill(); }
+  } else if (st.mode === 'color') {
+    G.g.fillStyle = C.surface; G.g.fillRect(0, 0, G.w, G.h);
+    const items = [['빨강 + 초록', '노랑', '#ffd400'], ['초록 + 파랑', '청록', '#00d0d0'], ['파랑 + 빨강', '자홍', '#e030e0'], ['빨강 + 초록 + 파랑', '흰색', '#ffffff']];
+    items.forEach(([a, b, c], i) => { const y = 30 + i * (G.h - 40) / 4; g.fillStyle = c; g.strokeStyle = C.ink; g.fillRect(G.w * .55, y - 10, 40, 20); g.strokeRect(G.w * .55, y - 10, 40, 20); label(g, `${a} → ${b}`, G.w * .5, y, {align: 'right', size: 13}); });
+  } else {
+    const m = axes(G, {x: [0, 10, 2, '시간 (ms)'], y: [-1.2, 1.2, .6, '압력 변화 (상대값)']});
+    const p = []; for (let t = 0; t <= 10; t += .02) p.push([t, st.amp * (st.air / 100 * .8 + .2) * waveShape(TAU * st.freq * t / 1000)]); line(G, p, m, C.phy, 2);
+  }
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>'; $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
+function table(){
+  if (st.mode === 'refl') setTable('빛의 반사와 굴절', ['현상', '특징', '예'], [['반사', '입사각 = 반사각', '거울, 잔잔한 호수에 비친 산'], ['굴절', '공기→물: 법선 쪽으로 꺾임', '물속 다리가 짧아 보임, 물속 동전'], ['물체를 보는 과정', '광원 → 물체에서 반사 → 눈', '']]);
+  else if (st.mode === 'image') setTable('거울과 렌즈의 상 (특징)', ['기구', '모양', '상의 특징', '쓰임'], [['평면거울', '평평함', '같은 크기, 좌우가 바뀜', '화장 거울'], ['볼록 거울', '바깥으로 볼록', '항상 작고 바로 섬, 넓게 보임', '자동차 측면 거울, 도로 반사경'], ['오목 거울', '안으로 오목', '가까우면 크고 바로, 멀면 거꾸로', '치과 거울, 손전등'], ['볼록 렌즈', '가운데가 두꺼움', '가까우면 크고 바로, 멀면 거꾸로', '돋보기, 원시 안경'], ['오목 렌즈', '가운데가 얇음', '항상 작고 바로 섬', '근시 안경']]);
+  else if (st.mode === 'color') setTable('물체의 색', ['물체', '반사하는 빛', '흰빛 아래', '빨간빛 아래', '파란빛 아래'], [['빨간 사과', '빨강', '빨간색', '빨간색', '검은색'], ['초록 잎', '초록', '초록색', '검은색', '검은색'], ['노란 바나나', '빨강·초록', '노란색', '빨간색', '검은색'], ['흰 종이', '모든 빛', '흰색', '빨간색', '파란색']]);
+  else setTable('소리의 3요소', ['요소', '관련된 것', '변화'], [['세기 (크기)', '진폭', '진폭이 클수록 큰 소리'], ['높낮이', '진동수', '진동수가 클수록 높은 소리'], ['맵시 (음색)', '파형', '파형이 다르면 같은 높이도 다르게 들림']]);
+}
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'refl') {
+    if (st.rf === 'reflect') { s = stat('입사각', st.ang, '°') + stat('반사각', st.ang, '°'); e = '<b>빛의 반사</b>: 빛이 물체의 표면에 부딪쳐 되돌아 나오는 현상. 입사각과 반사각은 항상 같습니다(<b>반사 법칙</b>). 매끄러운 면에서는 정반사, 울퉁불퉁한 면에서는 난반사가 일어납니다.'; t = '물체를 볼 수 있는 것은 광원에서 나온 빛이 물체에서 반사되어 눈에 들어오기 때문입니다.'; }
+    else if (st.rf === 'refract') { const b = Math.asin(Math.sin(st.ang / R2D) / N[st.md]) * R2D; s = stat('입사각', st.ang, '°') + stat('굴절각', b.toFixed(0), '°'); e = '<b>빛의 굴절</b>: 빛이 서로 다른 물질의 경계면을 지날 때 진행 방향이 꺾이는 현상. 공기에서 물이나 유리로 들어갈 때 빛은 법선 쪽으로 꺾입니다.'; t = '물보다 유리에서 더 많이 꺾입니다. 물질에 따라 빛의 속력이 다르기 때문입니다.'; }
+    else { s = stat('현상', '굴절'); e = '물속의 동전이 실제보다 <b>떠 보이는</b> 까닭: 동전에서 반사된 빛이 물에서 공기로 나올 때 꺾여 눈에 들어오는데, 우리 눈은 빛이 곧게 왔다고 생각해 연장선 위에 동전이 있는 것처럼 봅니다.'; t = '물이 담긴 컵에 꽂은 빨대가 꺾여 보이는 것도 같은 까닭입니다.'; }
+  } else if (st.mode === 'image') {
+    s = stat('기구', $('optic').selectedOptions[0].textContent) + stat('상', describe().replace('물체보다 ', ''));
+    e = st.optic === 'plane' ? '<b>평면거울의 상</b>: 물체에서 나온 빛이 거울에서 반사 법칙에 따라 반사되어 눈에 들어옵니다. 눈은 반사된 빛의 연장선이 만나는 거울 뒤쪽에 물체가 있는 것처럼 봅니다. 상은 물체와 크기가 같고, 거울에서 물체까지와 같은 거리에 있으며, 좌우가 바뀌어 보입니다.'
+      : '거울과 렌즈는 모양에 따라 빛을 모으거나(오목 거울, 볼록 렌즈) 퍼뜨립니다(볼록 거울, 오목 렌즈). 물체의 거리를 바꾸며 상의 크기와 방향이 어떻게 달라지는지 비교하세요.';
+    t = '중학교에서는 상의 위치와 크기를 계산하지 않고, 크기와 방향의 특징을 비교합니다.';
+  } else if (st.mode === 'color') {
+    const L = lights();
+    s = stat('켠 빛', ['빨강', '초록', '파랑'].filter((n, i) => [L.r, L.g, L.b][i]).join('·') || '없음') + stat('합성된 색', colorName(L.r, L.g, L.b));
+    e = st.c === 'obj' ? '<b>물체의 색</b>: 물체가 반사하는 빛의 색으로 보입니다. 빨간 사과는 빨간빛을 반사하고 나머지 빛은 흡수합니다. 흰 종이는 모든 빛을 반사하고, 검은 물체는 모든 빛을 흡수합니다.'
+      : '<b>빛의 합성</b>: 두 가지 이상의 빛이 합쳐져 다른 색의 빛으로 보이는 현상. 빛의 삼원색은 빨강, 초록, 파랑이며, 세 빛을 모두 합하면 흰색이 됩니다.';
+    t = st.c === 'pixel' ? '텔레비전, 스마트폰 화면은 빨강·초록·파랑 화소의 밝기를 조절해 여러 가지 색을 나타냅니다.' : '체크 상자로 빛을 켜고 끄며 비교하세요.';
+  } else {
+    s = stat('진폭', st.amp.toFixed(1)) + stat('진동수', st.freq, 'Hz') + stat('파형', $('timbre').selectedOptions[0].textContent) + stat('매질 (공기)', st.air, '%');
+    e = '<b>파동</b>: 한 곳에서 생긴 진동이 주위로 퍼져 나가는 현상. <b>소리</b>는 물체의 진동이 공기 같은 <b>매질</b>을 통해 전달되는 파동입니다. 진폭은 소리의 세기, 진동수는 높낮이, 파형은 맵시를 결정합니다.';
+    t = '[소리 듣기]를 누르고 진동수와 진폭을 바꿔 보세요. 유리종 속 공기를 빼면 소리가 점점 작아집니다.';
+  }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 조작 ===== */
+Kit.seg($('rfSeg'), 'rf', v => { st.rf = v; $('angWrap').hidden = v === 'coin'; $('medWrap').hidden = v !== 'refract'; })('reflect');
+$('ang').oninput = e => { st.ang = +e.target.value; $('angOut').textContent = st.ang + '°'; };
+Kit.seg($('mdSeg'), 'md', v => st.md = v)('water');
+$('optic').onchange = e => { st.optic = e.target.value; $('dist').closest('label').hidden = st.optic === 'plane'; };
+$('dist').oninput = e => { st.dist = +e.target.value; $('distOut').textContent = st.dist; };
+Kit.seg($('cSeg'), 'c', v => { st.c = v; $('objWrap').hidden = v !== 'obj'; })('mix');
+$('obj').onchange = e => st.obj = e.target.value;
+$('amp').oninput = e => { st.amp = +e.target.value; $('ampOut').textContent = st.amp.toFixed(1); updSound(); };
+$('freq').oninput = e => { st.freq = +e.target.value; $('freqOut').textContent = st.freq + ' Hz'; updSound(); };
+$('timbre').onchange = e => { st.timbre = e.target.value; if (osc) { sound(false); sound(true); } };
+$('air').oninput = e => { st.air = +e.target.value; $('airOut').textContent = st.air + '%'; updSound(); };
+$('sound').onclick = () => sound(!osc);
+Kit.tabs(m => { st.mode = m; table(); if (m !== 'wave') sound(false);
+  $('angWrap').hidden = !(m === 'refl' && st.rf !== 'coin'); $('medWrap').hidden = !(m === 'refl' && st.rf === 'refract'); $('objWrap').hidden = !(m === 'color' && st.c === 'obj');
+  if (m === 'image') $('dist').closest('label').hidden = st.optic === 'plane';
+  $('gTitle').textContent = {refl: '입사각에 따른 반사각·굴절각', image: '물체의 거리와 상의 크기', color: '빛의 합성 정리', wave: '소리의 파형'}[m];
+  $('gSub').textContent = {refl: '점선은 꺾이지 않을 때입니다.', image: '평면거울에서는 항상 1입니다.', color: '', wave: '진동수를 높이면 같은 시간에 더 많이 진동합니다.'}[m]; }, ['refl', 'image', 'color', 'wave']);
+Kit.loop(dt => { st.t += dt; }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h);
+  ({refl: drawRefl, image: drawImage, color: drawColor, wave: drawWave})[st.mode](); drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>

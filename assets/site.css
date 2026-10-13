@@ -22,7 +22,7 @@
 *{box-sizing:border-box}
 html,body{margin:0}
 [hidden]{display:none!important}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;word-break:keep-all;overflow-wrap:anywhere}
 a{color:inherit}
 .wrap{max-width:1180px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-direction:column;gap:16px}
 
