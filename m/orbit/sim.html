@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>천체의 운동 실험실 · 역학과 에너지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="역학과 에너지|02 천체의 운동" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>역학과 에너지 · 02 천체의 운동 <span class="code">역학과 에너지 Ⅰ</span></div>
+      <h1>천체의 운동 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="kepler">1. 케플러 법칙</button>
+      <button type="button" data-mode="sat">2. 만유인력과 인공위성</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="천체 운동 장면"></canvas></div>
+      <div class="controls">
+        <label class="field" data-only="kepler" for="ec">이심률 <input type="range" id="ec" min="0" max="0.8" step="0.05" value="0.5"><output id="ecOut">0.50</output></label>
+        <label class="field" data-only="kepler" for="sa">긴반지름 <input type="range" id="sa" min="0.5" max="2" step="0.25" value="1"><output id="saOut">1.00 AU</output></label>
+        <div class="field" data-only="kepler"><label><input type="checkbox" id="area" checked> 같은 시간 동안 쓸고 간 넓이 보기</label></div>
+        <label class="field" data-only="sat" for="lv">발사 속력 <input type="range" id="lv" min="5" max="12" step="0.1" value="7.7"><output id="lvOut">7.7 km/s</output></label>
+        <label class="field" data-only="sat" for="alt">발사 고도 <input type="range" id="alt" min="200" max="2000" step="100" value="300"><output id="altOut">300 km</output></label>
+        <button class="btn primary" type="button" id="launch" data-only="sat">발사</button>
+        <button class="btn" type="button" id="wipe" data-only="sat">궤도 지우기</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>지구가 태양에 가장 가까울 때(1월 초) 우리나라는 겨울이다. 계절은 거리 때문이 아닐까?</summary><p>지구 궤도의 이심률은 약 0.017로 거의 원이라 거리 차이가 작아요. 계절은 자전축이 기울어 태양의 남중 고도와 낮의 길이가 달라지기 때문이에요. 대신 케플러 제2법칙에 따라 1월에 공전 속력이 가장 빨라요.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>국제우주정거장 안의 우주인이 둥둥 떠 있는 것은 중력이 없어서일까?</summary><p>아니에요. 고도 400 km에서 중력 가속도는 지표의 약 89 %나 돼요. 우주정거장과 우주인이 함께 지구를 향해 계속 '떨어지며'(원운동하며) 돌기 때문에 무게를 느끼지 못하는 무중력 상태가 되는 거예요.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>정지 궤도 위성은 왜 모두 같은 고도(약 35 800 km)에 있을까?</summary><p>지구 자전 주기(약 24시간)와 같은 주기로 돌아야 하는데, 케플러 제3법칙(T² ∝ r³)에 따라 주기가 정해지면 궤도 반지름도 하나로 정해지기 때문이에요.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="GM(지구) = 3.986×10¹⁴ m³/s², 지구 반지름 6371 km. 행성 자료는 근삿값."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
+const st = {mode: 'kepler', e: .5, a: 1, area: true, t: 0, lv: 7.7, alt: 300, sat: null, paths: []};
+/* ===== 1. 케플러 법칙 ===== */
+const Tk = () => Math.pow(st.a, 1.5); // 년
+function kpos(t){ const M = TAU * ((t / Tk()) % 1); let E = M; for (let i = 0; i < 30; i++) E -= (E - st.e * Math.sin(E) - M) / (1 - st.e * Math.cos(E)); const b = st.a * Math.sqrt(1 - st.e * st.e); return [st.a * (Math.cos(E) - st.e), b * Math.sin(E)]; }
+const kspeed = ([x, y]) => { const r = Math.hypot(x, y); return Math.sqrt(4 * Math.PI * Math.PI * (2 / r - 1 / st.a)); }; // AU/년, GM_sun = 4π²
+function drawKepler(){ const g = S.g, W = S.w, H = S.h, sc = Math.min(W * .42 / (st.a * (1 + st.e)), H * .44 / st.a), cx = W * .5 + st.a * st.e * sc, cy = H * .5, X = x => cx + x * sc, Y = y => cy - y * sc, b = st.a * Math.sqrt(1 - st.e * st.e);
+  // 넓이 조각: 같은 시간 간격 12개
+  if (st.area) { const n = 12; for (let k = 0; k < n; k += 3) { g.fillStyle = k % 6 ? 'rgba(224,83,63,.22)' : 'rgba(47,111,208,.22)'; g.beginPath(); g.moveTo(X(0), Y(0)); for (let u = 0; u <= 1.0001; u += .05) { const [x, y] = kpos(Tk() * (k + u) / n); g.lineTo(X(x), Y(y)); } g.closePath(); g.fill(); } label(g, '색칠한 네 조각: 모두 같은 시간(주기의 1/12) 동안 쓸고 간 넓이 — 넓이가 모두 같다', W / 2, H - 14, {size: 11, color: C.muted}); }
+  g.strokeStyle = C.line; g.lineWidth = 1.5; g.beginPath(); g.ellipse(X(-st.a * st.e), cy, st.a * sc, b * sc, 0, 0, TAU); g.stroke();
+  // 초점
+  g.fillStyle = '#f2b636'; g.beginPath(); g.arc(X(0), Y(0), 12, 0, TAU); g.fill(); label(g, '태양 (초점)', X(0), Y(0) + 24, {size: 11, weight: 700}); g.strokeStyle = C.muted; g.beginPath(); g.arc(X(-2 * st.a * st.e), cy, 3, 0, TAU); g.stroke(); if (st.e > .05) label(g, '다른 초점', X(-2 * st.a * st.e), cy + 14, {size: 10, color: C.muted});
+  label(g, '근일점', X(st.a * (1 - st.e)) + 8, cy - 14, {size: 10, color: C.muted, align: 'left'}); label(g, '원일점', X(-st.a * (1 + st.e)) - 8, cy - 14, {size: 10, color: C.muted, align: 'right'});
+  const p = kpos(st.t), v = kspeed(p), r = Math.hypot(p[0], p[1]); g.strokeStyle = C.accent; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(X(0), Y(0)); g.lineTo(X(p[0]), Y(p[1])); g.stroke(); g.setLineDash([]);
+  const p2 = kpos(st.t + .002 * Tk()), dx = p2[0] - p[0], dy = p2[1] - p[1], dl = Math.hypot(dx, dy); arrow(g, X(p[0]), Y(p[1]), X(p[0]) + dx / dl * v * 4, Y(p[1]) - dy / dl * v * 4, C.phy, 2.5);
+  g.fillStyle = C.phy; g.beginPath(); g.arc(X(p[0]), Y(p[1]), 7, 0, TAU); g.fill();
+  label(g, `거리 ${r.toFixed(2)} AU · 속력 ${(v * 4.74).toFixed(1)} km/s`, 14, 18, {size: 12, weight: 700, align: 'left'}); }
+/* ===== 2. 인공위성 (뉴턴의 대포) ===== */
+const GM = 3.986e14, RE = 6.371e6, vCirc = h => Math.sqrt(GM / (RE + h * 1000)), vEsc = h => Math.sqrt(2 * GM / (RE + h * 1000));
+function launch(){ const r = RE + st.alt * 1000; st.sat = {x: 0, y: r, vx: st.lv * 1000, vy: 0, path: [[0, r]], done: false, crash: false, tt: 0}; }
+function stepSat(dt){ const s = st.sat; if (!s || s.done) return; const h = 2, n = Math.round(dt * 600 / h); for (let i = 0; i < n; i++) { const r = Math.hypot(s.x, s.y), a = -GM / (r * r * r); s.vx += a * s.x * h * .5; s.vy += a * s.y * h * .5; s.x += s.vx * h; s.y += s.vy * h; const r2 = Math.hypot(s.x, s.y), a2 = -GM / (r2 * r2 * r2); s.vx += a2 * s.x * h * .5; s.vy += a2 * s.y * h * .5; s.tt += h;
+    if (r2 < RE) { s.done = true; s.crash = true; break; } if (r2 > RE * 7) { s.done = true; break; } }
+  s.path.push([s.x, s.y]); if (s.path.length > 4000) s.path.shift();
+  if (!s.done && s.tt > 3 * 3600 * 6) s.done = true;
+  if (s.done) { st.paths.push({path: s.path, crash: s.crash}); if (st.paths.length > 5) st.paths.shift(); render(); } }
+function drawSat(){ const g = S.g, W = S.w, H = S.h, sc = Math.min(W, H) * .5 / (RE * 2.1), cx = W / 2, cy = H * .55, X = x => cx + x * sc, Y = y => cy - y * sc;
+  for (let i = 0; i < 60; i++) { const x = (i * 97) % W, y = (i * 53) % H; g.fillStyle = 'rgba(120,130,150,.35)'; g.fillRect(x, y, 1.5, 1.5); }
+  const grd = g.createRadialGradient(cx - 20, cy - 20, 10, cx, cy, RE * sc); grd.addColorStop(0, '#6fb0e8'); grd.addColorStop(1, '#2b6aa8'); g.fillStyle = grd; g.beginPath(); g.arc(cx, cy, RE * sc, 0, TAU); g.fill(); label(g, '지구', cx, cy, {size: 14, weight: 700, color: '#fff'});
+  g.strokeStyle = C.muted; g.setLineDash([2, 4]); g.beginPath(); g.arc(cx, cy, (RE + st.alt * 1000) * sc, 0, TAU); g.stroke(); g.setLineDash([]);
+  st.paths.forEach(p => { g.strokeStyle = p.crash ? 'rgba(224,83,63,.45)' : 'rgba(120,130,150,.5)'; g.lineWidth = 1.5; g.beginPath(); p.path.forEach((q, i) => i ? g.lineTo(X(q[0]), Y(q[1])) : g.moveTo(X(q[0]), Y(q[1]))); g.stroke(); });
+  const s = st.sat; if (s) { g.strokeStyle = C.accent; g.lineWidth = 2.2; g.beginPath(); s.path.forEach((q, i) => i ? g.lineTo(X(q[0]), Y(q[1])) : g.moveTo(X(q[0]), Y(q[1]))); g.stroke(); g.fillStyle = s.crash ? C.hot : C.accent; g.beginPath(); g.arc(X(s.x), Y(s.y), 5, 0, TAU); g.fill(); }
+  // 발사대
+  g.fillStyle = C.ink; g.beginPath(); g.moveTo(cx - 6, Y(RE + st.alt * 1000)); g.lineTo(cx + 6, Y(RE + st.alt * 1000)); g.lineTo(cx, Y(RE + st.alt * 1000) + 10); g.fill(); arrow(g, cx, Y(RE + st.alt * 1000), cx + 30, Y(RE + st.alt * 1000), C.hot, 2);
+  const v = st.lv, vc = vCirc(st.alt) / 1000, ve = vEsc(st.alt) / 1000, kind = v < vc - .05 ? '지구로 떨어진다 (또는 타원 궤도 일부)' : v <= vc + .05 ? '원 궤도 — 제1 우주 속도' : v < ve ? '타원 궤도' : '지구 중력을 벗어난다 — 탈출 속도 이상';
+  label(g, `예상: ${kind}`, W / 2, 20, {size: 14, weight: 700, color: C.accent});
+  if (s && s.crash && s.done) label(g, '충돌! 속력을 높여 보세요', W / 2, 42, {size: 13, weight: 700, color: C.hot}); }
+/* ===== 그래프·표 ===== */
+const PL = [['수성', .387, .241], ['금성', .723, .615], ['지구', 1, 1], ['화성', 1.524, 1.881], ['목성', 5.203, 11.86], ['토성', 9.537, 29.45]];
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'kepler') { const m = axes(G, {x: [0, 1, .25, '시간 (주기의 몇 배)'], y: [0, 3, .5, '태양까지 거리 (AU)']}); const P = [], V = []; for (let u = 0; u <= 1.0001; u += .005) { const p = kpos(Tk() * u); P.push([u, Math.hypot(p[0], p[1])]); } line(G, P, m, C.accent, 2.5); const u = (st.t / Tk()) % 1; g.fillStyle = C.phy; g.beginPath(); g.arc(m.X(u), m.Y(Math.hypot(...kpos(st.t))), 5, 0, TAU); g.fill(); label(g, '가까울 때는 짧게, 멀 때는 오래 머문다', m.X(.5), m.Y(2.7), {size: 10, color: C.muted}); }
+  else { const m = axes(G, {x: [0, 40, 5, '고도 (×1000 km)'], y: [0, 26, 4, '공전 주기 (시간)']}); const P = []; for (let h = .2; h <= 40; h += .2) { const r = RE + h * 1e6; P.push([h, TAU * Math.sqrt(r * r * r / GM) / 3600]); } line(G, P, m, C.accent, 2.5); const r0 = RE + st.alt * 1000; g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.alt / 1000), m.Y(TAU * Math.sqrt(r0 ** 3 / GM) / 3600), 5, 0, TAU); g.fill(); g.strokeStyle = C.muted; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(m.X(0), m.Y(23.93)); g.lineTo(m.X(35.79), m.Y(23.93)); g.lineTo(m.X(35.79), m.Y(0)); g.stroke(); g.setLineDash([]); label(g, '정지 궤도 (24시간)', m.X(30), m.Y(24.8), {size: 10, color: C.muted}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody'), set = (gt, gs, tt) => { $('gTitle').textContent = gt; $('gSub').textContent = gs; $('tTitle').textContent = tt; };
+  if (st.mode === 'kepler') { const rp = st.a * (1 - st.e), ra = st.a * (1 + st.e); s.innerHTML = `<div><b>${Tk().toFixed(2)} 년</b><span>공전 주기</span></div><div><b>${(T => (T * T / st.a ** 3).toFixed(2))(Tk())}</b><span>T² / a³</span></div><div><b>${rp.toFixed(2)} / ${ra.toFixed(2)} AU</b><span>근일점 / 원일점 거리</span></div><div><b>${(ra / rp).toFixed(2)} 배</b><span>근일점 속력 ÷ 원일점 속력</span></div>`;
+    $('explain').innerHTML = '<b>케플러 법칙</b> ① 타원 궤도 법칙: 행성은 태양을 한 초점으로 하는 타원 궤도를 돈다. ② 면적 속도 일정 법칙: 행성과 태양을 잇는 선분이 같은 시간 동안 쓸고 가는 넓이는 같다 → 가까울수록 빠르다. ③ 조화 법칙: 공전 주기의 제곱은 긴반지름의 세제곱에 비례한다 (T² ∝ a³).'; $('tip').textContent = '근일점과 원일점에서 속력의 비는 거리의 반비례: v근 × r근 = v원 × r원. 이심률 0은 원 궤도예요.';
+    th.innerHTML = '<tr><th>행성</th><th>a (AU)</th><th>T (년)</th><th>T²/a³</th></tr>'; tb.innerHTML = PL.map(([n, a, T]) => `<tr><td>${n}</td><td>${a}</td><td>${T}</td><td>${(T * T / a ** 3).toFixed(3)}</td></tr>`).join(''); set('시간에 따른 태양까지의 거리', `이심률 ${st.e.toFixed(2)}`, '케플러 제3법칙 확인'); }
+  else { const vc = vCirc(st.alt) / 1000, ve = vEsc(st.alt) / 1000, gh = GM / (RE + st.alt * 1000) ** 2; s.innerHTML = `<div><b>${vc.toFixed(2)} km/s</b><span>원 궤도 속력 √(GM/r)</span></div><div><b>${ve.toFixed(2)} km/s</b><span>탈출 속력 √(2GM/r)</span></div><div><b>${gh.toFixed(2)} m/s²</b><span>이 고도의 중력 가속도</span></div><div><b>${(TAU * Math.sqrt((RE + st.alt * 1000) ** 3 / GM) / 60).toFixed(0)} 분</b><span>원 궤도 주기</span></div>`;
+    $('explain').innerHTML = '<b>만유인력 법칙</b>: 질량을 가진 두 물체는 F = GMm/r²로 서로 끌어당겨요. 인공위성은 만유인력을 구심력으로 원운동해요: GMm/r² = mv²/r → v = √(GM/r). 뉴턴은 높은 산에서 대포를 충분히 빠르게 쏘면 땅에 떨어지지 않고 지구를 돈다고 생각했어요.'; $('tip').textContent = '발사 속력을 바꿔 가며 [발사]: 원 궤도 속력보다 느리면 추락, 같으면 원, 빠르면 타원, 탈출 속력 이상이면 지구를 떠나요. 지표 근처에서 제1 우주 속도 ≈ 7.9 km/s, 탈출 속도 ≈ 11.2 km/s.';
+    th.innerHTML = '<tr><th>위성</th><th>고도 (km)</th><th>속력 (km/s)</th><th>주기</th></tr>'; tb.innerHTML = [['국제우주정거장', 400], ['아리랑(지구 관측)', 685], ['GPS 위성', 20200], ['천리안(정지 궤도)', 35786]].map(([n, h]) => { const r = RE + h * 1000, T = TAU * Math.sqrt(r ** 3 / GM); return `<tr><td>${n}</td><td>${h}</td><td>${(Math.sqrt(GM / r) / 1000).toFixed(2)}</td><td>${T < 7200 ? (T / 60).toFixed(0) + '분' : (T / 3600).toFixed(1) + '시간'}</td></tr>`; }).join(''); set('고도와 공전 주기', '원 궤도, T = 2π√(r³/GM)', '여러 인공위성'); } }
+const bind = (id, k, f) => { $(id).oninput = e => { st[k] = +e.target.value; $(id + 'Out').textContent = f(st[k]); render(); }; };
+bind('ec', 'e', v => v.toFixed(2)); bind('sa', 'a', v => v.toFixed(2) + ' AU'); bind('lv', 'lv', v => v.toFixed(1) + ' km/s'); bind('alt', 'alt', v => v + ' km');
+$('area').onchange = e => { st.area = e.target.checked; }; $('launch').onclick = () => launch(); $('wipe').onclick = () => { st.paths = []; st.sat = null; };
+Kit.tabs(m => { st.mode = m; render(); }, ['kepler', 'sat']);
+Kit.loop(dt => { st.t += dt * .25 * Tk() / Math.max(.5, Tk()); stepSat(dt); }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); (st.mode === 'kepler' ? drawKepler : drawSat)(); drawGraph(); });
+})();
+</script>
+</body>
+</html>

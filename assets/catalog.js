@@ -91,9 +91,9 @@ window.CATALOG = [
   { no:40, disp:4, area:'phy', title:'빛과 물질', code:'물리학 Ⅲ', dir:'p/light', items:[{kind:'sim', title:'1차시 굴절과 전반사', href:'p/light/sim.html#refract'}, {kind:'sim', title:'2차시 빛의 간섭 (이중 슬릿)', href:'p/light/sim.html#interf'}, {kind:'sim', title:'3차시 빛의 입자성 (광전 효과)', href:'p/light/sim.html#photo'}, {kind:'sim', title:'4차시 물질파와 전자 현미경', href:'p/light/sim.html#matter'}, {kind:'ws', title:'학습지 1~4차시 (8쪽)', href:'p/light/worksheet.html'}]}
  ]},
  { id:'mech', level:'고', grade:'고3', book:'역학과 에너지', units:[
-  { no:41, disp:1, area:'phy', title:'평면 운동', code:'역학과 에너지 Ⅰ', dir:'m/plane', items:[{kind:'sim', title:'1차시 포물선 운동', href:''}, {kind:'sim', title:'2차시 등속 원운동', href:''}, {kind:'ws', title:'학습지', href:''}]},
-  { no:42, disp:2, area:'phy', title:'천체의 운동', code:'역학과 에너지 Ⅰ', dir:'m/orbit', items:[{kind:'sim', title:'1차시 케플러 법칙', href:''}, {kind:'sim', title:'2차시 만유인력과 인공위성', href:''}, {kind:'ws', title:'학습지', href:''}]},
-  { no:43, disp:3, area:'phy', title:'단진동', code:'역학과 에너지 Ⅰ', dir:'m/shm', items:[{kind:'sim', title:'1차시 용수철 진자의 단진동', href:''}, {kind:'sim', title:'2차시 단진자의 주기', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:41, disp:1, area:'phy', title:'평면 운동', code:'역학과 에너지 Ⅰ', dir:'m/plane', items:[{kind:'sim', title:'1차시 포물선 운동 (과녁 맞히기)', href:'m/plane/sim.html#proj'}, {kind:'sim', title:'2차시 등속 원운동', href:'m/plane/sim.html#circ'}, {kind:'ws', title:'학습지 1~2차시 (4쪽)', href:'m/plane/worksheet.html'}]},
+  { no:42, disp:2, area:'phy', title:'천체의 운동', code:'역학과 에너지 Ⅰ', dir:'m/orbit', items:[{kind:'sim', title:'1차시 케플러 법칙', href:'m/orbit/sim.html#kepler'}, {kind:'sim', title:'2차시 만유인력과 인공위성 (뉴턴의 대포)', href:'m/orbit/sim.html#sat'}, {kind:'ws', title:'학습지 1~2차시 (4쪽)', href:'m/orbit/worksheet.html'}]},
+  { no:43, disp:3, area:'phy', title:'단진동', code:'역학과 에너지 Ⅰ', dir:'m/shm', items:[{kind:'sim', title:'1차시 용수철 진자의 단진동', href:'m/shm/sim.html#spring'}, {kind:'sim', title:'2차시 단진자의 주기 (목표 주기 도전)', href:'m/shm/sim.html#pend'}, {kind:'ws', title:'학습지 1~2차시 (4쪽)', href:'m/shm/worksheet.html'}]},
   { no:44, disp:4, area:'phy', title:'열역학', code:'역학과 에너지 Ⅱ', dir:'m/gas', items:[{kind:'sim', title:'1차시 기체 분자 운동', href:''}, {kind:'sim', title:'2차시 열역학 과정과 P–V 그래프', href:''}, {kind:'ws', title:'학습지', href:''}]},
   { no:45, disp:5, area:'phy', title:'탄성파와 소리', code:'역학과 에너지 Ⅲ', dir:'m/wave', items:[{kind:'sim', title:'1차시 도플러 효과', href:''}, {kind:'sim', title:'2차시 정상파와 공명', href:''}, {kind:'ws', title:'학습지', href:''}]}
  ]},
