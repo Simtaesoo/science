@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>레이저 반사 퍼즐 · 중2 빛과 파동</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'laser', title: '레이저 반사 퍼즐', unit: '중2 · 10 빛과 파동', back: '../../index.html#g2', sim: 'sim.html#refl', dark: true,
+  lead: '거울을 놓아 레이저를 별까지 보내세요. 거울에 부딪힌 빛은 <b>입사각과 같은 반사각</b>으로 꺾여 나갑니다.',
+  howto: ['빈 칸을 누르면 거울 <b>/</b>이 놓이고, 다시 누르면 <b>\\</b>로 돌아갑니다.', '거울을 <b>길게 누르면</b> 치워집니다. 거울 수는 정해져 있어요.', '모든 ⭐에 빛이 닿으면 통과! 색깔 별은 같은 색 빛이 닿아야 켜집니다.'],
+  options: [{key: 'diff', label: '난이도', choices: [['easy', '하'], ['mid', '중'], ['hard', '상']], def: 'easy'}, {key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '<b>반사의 법칙</b>: 빛이 거울에 부딪혀 반사할 때 <b>입사각 = 반사각</b>이며, 입사 광선·반사 광선·법선은 같은 평면에 있습니다. 이 퍼즐의 거울은 빛과 45°를 이루므로 입사각과 반사각이 모두 45°여서 빛이 90° 꺾입니다. 색 필터는 그 색의 빛만 통과시킵니다(빛의 합성과 색).',
+  startLabel: '게임 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const COLS = 10, ROWS = 6, LEVELS = 10;
+const DIRS = [[1, 0], [0, 1], [-1, 0], [0, -1]]; // 오른쪽, 아래, 왼쪽, 위
+const REF = {'/': [3, 2, 1, 0], '\\': [1, 0, 3, 2]};  // 들어오는 방향 → 나가는 방향
+const CLR = {w: '255,255,255', r: '255,90,80', g: '90,230,120', b: '90,160,255'};
+let L = null, beam = [], lit = new Set(), hover = null, solvedT = 0, hintsUsed = 0, showAngle = true, levelIdx = 0, levelStart = 0, ui = {};
+
+/* ---------- 레벨 만들기: 정답 경로를 먼저 그리고 그 위에 별을 놓는다 ---------- */
+function genLevel(diff, n){
+  const rnd = D.rng(1000 + n * 97 + {easy: 1, mid: 2, hard: 3}[diff] * 7919);
+  const nm = diff === 'easy' ? 1 + (n > 4 ? 1 : 0) : diff === 'mid' ? 2 + (n > 5 ? 1 : 0) : 3 + (n > 4 ? 1 : 0);
+  for (let tries = 0; tries < 400; tries++) {
+    const sr = Math.floor(rnd() * ROWS), path = [], used = new Set(), mir = [];
+    let x = 0, y = sr, d = 0, ok = true; used.add(x + ',' + y);
+    for (let k = 0; k <= nm; k++) {
+      const len = 1 + Math.floor(rnd() * 4);
+      for (let s = 0; s < len; s++) { x += DIRS[d][0]; y += DIRS[d][1]; if (x < 0 || y < 0 || x >= COLS || y >= ROWS || used.has(x + ',' + y)) { ok = false; break; } used.add(x + ',' + y); path.push([x, y, d]); }
+      if (!ok) break;
+      if (k < nm) { const turn = rnd() < .5 ? 1 : 3, nd = (d + turn) % 4; const type = REF['/'][d] === nd ? '/' : '\\'; mir.push([x, y, type]); d = nd; }
+    }
+    if (!ok || path.length < 3) continue;
+    const last = path[path.length - 1], target = [last[0], last[1]];
+    if (mir.some(m => m[0] === target[0] && m[1] === target[1])) continue;
+    const stars = [{x: target[0], y: target[1], c: 'w'}];
+    // 어려운 단계: 경로 중간에 별 하나 더, 또는 색 필터 + 색 별
+    let filter = null;
+    if ((diff === 'hard' && n >= 3) || (diff === 'mid' && n >= 7)) { const mids = path.slice(1, -2).filter(p => !mir.some(m => m[0] === p[0] && m[1] === p[1])); if (mids.length) { const p = mids[Math.floor(rnd() * mids.length)]; stars.push({x: p[0], y: p[1], c: 'w'}); } }
+    if ((diff === 'hard' && n >= 6) || (diff === 'mid' && n >= 9)) { const cands = path.slice(0, -3).filter(p => !mir.some(m => m[0] === p[0] && m[1] === p[1]) && !stars.some(s => s.x === p[0] && s.y === p[1])); if (cands.length) { const p = cands[Math.floor(rnd() * cands.length)], c = ['r', 'g', 'b'][Math.floor(rnd() * 3)]; filter = {x: p[0], y: p[1], c}; stars.forEach(s => { if (path.findIndex(q => q[0] === s.x && q[1] === s.y) > path.findIndex(q => q[0] === p[0] && q[1] === p[1])) s.c = c; }); } }
+    // 벽: 경로가 아닌 칸에
+    const walls = []; const nw = diff === 'easy' ? 3 + n : diff === 'mid' ? 6 + n : 8 + n;
+    for (let i = 0; i < nw * 3 && walls.length < nw; i++) { const wx = Math.floor(rnd() * COLS), wy = Math.floor(rnd() * ROWS); if (used.has(wx + ',' + wy) || (wx === 0 && wy === sr) || walls.some(w => w[0] === wx && w[1] === wy)) continue; walls.push([wx, wy]); }
+    const fixed = (diff === 'hard' && n >= 8 && mir.length > 2) ? [mir[0]] : [];
+    return {src: [0, sr], walls, stars, filter, sol: mir, fixed, allow: mir.length - fixed.length + (diff === 'easy' ? 1 : 0), mirrors: fixed.map(m => ({x: m[0], y: m[1], t: m[2], fixed: true}))};
+  }
+}
+
+/* ---------- 빛 추적 ---------- */
+function trace(){
+  beam = []; lit = new Set(); const segs = []; let x = L.src[0], y = L.src[1], d = 0, col = 'w', guard = 0, sx = x, sy = y, sc = col;
+  const cellAt = (cx, cy) => ({mir: L.mirrors.find(m => m.x === cx && m.y === cy), wall: L.walls.some(w => w[0] === cx && w[1] === cy), star: L.stars.find(s => s.x === cx && s.y === cy), filt: L.filter && L.filter.x === cx && L.filter.y === cy ? L.filter : null});
+  while (guard++ < 200) {
+    const nx = x + DIRS[d][0], ny = y + DIRS[d][1];
+    if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) { segs.push({a: [sx, sy], b: [nx, ny], c: sc, edge: true}); break; }
+    const c = cellAt(nx, ny);
+    if (c.wall) { segs.push({a: [sx, sy], b: [nx, ny], c: sc, wall: true}); break; }
+    x = nx; y = ny;
+    if (c.star && (c.star.c === 'w' || c.star.c === col)) lit.add(c.star);
+    if (c.filt) { segs.push({a: [sx, sy], b: [x, y], c: sc}); col = (col === 'w' || col === c.filt.c) ? c.filt.c : null; sx = x; sy = y; sc = col; if (!col) { segs.push({a: [x, y], b: [x, y], c: 'w', dead: true}); break; } }
+    if (c.mir) { segs.push({a: [sx, sy], b: [x, y], c: sc, mir: c.mir, din: d}); d = REF[c.mir.t][d]; sx = x; sy = y; c.mir.dout = d; c.mir.din = segs[segs.length - 1].din; }
+  }
+  beam = segs;
+}
+
+/* ---------- 레벨 진행 ---------- */
+function loadLevel(i){
+  levelIdx = i; L = genLevel(app.opts.diff, i); hintsUsed = 0; solvedT = 0; levelStart = performance.now();
+  app.setLevel(i, LEVELS); trace(); renderSide();
+}
+function renderSide(){
+  const left = L.allow - L.mirrors.filter(m => !m.fixed).length;
+  ui.mission.innerHTML = `거울 <b style="color:var(--yellow);font-size:20px">${left}</b>개 남음 · 별 ${L.stars.length}개${L.filter ? ' · 색 필터 있음' : ''}`;
+  ui.prog.innerHTML = Array.from({length: LEVELS}, (_, k) => `<i class="${k < levelIdx ? 'done' : k === levelIdx ? 'now' : ''}"></i>`).join('');
+}
+function cellFromXY(px, py){ const g = geo(); const cx = Math.floor((px - g.ox) / g.cs), cy = Math.floor((py - g.oy) / g.cs); return cx >= 0 && cy >= 0 && cx < COLS && cy < ROWS ? [cx, cy] : null; }
+function geo(){ const cs = Math.min(S.w / (COLS + .6), S.h / (ROWS + .6)); return {cs, ox: (S.w - cs * COLS) / 2, oy: (S.h - cs * ROWS) / 2}; }
+function blocked(cx, cy){ return L.walls.some(w => w[0] === cx && w[1] === cy) || (L.src[0] === cx && L.src[1] === cy) || L.stars.some(s => s.x === cx && s.y === cy) || (L.filter && L.filter.x === cx && L.filter.y === cy); }
+function check(){ trace(); renderSide(); if (lit.size === L.stars.length && !solvedT) { solvedT = performance.now(); sfx.win(); const secs = (solvedT - levelStart) / 1000, used = L.mirrors.filter(m => !m.fixed).length, pts = Math.max(20, Math.round(100 + Math.max(0, 60 - secs) * 2 - hintsUsed * 40 + Math.max(0, L.sol.length - L.fixed.length - used) * 30)); app.addScore(pts); toast(`통과! +${pts}점`, 'good'); app.confetti(60);
+    setTimeout(() => { if (levelIdx + 1 >= LEVELS) end(); else { app.nextTurn(); loadLevel(levelIdx + 1); } }, 1500); } }
+function end(){ const sc = app.player.score, total = app.state.players.reduce((a, p) => a + p.score, 0); app.finish({stars: app.multi ? 3 : sc > 1300 ? 3 : sc > 900 ? 2 : 1, summary: app.multi ? '모둠별 점수입니다. 가장 적은 거울과 빠른 시간으로 푼 모둠이 유리해요.' : `10단계를 모두 통과했어요. 총점 <b>${sc}</b>점`, best: sc + '점', bestValue: sc}); }
+
+app.onStart = () => {
+  app.side.innerHTML = app.multi ? app.side.innerHTML : '';
+  const m = app.panel('미션'); m.className = 'mission'; ui.mission = m;
+  const p = app.panel('진행'); p.className = 'progress'; ui.prog = p;
+  const t = app.panel('도구', `<div class="tools"><button class="tool" id="hintB" type="button">💡 힌트 (−40점)</button><button class="tool" id="angB" type="button" aria-pressed="true">📐 각도 보기</button><button class="tool" id="clrB" type="button">🧹 거울 모두 치우기</button><button class="tool" id="skipB" type="button">⏭ 건너뛰기 (0점)</button></div>`);
+  t.querySelector('#hintB').onclick = () => { const need = L.sol.find(s => !L.mirrors.some(m => m.x === s[0] && m.y === s[1] && m.t === s[2])); if (!need) return toast('이미 정답 거울이 다 있어요'); L.mirrors = L.mirrors.filter(m => !(m.x === need[0] && m.y === need[1])); L.mirrors.push({x: need[0], y: need[1], t: need[2], fixed: true, hint: true}); L.allow = Math.max(L.allow - 1, 0); hintsUsed++; sfx.pop(); check(); };
+  t.querySelector('#angB').onclick = e => { showAngle = !showAngle; e.currentTarget.setAttribute('aria-pressed', String(showAngle)); };
+  t.querySelector('#clrB').onclick = () => { L.mirrors = L.mirrors.filter(m => m.fixed); sfx.whoosh(); check(); };
+  t.querySelector('#skipB').onclick = () => { if (solvedT) return; toast('다음 단계로'); if (levelIdx + 1 >= LEVELS) end(); else { app.nextTurn(); loadLevel(levelIdx + 1); } };
+  app.panel('알고 가기', '<p>거울에 수직인 선을 <b>법선</b>이라고 해요. 법선과 들어오는 빛 사이의 각이 <b>입사각</b>, 법선과 나가는 빛 사이의 각이 <b>반사각</b>입니다. 두 각은 항상 같아요.</p>');
+  app.startTimer(); loadLevel(0);
+};
+app.pointer({
+  tap(px, py){ if (!L || solvedT) return; const c = cellFromXY(px, py); if (!c || blocked(...c)) return; const m = L.mirrors.find(m => m.x === c[0] && m.y === c[1]);
+    if (m) { if (m.fixed) return toast('고정된 거울이에요'); m.t = m.t === '/' ? '\\' : '/'; sfx.click(); }
+    else { if (L.mirrors.filter(m => !m.fixed).length >= L.allow) { sfx.bad(); return toast('거울이 모두 쓰였어요', 'bad'); } L.mirrors.push({x: c[0], y: c[1], t: '/'}); sfx.pop(); }
+    check(); },
+  long(px, py){ if (!L || solvedT) return; const c = cellFromXY(px, py); if (!c) return; const i = L.mirrors.findIndex(m => m.x === c[0] && m.y === c[1] && !m.fixed); if (i >= 0) { L.mirrors.splice(i, 1); sfx.whoosh(); check(); } },
+  move(px, py){ hover = cellFromXY(px, py); }
+});
+
+/* ---------- 그리기 ---------- */
+app.draw = (g, W, H) => {
+  const {cs, ox, oy} = geo(), t = performance.now() / 1000, X = cx => ox + (cx + .5) * cs, Y = cy => oy + (cy + .5) * cs;
+  g.fillStyle = '#0d1b18'; g.fillRect(0, 0, W, H);
+  if (!L) return;
+  for (let i = 0; i < COLS; i++) for (let j = 0; j < ROWS; j++) { g.fillStyle = (i + j) % 2 ? '#13262200' : '#16302a'; g.fillRect(ox + i * cs, oy + j * cs, cs, cs); }
+  g.strokeStyle = 'rgba(155,227,181,.08)'; g.lineWidth = 1; for (let i = 0; i <= COLS; i++) { g.beginPath(); g.moveTo(ox + i * cs, oy); g.lineTo(ox + i * cs, oy + ROWS * cs); g.stroke(); } for (let j = 0; j <= ROWS; j++) { g.beginPath(); g.moveTo(ox, oy + j * cs); g.lineTo(ox + COLS * cs, oy + j * cs); g.stroke(); }
+  if (hover && !blocked(...hover) && !solvedT) { g.fillStyle = 'rgba(246,211,101,.10)'; g.fillRect(ox + hover[0] * cs, oy + hover[1] * cs, cs, cs); }
+  // 벽
+  L.walls.forEach(([x, y]) => { const px = ox + x * cs, py = oy + y * cs; g.fillStyle = '#3a4a46'; D.rr(g, px + 3, py + 3, cs - 6, cs - 6, 6); g.fill(); g.strokeStyle = '#4f625d'; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 8, py + cs * .45); g.lineTo(px + cs - 8, py + cs * .45); g.moveTo(px + cs * .5, py + 6); g.lineTo(px + cs * .5, py + cs * .45); g.moveTo(px + cs * .3, py + cs * .45); g.lineTo(px + cs * .3, py + cs - 6); g.moveTo(px + cs * .7, py + cs * .45); g.lineTo(px + cs * .7, py + cs - 6); g.stroke(); });
+  // 색 필터
+  if (L.filter) { const f = L.filter; g.fillStyle = `rgba(${CLR[f.c]},.35)`; D.rr(g, ox + f.x * cs + 6, oy + f.y * cs + 6, cs - 12, cs - 12, 8); g.fill(); g.strokeStyle = `rgb(${CLR[f.c]})`; g.lineWidth = 2; g.stroke(); D.text(g, '필터', X(f.x), Y(f.y) + cs * .32, {size: Math.max(9, cs * .16), color: `rgb(${CLR[f.c]})`}); }
+  // 광선
+  g.save(); g.globalCompositeOperation = 'lighter';
+  beam.forEach(s => { if (s.dead) return; const ax = X(s.a[0]), ay = Y(s.a[1]); let ex = X(s.b[0]), ey = Y(s.b[1]); if (s.edge || s.wall) { const dx = Math.sign(s.b[0] - s.a[0]), dy = Math.sign(s.b[1] - s.a[1]); ex -= dx * cs * .5; ey -= dy * cs * .5; }
+    const rgb = CLR[s.c || 'w']; [[12, .12], [6, .3], [2.5, .95]].forEach(([w, a]) => { g.strokeStyle = `rgba(${rgb},${a})`; g.lineWidth = w; g.lineCap = 'round'; g.beginPath(); g.moveTo(ax, ay); g.lineTo(ex, ey); g.stroke(); });
+    const L2 = Math.hypot(ex - ax, ey - ay); for (let k = 0; k < L2 / 26; k++) { const f = ((t * 2.2 + k / (L2 / 26)) % 1); g.fillStyle = `rgba(${rgb},.9)`; g.beginPath(); g.arc(ax + (ex - ax) * f, ay + (ey - ay) * f, 2, 0, 7); g.fill(); } });
+  g.restore();
+  // 발사기
+  const sx = X(L.src[0]), sy = Y(L.src[1]); g.fillStyle = '#c9ced6'; D.rr(g, sx - cs * .42, sy - cs * .22, cs * .7, cs * .44, 6); g.fill(); g.fillStyle = '#e8483a'; g.beginPath(); g.arc(sx + cs * .3, sy, cs * .1, 0, 7); g.fill(); D.glow(g, sx + cs * .3, sy, cs * .3, '255,90,80', .6);
+  // 별
+  L.stars.forEach(s => { const on = lit.has(s), x = X(s.x), y = Y(s.y), r = cs * .3 * (on ? 1 + .08 * Math.sin(t * 8) : 1), rgb = CLR[s.c];
+    if (on) D.glow(g, x, y, cs * .8, rgb === CLR.w ? '255,220,110' : rgb, .7);
+    g.beginPath(); for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? r * .45 : r; g.lineTo(x + Math.cos(a + (on ? t : 0) * .5) * rr, y + Math.sin(a + (on ? t : 0) * .5) * rr); } g.closePath();
+    g.fillStyle = on ? (s.c === 'w' ? '#ffd84a' : `rgb(${rgb})`) : 'rgba(255,255,255,.12)'; g.fill(); g.strokeStyle = s.c === 'w' ? '#ffd84a' : `rgb(${rgb})`; g.lineWidth = 2; g.stroke(); });
+  // 거울
+  L.mirrors.forEach(m => { const x = X(m.x), y = Y(m.y), r = cs * .38, k = m.t === '/' ? -1 : 1;
+    g.strokeStyle = m.fixed ? (m.hint ? '#f6d365' : '#8a8f99') : '#e8f1ff'; g.lineWidth = Math.max(4, cs * .09); g.lineCap = 'round'; g.beginPath(); g.moveTo(x - r, y - k * r); g.lineTo(x + r, y + k * r); g.stroke();
+    g.strokeStyle = 'rgba(120,170,255,.6)'; g.lineWidth = 2; g.beginPath(); g.moveTo(x - r + 3, y - k * r + 3 * k * 0 + 3); g.lineTo(x + r + 3, y + k * r + 3); g.stroke();
+    if (m.fixed) D.text(g, '🔒', x + cs * .3, y - cs * .32, {size: cs * .2});
+    if (showAngle && beam.some(s => s.mir === m)) { const nx = k, ny = -1; const nl = Math.hypot(nx, ny); g.setLineDash([4, 4]); g.strokeStyle = 'rgba(246,211,101,.8)'; g.lineWidth = 1.5;
+      // 법선 (거울에 수직, 빛이 오는 쪽)
+      const din = DIRS[m.din], dout = DIRS[m.dout], bis = [-din[0] + dout[0], -din[1] + dout[1]], bl = Math.hypot(...bis); g.beginPath(); g.moveTo(x, y); g.lineTo(x + bis[0] / bl * cs * .55, y + bis[1] / bl * cs * .55); g.stroke(); g.setLineDash([]);
+      D.text(g, '45°', x - din[0] * cs * .3 + bis[0] / bl * cs * .12, y - din[1] * cs * .3 + bis[1] / bl * cs * .12, {size: Math.max(10, cs * .17), color: '#f6d365', weight: 700}); D.text(g, '45°', x + dout[0] * cs * .3 + bis[0] / bl * cs * .12, y + dout[1] * cs * .3 + bis[1] / bl * cs * .12, {size: Math.max(10, cs * .17), color: '#9be3b5', weight: 700}); }
+  });
+  if (solvedT) { const k = Math.min(1, (performance.now() - solvedT) / 600); g.fillStyle = `rgba(13,27,24,${.35 * k})`; g.fillRect(0, 0, W, H); D.text(g, '통과!', W / 2, H / 2, {size: 64 * (0.8 + .2 * k), display: true, color: '#f6d365', stroke: '#0d1b18', strokeW: 8}); }
+};
+</script>
+</body>
+</html>

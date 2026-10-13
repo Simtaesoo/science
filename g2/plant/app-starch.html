@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>광합성 산물 확인하기 · 중2 식물과 에너지</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'starch', title: '광합성 산물 확인하기', unit: '중2 · 12 식물과 에너지', back: '../../index.html#g2', sim: 'sim.html#store',
+  lead: '실험대 위의 도구를 직접 끌어다 놓으며 <b>잎에서 녹말이 만들어지는지</b> 확인하는 가상 실험입니다. 순서와 안전 수칙을 지키면 별을 모두 받을 수 있어요.',
+  howto: ['오른쪽 <b>실험 순서</b>를 보며 알맞은 도구를 <b>끌어서</b> 놓으세요.', '단계마다 <b>왜 이렇게 하는지</b> 짧은 질문이 나옵니다.', '마지막에 아이오딘 반응 결과를 보고 결론을 고르세요.'],
+  options: [{key: 'exp', label: '실험', choices: [['foil', '포일로 가린 잎'], ['vari', '무늬(얼룩) 잎']], def: 'foil'}],
+  recap: '<b>광합성 산물 확인</b>: 빛을 받은 잎의 초록 부분에서만 아이오딘-아이오딘화 칼륨 용액이 <b>청람색</b>으로 변합니다. → 녹말은 <b>빛</b>이 있을 때, <b>엽록체</b>가 있는 곳에서 만들어집니다. 에탄올은 불이 붙기 쉬워 <b>물중탕</b>으로 데우고, 엽록소를 녹여 내어 색 변화를 잘 보이게 합니다.',
+  startLabel: '실험 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const STEPS = {
+  foil: [
+    {k: 'dark', t: '화분을 하룻밤 어두운 곳에 두기', tool: 'box', zone: 'plant', q: ['실험 전에 식물을 어두운 곳에 두는 까닭은?', ['잎에 있던 녹말을 없애기 위해', '잎을 시원하게 하기 위해', '잎의 엽록소를 없애기 위해'], 0]},
+    {k: 'foil', t: '잎의 일부를 알루미늄 포일로 가리기', tool: 'foil', zone: 'leaf', q: ['포일로 잎 일부를 가리는 까닭은?', ['빛을 받은 부분과 받지 못한 부분을 비교하려고', '잎이 마르지 않게 하려고', '잎의 온도를 높이려고'], 0]},
+    {k: 'sun', t: '햇빛이 잘 드는 곳에 4시간 두기', tool: 'plant', zone: 'window'},
+    {k: 'cut', t: '잎을 따서 포일 벗기기', tool: 'scissors', zone: 'leaf'},
+    {k: 'eth', t: '잎을 에탄올이 든 시험관에 넣기', tool: 'leaf', zone: 'tube'},
+    {k: 'bath', t: '시험관을 뜨거운 물이 든 비커에 넣어 물중탕하기', tool: 'tube', zone: 'beaker', danger: 'burner', q: ['에탄올을 불에 직접 가열하지 않고 물중탕하는 까닭은?', ['에탄올은 불이 붙기 쉬워 위험하기 때문에', '에탄올이 너무 빨리 식기 때문에', '물이 잎을 초록색으로 만들기 때문에'], 0]},
+    {k: 'rinse', t: '탈색된 잎을 따뜻한 물에 헹궈 페트리 접시에 펴기', tool: 'leaf2', zone: 'dish', q: ['잎을 에탄올에 넣고 데우는 까닭은?', ['엽록소를 녹여 내어 색 변화를 잘 보려고', '녹말을 만들기 위해', '잎을 부드럽게 해서 먹기 위해'], 0]},
+    {k: 'iodine', t: '아이오딘-아이오딘화 칼륨 용액 떨어뜨리기', tool: 'dropper', zone: 'dish'}
+  ]
+};
+STEPS.vari = STEPS.foil.filter(s => s.k !== 'foil').map(s => s.k === 'cut' ? Object.assign({}, s, {t: '무늬 잎을 따기'}) : s);
+STEPS.vari[0] = Object.assign({}, STEPS.vari[0]);
+const RESULT_Q = {foil: ['결과를 보고 알 수 있는 것은?', ['빛을 받은 부분에서만 녹말이 만들어졌다', '포일로 가린 부분에서 녹말이 더 많이 만들어졌다', '잎의 모든 부분에서 녹말이 똑같이 만들어졌다'], 0],
+  vari: ['결과를 보고 알 수 있는 것은?', ['엽록체가 있는 초록 부분에서만 녹말이 만들어졌다', '흰 부분에서 녹말이 더 많이 만들어졌다', '빛이 없어도 녹말이 만들어진다'], 0]};
+let steps, si, mistakes, drag = null, anim = {}, quiz = null, leaf = {}, ui = {}, done = false;
+
+/* 실험대 배치 (무대 비율 좌표) */
+const P = {window: [.14, .2], plant: [.22, .62], box: [.48, .2], foil: [.6, .2], scissors: [.72, .2], beaker: [.56, .72], burner: [.86, .72], tube: [.42, .72], dish: [.76, .45], dropper: [.88, .2], water: [.86, .45]};
+function at(k){ return [P[k][0] * S.w, P[k][1] * S.h]; }
+
+app.onStart = (o) => {
+  steps = STEPS[o.exp]; si = 0; mistakes = 0; done = false; quiz = null; drag = null;
+  leaf = {state: 'green', dark: false, foil: false, sun: 0, picked: false, inTube: false, bath: 0, rinsed: false, iodine: 0, vari: o.exp === 'vari'};
+  anim = {sunT: 0, steam: 0};
+  ui.steps = app.panel('실험 순서'); ui.info = app.panel('지금 할 일'); ui.q = app.panel('생각하기', '<p class="note-c">단계를 마치면 질문이 나타나요.</p>');
+  app.startTimer(); render();
+};
+function render(){
+  ui.steps.innerHTML = '<ol style="margin:0;padding-left:20px;line-height:1.75;font-size:14.5px">' + steps.map((s, i) => `<li style="opacity:${i < si ? .55 : 1};${i === si ? 'color:var(--yellow);font-weight:700' : ''}">${i < si ? '✔ ' : ''}${s.t}</li>`).join('') + '</ol>';
+  const s = steps[si]; ui.info.innerHTML = s ? `<p class="mission">${s.t}</p><p class="note-c" style="margin-top:6px">빛나는 도구를 끌어서 표시된 곳에 놓으세요.</p>` : '<p class="mission">결과를 관찰하고 결론을 고르세요.</p>';
+}
+function ask(q0, after){ const ord = q0[1].map((_, i) => i).sort(() => Math.random() - .5), q = [q0[0], ord.map(i => q0[1][i]), ord.indexOf(q0[2])]; quiz = q; ui.q.innerHTML = `<p style="margin-bottom:8px">${q[0]}</p>` + q[1].map((c, i) => `<button class="tool" style="width:100%;margin:4px 0;text-align:left" data-i="${i}" type="button">${c}</button>`).join('');
+  ui.q.querySelectorAll('button').forEach(b => b.onclick = () => { const i = +b.dataset.i; if (i === q[2]) { sfx.ok(); toast('정답!', 'good'); ui.q.innerHTML = `<p>✔ ${q[1][q[2]]}</p>`; quiz = null; after && after(); } else { sfx.bad(); mistakes++; b.disabled = true; toast('다시 생각해 보세요', 'bad'); } }); }
+function complete(){ const s = steps[si]; si++; sfx.ok(); render(); if (s.q) ask(s.q, () => {}); if (si >= steps.length) setTimeout(() => ask(RESULT_Q[app.opts.exp], finish), 2200); }
+function finish(){ done = true; const sec = app.stopTimer(); app.finish({stars: mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1, summary: `실수 ${mistakes}번 · ${Math.round(sec)}초 만에 실험을 마쳤어요.`, best: `실수 ${mistakes}번`, bestValue: -mistakes}); }
+
+/* 도구 위치 (현재 상태에 따라) */
+function toolPos(k){ if (k === 'plant') return leaf.sun > 0 ? at('window').map((v, i) => i ? v + S.h * .42 : v + S.w * .08) : at('plant'); if (k === 'leaf') return [S.w * .32, S.h * .45]; if (k === 'leaf2') return [S.w * .42, S.h * .55]; return at(k); }
+function toolVisible(k){ const s = steps[si]; if (!s) return k === 'dropper'; if (k === 'leaf') return leaf.picked && !leaf.inTube; if (k === 'leaf2') return leaf.bath >= 1 && !leaf.rinsed; return true; }
+function zonePos(z){ if (z === 'plant' || z === 'leaf') { const p = toolPos('plant'); return [p[0] + S.w * .02, p[1] - S.h * .2]; } if (z === 'window') return [at('window')[0] + S.w * .08, at('window')[1] + S.h * .3]; if (z === 'tube') return at('tube'); if (z === 'beaker') return at('beaker'); if (z === 'dish') return at('dish'); return at(z); }
+function hit(p, q, r){ return Math.hypot(p[0] - q[0], p[1] - q[1]) < r; }
+
+app.pointer({
+  down(x, y){ if (quiz || done) return; const s = steps[si]; const cands = ['box', 'foil', 'scissors', 'plant', 'leaf', 'leaf2', 'tube', 'dropper', 'burner'].filter(toolVisible);
+    for (const k of cands) { const p = toolPos(k); if (hit([x, y], p, S.w * .055)) { if (s && k !== s.tool && !(k === 'burner')) { sfx.bad(); toast('지금은 다른 도구가 필요해요', 'bad'); mistakes++; return; } if (k === 'burner') { sfx.bad(); toast('알코올램프로 에탄올을 직접 가열하면 불이 붙을 수 있어요!', 'bad'); mistakes++; return; } drag = {k, x, y}; sfx.click(); return; } } },
+  move(x, y, isDown){ if (drag) { drag.x = x; drag.y = y; } },
+  up(x, y){ if (!drag) return; const s = steps[si]; const z = zonePos(s.zone);
+    if (s.danger && hit([x, y], at(s.danger), S.w * .07)) { sfx.bad(); toast('직접 가열은 위험해요! 물중탕을 하세요', 'bad'); mistakes++; drag = null; return; }
+    if (hit([x, y], z, S.w * .09)) { act(s.k); } else { sfx.whoosh(); }
+    drag = null; }
+});
+function act(k){
+  if (k === 'dark') { leaf.dark = true; anim.dark = performance.now(); toast('하룻밤이 지났어요 🌙'); complete(); }
+  else if (k === 'foil') { leaf.foil = true; complete(); }
+  else if (k === 'sun') { leaf.sun = .001; anim.sunT = performance.now(); }
+  else if (k === 'cut') { leaf.picked = true; sfx.pop(); complete(); }
+  else if (k === 'eth') { leaf.inTube = true; sfx.bubble(); complete(); }
+  else if (k === 'bath') { leaf.bathing = performance.now(); }
+  else if (k === 'rinse') { leaf.rinsed = true; sfx.drip(); complete(); }
+  else if (k === 'iodine') { leaf.iodineT = performance.now(); for (let i = 0; i < 4; i++) setTimeout(() => sfx.drip(), i * 180); complete(); }
+}
+app.step = dt => {
+  if (leaf.sun > 0 && leaf.sun < 1) { leaf.sun = Math.min(1, (performance.now() - anim.sunT) / 2600); if (leaf.sun >= 1) { toast('4시간이 지났어요 ☀️'); complete(); } }
+  if (leaf.bathing && leaf.bath < 1) { leaf.bath = Math.min(1, (performance.now() - leaf.bathing) / 3200); if (Math.random() < .2) sfx.bubble(); if (leaf.bath >= 1) { toast('잎의 초록색이 빠졌어요'); complete(); } }
+  if (leaf.iodineT) leaf.iodine = Math.min(1, (performance.now() - leaf.iodineT) / 2000);
+};
+
+/* ---------- 그리기 ---------- */
+function leafPath(g, x, y, s, a){ const c = Math.cos(a), n = Math.sin(a), T = (px, py) => [x + px * c - py * n, y + px * n + py * c];
+  g.beginPath(); g.moveTo(...T(0, 0)); g.bezierCurveTo(...T(s * .35, -s * .35), ...T(s * .85, -s * .3), ...T(s, 0)); g.bezierCurveTo(...T(s * .85, s * .3), ...T(s * .35, s * .35), ...T(0, 0)); g.closePath(); }
+function drawLeaf(g, x, y, s, ang, mode){ // mode: 'live' 살아 있는 잎 | 'bleach' 탈색 | 'iodine' 아이오딘 반응
+  const vari = leaf.vari, T = leaf.bath, I = leaf.iodine;
+  const base = mode === 'live' ? '#4fa44a' : mode === 'bleach' ? `rgb(${D.lerp(79, 236, T) | 0},${D.lerp(164, 230, T) | 0},${D.lerp(74, 190, T) | 0})` : '#ece5bd';
+  leafPath(g, x, y, s, ang); g.fillStyle = base; g.fill();
+  g.save(); leafPath(g, x, y, s, ang); g.clip();
+  if (vari) { g.lineWidth = s * .2; g.strokeStyle = mode === 'live' ? '#eef3df' : '#f4f0dc'; leafPath(g, x, y, s, ang); g.stroke(); }
+  if (mode === 'iodine' && I > 0) { g.globalAlpha = I; g.fillStyle = '#2d2b52'; leafPath(g, x, y, s, ang); g.fill();
+    g.fillStyle = g.strokeStyle = '#b5752e';
+    if (vari) { g.lineWidth = s * .2; leafPath(g, x, y, s, ang); g.stroke(); }
+    else { g.save(); g.translate(x, y); g.rotate(ang); g.fillRect(s * .38, -s, s * .26, s * 2); g.restore(); }
+    g.globalAlpha = 1; }
+  g.restore();
+  g.save(); g.translate(x, y); g.rotate(ang); g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(0, 0); g.lineTo(s, 0); for (let k = 1; k < 5; k++) { g.moveTo(s * k / 5, 0); g.lineTo(s * (k / 5 + .1), -s * .12); g.moveTo(s * k / 5, 0); g.lineTo(s * (k / 5 + .1), s * .12); } g.stroke();
+  if (leaf.foil && mode === 'live' && !leaf.picked && s > 0) { g.fillStyle = '#cfd5dc'; g.fillRect(s * .38, -s * .32, s * .26, s * .64); g.strokeStyle = '#9aa3ad'; g.lineWidth = 1; g.strokeRect(s * .38, -s * .32, s * .26, s * .64); for (let k = 0; k < 5; k++) { g.strokeStyle = 'rgba(255,255,255,.6)'; g.beginPath(); g.moveTo(s * .4, -s * .28 + k * s * .12); g.lineTo(s * .62, -s * .22 + k * s * .12); g.stroke(); } }
+  g.restore(); }
+function glowRing(g, p, r, t){ g.strokeStyle = `rgba(246,211,101,${.5 + .4 * Math.sin(t * 5)})`; g.lineWidth = 3; g.setLineDash([6, 5]); g.beginPath(); g.arc(p[0], p[1], r, 0, 7); g.stroke(); g.setLineDash([]); }
+app.draw = (g, W, H) => {
+  const t = performance.now() / 1000, s = steps ? steps[si] : null, u = Math.min(W, H);
+  // 벽과 실험대
+  g.fillStyle = '#e9e2d1'; g.fillRect(0, 0, W, H * .58); g.fillStyle = '#c99c66'; g.fillRect(0, H * .58, W, H * .42); g.fillStyle = '#b8895a'; g.fillRect(0, H * .58, W, 8);
+  for (let i = 0; i < 6; i++) { g.strokeStyle = 'rgba(120,80,40,.15)'; g.beginPath(); g.moveTo(0, H * .64 + i * H * .06); g.lineTo(W, H * .62 + i * H * .065); g.stroke(); }
+  // 창문 + 햇빛
+  const wp = at('window'), ww = W * .2, wh = H * .3; g.fillStyle = '#bfe3f7'; g.fillRect(wp[0] - ww / 2 + W * .08, wp[1] - wh / 2, ww, wh); g.strokeStyle = '#fff'; g.lineWidth = 6; g.strokeRect(wp[0] - ww / 2 + W * .08, wp[1] - wh / 2, ww, wh); g.beginPath(); g.moveTo(wp[0] + W * .08, wp[1] - wh / 2); g.lineTo(wp[0] + W * .08, wp[1] + wh / 2); g.stroke();
+  g.fillStyle = '#ffd04d'; g.beginPath(); g.arc(wp[0] + W * .12, wp[1] - wh * .2, u * .035, 0, 7); g.fill();
+  if (leaf.sun > 0) { g.fillStyle = `rgba(255,220,120,${.18 + .08 * Math.sin(t * 2)})`; g.beginPath(); g.moveTo(wp[0] - ww / 2 + W * .08, wp[1] + wh / 2); g.lineTo(wp[0] + ww / 2 + W * .08, wp[1] + wh / 2); g.lineTo(wp[0] + ww / 2 + W * .14, H * .6); g.lineTo(wp[0] - ww / 2 + W * .02, H * .6); g.fill(); }
+  // 화분
+  if (!(drag && drag.k === 'plant')) drawPlant(g, ...toolPos('plant'), u, t);
+  // 어둠 상자 효과
+  if (anim.dark && performance.now() - anim.dark < 1400) { const k = 1 - Math.abs((performance.now() - anim.dark) / 700 - 1); g.fillStyle = `rgba(10,15,30,${.85 * k})`; g.fillRect(0, 0, W, H); D.text(g, '🌙 하룻밤…', W / 2, H / 2, {size: 30, display: true, color: '#fff'}); }
+  // 알코올램프 (위험)
+  const bp = at('burner'); g.fillStyle = 'rgba(180,220,255,.5)'; D.rr(g, bp[0] - u * .04, bp[1] - u * .01, u * .08, u * .07, 10); g.fill(); g.strokeStyle = '#7a8a9a'; g.stroke(); g.fillStyle = '#555'; g.fillRect(bp[0] - 3, bp[1] - u * .035, 6, u * .025); g.fillStyle = 'rgba(255,150,40,.85)'; g.beginPath(); g.ellipse(bp[0], bp[1] - u * .05 + Math.sin(t * 20) * 1.5, u * .009, u * .022, 0, 0, 7); g.fill(); D.text(g, '알코올램프', bp[0], bp[1] + u * .08, {size: 12, color: '#5a4630'});
+  // 비커(뜨거운 물)
+  const kp = at('beaker'), bw = u * .14, bh = u * .16; g.fillStyle = 'rgba(120,180,230,.35)'; g.fillRect(kp[0] - bw / 2, kp[1] - bh * .35, bw, bh * .75); g.strokeStyle = '#6d8796'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(kp[0] - bw / 2, kp[1] - bh * .7); g.lineTo(kp[0] - bw / 2, kp[1] + bh * .4); g.lineTo(kp[0] + bw / 2, kp[1] + bh * .4); g.lineTo(kp[0] + bw / 2, kp[1] - bh * .7); g.stroke();
+  for (let i = 0; i < 4; i++) { const ph = (t * .5 + i / 4) % 1; g.strokeStyle = `rgba(255,255,255,${.6 * (1 - ph)})`; g.lineWidth = 2; g.beginPath(); g.moveTo(kp[0] - bw * .3 + i * bw * .2, kp[1] - bh * .7 - ph * 30); g.quadraticCurveTo(kp[0] - bw * .25 + i * bw * .2, kp[1] - bh * .8 - ph * 30, kp[0] - bw * .3 + i * bw * .2, kp[1] - bh * .9 - ph * 30); g.stroke(); }
+  D.text(g, '뜨거운 물', kp[0], kp[1] + bh * .55, {size: 12, color: '#5a4630'});
+  // 시험관 (에탄올)
+  const tubeIn = leaf.bathing && !(drag && drag.k === 'tube'), tp = tubeIn ? [kp[0], kp[1] - bh * .1] : at('tube');
+  if (!(drag && drag.k === 'tube')) drawTube(g, tp[0], tp[1], u);
+  // 페트리 접시
+  const dp = at('dish'); g.fillStyle = 'rgba(230,240,245,.8)'; g.beginPath(); g.ellipse(dp[0], dp[1], u * .17, u * .07, 0, 0, 7); g.fill(); g.strokeStyle = '#9fb3bf'; g.lineWidth = 2; g.stroke(); D.text(g, '페트리 접시', dp[0], dp[1] + u * .1, {size: 12, color: '#5a4630'});
+  if (leaf.rinsed) drawLeaf(g, dp[0] - u * .14, dp[1], u * .28, 0, leaf.iodine > 0 ? 'iodine' : 'bleach');
+  if (leaf.iodineT) for (let i = 0; i < 6; i++) { const ph = ((performance.now() - leaf.iodineT) / 400 - i * .3); if (ph > 0 && ph < 1) { g.fillStyle = '#8a5a20'; g.beginPath(); g.arc(dp[0] - u * .05 + i * u * .02, dp[1] - u * .15 + ph * u * .14, 3, 0, 7); g.fill(); } }
+  // 도구들
+  ['box', 'foil', 'scissors', 'dropper'].forEach(k => { if (drag && drag.k === k) return; if (k === 'foil' && leaf.foil) return; drawTool(g, k, ...at(k), u); });
+  if (toolVisible('leaf') && !(drag && drag.k === 'leaf')) drawLeaf(g, ...toolPos('leaf'), u * .16, -.2, 'live');
+  if (toolVisible('leaf2') && !(drag && drag.k === 'leaf2')) drawLeaf(g, ...toolPos('leaf2'), u * .16, -.2, 'bleach');
+  // 힌트 표시
+  if (s && !quiz && !drag) { glowRing(g, toolPos(s.tool), u * .06, t); }
+  if (s && drag) { const zp = zonePos(s.zone); glowRing(g, zp, u * .08, t); D.text(g, '여기에 놓기', zp[0], zp[1] - u * .11, {size: 14, display: true, color: '#7a5a10', stroke: '#fff', strokeW: 4}); }
+  if (drag) { if (drag.k === 'plant') drawPlant(g, drag.x, drag.y, u, t); else if (drag.k === 'leaf') drawLeaf(g, drag.x - u * .08, drag.y, u * .16, -.2, 'live'); else if (drag.k === 'leaf2') drawLeaf(g, drag.x - u * .08, drag.y, u * .16, -.2, 'bleach'); else if (drag.k === 'tube') drawTube(g, drag.x, drag.y, u); else drawTool(g, drag.k, drag.x, drag.y, u); }
+  // 결과 라벨
+  if (leaf.iodine >= 1) { D.text(g, leaf.vari ? '초록이던 부분: 청람색 · 흰 부분: 변화 없음(갈색)' : '빛 받은 부분: 청람색 · 가린 부분: 변화 없음(갈색)', W / 2, H * .08, {size: Math.max(13, u * .03), display: true, color: '#2d2b52', stroke: '#fff', strokeW: 5}); }
+};
+function drawPlant(g, x, y, u, t){ g.fillStyle = '#b5683e'; g.beginPath(); g.moveTo(x - u * .07, y); g.lineTo(x + u * .07, y); g.lineTo(x + u * .055, y + u * .1); g.lineTo(x - u * .055, y + u * .1); g.closePath(); g.fill(); g.fillStyle = '#9a5532'; g.fillRect(x - u * .075, y - 4, u * .15, 10);
+  g.strokeStyle = '#3d7a37'; g.lineWidth = 4; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x - 5, y - u * .15, x + 2, y - u * .26); g.stroke();
+  const sway = Math.sin(t * 1.5) * .04;
+  if (!leaf.picked) drawLeaf(g, x + 2, y - u * .2, u * .2, -.35 + sway, 'live');
+  const f0 = leaf.foil; leaf.foil = false; drawLeaf(g, x, y - u * .14, u * .13, Math.PI + .4 - sway, 'live'); drawLeaf(g, x + 2, y - u * .26, u * .11, -1.4 + sway, 'live'); leaf.foil = f0;
+  if (leaf.dark && !leaf.sun && !leaf.foil && steps && steps[si] && steps[si].k === 'foil') {} }
+function drawTube(g, x, y, u){ const w = u * .035, h = u * .18; g.save(); g.translate(x, y); g.fillStyle = `rgba(${D.lerp(240, 120, leaf.bath)},${D.lerp(240, 190, leaf.bath)},${D.lerp(220, 100, leaf.bath)},.75)`; g.fillRect(-w / 2, -h * .1, w, h * .6); g.strokeStyle = '#7f8f99'; g.lineWidth = 2; g.beginPath(); g.moveTo(-w / 2, -h * .5); g.lineTo(-w / 2, h * .4); g.arc(0, h * .4, w / 2, Math.PI, 0, true); g.lineTo(w / 2, -h * .5); g.stroke();
+  if (leaf.inTube && !leaf.rinsed && leaf.bath < 1) { g.fillStyle = `rgb(${D.lerp(79, 236, leaf.bath)},${D.lerp(164, 230, leaf.bath)},${D.lerp(74, 190, leaf.bath)})`; g.beginPath(); g.ellipse(0, h * .15, w * .3, h * .25, 0, 0, 7); g.fill(); }
+  g.restore(); D.text(g, '에탄올', x, y + h * .65, {size: 12, color: '#5a4630'}); }
+function drawTool(g, k, x, y, u){ const r = u * .06;
+  g.save(); g.translate(x, y);
+  if (k === 'box') { g.fillStyle = '#3a3346'; D.rr(g, -r * 1.2, -r, r * 2.4, r * 2, 6); g.fill(); D.text(g, '🌙', 0, 0, {size: r}); D.text(g, '어둠 상자', 0, r * 1.5, {size: 12, color: '#5a4630'}); }
+  if (k === 'foil') { g.fillStyle = '#d4d9df'; g.beginPath(); g.moveTo(-r, -r * .8); g.lineTo(r, -r); g.lineTo(r * .9, r * .8); g.lineTo(-r * .9, r); g.closePath(); g.fill(); g.strokeStyle = '#9aa3ad'; g.stroke(); D.text(g, '알루미늄 포일', 0, r * 1.5, {size: 12, color: '#5a4630'}); }
+  if (k === 'scissors') { D.text(g, '✂️', 0, 0, {size: r * 1.6}); D.text(g, '가위', 0, r * 1.5, {size: 12, color: '#5a4630'}); }
+  if (k === 'dropper') { g.fillStyle = '#7a4a1e'; D.rr(g, -r * .5, -r * .3, r, r * 1.2, 4); g.fill(); g.fillStyle = '#222'; g.fillRect(-r * .2, -r, r * .4, r * .7); D.text(g, '아이오딘 용액', 0, r * 1.5, {size: 12, color: '#5a4630'}); }
+  g.restore(); }
+</script>
+</body>
+</html>

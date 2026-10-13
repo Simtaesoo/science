@@ -30,6 +30,8 @@
 .items a{flex:1;min-width:0;text-decoration:none;font-weight:500}
 .items a:hover{text-decoration:underline}
 .items .ready .tag{background:var(--area);border-color:var(--area);color:var(--surface)}
+.items .ready .tag.k-app{background:#f6d365;border-color:#d9b23f;color:#2a2a1a;font-weight:700}
+.items .ready .tag.k-quiz{background:#c7b3f2;border-color:#a68fd8;color:#24183f;font-weight:700}
 .items .plan span.t{color:var(--muted);flex:1;min-width:0}
 .items .soon{font-size:11px;color:var(--muted);flex:none}
 .filter{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -82,7 +84,7 @@
     const units = g.units.filter(u => !onlyReady || u.items.some(i => i.href));
     $('units').innerHTML = units.map(u => {
       const items = u.items.filter(i => !onlyReady || i.href).map(i => {
-        const tag = `<span class="tag">${i.kind === 'ws' ? '학습지' : '시뮬레이션'}</span>`;
+        const tag = `<span class="tag k-${i.kind}">${{ws: '학습지', app: '실험·게임', sim: '시뮬레이션', quiz: '퀴즈'}[i.kind] || '자료'}</span>`;
         return i.href
           ? `<li class="ready">${tag}<a href="${i.href}">${i.title}</a></li>`
           : `<li class="plan">${tag}<span class="t">${i.title}</span><span class="soon">준비 중</span></li>`;
