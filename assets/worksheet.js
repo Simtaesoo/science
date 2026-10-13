@@ -29,9 +29,17 @@ window.addEventListener('DOMContentLoaded', () => {
     s += `</g><g font-size="9.5" fill="#16202a"><text x="${L + w / 2}" y="${H - 4}" text-anchor="middle">${xl}</text>` +
          `<text transform="translate(10 ${T + h / 2}) rotate(-90)" text-anchor="middle">${yl}</text></g>`;
     if (svg.dataset.ans) {
-      const pts = svg.dataset.ans.trim().split(/\s+/).map(p => p.split(':').map(Number));
-      s += `<g class="ans-svg"><polyline fill="none" stroke="#d2412f" stroke-width="1.6" points="${pts.map(p => X(p[0]) + ',' + Y(p[1])).join(' ')}"/>` +
-           pts.map(p => `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="3" fill="#d2412f"/>`).join('') + '</g>';
+      // 여러 선은 | 로 구분, 선 이름은 '이름=' 으로 시작 (예: "A=0:90 10:60|B=0:10 10:40")
+      s += '<g class="ans-svg">';
+      svg.dataset.ans.split('|').forEach((ser, k) => {
+        let name = '', body = ser.trim();
+        if (body.includes('=')) [name, body] = body.split('=');
+        const pts = body.trim().split(/\s+/).map(p => p.split(':').map(Number));
+        s += `<polyline fill="none" stroke="#d2412f" stroke-width="1.6" ${k ? 'stroke-dasharray="4 3"' : ''} points="${pts.map(p => X(p[0]) + ',' + Y(p[1])).join(' ')}"/>`;
+        if (!svg.hasAttribute('data-smooth')) s += pts.map(p => `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="2.6" fill="#d2412f"/>`).join('');
+        if (name) { const q = pts[pts.length - 1]; s += `<text x="${X(q[0]) - 2}" y="${Y(q[1]) - 5}" font-size="9" fill="#d2412f" text-anchor="end">${name}</text>`; }
+      });
+      s += '</g>';
     }
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.innerHTML = s;
   });

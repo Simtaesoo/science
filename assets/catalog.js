@@ -13,15 +13,16 @@ window.CATALOG = [
   { no:2, area:'bio', title:'생물의 구성과 다양성', code:'9과02', items:[
     {kind:'sim', title:'동물 세포와 식물 세포 탐색기'}, {kind:'sim', title:'세포에서 개체까지 확대해 보기'}, {kind:'sim', title:'5계 분류 게임'} ]},
   { no:3, area:'phy', title:'열', code:'9과03', items:[
-    {kind:'sim', title:'입자 운동으로 보는 열평형'}, {kind:'sim', title:'전도·대류·복사 비교'}, {kind:'sim', title:'비열과 열팽창 실험'} ]},
+    {kind:'sim', title:'1차시 온도와 열평형', href:'g1/heat/sim.html#eq'}, {kind:'sim', title:'2차시 열의 이동 (전도·대류·복사)', href:'g1/heat/sim.html#move'},
+    {kind:'sim', title:'3차시 비열과 열팽창', href:'g1/heat/sim.html#cap'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/heat/worksheet.html'} ]},
   { no:4, area:'chem', title:'물질의 상태 변화', code:'9과04', items:[
-    {kind:'sim', title:'입자 모형 실험실 (확산·증발 / 세 가지 상태 / 가열·냉각 곡선)', href:'g1/state/sim.html'},
-    {kind:'ws', title:'학습지 3차시', href:'g1/state/worksheet.html'} ]},
+    {kind:'sim', title:'1차시 확산과 증발', href:'g1/state/sim.html#diff'}, {kind:'sim', title:'2차시 세 가지 상태와 상태 변화', href:'g1/state/sim.html#states'},
+    {kind:'sim', title:'3차시 상태 변화와 열에너지 (가열·냉각 곡선)', href:'g1/state/sim.html#curve'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/state/worksheet.html'} ]},
   { no:5, area:'phy', title:'힘의 작용', code:'9과05', items:[
     {kind:'sim', title:'힘의 합성과 평형'}, {kind:'sim', title:'탄성력·마찰력·부력 측정'}, {kind:'sim', title:'알짜힘과 운동 변화'} ]},
   { no:6, area:'chem', title:'기체의 성질', code:'9과06', items:[
-    {kind:'sim', title:'기체 실험실 (압력과 입자 충돌 / 압력과 부피 / 온도와 부피)', href:'g1/gas/sim.html'},
-    {kind:'ws', title:'학습지 3차시', href:'g1/gas/worksheet.html'} ]},
+    {kind:'sim', title:'1차시 압력과 기체의 압력', href:'g1/gas/sim.html#p'}, {kind:'sim', title:'2차시 압력과 부피의 관계', href:'g1/gas/sim.html#pv'},
+    {kind:'sim', title:'3차시 온도와 부피의 관계', href:'g1/gas/sim.html#tv'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/gas/worksheet.html'} ]},
   { no:7, area:'earth', title:'태양계', code:'9과07', items:[
     {kind:'sim', title:'지구형·목성형 행성 분류'}, {kind:'sim', title:'자전·공전과 별자리'}, {kind:'sim', title:'달의 위상과 일식·월식'} ]}
  ]},

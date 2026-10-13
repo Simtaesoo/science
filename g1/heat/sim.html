@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>열 실험실 · 중1 열</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="1학년|03 열" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 1 · 03 열 <span class="code">9과03-01</span><span class="code">9과03-02</span><span class="code">9과03-03</span></div>
+      <h1>열 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="eq">1. 온도와 열평형</button>
+      <button type="button" data-mode="move">2. 열의 이동</button>
+      <button type="button" data-mode="cap">3. 비열과 열팽창</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="실험 장치 그림"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <button class="btn" id="reset" type="button">처음부터</button>
+        <!-- 1차시 -->
+        <label class="field" data-only="eq" for="ta">A 온도 <input type="range" id="ta" min="40" max="100" step="5" value="90"><output id="taOut">90 °C</output></label>
+        <label class="field" data-only="eq" for="tb">B 온도 <input type="range" id="tb" min="0" max="35" step="5" value="10"><output id="tbOut">10 °C</output></label>
+        <div class="field" data-only="eq">B의 양 <div class="seg" id="mbSeg"><button type="button" data-mb="1">A와 같게</button><button type="button" data-mb="3">A의 3배</button></div></div>
+        <!-- 2차시 -->
+        <div class="field" data-only="move"><div class="seg" id="mvSeg"><button type="button" data-mv="cond">전도</button><button type="button" data-mv="conv">대류</button><button type="button" data-mv="rad">복사</button></div></div>
+        <div class="field" data-only="move" id="heaterPosWrap">가열 위치 <div class="seg" id="hpSeg"><button type="button" data-hp="bottom">아래</button><button type="button" data-hp="top">위</button></div></div>
+        <label class="field" data-only="move" for="dist" id="distWrap">전등과의 거리 <input type="range" id="dist" min="1" max="3" step="0.5" value="1.5"><output id="distOut">1.5 m</output></label>
+        <!-- 3차시 -->
+        <div class="field" data-only="cap"><div class="seg" id="cpSeg"><button type="button" data-cp="spec">비열</button><button type="button" data-cp="exp">열팽창</button></div></div>
+        <div class="field" data-only="cap" id="matWrap">오른쪽 비커 <select id="matB"><option value="oil">식용유</option><option value="sand">모래</option><option value="iron">철 가루</option></select></div>
+        <div class="field" data-only="cap" id="heatWrap"><div class="seg" id="onSeg"><button type="button" data-on="1">가열</button><button type="button" data-on="0">가열 끄기</button></div></div>
+        <label class="field" data-only="cap" for="texp" id="texpWrap">온도 <input type="range" id="texp" min="0" max="100" step="5" value="20"><output id="texpOut">20 °C</output></label>
+      </div>
+    </section>
+
+    <aside class="panel ledger" aria-label="측정값">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <div class="headrow"><h2 id="tTitle">관찰 기록</h2><button class="btn" id="clear" type="button">표 비우기</button></div>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>열평형이 되면 열의 이동이 완전히 멈출까?</summary>
+        <p>두 물체의 온도가 같아지면 한쪽으로 쏠리는 열의 이동이 없어집니다. 입자는 계속 움직이지만, 주고받는 열의 양이 같아져 온도가 더 변하지 않는 상태입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>냄비 손잡이는 왜 나무나 플라스틱으로 만들까?</summary>
+        <p>나무와 플라스틱은 금속보다 전도가 느리게 일어나는 물질이라, 냄비 몸체의 열이 손잡이까지 잘 전달되지 않기 때문입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>바닷가에서 낮에는 바다에서, 밤에는 육지에서 바람이 부는 까닭은?</summary>
+        <p>물은 모래보다 비열이 커서 온도가 천천히 변합니다. 낮에는 육지가 더 빨리 뜨거워져 그 위의 공기가 올라가고, 밤에는 육지가 더 빨리 식어 반대로 바람이 붑니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="온도 변화는 원리를 보여 주기 위해 단순화한 모형으로 계산했습니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, tempColor, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const st = {mode:'eq', t:0, hist:[], rows:{eq:[], cond:[], conv:[], rad:[], spec:[], exp:[]},
+  // 1차시
+  ta:90, tb:10, A:90, B:10, mb:1, eqDone:false,
+  // 2차시
+  mv:'cond', rods:null, wax:null, hp:'bottom', parts:[], dist:1.5, cans:{black:20, white:20},
+  // 3차시
+  cp:'spec', matB:'oil', on:1, TA:20, TB:20, texp:20};
+
+/* ================= 1차시: 열평형 ================= */
+function resetEq(){ st.A = st.ta; st.B = st.tb; st.t = 0; st.hist = []; st.eqDone = false; }
+function stepEq(dt){
+  const k = 0.09, flow = k * (st.A - st.B);
+  st.A -= flow / 1 * dt; st.B += flow / st.mb * dt; st.t += dt;
+  if (!st.eqDone && Math.abs(st.A - st.B) < 0.3) {
+    st.eqDone = true;
+    st.rows.eq.push([st.ta + ' °C', st.tb + ' °C', st.mb === 1 ? '같게' : '3배', ((st.A + st.B) / 2).toFixed(1) + ' °C']);
+    if (st.rows.eq.length > 8) st.rows.eq.shift(); table();
+  }
+}
+function drawBlock(x, y, cols, rows, T, cell){
+  const g = S.g, amp = 0.6 + 3.2 * Math.max(0, T) / 100;
+  g.fillStyle = C.soft; g.fillRect(x, y, cols * cell, rows * cell);
+  g.strokeStyle = C.ink; g.lineWidth = 2; g.strokeRect(x, y, cols * cell, rows * cell);
+  g.fillStyle = tempColor(T, 0, 100);
+  for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+    g.beginPath(); g.arc(x + (i + .5) * cell + (Math.random() - .5) * amp * 2, y + (j + .5) * cell + (Math.random() - .5) * amp * 2, cell * .3, 0, 7); g.fill();
+  }
+}
+function drawEq(){
+  const g = S.g, cell = Math.min(S.w / 26, S.h / 11), rows = 6, ca = 5, cb = 5 * st.mb;
+  const total = (ca + cb) * cell, x0 = (S.w - total) / 2, y0 = S.h / 2 - rows * cell / 2;
+  drawBlock(x0, y0, ca, rows, st.A, cell); drawBlock(x0 + ca * cell, y0, cb, rows, st.B, cell);
+  label(g, `A  ${st.A.toFixed(1)} °C`, x0 + ca * cell / 2, y0 - 16, {weight: 600});
+  label(g, `B  ${st.B.toFixed(1)} °C`, x0 + ca * cell + cb * cell / 2, y0 - 16, {weight: 600});
+  const d = st.A - st.B;
+  if (Math.abs(d) > 0.3) {
+    const xm = x0 + ca * cell, w = 1.5 + Math.abs(d) / 12;
+    arrow(g, xm - 26, y0 + rows * cell + 26, xm + 26, y0 + rows * cell + 26, C.hot, w);
+    label(g, '열의 이동', xm, y0 + rows * cell + 46, {size: 12, color: C.hot});
+  } else label(g, '열평형 상태', x0 + total / 2, y0 + rows * cell + 30, {weight: 700, color: C.phy});
+  label(g, '입자의 색은 온도, 흔들림은 운동의 활발한 정도를 나타냅니다.', S.w / 2, S.h - 14, {size: 11, color: C.muted});
+}
+
+/* ================= 2차시: 전도 ================= */
+const RODS = [{n:'구리', k:1.0}, {n:'알루미늄', k:0.75}, {n:'철', k:0.25}, {n:'유리', k:0.04}];
+const NC = 40, WAX = [0.25, 0.5, 0.75];
+function resetCond(){ st.rods = RODS.map(() => new Array(NC).fill(20)); st.wax = RODS.map(() => WAX.map(() => ({fallen:false, y:0, t:null}))); st.t = 0; st.hist = []; }
+function stepCond(dt){
+  const sub = Math.max(1, Math.ceil(dt * 60 / 0.45)), h = dt / sub;   // 계산이 튀지 않도록 잘게 나눈다
+  for (let s = 0; s < sub; s++) RODS.forEach((r, ri) => {
+    const T = st.rods[ri], n = T.slice();
+    n[0] = 100;
+    for (let i = 1; i < NC; i++) {
+      const right = i < NC - 1 ? T[i + 1] : T[i];
+      n[i] = T[i] + h * (r.k * 60 * (T[i - 1] - 2 * T[i] + right) / 1 - 0.02 * (T[i] - 20));
+    }
+    st.rods[ri] = n;
+  });
+  st.t += dt;
+  RODS.forEach((r, ri) => WAX.forEach((p, wi) => {
+    const w = st.wax[ri][wi];
+    if (!w.fallen && st.rods[ri][Math.round(p * (NC - 1))] > 45) {
+      w.fallen = true; w.t = st.t; st.rows.cond.push([r.n, (wi + 1) + '번 촛농', st.t.toFixed(1) + ' 초']); if (st.rows.cond.length > 12) st.rows.cond.shift(); table();
+    }
+    if (w.fallen) w.y = Math.min(1, w.y + dt * 2);
+  }));
+}
+function drawCond(){
+  const g = S.g, x0 = 110, x1 = S.w - 30, lh = Math.min(26, S.h / 12), gap = (S.h - 40) / 4;
+  RODS.forEach((r, ri) => {
+    const y = 26 + ri * gap, cw = (x1 - x0) / NC;
+    for (let i = 0; i < NC; i++) { g.fillStyle = tempColor(st.rods[ri][i], 20, 100); g.fillRect(x0 + i * cw, y, cw + .5, lh); }
+    g.strokeStyle = C.ink; g.lineWidth = 1.5; g.strokeRect(x0, y, x1 - x0, lh);
+    label(g, r.n, x0 - 12, y + lh / 2, {align: 'right', weight: 600});
+    WAX.forEach((p, wi) => { const w = st.wax[ri][wi], wx = x0 + p * (x1 - x0), wy = y + lh + 6 + w.y * (gap - lh - 18);
+      g.globalAlpha = w.fallen ? 1 - w.y * .6 : 1; g.fillStyle = C.warn; g.beginPath(); g.ellipse(wx, wy, 6, 5, 0, 0, 7); g.fill(); g.globalAlpha = 1; });
+  });
+  // 가열 장치: 모든 막대의 왼쪽 끝을 같은 온도(100 °C)로 데운다
+  g.fillStyle = C.hot; g.globalAlpha = .8; g.fillRect(x0 - 6, 18, 6, S.h - 40); g.globalAlpha = 1;
+  label(g, '가열 (100 °C)', x0 - 3, S.h - 6, {size: 11, color: C.hot, base: 'bottom'});
+}
+
+/* ================= 2차시: 대류 ================= */
+function resetConv(){
+  st.parts = []; for (let i = 0; i < 150; i++) st.parts.push({x: Math.random(), y: Math.random(), T: 20});
+  st.t = 0; st.hist = [];
+}
+function stepConv(dt){
+  const A = st.hp === 'bottom' ? -0.22 * Math.min(1, st.t / 3) : 0;
+  for (const p of st.parts) {
+    const u = A * Math.PI * Math.sin(Math.PI * p.x) * Math.cos(Math.PI * p.y);
+    const v = -A * Math.PI * Math.cos(Math.PI * p.x) * Math.sin(Math.PI * p.y);
+    p.x += (u + (Math.random() - .5) * .06) * dt; p.y += (v + (Math.random() - .5) * .06) * dt;
+    p.x = Math.min(.99, Math.max(.01, p.x)); p.y = Math.min(.99, Math.max(.01, p.y));
+    const nearHeat = st.hp === 'bottom' ? (p.y < 0.12 && p.x < 0.4) : (p.y > 0.88);
+    if (nearHeat) p.T += 60 * dt;
+    p.T += (20 - p.T) * 0.05 * dt;
+    if (st.hp === 'bottom' && p.y > 0.9) p.T += (20 - p.T) * 0.4 * dt;
+    p.T = Math.min(95, p.T);
+  }
+  st.t += dt;
+}
+function layerT(top){ const L = st.parts.filter(p => top ? p.y > 0.75 : p.y < 0.25); return L.reduce((a, p) => a + p.T, 0) / Math.max(1, L.length); }
+function drawConv(){
+  const g = S.g, s = Math.min(S.w * .6, S.h - 60), x0 = (S.w - s) / 2, y0 = 24;
+  g.fillStyle = C.soft; g.fillRect(x0, y0, s, s);
+  g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.moveTo(x0, y0 - 6); g.lineTo(x0, y0 + s); g.lineTo(x0 + s, y0 + s); g.lineTo(x0 + s, y0 - 6); g.stroke();
+  for (const p of st.parts) { g.fillStyle = tempColor(p.T, 20, 70); g.beginPath(); g.arc(x0 + p.x * s, y0 + (1 - p.y) * s, 4, 0, 7); g.fill(); }
+  g.fillStyle = C.hot; g.globalAlpha = .7;
+  if (st.hp === 'bottom') g.fillRect(x0, y0 + s + 6, s * .4, 10); else g.fillRect(x0 - 10, y0 + 2, s + 20, 8);
+  g.globalAlpha = 1;
+  if (st.hp === 'bottom' && st.t > 2) {
+    arrow(g, x0 + s * .15, y0 + s * .8, x0 + s * .15, y0 + s * .25, C.hot, 2);
+    arrow(g, x0 + s * .85, y0 + s * .25, x0 + s * .85, y0 + s * .8, C.cold, 2);
+  }
+  label(g, `위쪽 물 ${layerT(true).toFixed(0)} °C`, x0 + s + 12, y0 + s * .15, {align: 'left', size: 12});
+  label(g, `아래쪽 물 ${layerT(false).toFixed(0)} °C`, x0 + s + 12, y0 + s * .85, {align: 'left', size: 12});
+}
+
+/* ================= 2차시: 복사 ================= */
+function resetRad(){ st.cans = {black: 20, white: 20}; st.t = 0; st.hist = []; }
+function stepRad(dt){
+  const I = 9 / (st.dist * st.dist);
+  st.cans.black += (0.95 * I - 0.12 * (st.cans.black - 20)) * dt;
+  st.cans.white += (0.30 * I - 0.12 * (st.cans.white - 20)) * dt;
+  st.t += dt;
+}
+function drawRad(){
+  const g = S.g, lx = 60, ly = S.h / 2, scale = (S.w - 220) / 3;
+  // 전등
+  g.fillStyle = C.warn; g.beginPath(); g.arc(lx, ly, 24, 0, 7); g.fill();
+  label(g, '전등', lx, ly + 40, {size: 12, color: C.muted});
+  const cx = lx + 40 + st.dist * scale;
+  // 복사선 (물질 없이 전달)
+  g.strokeStyle = C.warn; g.lineWidth = 1.6;
+  for (let k = -2; k <= 2; k++) {
+    g.beginPath();
+    for (let x = lx + 30; x < cx - 30; x += 3) { const ph = (x - st.t * 120) / 10; const y = ly + k * 34 + Math.sin(ph) * 4; x === lx + 30 ? g.moveTo(x, y) : g.lineTo(x, y); }
+    g.globalAlpha = .55; g.stroke(); g.globalAlpha = 1;
+  }
+  [['black', -60, '검은색 캔'], ['white', 60, '흰색 캔']].forEach(([k, dy, n]) => {
+    const y = ly + dy - 30;
+    g.fillStyle = k === 'black' ? '#1d2228' : '#f4f6f8'; g.strokeStyle = C.ink; g.lineWidth = 1.5;
+    g.fillRect(cx - 20, y, 40, 60); g.strokeRect(cx - 20, y, 40, 60);
+    label(g, `${n}  ${st.cans[k].toFixed(1)} °C`, cx + 32, y + 30, {align: 'left', weight: 600});
+  });
+  label(g, `거리 ${st.dist} m`, (lx + cx) / 2, S.h - 16, {size: 12, color: C.muted});
+}
+
+/* ================= 3차시: 비열 ================= */
+const MAT = {water:{n:'물', c:4.2, col:'cold'}, oil:{n:'식용유', c:2.0, col:'warn'}, sand:{n:'모래', c:0.8, col:'earth'}, iron:{n:'철 가루', c:0.45, col:'muted'}};
+function resetSpec(){ st.TA = 20; st.TB = 20; st.t = 0; st.hist = []; setOn(1); }
+function stepSpec(dt){
+  const P = 6;
+  const f = (T, c) => st.on ? Math.min(150, T + P / c * dt) : T - 0.06 * (T - 20) * 4.2 / c * dt;
+  st.TA = f(st.TA, MAT.water.c); st.TB = f(st.TB, MAT[st.matB].c); st.t += dt;
+}
+function drawBeaker(x, y, w, h, T, m){
+  const g = S.g;
+  g.fillStyle = m === 'water' ? 'rgba(80,150,230,.35)' : m === 'oil' ? 'rgba(230,180,40,.45)' : m === 'sand' ? 'rgba(190,140,80,.6)' : 'rgba(120,120,130,.6)';
+  g.fillRect(x, y + h * .3, w, h * .7);
+  g.strokeStyle = C.ink; g.lineWidth = 2.5; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + h); g.lineTo(x + w, y + h); g.lineTo(x + w, y); g.stroke();
+  // 온도계
+  const tx = x + w * .75, top = y - 30, bot = y + h * .85, frac = Math.min(1, (T - 0) / 150);
+  g.fillStyle = C.surface; g.strokeStyle = C.ink; g.lineWidth = 1; g.fillRect(tx - 4, top, 8, bot - top); g.strokeRect(tx - 4, top, 8, bot - top);
+  g.fillStyle = C.hot; g.fillRect(tx - 2, bot - (bot - top) * frac, 4, (bot - top) * frac);
+  label(g, `${MAT[m].n}  ${T.toFixed(1)} °C`, x + w / 2, y + h + 18, {weight: 600});
+  if (st.on) { g.fillStyle = C.hot; g.globalAlpha = .6; g.fillRect(x, y + h + 30, w, 8); g.globalAlpha = 1; }
+}
+function drawSpec(){
+  const w = Math.min(150, S.w / 4), h = Math.min(170, S.h * .5), y = S.h * .22;
+  drawBeaker(S.w * .3 - w / 2, y, w, h, st.TA, 'water');
+  drawBeaker(S.w * .7 - w / 2, y, w, h, st.TB, st.matB);
+  label(S.g, '질량이 같은 두 물질을 같은 세기로 가열', S.w / 2, 18, {size: 12, color: C.muted});
+}
+
+/* ================= 3차시: 열팽창 ================= */
+const EXP = [{n:'알루미늄', a:23}, {n:'구리', a:17}, {n:'철', a:12}, {n:'유리', a:9}];
+function drawExp(){
+  const g = S.g, x0 = 110, L0 = S.w * 0.5, dT = st.texp - 20, mag = 900;
+  label(g, '막대 길이 변화 (실제보다 크게 과장)', x0, 16, {align: 'left', size: 12, color: C.muted});
+  EXP.forEach((m, i) => {
+    const y = 36 + i * 34, L = L0 * (1 + m.a * 1e-6 * dT * mag);
+    g.fillStyle = tempColor(st.texp, 0, 100); g.fillRect(x0, y, L, 14);
+    g.strokeStyle = C.ink; g.lineWidth = 1; g.strokeRect(x0, y, L, 14);
+    g.setLineDash([3, 3]); g.strokeStyle = C.muted; g.beginPath(); g.moveTo(x0 + L0, y - 4); g.lineTo(x0 + L0, y + 18); g.stroke(); g.setLineDash([]);
+    label(g, m.n, x0 - 10, y + 7, {align: 'right', weight: 600});
+  });
+  // 바이메탈
+  const by = S.h * .72, bx = x0, len = S.w * .5, curv = (23 - 12) * dT * 0.00045;
+  label(g, '바이메탈 (위: 알루미늄, 아래: 철)', bx, by - 34, {align: 'left', size: 12, color: C.muted});
+  g.fillStyle = C.ink; g.fillRect(bx - 14, by - 22, 14, 44);
+  [[C.phy, -6], [C.muted, 0]].forEach(([col, off]) => {
+    g.strokeStyle = col; g.lineWidth = 6; g.beginPath();
+    for (let s = 0; s <= 1.001; s += 0.02) { const x = bx + s * len, y = by + off + curv * (s * len) ** 2 / 2; s === 0 ? g.moveTo(x, y) : g.lineTo(x, y); }
+    g.stroke();
+  });
+  label(g, dT > 0 ? '가열하면 많이 늘어나는 알루미늄 쪽이 바깥으로 휜다' : dT < 0 ? '식히면 반대쪽으로 휜다' : '20 °C: 곧게 펴져 있다', bx + len / 2, S.h - 14, {size: 12});
+}
+
+/* ================= 공통 그리기 ================= */
+function drawScene(){ const g = S.g; g.fillStyle = C.surface; g.fillRect(0, 0, S.w, S.h);
+  if (st.mode === 'eq') drawEq();
+  else if (st.mode === 'move') ({cond: drawCond, conv: drawConv, rad: drawRad})[st.mv]();
+  else (st.cp === 'spec' ? drawSpec : drawExp)();
+}
+function drawGraph(){
+  const tmax = Math.max(20, Math.ceil(st.t / 10) * 10);
+  if (st.mode === 'eq') {
+    const m = axes(G, {x: [0, tmax, tmax / 5, '시간 (초)'], y: [0, 100, 20, '온도 (°C)']});
+    line(G, st.hist.map(d => [d.t, d.a]), m, C.hot); line(G, st.hist.map(d => [d.t, d.b]), m, C.cold);
+    legend([['A', C.hot], ['B', C.cold]], m);
+  } else if (st.mode === 'move' && st.mv === 'cond') {
+    const m = axes(G, {x: [0, 1, .25, '막대에서의 위치 (가열한 쪽 → 끝)'], y: [20, 100, 20, '온도 (°C)']});
+    const cols = [C.warn, C.phy, C.muted, C.chem];
+    RODS.forEach((r, i) => line(G, st.rods[i].map((T, j) => [j / (NC - 1), T]), m, cols[i], 2));
+    legend(RODS.map((r, i) => [r.n, cols[i]]), m);
+  } else if (st.mode === 'move' && st.mv === 'conv') {
+    const m = axes(G, {x: [0, tmax, tmax / 5, '시간 (초)'], y: [0, 100, 20, '온도 (°C)']});
+    line(G, st.hist.map(d => [d.t, d.a]), m, C.hot); line(G, st.hist.map(d => [d.t, d.b]), m, C.cold);
+    legend([['위쪽 물', C.hot], ['아래쪽 물', C.cold]], m);
+  } else if (st.mode === 'move') {
+    const m = axes(G, {x: [0, tmax, tmax / 5, '시간 (초)'], y: [0, 100, 20, '온도 (°C)']});
+    line(G, st.hist.map(d => [d.t, d.a]), m, C.ink); line(G, st.hist.map(d => [d.t, d.b]), m, C.warn);
+    legend([['검은색 캔', C.ink], ['흰색 캔', C.warn]], m);
+  } else if (st.cp === 'spec') {
+    const m = axes(G, {x: [0, tmax, tmax / 5, '시간 (초)'], y: [0, 160, 40, '온도 (°C)']});
+    line(G, st.hist.map(d => [d.t, d.a]), m, C.cold); line(G, st.hist.map(d => [d.t, d.b]), m, C[MAT[st.matB].col]);
+    legend([['물', C.cold], [MAT[st.matB].n, C[MAT[st.matB].col]]], m);
+  } else {
+    const m = axes(G, {x: [0, 100, 20, '온도 (°C)'], y: [-0.5, 2, 0.5, '늘어난 길이 (mm, 1 m 막대)']});
+    const cols = [C.phy, C.warn, C.muted, C.chem];
+    EXP.forEach((e, i) => line(G, [[0, e.a * 1e-3 * -20], [100, e.a * 1e-3 * 80]], m, cols[i], 2));
+    G.g.strokeStyle = C.ink; G.g.setLineDash([4, 4]); G.g.beginPath(); G.g.moveTo(m.X(st.texp), m.T); G.g.lineTo(m.X(st.texp), m.T + m.h); G.g.stroke(); G.g.setLineDash([]);
+    legend(EXP.map((e, i) => [e.n, cols[i]]), m);
+  }
+}
+function legend(items, m){
+  const g = G.g; let x = m.L + 8; g.font = font(11);
+  items.forEach(([n, c]) => { g.fillStyle = c; g.fillRect(x, m.T + 6, 14, 3); g.fillStyle = C.ink; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(n, x + 18, m.T + 8); x += g.measureText(n).width + 34; });
+}
+
+/* ================= 계기판과 설명 ================= */
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'eq') {
+    s = stat('A의 온도', st.A.toFixed(1), '°C') + stat('B의 온도', st.B.toFixed(1), '°C') + stat('온도 차', Math.abs(st.A - st.B).toFixed(1), '°C') + stat('상태', st.eqDone ? '열평형' : '열 이동 중');
+    e = '<b>열</b>은 온도가 높은 물체에서 낮은 물체로 이동합니다. 두 물체의 온도가 같아져 더 이상 변하지 않는 상태를 <b>열평형</b>이라고 합니다.';
+    t = '뜨거운 A의 입자는 운동이 둔해지고, 차가운 B의 입자는 운동이 활발해집니다. B의 양을 바꾸면 열평형 온도가 어떻게 달라질까요?';
+  } else if (st.mode === 'move' && st.mv === 'cond') {
+    const fall = RODS.map((r, i) => st.wax[i].filter(w => w.fallen).length);
+    s = RODS.map((r, i) => stat(r.n, fall[i] + ' / 3', '개 떨어짐')).join('');
+    e = '<b>전도</b>: 고체에서 이웃한 입자의 운동이 차례로 전달되어 열이 이동하는 방식입니다. 금속은 전도가 빠르고 유리·나무는 느립니다.';
+    t = '촛농이 떨어지는 순서와 시간을 기록표에서 비교해 보세요.';
+  } else if (st.mode === 'move' && st.mv === 'conv') {
+    s = stat('위쪽 물', layerT(true).toFixed(1), '°C') + stat('아래쪽 물', layerT(false).toFixed(1), '°C');
+    e = '<b>대류</b>: 액체나 기체에서 데워진 입자가 직접 위로 이동하며 열을 옮기는 방식입니다. 뜨거운 물은 위로, 차가운 물은 아래로 움직이며 순환합니다.';
+    t = st.hp === 'bottom' ? '[가열 위치]를 [위]로 바꾸면 어떻게 될까요?' : '위쪽만 데우면 대류가 일어나지 않아 아래쪽 물은 잘 데워지지 않습니다. 그래서 난로는 아래에, 에어컨은 위에 설치합니다.';
+  } else if (st.mode === 'move') {
+    s = stat('검은색 캔', st.cans.black.toFixed(1), '°C') + stat('흰색 캔', st.cans.white.toFixed(1), '°C');
+    e = '<b>복사</b>: 열이 물질의 도움 없이 직접 전달되는 방식입니다. 태양의 열이 진공인 우주를 지나 지구에 도착하는 것도 복사입니다.';
+    t = '검은색은 복사열을 잘 흡수합니다. 거리를 바꾸면 온도가 오르는 빠르기가 어떻게 달라지는지 비교해 보세요.';
+  } else if (st.cp === 'spec') {
+    s = stat('물', st.TA.toFixed(1), '°C') + stat(MAT[st.matB].n, st.TB.toFixed(1), '°C');
+    e = '<b>비열</b>: 어떤 물질 1 g의 온도를 1 °C 높이는 데 필요한 열의 양입니다. 비열이 큰 물질일수록 온도가 천천히 변합니다. 물은 비열이 매우 큽니다.';
+    t = '가열을 끄고 식는 빠르기도 비교해 보세요. 비열이 큰 물질은 천천히 데워지고 천천히 식습니다.';
+  } else {
+    s = stat('온도', st.texp, '°C') + stat('가장 많이 늘어남', '알루미늄');
+    e = '<b>열팽창</b>: 물체가 열을 받아 입자 운동이 활발해지면 입자 사이 거리가 멀어져 길이나 부피가 늘어나는 현상입니다. 늘어나는 정도는 물질마다 다릅니다.';
+    t = '철로 이음매의 틈, 다리의 신축 이음, 전기다리미의 바이메탈 온도 조절 장치가 열팽창을 고려하거나 이용한 예입니다.';
+  }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+const HEAD = {eq:['A 처음','B 처음','B의 양','열평형 온도'], cond:['막대','촛농','떨어진 시간'], conv:['','',''], rad:['','',''], spec:['','',''], exp:['','','']};
+const TITLE = {eq:'열평형 기록', cond:'촛농이 떨어진 시간', conv:'대류 정리', rad:'복사 정리', spec:'비열 비교', exp:'물질별 열팽창'};
+const STATIC = {
+  conv: [['가열 위치', '물의 움직임', '데워지는 곳'], ['아래', '위아래로 순환', '물 전체'], ['위', '거의 움직이지 않음', '위쪽만']],
+  rad: [['캔 색깔', '복사열 흡수', '온도 변화'], ['검은색', '잘 흡수한다', '빠르게 오른다'], ['흰색', '잘 반사한다', '천천히 오른다']],
+  spec: [['물질', '비열 비교', '온도 변화'], ['물', '매우 크다', '가장 느리다'], ['식용유', '물보다 작다', '물보다 빠르다'], ['모래', '작다', '빠르다'], ['철 가루', '매우 작다', '매우 빠르다']],
+  exp: [['물질', '열팽창 정도', '예'], ['알루미늄', '가장 크다', '바이메탈 바깥쪽'], ['구리', '크다', '전선'], ['철', '중간', '철로, 다리'], ['유리', '작다', '내열 유리는 더 작다']]
+};
+function key(){ return st.mode === 'eq' ? 'eq' : st.mode === 'move' ? st.mv : st.cp; }
+function table(){
+  const k = key(); $('tTitle').textContent = TITLE[k];
+  if (STATIC[k]) { const [h, ...rows] = STATIC[k]; $('thead').innerHTML = '<tr>' + h.map(x => `<th>${x}</th>`).join('') + '</tr>';
+    $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); $('clear').hidden = true; return; }
+  $('clear').hidden = false;
+  $('thead').innerHTML = '<tr>' + HEAD[k].map(x => `<th>${x}</th>`).join('') + '</tr>';
+  const rows = st.rows[k];
+  $('tbody').innerHTML = rows.length ? rows.map(r => '<tr>' + r.map(x => `<td>${x}</td>`).join('') + '</tr>').join('')
+    : `<tr class="empty"><td colspan="${HEAD[k].length}">${k === 'eq' ? '열평형에 도달하면 자동으로 기록됩니다. 온도와 양을 바꿔 여러 번 해 보세요.' : '촛농이 떨어질 때마다 자동으로 기록됩니다.'}</td></tr>`;
+}
+$('clear').onclick = () => { st.rows[key()] = []; table(); };
+
+/* ================= 조작 ================= */
+function reset(){
+  if (st.mode === 'eq') resetEq();
+  else if (st.mode === 'move') ({cond: resetCond, conv: resetConv, rad: resetRad})[st.mv]();
+  else if (st.cp === 'spec') resetSpec();
+  st.hist = []; st.t = 0; table();
+  $('gTitle').textContent = {eq:'시간에 따른 온도 변화', cond:'막대의 위치별 온도', conv:'위·아래 물의 온도', rad:'캔의 온도 변화', spec:'가열 시간과 온도', exp:'온도와 늘어난 길이'}[key()];
+  $('gSub').textContent = {eq:'두 그래프가 만나는 온도가 열평형 온도입니다.', cond:'그래프가 오른쪽까지 빨리 올라가는 막대일수록 전도가 빠릅니다.', conv:'', rad:'같은 거리에서 색깔에 따라 온도 변화가 다릅니다.', spec:'기울기가 완만할수록 온도가 천천히 변합니다.', exp:'1 m 막대를 기준으로 그린 실제 값입니다.'}[key()];
+  $('heaterPosWrap').hidden = !(st.mode === 'move' && st.mv === 'conv');
+  $('distWrap').hidden = !(st.mode === 'move' && st.mv === 'rad');
+  ['matWrap', 'heatWrap'].forEach(id => $(id).hidden = !(st.mode === 'cap' && st.cp === 'spec'));
+  $('texpWrap').hidden = !(st.mode === 'cap' && st.cp === 'exp');
+}
+$('reset').onclick = reset;
+$('ta').oninput = e => { st.ta = +e.target.value; $('taOut').textContent = st.ta + ' °C'; resetEq(); };
+$('tb').oninput = e => { st.tb = +e.target.value; $('tbOut').textContent = st.tb + ' °C'; resetEq(); };
+Kit.seg($('mbSeg'), 'mb', v => { st.mb = +v; resetEq(); });
+Kit.seg($('mvSeg'), 'mv', v => { st.mv = v; reset(); });
+Kit.seg($('hpSeg'), 'hp', v => { st.hp = v; resetConv(); });
+$('dist').oninput = e => { st.dist = +e.target.value; $('distOut').textContent = st.dist + ' m'; resetRad(); };
+Kit.seg($('cpSeg'), 'cp', v => { st.cp = v; reset(); });
+$('matB').onchange = e => { st.matB = e.target.value; resetSpec(); };
+const setOn = Kit.seg($('onSeg'), 'on', v => { st.on = +v; });
+$('texp').oninput = e => { st.texp = +e.target.value; $('texpOut').textContent = st.texp + ' °C'; };
+
+let acc = 0;
+function step(dt){
+  if (st.mode === 'eq') stepEq(dt * 1.5);
+  else if (st.mode === 'move') ({cond: stepCond, conv: stepConv, rad: stepRad})[st.mv](dt);
+  else if (st.cp === 'spec') stepSpec(dt);
+  acc += dt;
+  if (acc > 0.15) { acc = 0;
+    const k = key(), d = {t: st.t};
+    if (k === 'eq') { d.a = st.A; d.b = st.B; } else if (k === 'conv') { d.a = layerT(true); d.b = layerT(false); }
+    else if (k === 'rad') { d.a = st.cans.black; d.b = st.cans.white; } else if (k === 'spec') { d.a = st.TA; d.b = st.TB; }
+    if (d.a !== undefined) { st.hist.push(d); if (st.hist.length > 1500) st.hist.shift(); }
+  }
+}
+Kit.seg($('mbSeg'), 'mb', v => { st.mb = +v; resetEq(); })(1);
+Kit.seg($('mvSeg'), 'mv', v => { st.mv = v; reset(); });
+document.querySelector('#mvSeg [data-mv="cond"]').setAttribute('aria-pressed', 'true');
+document.querySelector('#hpSeg [data-hp="bottom"]').setAttribute('aria-pressed', 'true');
+document.querySelector('#cpSeg [data-cp="spec"]').setAttribute('aria-pressed', 'true');
+resetCond(); resetConv(); resetRad(); resetSpec(); resetEq();
+Kit.tabs(m => { st.mode = m; reset(); }, ['eq', 'move', 'cap']);
+Kit.loop(step, () => { drawScene(); drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>
