@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>풍선 동굴 탐험 · 중1 기체의 성질</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'balloon', title: '풍선 동굴 탐험', unit: '중1 · 06 기체의 성질', back: '../../index.html#g1', sim: 'sim.html#tv', dark: true,
+  lead: '동굴을 지나는 풍선의 크기를 <b>온도</b>로 조절하세요. 좁은 틈은 작게, 별 고리는 크게! 보라색 <b>고압 구역</b>에서는 풍선이 저절로 줄어듭니다.',
+  howto: ['<b>누르고 있으면 가열</b>(풍선이 커짐), 손을 떼면 식어요(작아짐). 스페이스바도 됩니다.', '압력이 높은 구역에 들어가면 같은 온도에서도 부피가 줄어요.', '벽에 닿으면 ❤️이 줄어요. 별 고리를 지나며 크게 부풀면 점수!'],
+  options: [{key: 'diff', label: '속도', choices: [['easy', '느리게'], ['mid', '보통'], ['hard', '빠르게']], def: 'easy'}, {key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '<b>샤를 법칙</b>: 압력이 일정할 때 기체의 온도가 높아지면 입자의 운동이 활발해져 부피가 커집니다. <b>보일 법칙</b>: 온도가 일정할 때 압력이 커지면 부피가 작아집니다. 풍선 속 입자의 수는 변하지 않고, 입자 사이 거리와 운동 속도가 달라집니다.',
+  startLabel: '출발!'
+});
+const {S, sfx, toast} = app, D = Draw;
+let T, P, x, lives, items, heat = false, speed, starsGot, dist, ended, flash = 0, parts = [], ui = {}, runEnd = 0;
+const T_MIN = -40, T_MAX = 160, V0 = 1;
+const vol = () => (T + 273) / 298 / P;            // 25 ℃, 1기압일 때 1
+const rad = () => S.h * .12 * Math.cbrt(vol());   // 실제 부피 → 반지름 (세제곱근)
+function build(){ const R = D.rng(42 + app.state.turn * 7); items = []; let px = 1.2;
+  for (let i = 0; i < 26; i++) { const r = R();
+    if (r < .22) items.push({k: 'press', x: px, w: .9 + R() * .5, p: 2}), px += 1.2;
+    else if (r < .62) items.push({k: 'gap', x: px, gap: .105 + R() * .031 + (i < 3 ? .028 : 0)}), px += .55 + R() * .2;
+    else items.push({k: 'ring', x: px, need: .123 + R() * .008, got: false}), px += .55 + R() * .2; }
+  runEnd = px + .5; }
+app.onStart = o => { T = 25; P = 1; x = 0; lives = 3; starsGot = 0; dist = 0; ended = false; speed = {easy: .16, mid: .23, hard: .32}[o.diff]; build();
+  parts = Array.from({length: 30}, () => ({a: Math.random() * 7, r: Math.random(), s: Math.random() * 6})); app.setLevel(0, 1);
+  ui.g = app.panel('풍선 계기판'); ui.l = app.panel('목숨과 별'); app.panel('조작', '<p>무대를 <b>누르고 있으면</b> 버너가 켜져요.<br>키보드: <b>스페이스바</b></p>'); app.startTimer(); };
+app.pointer({down(){ heat = true; }, up(){ heat = false; }});
+addEventListener('keydown', e => { if (e.code === 'Space' && !app.stage.closest('[hidden]')) { heat = true; e.preventDefault(); } });
+addEventListener('keyup', e => { if (e.code === 'Space') heat = false; });
+app.step = dt => {
+  if (ended || !items) return;
+  T += (heat ? 95 : -60) * dt; T = D.clamp(T, T_MIN, T_MAX); if (heat && Math.random() < .3) sfx.tick();
+  x += speed * dt; dist = x;
+  const zone = items.find(it => it.k === 'press' && x > it.x && x < it.x + it.w); P += ((zone ? zone.p : 1) - P) * Math.min(1, dt * 3);
+  const r = rad() / S.h;
+  items.forEach(it => { if (it.k === 'gap' && !it.done && Math.abs(it.x - x) < .02) { it.done = true; if (r > it.gap) { lives--; flash = performance.now(); sfx.bad(); toast('쿵! 너무 커요', 'bad'); } else { app.addScore(10); sfx.pop(); } }
+    if (it.k === 'ring' && !it.done && Math.abs(it.x - x) < .02) { it.done = true; if (r >= it.need) { it.got = true; starsGot++; app.addScore(30); sfx.ok(); toast('⭐ 별 고리 통과!', 'good'); } else { sfx.whoosh(); toast('조금 더 크게!', ''); } } });
+  ui.g.innerHTML = `<div class="range">온도 <output>${Math.round(T)} ℃</output></div><div class="range">압력 <output>${P.toFixed(1)} 기압</output></div><div class="range">부피 <output>${(vol() * 500).toFixed(0)} mL</output></div><p class="note-c" style="margin-top:6px">${zone ? '⚠ 고압 구역: 압력이 커져 부피가 줄어요' : heat ? '🔥 가열 중: 입자 운동이 빨라져요' : '❄️ 식는 중: 입자 운동이 느려져요'}</p>`;
+  ui.l.innerHTML = `<p style="font-size:22px">${'❤️'.repeat(Math.max(0, lives))}${'🤍'.repeat(Math.max(0, 3 - lives))}</p><p>별 고리 ⭐ ${starsGot}개 · 진행 ${Math.min(100, Math.round(x / runEnd * 100))}%</p>`;
+  if (lives <= 0 || x >= runEnd) { ended = true; const sc = app.player.score; setTimeout(() => { if (app.multi && app.state.turn < app.state.players.length - 1) { app.nextTurn(); app.onStart(app.opts); } else app.finish({stars: app.multi ? 3 : lives <= 0 ? 1 : starsGot >= 6 ? 3 : 2, title: lives <= 0 ? '풍선이 터졌어요!' : null, summary: app.multi ? '모둠별 점수입니다.' : `점수 <b>${sc}</b> · 별 고리 ${starsGot}개 · 남은 목숨 ${Math.max(0, lives)}`, best: sc + '점', bestValue: sc}); }, 900); }
+};
+app.draw = (g, W, H) => {
+  if (!items) return; const t = performance.now() / 1000, cx = W * .3, cy = H * .5, px = v => cx + (v - x) * W * .9;
+  const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#1d2b3a'); bg.addColorStop(1, '#0f1a24'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  // 동굴 천장·바닥
+  g.fillStyle = '#3a2f2a'; g.beginPath(); g.moveTo(0, 0); for (let i = 0; i <= 40; i++) { const u = x + (i / 40 - .33) * 1.2; g.lineTo(i / 40 * W, H * .08 + Math.sin(u * 9) * 8 + Math.sin(u * 23) * 4); } g.lineTo(W, 0); g.fill();
+  g.beginPath(); g.moveTo(0, H); for (let i = 0; i <= 40; i++) { const u = x + (i / 40 - .33) * 1.2; g.lineTo(i / 40 * W, H * .92 - Math.sin(u * 7) * 8 - Math.sin(u * 19) * 4); } g.lineTo(W, H); g.fill();
+  items.forEach(it => { const X = px(it.x); if (X < -W || X > W * 2) return;
+    if (it.k === 'press') { const X2 = px(it.x + it.w); g.fillStyle = 'rgba(160,110,230,.18)'; g.fillRect(X, 0, X2 - X, H); g.strokeStyle = 'rgba(200,160,255,.5)'; g.setLineDash([6, 6]); g.strokeRect(X, 4, X2 - X, H - 8); g.setLineDash([]); D.text(g, '고압 구역 2기압', (X + X2) / 2, H * .14, {size: 14, color: '#d9c4ff', weight: 700}); for (let k = 0; k < 6; k++) D.arrow(g, (X + X2) / 2 + Math.cos(k) * 40, H * .5 + Math.sin(k * 2) * 60 - 30 + ((t * 40 + k * 20) % 30), (X + X2) / 2 + Math.cos(k) * 40, H * .5 + Math.sin(k * 2) * 60 - 10 + ((t * 40 + k * 20) % 30), 'rgba(200,160,255,.35)', 2); }
+    if (it.k === 'gap') { const gp = it.gap * H; g.fillStyle = it.done && rad() > gp ? '#7a3a3a' : '#5b4a40'; D.rr(g, X - 16, 0, 32, cy - gp, 8); g.fill(); D.rr(g, X - 16, cy + gp, 32, H - cy - gp, 8); g.fill(); g.strokeStyle = 'rgba(255,255,255,.12)'; g.lineWidth = 2; g.beginPath(); g.moveTo(X - 16, cy - gp); g.lineTo(X + 16, cy - gp); g.moveTo(X - 16, cy + gp); g.lineTo(X + 16, cy + gp); g.stroke(); }
+    if (it.k === 'ring') { const rr = it.need * H; g.strokeStyle = it.got ? '#9be3b5' : '#f6d365'; g.lineWidth = 4; g.setLineDash(it.got ? [] : [10, 6]); g.beginPath(); g.ellipse(X, cy, 10, rr, 0, 0, 7); g.stroke(); g.setLineDash([]); D.text(g, '⭐', X, cy - rr - 16, {size: 18}); } });
+  // 풍선
+  const r = rad(), hot = (T - T_MIN) / (T_MAX - T_MIN), bob = Math.sin(t * 2) * 4, flick = performance.now() - flash < 400;
+  g.strokeStyle = '#ccc'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(cx, cy + r + bob); g.quadraticCurveTo(cx - 10, cy + r + 30 + bob, cx, cy + r + 50 + bob); g.stroke();
+  const grd = g.createRadialGradient(cx - r * .3, cy - r * .3 + bob, r * .1, cx, cy + bob, r); grd.addColorStop(0, `hsl(${8 + (1 - hot) * 200} 85% 72%)`); grd.addColorStop(1, `hsl(${8 + (1 - hot) * 200} 70% 45%)`);
+  g.fillStyle = flick ? '#ff6a5a' : grd; g.beginPath(); g.arc(cx, cy + bob, r, 0, 7); g.fill();
+  // 속 입자 (빠르기 = 온도)
+  const sp = .6 + hot * 4; g.fillStyle = 'rgba(255,255,255,.85)'; parts.forEach(p => { p.a += sp * .02 * (1 + p.s * .2); const rr = r * .8 * Math.sqrt(p.r); g.beginPath(); g.arc(cx + Math.cos(p.a + p.s) * rr, cy + bob + Math.sin(p.a * 1.3 + p.s) * rr, 2.2, 0, 7); g.fill(); });
+  // 버너 불꽃
+  if (heat) for (let k = 0; k < 3; k++) { g.fillStyle = ['rgba(255,120,40,.8)', 'rgba(255,200,60,.7)', 'rgba(80,140,255,.6)'][k]; g.beginPath(); g.ellipse(cx, cy + r + 60 + bob, 7 - k * 2, 16 + Math.sin(t * 30 + k) * 4 - k * 3, 0, 0, 7); g.fill(); }
+  g.fillStyle = '#6a4a2a'; g.fillRect(cx - 12, cy + r + 50 + bob, 24, 14);
+  if (ended) D.text(g, lives <= 0 ? '펑!' : '도착!', W / 2, H / 2, {size: 60, display: true, color: '#f6d365', stroke: '#0f1a24', strokeW: 8});
+};
+</script>
+</body>
+</html>

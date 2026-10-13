@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>상태 변화 분류 러시 · 중1 물질의 상태 변화</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'rush', title: '상태 변화 분류 러시', unit: '중1 · 04 물질의 상태 변화', back: '../../index.html#g1', sim: 'sim.html#states',
+  lead: '하늘에서 생활 속 현상 카드가 떨어집니다. 바닥에 닿기 전에 알맞은 <b>상태 변화</b> 상자를 눌러 보내세요. 연속으로 맞히면 콤보 점수!',
+  howto: ['카드를 읽고 아래 상자 중 하나를 <b>누르세요</b>. 키보드 숫자 키도 됩니다.', '틀리거나 바닥에 떨어지면 ❤️이 줄어요.', '<b>열 모드</b>에서는 열을 흡수하는지 방출하는지로 나눠요.'],
+  options: [{key: 'mode', label: '모드', choices: [['name', '상태 변화 이름'], ['heat', '열에너지 흡수·방출']], def: 'name'}, {key: 'diff', label: '속도', choices: [['easy', '느리게'], ['mid', '보통'], ['hard', '빠르게']], def: 'easy'}],
+  recap: '<b>열에너지를 흡수</b>하는 상태 변화: 융해(고→액), 기화(액→기), 승화(고→기) → 입자 운동이 활발해지고 입자 사이 거리가 멀어집니다. <b>열에너지를 방출</b>하는 상태 변화: 응고(액→고), 액화(기→액), 승화(기→고) → 입자 운동이 둔해지고 거리가 가까워집니다. 상태가 변해도 입자의 종류와 수는 변하지 않습니다.',
+  startLabel: '시작!'
+});
+const {S, sfx, toast} = app, D = Draw;
+const BINS = {name: [['melt', '융해', '고체→액체'], ['freeze', '응고', '액체→고체'], ['vapor', '기화', '액체→기체'], ['cond', '액화', '기체→액체'], ['subl', '승화', '고체→기체'], ['depo', '승화', '기체→고체']], heat: [['abs', '열 흡수', '주위가 시원해짐'], ['rel', '열 방출', '주위가 따뜻해짐']]};
+const CARDS = [
+  ['🧊', '얼음이 녹는다', 'melt'], ['🍦', '아이스크림이 녹아 흘러내린다', 'melt'], ['🧈', '프라이팬 위 버터가 녹는다', 'melt'], ['⛄', '봄볕에 눈사람이 녹는다', 'melt'], ['🔥', '철을 녹여 쇳물을 만든다', 'melt'], ['🕯️', '불 붙은 초의 심지 주변이 녹는다', 'melt'],
+  ['🕯️', '흘러내린 촛농이 굳는다', 'freeze'], ['🧊', '물을 얼려 얼음을 만든다', 'freeze'], ['🍫', '녹인 초콜릿을 틀에 넣어 굳힌다', 'freeze'], ['🌋', '흘러나온 용암이 식어 굳는다', 'freeze'], ['🏔️', '처마 끝에 고드름이 생긴다', 'freeze'], ['⚙️', '쇳물을 틀에 부어 굳힌다', 'freeze'],
+  ['👕', '젖은 빨래가 마른다', 'vapor'], ['🫖', '주전자의 물이 끓는다', 'vapor'], ['🧴', '손 소독제를 바르면 시원하다', 'vapor'], ['🐟', '어항의 물이 조금씩 줄어든다', 'vapor'], ['💦', '운동 후 땀이 마르며 시원해진다', 'vapor'], ['🌧️', '비 온 뒤 물웅덩이가 사라진다', 'vapor'],
+  ['🥤', '차가운 컵 표면에 물방울이 맺힌다', 'cond'], ['🌿', '새벽 풀잎에 이슬이 맺힌다', 'cond'], ['🪞', '샤워 후 욕실 거울이 뿌옇게 흐려진다', 'cond'], ['👓', '추운 날 실내에 들어오면 안경에 김이 서린다', 'cond'], ['🍲', '냄비 뚜껑 안쪽에 물방울이 맺힌다', 'cond'], ['🌫️', '새벽에 강가에 안개가 생긴다', 'cond'],
+  ['💨', '드라이아이스가 점점 작아진다', 'subl'], ['🧦', '옷장 속 고체 방향제가 작아진다', 'subl'], ['🥶', '한겨울 영하에 언 빨래가 마른다', 'subl'], ['🧊', '냉동실 얼음이 오래 두면 작아진다', 'subl'],
+  ['❄️', '추운 아침 풀잎에 서리가 내린다', 'depo'], ['🪟', '겨울철 유리창에 성에가 낀다', 'depo'], ['🧊', '냉동실 벽에 성에가 생긴다', 'depo'], ['🌲', '나뭇가지에 상고대가 핀다', 'depo']
+];
+const HEAT = {melt: 'abs', vapor: 'abs', subl: 'abs', freeze: 'rel', cond: 'rel', depo: 'rel'};
+let ended = false, deck, card, cy, lives, combo, speed, bins, mode, answered, hit = null, ui = {}, count, wrongs = [];
+app.onStart = o => { mode = o.mode; bins = BINS[mode]; deck = CARDS.slice().sort(() => Math.random() - .5); lives = 3; combo = 0; count = 0; wrongs = []; speed = {easy: .07, mid: .1, hard: .14}[o.diff];
+  ui.s = app.panel('현황'); ui.k = app.panel('방금 문제'); ui.k.innerHTML = '<p class="note-c">카드를 분류해 보세요.</p>'; app.panel('키보드', `<p>${bins.map((b, i) => `<b>${i + 1}</b> ${b[1]}${mode === 'name' && b[0].startsWith('d') ? '(기→고)' : mode === 'name' && b[0] === 'subl' ? '(고→기)' : ''}`).join(' · ')}</p>`);
+  app.setLevel(0, CARDS.length); app.startTimer(); next(); };
+function next(){ if (!deck.length || lives <= 0) return end(); card = deck.pop(); cy = -.1; answered = false; count++; app.setLevel(count - 1, CARDS.length); render(); }
+function render(){ ui.s.innerHTML = `<p style="font-size:22px">${'❤️'.repeat(Math.max(0, lives))}${'🤍'.repeat(Math.max(0, 3 - lives))}</p><p>콤보 <b style="color:var(--yellow);font-size:20px">${combo}</b></p>`; }
+function answer(i){ if (!card || answered) return; answered = true; const right = mode === 'name' ? card[2] : HEAT[card[2]], ok = bins[i][0] === right; hit = {i, ok, t: performance.now()};
+  const nm = BINS.name.find(b => b[0] === card[2]);
+  if (ok) { combo++; const pts = 10 + Math.min(combo, 10) * 2 + Math.round((1 - Math.max(0, cy)) * 10); app.addScore(pts); sfx.ok(); if (combo % 5 === 0) { toast(`${combo} 콤보!`, 'good'); sfx.win(); } }
+  else { combo = 0; lives--; sfx.bad(); toast('아쉬워요', 'bad'); wrongs.push(card); }
+  ui.k.innerHTML = `<p>${card[0]} ${card[1]}</p><p style="margin-top:6px">→ <b style="color:var(--yellow)">${nm[1]} (${nm[2]})</b>, 열에너지 <b>${HEAT[card[2]] === 'abs' ? '흡수' : '방출'}</b></p>`;
+  render(); setTimeout(next, 650); }
+function end(){ if (ended) return; ended = true; const sc = app.player.score, n = count - wrongs.length; app.finish({stars: lives <= 0 ? 1 : wrongs.length === 0 ? 3 : 2, title: lives <= 0 ? '게임 오버' : null, summary: `${count}장 중 ${count - wrongs.length}장 정답 · 점수 <b>${sc}</b>${wrongs.length ? '<br>틀린 카드: ' + wrongs.map(c => c[1]).join(', ') : ''}`, best: sc + '점', bestValue: sc}); }
+const origStart = app.onStart; app.onStart = o => { ended = false; origStart(o); };
+addEventListener('keydown', e => { const n = +e.key; if (n >= 1 && n <= (bins || []).length) answer(n - 1); });
+function binRect(i){ const n = bins.length, W = S.w, H = S.h, gap = 8, w = (W - gap * (n + 1)) / n; return [gap + i * (w + gap), H * .78, w, H * .2]; }
+app.pointer({tap(x, y){ if (!bins) return; bins.forEach((b, i) => { const [bx, by, bw, bh] = binRect(i); if (x > bx && x < bx + bw && y > by && y < by + bh) answer(i); }); }});
+app.step = dt => { if (!card || answered || ended) return; cy += speed * dt * (1 + count * .015); if (cy > .62) { answered = true; lives--; combo = 0; sfx.bad(); toast('떨어졌어요!', 'bad'); wrongs.push(card); render(); const nm = BINS.name.find(b => b[0] === card[2]); ui.k.innerHTML = `<p>${card[0]} ${card[1]}</p><p style="margin-top:6px">→ <b style="color:var(--yellow)">${nm[1]} (${nm[2]})</b></p>`; setTimeout(next, 700); } };
+app.draw = (g, W, H) => {
+  const t = performance.now() / 1000; const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#dff0fb'); bg.addColorStop(1, '#f8f3e6'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 18; i++) { g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.arc((i * 97 + t * 10) % W, (i * 53) % (H * .7), 2 + (i % 3), 0, 7); g.fill(); }
+  if (!bins) return;
+  // 상자
+  bins.forEach((b, i) => { const [x, y, w, h] = binRect(i), isHit = hit && hit.i === i && performance.now() - hit.t < 500, col = mode === 'heat' ? (b[0] === 'abs' ? ['#ffe1d6', '#e8705a'] : ['#d9ecff', '#4a8ad8']) : [['#e9f6ff', '#5aa8d8'], ['#e6f1ff', '#3a6ad8'], ['#fff1e0', '#e0903a'], ['#e7f8ef', '#3aa86a'], ['#f3ecff', '#8a5ad8'], ['#eef7fb', '#5a9ab0']][i];
+    g.fillStyle = isHit ? (hit.ok ? '#bff0cf' : '#ffc9c0') : col[0]; D.rr(g, x, y, w, h, 14); g.fill(); g.strokeStyle = col[1]; g.lineWidth = 3; g.stroke();
+    D.text(g, b[1], x + w / 2, y + h * .38, {size: Math.min(26, w * .2), display: true, color: col[1]}); D.text(g, b[2], x + w / 2, y + h * .72, {size: Math.min(13, w * .1), color: '#4a4a4a'}); D.text(g, String(i + 1), x + 14, y + 14, {size: 12, color: '#999'}); });
+  // 카드
+  if (card) { const cw = Math.min(W * .62, 420), ch = H * .2, x = W / 2 - cw / 2, y = H * .04 + cy * H; g.save(); g.translate(W / 2, y + ch / 2); g.rotate(Math.sin(t * 2) * .02); g.translate(-W / 2, -(y + ch / 2));
+    g.fillStyle = 'rgba(0,0,0,.12)'; D.rr(g, x + 4, y + 6, cw, ch, 16); g.fill(); g.fillStyle = '#fffdf6'; D.rr(g, x, y, cw, ch, 16); g.fill(); g.strokeStyle = '#e2d6b8'; g.lineWidth = 2; g.stroke();
+    D.text(g, card[0], x + 40, y + ch / 2, {size: 38}); wrapText(g, card[1], x + 78, y + ch / 2, cw - 96); g.restore(); }
+  // 바닥 경계선
+  g.strokeStyle = 'rgba(220,80,60,.4)'; g.setLineDash([8, 6]); g.lineWidth = 2; g.beginPath(); g.moveTo(0, H * .76); g.lineTo(W, H * .76); g.stroke(); g.setLineDash([]);
+};
+function wrapText(g, txt, x, cy, w){ g.font = "18px 'Jua','IBM Plex Sans KR',sans-serif"; const lines = []; let line = ''; for (const ch of txt) { if (g.measureText(line + ch).width > w) { lines.push(line); line = ch; } else line += ch; } lines.push(line); lines.forEach((l, i) => D.text(g, l, x, cy + (i - (lines.length - 1) / 2) * 24, {size: 18, display: true, align: 'left', color: '#2b2a26'})); }
+</script>
+</body>
+</html>

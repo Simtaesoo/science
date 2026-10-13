@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>알짜힘 골프 · 중1 힘의 작용</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'golf', title: '알짜힘 골프', unit: '중1 · 05 힘의 작용', back: '../../index.html#g1', sim: 'sim.html#net',
+  lead: '공을 힘껏 밀어 구멍에 넣으세요. 밀고 나면 <b>마찰력</b>만 남아 공이 느려집니다. 얼음, 잔디, 모래 위에서 마찰력이 어떻게 다른지 느껴 보세요.',
+  howto: ['공을 누른 채 <b>가고 싶은 방향으로 끌면</b> 미는 힘(빨간 화살표)이 정해집니다.', '손을 떼면 0.4초 동안 그 힘으로 밀어요. 이후에는 <b>마찰력(파란 화살표)</b>이 공을 멈추게 합니다.', '너무 빠르면 구멍을 지나쳐요. 적은 타수로 넣을수록 점수가 높아요.'],
+  options: [{key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '<b>알짜힘</b>: 물체에 작용하는 모든 힘의 합. 밀고 있는 동안 알짜힘은 미는 힘 − 마찰력이고 공은 빨라집니다. 손을 뗀 뒤 알짜힘은 마찰력뿐이며 운동 반대 방향이라 공이 느려집니다. <b>마찰력</b>은 표면이 거칠수록(모래 &gt; 잔디 &gt; 얼음) 큽니다. 알짜힘이 0이면 운동 상태가 변하지 않습니다.',
+  startLabel: '첫 홀로'
+});
+const {S, sfx, toast} = app, D = Draw;
+const MU = {ice: .12, grass: .5, sand: 1.6};
+const SURF_NAME = {ice: '얼음', grass: '잔디', sand: '모래'};
+// 홀: 공 시작, 구멍, 파, 바닥 구역[종류, x, y, w, h], 벽[x, y, w, h]
+const HOLES = [
+  {ball: [.12, .5], hole: [.85, .5], par: 2, zones: [], walls: []},
+  {ball: [.12, .8], hole: [.85, .2], par: 2, zones: [['sand', .4, .35, .25, .3]], walls: []},
+  {ball: [.1, .5], hole: [.88, .5], par: 3, zones: [['ice', .25, 0, .5, 1]], walls: [[.55, .3, .03, .4]]},
+  {ball: [.15, .15], hole: [.15, .85], par: 3, zones: [], walls: [[.0, .48, .7, .04]]},
+  {ball: [.1, .5], hole: [.9, .5], par: 3, zones: [['sand', .3, 0, .12, 1], ['ice', .55, .2, .3, .6]], walls: []},
+  {ball: [.5, .88], hole: [.5, .12], par: 3, zones: [['ice', 0, .3, 1, .4]], walls: [[.3, .5, .4, .04]]},
+  {ball: [.1, .15], hole: [.9, .85], par: 4, zones: [['sand', .3, .3, .4, .4]], walls: [[.25, 0, .03, .65], [.72, .35, .03, .65]]},
+  {ball: [.12, .5], hole: [.86, .5], par: 3, zones: [['ice', .2, 0, .6, 1]], walls: [[.45, 0, .03, .42], [.45, .58, .03, .42]]}
+];
+let H, hi, ball, strokes, aim = null, push = 0, pushF = [0, 0], moving = false, holeDone = 0, trail = [], ui = {};
+const Rb = .018;
+let A = 1.6; // 가로/세로 비율: 물리 좌표는 세로 길이를 1로 둔다
+function surfAt(x, y){ for (let i = H.zones.length - 1; i >= 0; i--) { const [k, zx0, zy, zw0, zh] = H.zones[i], zx = zx0 * A, zw = zw0 * A; if (x >= zx && x <= zx + zw && y >= zy && y <= zy + zh) return k; } return 'grass'; }
+function geo(){ const pad = 14; return {x: pad, y: pad, w: S.w - pad * 2, h: S.h - pad * 2}; }
+function loadHole(i){ hi = i; H = HOLES[i]; const G = geo(); A = G.w / G.h; ball = {x: H.ball[0] * A, y: H.ball[1], vx: 0, vy: 0}; strokes = 0; holeDone = 0; trail = []; app.setLevel(i, HOLES.length); render(); }
+function render(){ ui.m.innerHTML = `파 <b style="color:var(--yellow);font-size:20px">${H.par}</b> · 친 횟수 <b style="color:var(--yellow);font-size:20px">${strokes}</b>`; }
+app.onStart = () => {
+  ui.m = app.panel('이번 홀'); ui.m.className = 'mission';
+  ui.f = app.panel('지금 공에 작용하는 힘', '<p class="note-c">공을 쳐 보세요.</p>');
+  app.panel('바닥', '<p>❄️ 얼음: 마찰력 아주 작음<br>🌱 잔디: 보통<br>🏜️ 모래: 마찰력 큼</p>');
+  app.startTimer(); loadHole(0);
+};
+app.pointer({
+  down(x, y){ if (moving || holeDone) return; const G = geo(), bx = G.x + ball.x * G.h, by = G.y + ball.y * G.h; if (Math.hypot(x - bx, y - by) < 40) { aim = {x, y}; sfx.click(); } },
+  move(x, y){ if (aim) { aim.x = x; aim.y = y; } },
+  up(x, y){ if (!aim) return; const G = geo(), bx = G.x + ball.x * G.h, by = G.y + ball.y * G.h, dx = x - bx, dy = y - by, L = Math.min(160, Math.hypot(dx, dy)); aim = null; if (L < 10) return;
+    const F = L / 160; pushF = [dx / Math.hypot(dx, dy) * F, dy / Math.hypot(dx, dy) * F]; push = .4; moving = true; strokes++; render(); sfx.whoosh(); }
+});
+app.step = dt => {
+  if (!H || !moving) return;
+  for (let k = 0; k < 4; k++) { const d = dt / 4, sp = Math.hypot(ball.vx, ball.vy), mu = MU[surfAt(ball.x, ball.y)];
+    let ax = 0, ay = 0; if (push > 0) { ax += pushF[0] * 3; ay += pushF[1] * 3; push -= d; }
+    if (sp > 1e-4) { ax -= ball.vx / sp * mu; ay -= ball.vy / sp * mu; } else if (push <= 0) { ball.vx = ball.vy = 0; }
+    const nvx = ball.vx + ax * d, nvy = ball.vy + ay * d; if (push <= 0 && sp > 0 && (nvx * ball.vx + nvy * ball.vy) < 0) { ball.vx = ball.vy = 0; } else { ball.vx = nvx; ball.vy = nvy; }
+    ball.x += ball.vx * d; ball.y += ball.vy * d;
+    if (ball.x < Rb) { ball.x = Rb; ball.vx = -ball.vx * .7; sfx.tick(); } if (ball.x > A - Rb) { ball.x = A - Rb; ball.vx = -ball.vx * .7; sfx.tick(); }
+    if (ball.y < Rb) { ball.y = Rb; ball.vy = -ball.vy * .7; sfx.tick(); } if (ball.y > 1 - Rb) { ball.y = 1 - Rb; ball.vy = -ball.vy * .7; sfx.tick(); }
+    H.walls.forEach(([wx0, wy, ww0, wh]) => { const wx = wx0 * A, ww = ww0 * A; if (ball.x > wx - Rb && ball.x < wx + ww + Rb && ball.y > wy - Rb && ball.y < wy + wh + Rb) { const ox = Math.min(ball.x - (wx - Rb), wx + ww + Rb - ball.x), oy = Math.min(ball.y - (wy - Rb), wy + wh + Rb - ball.y); if (ox < oy) { ball.vx = -ball.vx * .7; ball.x += ball.x < wx + ww / 2 ? -ox : ox; } else { ball.vy = -ball.vy * .7; ball.y += ball.y < wy + wh / 2 ? -oy : oy; } sfx.tick(); } });
+    const dh = Math.hypot(ball.x - H.hole[0] * A, ball.y - H.hole[1]), sp2 = Math.hypot(ball.vx, ball.vy);
+    if (dh < .03 && sp2 < .45 && push <= 0) { sunk(); return; } else if (dh < .02 && sp2 >= .35 && !ball.lip) { ball.lip = true; toast('너무 빨라서 지나쳤어요!', 'bad'); sfx.bad(); }
+    if (dh > .04) ball.lip = false; }
+  trail.push([ball.x, ball.y]); if (trail.length > 160) trail.shift();
+  if (push <= 0 && Math.hypot(ball.vx, ball.vy) < 1e-4) { moving = false; ball.vx = ball.vy = 0; }
+  const mu = MU[surfAt(ball.x, ball.y)], sp = Math.hypot(ball.vx, ball.vy);
+  ui.f.innerHTML = `<p>바닥: <b>${SURF_NAME[surfAt(ball.x, ball.y)]}</b><br>미는 힘: <b style="color:var(--coral)">${push > 0 ? '있음' : '없음'}</b><br>마찰력: <b style="color:var(--sky)">${sp > 0 ? '운동 반대 방향' : '없음'}</b><br>알짜힘: <b style="color:var(--yellow)">${push > 0 ? '미는 방향 → 빨라짐' : sp > 0 ? '마찰력 방향 → 느려짐' : '0 → 정지 유지'}</b></p>`;
+};
+function sunk(){ moving = false; holeDone = performance.now(); ball.x = H.hole[0] * A; ball.y = H.hole[1]; ball.vx = ball.vy = 0; sfx.win(); const diff = strokes - H.par, pts = Math.max(10, 100 - diff * 25 + (strokes === 1 ? 50 : 0));
+  app.addScore(pts); toast(strokes === 1 ? '홀인원!! +' + pts : diff < 0 ? '버디! +' + pts : diff === 0 ? '파! +' + pts : `보기 +${pts}`, 'good'); app.confetti(strokes === 1 ? 150 : 50);
+  setTimeout(() => { if (hi + 1 >= HOLES.length) { const sc = app.player.score; app.finish({stars: app.multi ? 3 : sc >= 750 ? 3 : sc >= 550 ? 2 : 1, summary: app.multi ? '모둠별 점수입니다.' : `8개 홀 총점 <b>${sc}</b>점`, best: sc + '점', bestValue: sc}); } else { app.nextTurn(); loadHole(hi + 1); } }, 1600); }
+
+app.draw = (g, W, Hh) => {
+  if (!H) return; const G = geo(), X = v => G.x + v * G.w, Y = v => G.y + v * G.h, XP = v => G.x + v * G.h, t = performance.now() / 1000;
+  g.fillStyle = '#3f7d3a'; g.fillRect(0, 0, W, Hh); g.fillStyle = '#5aa04e'; D.rr(g, G.x, G.y, G.w, G.h, 18); g.fill();
+  for (let i = 0; i < 12; i++) { g.fillStyle = i % 2 ? 'rgba(255,255,255,.035)' : 'rgba(0,0,0,.03)'; g.fillRect(G.x + i * G.w / 12, G.y, G.w / 12, G.h); }
+  H.zones.forEach(([k, zx, zy, zw, zh]) => { const x = X(zx), y = Y(zy), w = zw * G.w, h = zh * G.h; if (k === 'ice') { g.fillStyle = '#cfeaf7'; g.fillRect(x, y, w, h); g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 2; for (let i = 0; i < 8; i++) { g.beginPath(); g.moveTo(x + (i * 53) % w, y + (i * 31) % h); g.lineTo(x + (i * 53) % w + 18, y + (i * 31) % h + 10); g.stroke(); } }
+    else { g.fillStyle = '#e8cf8c'; g.fillRect(x, y, w, h); g.fillStyle = 'rgba(160,120,60,.35)'; for (let i = 0; i < 80; i++) { g.beginPath(); g.arc(x + (i * 37.3) % w, y + (i * 23.7) % h, 1.4, 0, 7); g.fill(); } }
+    D.text(g, k === 'ice' ? '❄️ 얼음' : '🏜️ 모래', x + w / 2, y + 16, {size: 13, color: '#2b2a26', weight: 700}); });
+  H.walls.forEach(([wx, wy, ww, wh]) => { g.fillStyle = '#8a6a48'; D.rr(g, X(wx), Y(wy), ww * G.w, wh * G.h, 4); g.fill(); g.fillStyle = 'rgba(255,255,255,.15)'; g.fillRect(X(wx), Y(wy), ww * G.w, 3); });
+  // 구멍과 깃발
+  const hx = X(H.hole[0]), hy = Y(H.hole[1]); g.fillStyle = '#1b2a1b'; g.beginPath(); g.ellipse(hx, hy, 15, 11, 0, 0, 7); g.fill(); g.strokeStyle = '#eee'; g.lineWidth = 2; g.beginPath(); g.moveTo(hx, hy); g.lineTo(hx, hy - 50); g.stroke(); g.fillStyle = '#f28c7a'; g.beginPath(); g.moveTo(hx, hy - 50); g.lineTo(hx + 26 + Math.sin(t * 4) * 3, hy - 42); g.lineTo(hx, hy - 34); g.fill();
+  // 궤적
+  g.fillStyle = 'rgba(255,255,255,.5)'; trail.forEach((p, i) => { if (i % 4 === 0) { g.beginPath(); g.arc(XP(p[0]), Y(p[1]), 1.8, 0, 7); g.fill(); } });
+  // 공
+  const bx = XP(ball.x), by = Y(ball.y); if (!(holeDone && performance.now() - holeDone > 300)) { g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(bx + 3, by + 4, 11, 7, 0, 0, 7); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(bx, by, 11, 0, 7); g.fill(); g.strokeStyle = '#ccc'; g.stroke(); }
+  // 힘 화살표
+  const sp = Math.hypot(ball.vx, ball.vy);
+  if (aim) { const dx = aim.x - bx, dy = aim.y - by, L = Math.min(160, Math.hypot(dx, dy)), a = Math.atan2(dy, dx); D.arrow(g, bx, by, bx + Math.cos(a) * L, by + Math.sin(a) * L, '#e8483a', 5); D.text(g, `미는 힘 ${Math.round(L / 160 * 10)}`, bx + Math.cos(a) * L, by + Math.sin(a) * L - 18, {size: 14, weight: 700, color: '#fff', stroke: '#7a2018', strokeW: 4});
+    g.setLineDash([4, 6]); g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 2; g.beginPath(); g.moveTo(bx, by); g.lineTo(bx + Math.cos(a) * L * 2.2, by + Math.sin(a) * L * 2.2); g.stroke(); g.setLineDash([]); }
+  if (moving) { if (push > 0) D.arrow(g, bx, by, bx + pushF[0] * 70, by + pushF[1] * 70, '#e8483a', 4);
+    if (sp > 1e-3) { const mu = MU[surfAt(ball.x, ball.y)], L = 14 + mu * 120; D.arrow(g, bx, by, bx - ball.vx / sp * L, by - ball.vy / sp * L, '#3a7ad8', 4); } }
+  if (!moving && !aim && !holeDone) { g.strokeStyle = `rgba(246,211,101,${.5 + .4 * Math.sin(t * 5)})`; g.lineWidth = 3; g.beginPath(); g.arc(bx, by, 22, 0, 7); g.stroke(); }
+};
+</script>
+</body>
+</html>

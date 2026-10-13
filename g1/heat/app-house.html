@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>단열 하우스 설계 · 중1 열</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'house', title: '단열 하우스 설계', unit: '중1 · 03 열', back: '../../index.html#g1', sim: 'sim.html#move',
+  lead: '정해진 예산으로 지붕·벽·바닥·창문·틈의 재료를 골라 <b>밤새 따뜻한 집</b>(또는 한여름 시원한 집)을 설계하세요. 열은 <b>전도·대류·복사</b>로 빠져나갑니다.',
+  howto: ['오른쪽에서 <b>재료를 고른 뒤</b> 집의 부분을 눌러 바꾸세요.', '예산 안에서 설계했으면 <b>[하룻밤 지내 보기]</b>를 눌러요.', '목표 온도를 맞추면 통과! 남은 예산이 많을수록 점수가 높아요.'],
+  options: [{key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '<b>전도</b>: 고체 속에서 이웃한 입자로 열이 전달 — 금속은 잘, 스타이로폼·공기층은 잘 전달하지 않아 단열재로 씁니다. <b>대류</b>: 액체·기체 입자가 직접 이동하며 열을 전달 — 문틈을 막으면 줄어듭니다. <b>복사</b>: 열이 물질을 거치지 않고 직접 이동 — 커튼·반사 필름으로 줄입니다. 단열은 겨울에는 열이 나가는 것을, 여름에는 들어오는 것을 막습니다.',
+  startLabel: '설계 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const MAT = {
+  wall: [['steel', '얇은 철판', 6, 1, '#9aa3ad'], ['brick', '벽돌', 2.5, 2, '#b8664a'], ['wood', '나무', 1.6, 2, '#b08a5a'], ['foam', '벽돌+스타이로폼', .4, 4, '#f2ece0']],
+  window: [['single', '홑유리창', 5, 1, '#bfe3f7'], ['double', '이중창', 2.5, 3, '#9fd0f0'], ['curtain', '이중창+두꺼운 커튼', 1.4, 4, '#c7a6d8']],
+  gap: [['open', '문틈 그대로', 3, 0, '#f28c7a'], ['seal', '문풍지로 막기', .5, 1, '#9be3b5']]};
+const PARTS = [['roof', '지붕', 'wall', 1.2], ['left', '왼쪽 벽', 'wall', 1], ['right', '오른쪽 벽', 'wall', 1], ['floor', '바닥', 'wall', .8], ['window', '창문', 'window', .5], ['gap', '문틈', 'gap', 1]];
+const LV = [
+  {name: '추운 겨울밤', season: 'w', out: -5, power: 70, budget: 22},
+  {name: '예산이 빠듯해요', season: 'w', out: -5, power: 70, budget: 14},
+  {name: '산속 한파', season: 'w', out: -15, power: 90, budget: 18},
+  {name: '창문이 큰 집', season: 'w', out: -5, power: 70, budget: 16, winBig: true},
+  {name: '한여름 낮 (냉방)', season: 's', out: 35, power: 60, budget: 16}];
+let lv, li, design, sel = null, run = null, hist = [], ui = {}, target = 0;
+function mat(part, key){ return MAT[PARTS.find(p => p[0] === part)[2]].find(m => m[0] === key); }
+function cost(d){ return PARTS.reduce((a, p) => a + mat(p[0], d[p[0]])[3], 0); }
+function UA(d, L){ return PARTS.reduce((a, p) => a + mat(p[0], d[p[0]])[2] * (p[0] === 'window' && L.winBig ? 1.2 : p[3]), 0); }
+function gain(d, L){ return L.season === 's' ? (d.window === 'curtain' ? 6 : d.window === 'double' ? 18 : 24) * (L.winBig ? 2 : 1) + (d.roof === 'foam' ? 3 : d.roof === 'steel' ? 20 : 10) : 0; }
+function eqT(d, L){ const ua = UA(d, L); return L.season === 'w' ? L.out + L.power / ua : L.out + (gain(d, L) - L.power) / ua; }
+function bestUnder(L){ let best = null; const keys = PARTS.map(p => MAT[p[2]].map(m => m[0]));
+  (function rec(i, d){ if (i === PARTS.length) { if (cost(d) <= L.budget) { const T = eqT(d, L); if (!best || (L.season === 'w' ? T > best : T < best)) best = T; } return; } keys[i].forEach(k => rec(i + 1, Object.assign({}, d, {[PARTS[i][0]]: k}))); })(0, {}); return best; }
+function load(i){ li = i; lv = LV[i]; design = {roof: 'steel', left: 'steel', right: 'steel', floor: 'steel', window: 'single', gap: 'open'}; run = null; hist = []; sel = null;
+  const b = bestUnder(lv); target = lv.season === 'w' ? Math.floor(b - 2) : Math.ceil(b + 2); app.setLevel(i, LV.length); render(); }
+function render(){ const c = cost(design), over = c > lv.budget;
+  ui.m.innerHTML = `<p class="mission"><b>${lv.name}</b><br>바깥 ${lv.out} ℃ · ${lv.season === 'w' ? '난방기' : '냉방기'} 일정<br>목표: 실내 <b style="color:var(--yellow);font-size:20px">${lv.season === 'w' ? target + ' ℃ 이상' : target + ' ℃ 이하'}</b></p><p style="margin-top:6px">예산 <b style="color:${over ? 'var(--coral)' : 'var(--mint)'};font-size:20px">${c} / ${lv.budget}</b></p>`;
+  ui.t.innerHTML = Object.entries(MAT).map(([g, list]) => `<p class="note-c" style="margin:6px 0 4px">${{wall: '지붕·벽·바닥', window: '창문', gap: '문틈'}[g]}</p><div class="tools">${list.map(m => `<button class="tool" type="button" data-g="${g}" data-k="${m[0]}" aria-pressed="${sel && sel[1] === m[0]}"><i style="width:12px;height:12px;border-radius:3px;background:${m[4]};display:inline-block"></i>${m[1]} <small>💰${m[3]}</small></button>`).join('')}</div>`).join('');
+  ui.t.querySelectorAll('button').forEach(b => b.onclick = () => { sel = [b.dataset.g, b.dataset.k]; sfx.click(); render(); });
+  ui.r.innerHTML = `<button class="big" id="runB" type="button" ${over ? 'disabled style="opacity:.5"' : ''}>${lv.season === 'w' ? '🌙 하룻밤 지내 보기' : '☀️ 한낮 지내 보기'}</button>`;
+  ui.r.querySelector('#runB').onclick = () => { if (cost(design) > lv.budget) return; run = {t: 0, T: lv.season === 'w' ? 20 : 26}; hist = []; sfx.whoosh(); }; }
+app.onStart = () => { ui.m = app.panel('미션'); ui.t = app.panel('재료 고르기'); ui.r = app.panel(''); app.startTimer(); load(0); };
+function houseGeo(){ const W = S.w * .6, H = S.h, cx = W * .52, base = H * .78, hw = Math.min(W * .36, H * .4), hh = hw * .9; return {cx, base, hw, hh}; }
+function partAt(x, y){ const {cx, base, hw, hh} = houseGeo(), th = hw * .12;
+  if (x > cx + hw * .15 && x < cx + hw * .7 && y > base - hh * .7 && y < base - hh * .35) return 'window';
+  if (x > cx - hw * .7 && x < cx - hw * .25 && y > base - hh * .1 && y < base) return 'gap';
+  if (y < base - hh + th && y > base - hh - hw * .55 && Math.abs(x - cx) < hw + th) return 'roof';
+  if (x < cx - hw + th && x > cx - hw - th && y < base && y > base - hh) return 'left';
+  if (x > cx + hw - th && x < cx + hw + th && y < base && y > base - hh) return 'right';
+  if (y > base - th && y < base + th && Math.abs(x - cx) < hw) return 'floor'; return null; }
+app.pointer({tap(x, y){ if (run) return; const p = partAt(x, y); if (!p) return; const grp = PARTS.find(q => q[0] === p)[2]; if (!sel) return toast('먼저 재료를 고르세요'); if (sel[0] !== grp) { sfx.bad(); return toast(`${PARTS.find(q => q[0] === p)[1]}에는 쓸 수 없는 재료예요`, 'bad'); } design[p] = sel[1]; sfx.pop(); render(); }});
+app.step = dt => { if (!run || run.done) return; const ua = UA(design, lv), C = 60; for (let k = 0; k < 10; k++) { const d = dt / 10 * 2; const q = lv.season === 'w' ? lv.power - ua * (run.T - lv.out) : gain(design, lv) - lv.power - ua * (run.T - lv.out); run.T += q / C * d; run.t += d; }
+  hist.push([run.t, run.T]); if (run.t >= 12) { run.done = true; const ok = lv.season === 'w' ? run.T >= target : run.T <= target, saved = lv.budget - cost(design);
+    if (ok) { const pts = 100 + saved * 15 + Math.round(Math.abs(run.T - target) * 5); app.addScore(pts); sfx.win(); app.confetti(70); toast(`성공! +${pts}`, 'good'); setTimeout(() => { if (li + 1 >= LV.length) end(); else { app.nextTurn(); load(li + 1); } }, 1800); }
+    else { sfx.bad(); toast(`실내 ${run.T.toFixed(1)} ℃ — 목표에 못 미쳤어요. 재료를 바꿔 다시!`, 'bad'); setTimeout(() => { run = null; render(); }, 1800); } } };
+function end(){ const sc = app.player.score; app.finish({stars: app.multi ? 3 : sc >= 700 ? 3 : sc >= 500 ? 2 : 1, summary: app.multi ? '모둠별 점수입니다.' : `5가지 집을 모두 설계했어요. 총점 <b>${sc}</b>`, best: sc + '점', bestValue: sc}); }
+app.draw = (g, W, H) => {
+  if (!lv) return; const t = performance.now() / 1000, {cx, base, hw, hh} = houseGeo(), th = hw * .12, win = lv.season === 'w';
+  const sky = g.createLinearGradient(0, 0, 0, H); if (win) { sky.addColorStop(0, '#16213a'); sky.addColorStop(1, '#2c3d5c'); } else { sky.addColorStop(0, '#8fd0f5'); sky.addColorStop(1, '#e6f4fb'); } g.fillStyle = sky; g.fillRect(0, 0, W, H);
+  if (win) { for (let i = 0; i < 40; i++) { g.fillStyle = 'rgba(255,255,255,.8)'; g.beginPath(); g.arc((i * 61 + t * 12) % W, (i * 37 + t * 30) % H, 1.6, 0, 7); g.fill(); } g.fillStyle = '#f2f2e0'; g.beginPath(); g.arc(W * .08, H * .12, 16, 0, 7); g.fill(); }
+  else { g.fillStyle = '#ffcf40'; g.beginPath(); g.arc(W * .1, H * .14, 26, 0, 7); g.fill(); }
+  g.fillStyle = win ? '#e8eef5' : '#8fbf6a'; g.fillRect(0, base + th, W, H - base - th);
+  const col = p => mat(p, design[p])[4];
+  // 실내
+  const inT = run ? run.T : (win ? 20 : 26); g.fillStyle = `hsla(${Math.max(0, Math.min(220, 220 - (inT + 10) * 4.5))},70%,70%,.35)`; g.fillRect(cx - hw, base - hh, hw * 2, hh);
+  // 벽·지붕·바닥
+  const hl = p => sel && !run && partAt(...[0, 0]) === null ? 0 : 0;
+  g.fillStyle = col('left'); g.fillRect(cx - hw - th, base - hh, th * 2, hh); g.fillStyle = col('right'); g.fillRect(cx + hw - th, base - hh, th * 2, hh); g.fillStyle = col('floor'); g.fillRect(cx - hw - th, base - th, hw * 2 + th * 2, th * 2);
+  g.fillStyle = col('roof'); g.beginPath(); g.moveTo(cx - hw - th * 2, base - hh + th); g.lineTo(cx, base - hh - hw * .55); g.lineTo(cx + hw + th * 2, base - hh + th); g.lineTo(cx + hw + th * 2, base - hh - th * .2); g.lineTo(cx, base - hh - hw * .55 - th * 1.4); g.lineTo(cx - hw - th * 2, base - hh - th * .2); g.closePath(); g.fill();
+  ['left', 'right', 'floor', 'roof'].forEach(p => { if (design[p] === 'foam') { g.strokeStyle = 'rgba(184,102,74,.7)'; g.lineWidth = 2; } });
+  // 창문
+  const wx = cx + hw * .15, wy = base - hh * .7, ww = hw * .55 * (lv.winBig ? 1.3 : 1), wh = hh * .35; g.fillStyle = col('window'); g.fillRect(wx, wy, ww, wh); g.strokeStyle = '#fff'; g.lineWidth = 3; g.strokeRect(wx, wy, ww, wh); if (design.window !== 'single') { g.lineWidth = 1.5; g.strokeRect(wx + 4, wy + 4, ww - 8, wh - 8); } if (design.window === 'curtain') { g.fillStyle = 'rgba(140,90,170,.75)'; g.fillRect(wx, wy, ww * .3, wh); g.fillRect(wx + ww * .7, wy, ww * .3, wh); }
+  // 문과 틈
+  const dx = cx - hw * .7, dw = hw * .45; g.fillStyle = '#7a5a3a'; g.fillRect(dx, base - hh * .65, dw, hh * .65 - th); g.fillStyle = design.gap === 'open' ? '#222' : '#9be3b5'; g.fillRect(dx, base - th - 5, dw, 5);
+  // 이름표
+  const tag = (txt, x, y) => D.text(g, txt, x, y, {size: 11, color: win ? '#fff' : '#2b2a26', stroke: win ? '#16213a' : '#e6f4fb', strokeW: 3});
+  tag(mat('roof', design.roof)[1], cx, base - hh - hw * .3); tag(mat('left', design.left)[1], cx - hw - th - 4, base - hh * .5 - 30); tag(mat('right', design.right)[1], cx + hw + th + 4, base - hh * .2); tag(mat('window', design.window)[1], wx + ww / 2, wy - 10); tag(mat('gap', design.gap)[1], dx + dw / 2, base + th + 14); tag(mat('floor', design.floor)[1], cx + hw * .4, base + th + 14);
+  // 열 흐름 화살표
+  if (run || true) { const dT = (run ? run.T : inT) - lv.out, sgn = Math.sign(dT) || 1;
+    const flow = (x0, y0, nx, ny, U, kind) => { const n = Math.min(4, Math.round(U)); for (let k = 0; k < n; k++) { const f = (t * .8 + k / n) % 1, d = 26 * f * sgn; const x = x0 + nx * d + (kind === 'conv' ? Math.sin(t * 5 + k) * 6 : 0), y = y0 + ny * d; g.globalAlpha = 1 - f; if (kind === 'rad') { g.strokeStyle = '#ff8a3a'; g.lineWidth = 2; g.beginPath(); for (let s = 0; s < 10; s++) g.lineTo(x + nx * s * 2 + Math.sin(s + t * 8) * 3 * ny, y + ny * s * 2 + Math.sin(s + t * 8) * 3 * nx); g.stroke(); } else { D.arrow(g, x, y, x + nx * 14 * sgn, y + ny * 14 * sgn, kind === 'conv' ? '#ff6a5a' : '#ff9a4a', 2.5); } g.globalAlpha = 1; } };
+    flow(cx - hw - th, base - hh * .5, -1, 0, mat('left', design.left)[2], 'cond'); flow(cx + hw + th, base - hh * .3, 1, 0, mat('right', design.right)[2], 'cond'); flow(cx, base - hh - hw * .5, 0, -1, mat('roof', design.roof)[2], 'cond'); flow(wx + ww / 2, wy + wh / 2, 1, -.2, mat('window', design.window)[2], 'rad'); flow(dx + dw / 2, base - th, 0, 1, mat('gap', design.gap)[2] * 1.2, 'conv'); }
+  // 온도계와 그래프
+  const gx = S.w * .63, gw = S.w * .34, gy = H * .1, gh = H * .55; g.fillStyle = 'rgba(255,255,255,.88)'; D.rr(g, gx, gy - 30, gw, gh + 60, 12); g.fill();
+  D.text(g, `실내 ${inT.toFixed(1)} ℃`, gx + gw / 2, gy - 12, {size: 18, display: true, color: '#c0392b'});
+  const tmin = Math.min(lv.out, target) - 5, tmax = Math.max(win ? 25 : lv.out + 5, target + 5), YT = v => gy + gh - (v - tmin) / (tmax - tmin) * gh, XT = v => gx + 14 + v / 12 * (gw - 28);
+  g.strokeStyle = '#ccc'; g.lineWidth = 1; g.beginPath(); g.moveTo(gx + 14, gy); g.lineTo(gx + 14, gy + gh); g.lineTo(gx + gw - 14, gy + gh); g.stroke();
+  g.strokeStyle = '#3aa86a'; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(XT(0), YT(target)); g.lineTo(XT(12), YT(target)); g.stroke(); g.setLineDash([]); D.text(g, `목표 ${target} ℃`, XT(12), YT(target) - 10, {size: 11, align: 'right', color: '#3aa86a'});
+  g.strokeStyle = '#6a8ab8'; g.setLineDash([2, 4]); g.beginPath(); g.moveTo(XT(0), YT(lv.out)); g.lineTo(XT(12), YT(lv.out)); g.stroke(); g.setLineDash([]); D.text(g, `바깥 ${lv.out} ℃`, XT(12), YT(lv.out) + 12, {size: 11, align: 'right', color: '#6a8ab8'});
+  g.strokeStyle = '#e74c3c'; g.lineWidth = 3; g.beginPath(); hist.forEach(([tt, T], i) => i ? g.lineTo(XT(tt), YT(T)) : g.moveTo(XT(tt), YT(T))); g.stroke();
+  D.text(g, `${Math.floor(run ? run.t : 0)}시간 / 12시간`, gx + gw / 2, gy + gh + 18, {size: 12, color: '#555'});
+  if (!run && sel) D.text(g, `👆 바꿀 부분을 누르세요`, cx, 22, {size: 15, display: true, color: win ? '#f6d365' : '#7a5a10'});
+};
+</script>
+</body>
+</html>

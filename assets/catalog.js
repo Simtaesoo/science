@@ -17,17 +17,17 @@ window.CATALOG = [
     {kind:'sim', title:'5차시 생물다양성 보전', href:'g1/life/sim.html#protect'}, {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g1/life/worksheet.html'} ]},
   { no:3, area:'phy', title:'열', code:'9과03', items:[
     {kind:'sim', title:'1차시 온도와 열평형', href:'g1/heat/sim.html#eq'}, {kind:'sim', title:'2차시 열의 이동 (전도·대류·복사)', href:'g1/heat/sim.html#move'},
-    {kind:'sim', title:'3차시 비열과 열팽창', href:'g1/heat/sim.html#cap'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/heat/worksheet.html'} ]},
+    {kind:'sim', title:'3차시 비열과 열팽창', href:'g1/heat/sim.html#cap'}, {kind:'app', title:'게임: 단열 하우스 설계 (전도·대류·복사)', href:'g1/heat/app-house.html'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/heat/worksheet.html'} ]},
   { no:4, area:'chem', title:'물질의 상태 변화', code:'9과04', items:[
     {kind:'sim', title:'1차시 확산과 증발', href:'g1/state/sim.html#diff'}, {kind:'sim', title:'2차시 세 가지 상태와 상태 변화', href:'g1/state/sim.html#states'},
-    {kind:'sim', title:'3차시 상태 변화와 열에너지 (가열·냉각 곡선)', href:'g1/state/sim.html#curve'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/state/worksheet.html'} ]},
+    {kind:'sim', title:'3차시 상태 변화와 열에너지 (가열·냉각 곡선)', href:'g1/state/sim.html#curve'}, {kind:'app', title:'게임: 상태 변화 분류 러시', href:'g1/state/app-rush.html'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/state/worksheet.html'} ]},
   { no:5, area:'phy', title:'힘의 작용', code:'9과05', items:[
     {kind:'sim', title:'1차시 힘의 표현과 힘의 평형', href:'g1/force/sim.html#bal'}, {kind:'sim', title:'2~3차시 중력·탄성력·마찰력·부력', href:'g1/force/sim.html#kinds'},
     {kind:'sim', title:'4차시 알짜힘과 운동 상태의 변화', href:'g1/force/sim.html#net'}, {kind:'sim', title:'5차시 힘의 평형과 장치 설계 (잠수정)', href:'g1/force/sim.html#design'},
-    {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g1/force/worksheet.html'} ]},
+    {kind:'app', title:'게임: 알짜힘 골프 (마찰력)', href:'g1/force/app-golf.html'}, {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g1/force/worksheet.html'} ]},
   { no:6, area:'chem', title:'기체의 성질', code:'9과06', items:[
     {kind:'sim', title:'1차시 압력과 기체의 압력', href:'g1/gas/sim.html#p'}, {kind:'sim', title:'2차시 압력과 부피의 관계', href:'g1/gas/sim.html#pv'},
-    {kind:'sim', title:'3차시 온도와 부피의 관계', href:'g1/gas/sim.html#tv'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/gas/worksheet.html'} ]},
+    {kind:'sim', title:'3차시 온도와 부피의 관계', href:'g1/gas/sim.html#tv'}, {kind:'app', title:'게임: 풍선 동굴 탐험 (온도·압력과 부피)', href:'g1/gas/app-balloon.html'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/gas/worksheet.html'} ]},
   { no:7, area:'earth', title:'태양계', code:'9과07', items:[
     {kind:'sim', title:'1차시 태양계 천체와 행성의 분류', href:'g1/solar/sim.html#planets'}, {kind:'sim', title:'2차시 태양 활동과 지구', href:'g1/solar/sim.html#sun'},
     {kind:'sim', title:'3차시 지구의 자전과 공전 (일주·연주 운동)', href:'g1/solar/sim.html#rot'}, {kind:'sim', title:'4차시 달의 위상과 일식·월식', href:'g1/solar/sim.html#moon'},
