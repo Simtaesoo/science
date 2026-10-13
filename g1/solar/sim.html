@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>태양계 관측소 · 중1 태양계</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+<style>
+.pchips{display:flex;flex-wrap:wrap;gap:6px}
+.pchips button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:3px 10px;font:500 13px var(--f-body);cursor:pointer}
+.pchips button[aria-pressed="true"]{background:var(--area);color:var(--surface);border-color:var(--area)}
+</style>
+</head>
+<body data-root="../../" class="area-earth">
+<div class="wrap">
+  <nav class="topbar" data-topbar="1학년|07 태양계" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 1 · 07 태양계 <span class="code">9과07-01</span><span class="code">9과07-02</span><span class="code">9과07-03</span><span class="code">9과07-04</span></div>
+      <h1>태양계 관측소</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="planets">1. 태양계 천체</button>
+      <button type="button" data-mode="sun">2. 태양 활동</button>
+      <button type="button" data-mode="rot">3. 자전과 공전</button>
+      <button type="button" data-mode="moon">4. 달의 위상과 식</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="관측 화면">
+      <div class="canvas-box"><canvas id="scene" aria-label="천체 모형"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <!-- 1 -->
+        <div class="field" data-only="planets">그래프 <select id="axis"><option value="rd">반지름과 밀도</option><option value="md">질량과 밀도</option></select></div>
+        <label class="field" data-only="planets" for="grp"><input type="checkbox" id="grp"> 두 무리로 나누어 보기</label>
+        <!-- 2 -->
+        <label class="field" data-only="sun" for="year">연도 <input type="range" id="year" min="2008" max="2030" step="0.5" value="2025"><output id="yearOut">2025년</output></label>
+        <label class="field" data-only="sun" for="day">관측 날짜 <input type="range" id="day" min="0" max="12" step="1" value="0"><output id="dayOut">1일째</output></label>
+        <!-- 3 -->
+        <div class="field" data-only="rot"><div class="seg" id="rotSeg"><button type="button" data-rot="daily">일주 운동 (자전)</button><button type="button" data-rot="annual">연주 운동 (공전)</button></div></div>
+        <div class="field" data-only="rot" id="faceWrap">바라보는 방향 <div class="seg" id="faceSeg"><button type="button" data-face="N">북</button><button type="button" data-face="E">동</button><button type="button" data-face="S">남</button><button type="button" data-face="W">서</button></div></div>
+        <label class="field" data-only="rot" for="month" id="monthWrap">월 <input type="range" id="month" min="1" max="12" step="1" value="9"><output id="monthOut">9월</output></label>
+        <!-- 4 -->
+        <label class="field" data-only="moon" for="lunar">음력 날짜 <input type="range" id="lunar" min="1" max="30" step="0.5" value="8"><output id="lunarOut">8일</output></label>
+        <label class="field" data-only="moon" for="tilt"><input type="checkbox" id="tilt"> 달 궤도의 기울기 반영</label>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="관측 결과">
+      <div class="pchips" id="pchips" data-only="planets"></div>
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">자료</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>목성형 행성은 크기가 큰데 왜 밀도는 작을까?</summary>
+        <p>목성형 행성은 주로 수소와 헬륨 같은 가벼운 기체로 이루어져 있습니다. 반면 지구형 행성은 암석과 금속으로 이루어져 크기는 작아도 밀도가 큽니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>계절에 따라 밤하늘에 보이는 별자리가 바뀌는 까닭은?</summary>
+        <p>지구가 태양 둘레를 공전하면서 한밤중에 지구가 바라보는 방향이 달라지기 때문입니다. 태양 쪽에 있는 별자리는 낮에 떠 있어 보이지 않습니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>보름달은 매달 뜨는데 월식은 왜 가끔만 일어날까?</summary>
+        <p>달의 공전 궤도가 지구의 공전 궤도면에 대해 약 5° 기울어져 있어서, 보름달이 대부분 지구 그림자의 위나 아래로 지나가기 때문입니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="행성 자료는 지구를 1로 한 값의 근삿값이며, 흑점 수 곡선은 약 11년 주기를 보여 주는 모형입니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+
+/* ===== 자료 ===== */
+const PL = [
+  {n:'수성', d:0.39, r:0.38, m:0.055, rho:5.4, ring:'없음', moon:'없음', sur:'암석', col:'#9a8f86', type:'T'},
+  {n:'금성', d:0.72, r:0.95, m:0.82, rho:5.2, ring:'없음', moon:'없음', sur:'암석', col:'#d9b46a', type:'T'},
+  {n:'지구', d:1.00, r:1.00, m:1.00, rho:5.5, ring:'없음', moon:'1개', sur:'암석', col:'#3f84d6', type:'T'},
+  {n:'화성', d:1.52, r:0.53, m:0.11, rho:3.9, ring:'없음', moon:'2개', sur:'암석', col:'#c4653a', type:'T'},
+  {n:'목성', d:5.20, r:11.2, m:318, rho:1.3, ring:'있음', moon:'많음', sur:'기체', col:'#c9a27a', type:'J'},
+  {n:'토성', d:9.58, r:9.45, m:95, rho:0.7, ring:'있음', moon:'많음', sur:'기체', col:'#e2c98a', type:'J'},
+  {n:'천왕성', d:19.2, r:4.0, m:14.5, rho:1.3, ring:'있음', moon:'많음', sur:'기체·얼음', col:'#8fd0d6', type:'J'},
+  {n:'해왕성', d:30.1, r:3.9, m:17.1, rho:1.6, ring:'있음', moon:'많음', sur:'기체·얼음', col:'#4f6fd8', type:'J'}
+];
+const ZOD = ['물고기','양','황소','쌍둥이','게','사자','처녀','천칭','전갈','궁수','염소','물병'];
+const st = {mode:'planets', t:0, sel:2, axis:'rd', grp:false, year:2025, day:0, rot:'daily', face:'S', month:9, lunar:8, tilt:false, hours:0, spin:0};
+
+/* ===== 1. 태양계 천체 ===== */
+function drawPlanets(){
+  const g = S.g, cx = S.w * 0.5, cy = S.h * 0.5, R = Math.min(S.w, S.h) * 0.46;
+  const rr = d => 18 + Math.log10(d / 0.3 + 1) / Math.log10(30.1 / 0.3 + 1) * (R - 18);   // 거리는 로그 눈금
+  g.fillStyle = '#0b1220'; g.fillRect(0, 0, S.w, S.h);
+  for (let i = 0; i < 120; i++) { const x = (i * 97.13) % S.w, y = (i * 53.71) % S.h; g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(x, y, 1, 1); }
+  // 소행성대
+  g.strokeStyle = 'rgba(200,190,170,.35)'; g.setLineDash([1, 4]); g.lineWidth = 6; g.beginPath(); g.arc(cx, cy, rr(2.8), 0, TAU); g.stroke(); g.setLineDash([]);
+  g.fillStyle = '#ffcf4a'; g.beginPath(); g.arc(cx, cy, 12, 0, TAU); g.fill();
+  PL.forEach((p, i) => {
+    const r = rr(p.d), a = st.t * 0.6 / Math.pow(p.d, 1.5) + i * 1.3;
+    g.strokeStyle = st.grp ? (p.type === 'T' ? 'rgba(240,160,96,.55)' : 'rgba(121,162,255,.55)') : 'rgba(255,255,255,.18)'; g.lineWidth = 1; g.beginPath(); g.arc(cx, cy, r, 0, TAU); g.stroke();
+    const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r, s = 3 + Math.sqrt(p.r) * 2.2;
+    g.fillStyle = p.col; g.beginPath(); g.arc(x, y, s, 0, TAU); g.fill();
+    if (p.ring === '있음' && i === 5) { g.strokeStyle = '#e2c98a'; g.lineWidth = 1.5; g.beginPath(); g.ellipse(x, y, s * 1.9, s * .6, -.3, 0, TAU); g.stroke(); }
+    if (i === st.sel) { g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, s + 5, 0, TAU); g.stroke(); }
+    g.fillStyle = 'rgba(255,255,255,.85)'; g.font = font(11); g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(p.n, x + s + 6, y);
+  });
+  g.fillStyle = 'rgba(255,255,255,.6)'; g.font = font(11); g.textAlign = 'left'; g.fillText('소행성대', cx + rr(2.8) + 4, cy - 8);
+  g.fillText('거리는 실제 비율이 아니라 보기 좋게 줄인 눈금입니다.', 10, S.h - 12);
+}
+
+/* ===== 2. 태양 활동 ===== */
+const sunspotN = y => Math.round(10 + 140 * (1 - Math.cos(TAU * (y - 2008.9) / 11)) / 2);
+function seeded(n){ let r = n * 9301 + 49297; return () => (r = (r * 9301 + 49297) % 233280) / 233280; }
+function drawSun(){
+  const g = S.g, cx = S.w * 0.42, cy = S.h * 0.5, R = Math.min(S.w * 0.3, S.h * 0.38), N = sunspotN(st.year), act = (N - 10) / 140;
+  g.fillStyle = '#0b1220'; g.fillRect(0, 0, S.w, S.h);
+  // 코로나
+  const cg = g.createRadialGradient(cx, cy, R, cx, cy, R * (1.5 + act * .5));
+  cg.addColorStop(0, 'rgba(255,230,180,.45)'); cg.addColorStop(1, 'rgba(255,230,180,0)'); g.fillStyle = cg; g.beginPath(); g.arc(cx, cy, R * 2, 0, TAU); g.fill();
+  // 광구
+  const pg = g.createRadialGradient(cx - R * .2, cy - R * .2, R * .1, cx, cy, R);
+  pg.addColorStop(0, '#ffe28a'); pg.addColorStop(1, '#f08a24'); g.fillStyle = pg; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill();
+  // 쌀알 무늬
+  const rnd = seeded(7); g.fillStyle = 'rgba(160,70,0,.12)';
+  for (let i = 0; i < 260; i++) { const a = rnd() * TAU, rr = Math.sqrt(rnd()) * R * .95; g.beginPath(); g.arc(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, 2 + rnd() * 2, 0, TAU); g.fill(); }
+  // 흑점: 태양 자전으로 동→서(화면 왼쪽→오른쪽)로 이동
+  const sr = seeded(Math.floor(st.year * 2)), count = Math.round(N / 12);
+  for (let i = 0; i < count; i++) {
+    const lat = (sr() - .5) * 0.9, lon0 = sr() * Math.PI - Math.PI / 2 - 0.6, lon = lon0 + st.day * (TAU / 27);
+    if (Math.abs(lon) > Math.PI / 2) continue;
+    const x = cx + R * Math.cos(lat) * Math.sin(lon), y = cy - R * Math.sin(lat), sz = (3 + sr() * 6) * Math.cos(lon) ** .5;
+    g.fillStyle = 'rgba(60,20,0,.85)'; g.beginPath(); g.ellipse(x, y, sz * Math.cos(lon) + 1, sz, 0, 0, TAU); g.fill();
+  }
+  // 홍염
+  if (act > 0.35) { g.strokeStyle = 'rgba(255,90,60,.85)'; g.lineWidth = 5; g.beginPath(); g.arc(cx + R * .98, cy - R * .25, R * .18 * act, Math.PI * 1.1, Math.PI * 2.1); g.stroke(); }
+  // 지구와 오로라
+  const ex = S.w * 0.86, ey = cy, er = Math.min(28, R * .25);
+  if (act > 0.5) { g.strokeStyle = `rgba(90,255,150,${act - .3})`; g.lineWidth = 4; g.beginPath(); g.arc(ex, ey, er + 6, -Math.PI * .8, -Math.PI * .2); g.stroke(); g.beginPath(); g.arc(ex, ey, er + 6, Math.PI * .2, Math.PI * .8); g.stroke(); }
+  g.fillStyle = '#3f84d6'; g.beginPath(); g.arc(ex, ey, er, 0, TAU); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.85)'; g.font = font(11); g.textAlign = 'center'; g.fillText('지구 (크기·거리 과장)', ex, ey + er + 20);
+  if (act > 0.6) { g.strokeStyle = 'rgba(255,200,120,.6)'; g.lineWidth = 1.5; for (let k = -1; k <= 1; k++) { g.beginPath(); g.moveTo(cx + R * 1.1, cy + k * 18); g.lineTo(ex - er - 10, ey + k * 10); g.stroke(); } }
+  g.textAlign = 'left'; g.fillStyle = 'rgba(255,255,255,.75)'; g.fillText('동', cx - R - 22, cy); g.fillText('서', cx + R + 10, cy + 30);
+}
+
+/* ===== 3. 자전과 공전 ===== */
+// 별: [이름, 적경(시), 적위(도)]
+const NAMED = [['북극성', 2.5, 89.3], ['북두칠성', 11.0, 61.8], ['', 11.0, 56.4], ['', 11.9, 53.7], ['', 12.3, 57.0], ['', 12.9, 56.0], ['', 13.4, 54.9], ['', 13.8, 49.3],
+  ['카시오페이아', 0.7, 56.5], ['', 0.2, 59.1], ['', 0.9, 60.7], ['', 1.4, 60.2], ['', 1.9, 63.7],
+  ['오리온', 5.9, 7.4], ['', 5.2, -8.2], ['', 5.5, -1.2], ['', 5.6, -1.9], ['', 5.4, -0.3], ['', 5.4, 6.3], ['', 5.8, -9.7]];
+const RAND = []; { const r = seeded(3); for (let i = 0; i < 260; i++) RAND.push(['', r() * 24, Math.asin(r() * 2 - 1) * 180 / Math.PI]); }
+const LAT = 37 * Math.PI / 180;
+function altaz(raH, decD, lstH){
+  const H = (lstH - raH) * 15 * Math.PI / 180, d = decD * Math.PI / 180;
+  const sinAlt = Math.sin(d) * Math.sin(LAT) + Math.cos(d) * Math.cos(LAT) * Math.cos(H), alt = Math.asin(sinAlt);
+  const az = Math.atan2(-Math.cos(d) * Math.sin(H), Math.sin(d) * Math.cos(LAT) - Math.cos(d) * Math.sin(LAT) * Math.cos(H)); // 북=0, 동=90°
+  return [alt, (az + TAU) % TAU];
+}
+function drawDaily(){
+  const g = S.g, A0 = {N:0, E:90, S:180, W:270}[st.face] * Math.PI / 180, fov = Math.PI * 0.75;
+  g.fillStyle = '#0b1220'; g.fillRect(0, 0, S.w, S.h);
+  const hy = S.h - 46, sc = S.w / fov;
+  const P = (alt, az) => { let da = az - A0; da = (da + Math.PI * 3) % TAU - Math.PI; return [S.w / 2 + da * sc, hy - alt * sc]; };
+  const lst = 20 + st.hours;   // 저녁 8시 무렵부터
+  // 별의 자취
+  g.lineWidth = 1;
+  [...NAMED, ...RAND].forEach(s => {
+    g.strokeStyle = 'rgba(160,190,255,.35)'; g.beginPath(); let started = false;
+    let px = null;
+    for (let h = 0; h <= st.hours + 1e-6; h += 0.25) { const [al, az] = altaz(s[1], s[2], 20 + h); if (al < 0) { started = false; continue; } const [x, y] = P(al, az);
+      if (px !== null && Math.abs(x - px) > S.w / 3) started = false;   // 화면 뒤쪽으로 넘어가는 선은 끊는다
+      started ? g.lineTo(x, y) : (g.moveTo(x, y), started = true); px = x; }
+    g.stroke();
+  });
+  NAMED.concat(RAND).forEach((s, i) => {
+    const [al, az] = altaz(s[1], s[2], lst); if (al < 0) return; const [x, y] = P(al, az);
+    g.fillStyle = i < NAMED.length ? '#fff' : 'rgba(255,255,255,.7)'; g.beginPath(); g.arc(x, y, i < NAMED.length ? 2.4 : 1.3, 0, TAU); g.fill();
+    if (s[0]) { g.font = font(11); g.fillStyle = '#ffd46b'; g.textAlign = 'left'; g.fillText(s[0], x + 5, y - 5); }
+  });
+  g.fillStyle = '#1b2a1b'; g.fillRect(0, hy, S.w, S.h - hy);
+  ['N', 'E', 'S', 'W'].forEach((d, i) => { const [x] = P(0, i * Math.PI / 2); if (x > 0 && x < S.w) label(g, {N:'북', E:'동', S:'남', W:'서'}[d], x, hy + 18, {color: '#fff', weight: 700}); });
+  label(g, `관측 ${st.hours.toFixed(1)}시간 경과 (한국, 중위도)`, 12, 16, {align: 'left', color: 'rgba(255,255,255,.8)', size: 12});
+  // 우주에서 본 지구 (작은 그림)
+  const ix = S.w - 70, iy = 60, ir = 30;
+  g.fillStyle = '#3f84d6'; g.beginPath(); g.arc(ix, iy, ir, 0, TAU); g.fill();
+  g.fillStyle = 'rgba(0,0,0,.45)'; g.beginPath(); g.arc(ix, iy, ir, -Math.PI / 2, Math.PI / 2); g.fill();
+  const a = -st.hours * 15 * Math.PI / 180; g.fillStyle = '#ffd46b'; g.beginPath(); g.arc(ix + Math.cos(a + Math.PI) * ir * .6, iy + Math.sin(a + Math.PI) * ir * .6, 4, 0, TAU); g.fill();
+  g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.beginPath(); g.arc(ix, iy, ir + 8, -0.3, -1.5, true); g.stroke();
+  label(g, '북극 위에서 본 지구', ix, iy + ir + 14, {size: 10, color: 'rgba(255,255,255,.8)'}); label(g, '반시계 방향 자전', ix, iy + ir + 27, {size: 10, color: 'rgba(255,255,255,.8)'});
+}
+// 교과서 표기(그달에 태양이 지나는 별자리: 1월 궁수자리 … 9월 사자자리 … 12월 전갈자리)에 맞춘다
+function sunLon(month){ return (((Math.round(month) + 8) % 12) * 30 + (month - Math.round(month)) * 30 + 360) % 360; }
+const zodAt = lon => ZOD[Math.round(lon / 30) % 12];
+function drawAnnual(){
+  const g = S.g, cx = S.w / 2, cy = S.h / 2, R = Math.min(S.w, S.h) * 0.42, r = R * 0.55;
+  g.fillStyle = '#0b1220'; g.fillRect(0, 0, S.w, S.h);
+  ZOD.forEach((z, i) => { const a = -(i * 30) * Math.PI / 180; const x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R;
+    g.fillStyle = 'rgba(255,212,107,.9)'; g.font = font(12, 600); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(z, x, y); });
+  g.strokeStyle = 'rgba(255,255,255,.25)'; g.beginPath(); g.arc(cx, cy, r, 0, TAU); g.stroke();
+  g.fillStyle = '#ffcf4a'; g.beginPath(); g.arc(cx, cy, 16, 0, TAU); g.fill(); label(g, '태양', cx, cy + 28, {color: '#fff', size: 11});
+  const sl = sunLon(st.month + st.t * 0), ea = -((sl + 180) % 360) * Math.PI / 180, ex = cx + Math.cos(ea) * r, ey = cy + Math.sin(ea) * r;
+  g.fillStyle = '#3f84d6'; g.beginPath(); g.arc(ex, ey, 10, 0, TAU); g.fill();
+  g.fillStyle = 'rgba(0,0,0,.6)'; g.beginPath(); g.arc(ex, ey, 10, ea - Math.PI / 2, ea + Math.PI / 2); g.fill();
+  const mx = cx + Math.cos(ea) * (R - 22), my = cy + Math.sin(ea) * (R - 22);
+  g.setLineDash([4, 4]); g.strokeStyle = '#79a2ff'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(ex, ey); g.lineTo(mx, my); g.stroke();
+  g.strokeStyle = '#ffcf4a'; g.beginPath(); g.moveTo(ex, ey); g.lineTo(cx - Math.cos(ea) * (R - 22), cy - Math.sin(ea) * (R - 22)); g.stroke(); g.setLineDash([]);
+  label(g, `${st.month}월의 지구`, ex, ey - 20, {color: '#fff', size: 12, weight: 700});
+  label(g, '파란 점선: 한밤중에 보이는 방향   노란 점선: 태양이 보이는 방향', cx, S.h - 12, {size: 11, color: 'rgba(255,255,255,.75)'});
+  label(g, '지구는 반시계 방향으로 공전', 12, 16, {align: 'left', size: 11, color: 'rgba(255,255,255,.75)'});
+}
+
+/* ===== 4. 달의 위상 ===== */
+const PH = [[1, '삭'], [3, '초승달'], [7.5, '상현달'], [11, '보름 전 달'], [15, '망 (보름달)'], [19, '보름 지난 달'], [22.5, '하현달'], [27, '그믐달'], [30, '삭']];
+function phaseName(d){ let best = PH[0]; PH.forEach(p => { if (Math.abs(p[0] - d) < Math.abs(best[0] - d)) best = p; }); return best[1]; }
+function moonAngle(){ return (st.lunar - 1) / 29.5 * TAU; }   // 0 = 삭 (태양 쪽)
+function drawPhaseDisk(g, x, y, r, ang){
+  // ang 0: 삭, π: 망. 북반구에서는 차오를 때(삭→망) 오른쪽이 밝다
+  const lit = '#f2ead2', dark = '#2a2f38', k = Math.cos(ang), waxing = Math.sin(ang) >= 0;
+  g.fillStyle = dark; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
+  g.fillStyle = lit; g.beginPath();
+  if (waxing) g.arc(x, y, r, -Math.PI / 2, Math.PI / 2); else g.arc(x, y, r, Math.PI / 2, Math.PI * 1.5);
+  g.fill();
+  // 초승·그믐(k>0)은 어두운 타원으로 덮고, 보름 무렵(k<0)은 밝은 타원을 더한다
+  g.fillStyle = k > 0 ? dark : lit; g.beginPath(); g.ellipse(x, y, Math.abs(k) * r, r, 0, 0, TAU); g.fill();
+}
+function drawMoon(){
+  const g = S.g, cx = S.w * 0.36, cy = S.h * 0.52, R = Math.min(S.w * 0.27, S.h * 0.36);
+  g.fillStyle = '#0b1220'; g.fillRect(0, 0, S.w, S.h);
+  // 햇빛 (왼쪽에서)
+  g.strokeStyle = 'rgba(255,207,74,.35)'; g.lineWidth = 1; for (let k = -4; k <= 4; k++) { g.beginPath(); g.moveTo(6, cy + k * R * .25); g.lineTo(cx - R - 20, cy + k * R * .25); g.stroke(); }
+  label(g, '햇빛', 22, cy - R - 8, {color: '#ffcf4a', size: 12});
+  g.strokeStyle = 'rgba(255,255,255,.25)'; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.stroke();
+  // 지구
+  g.fillStyle = '#3f84d6'; g.beginPath(); g.arc(cx, cy, 16, 0, TAU); g.fill(); g.fillStyle = 'rgba(0,0,0,.55)'; g.beginPath(); g.arc(cx, cy, 16, -Math.PI / 2, Math.PI / 2); g.fill();
+  // 지구 그림자
+  g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(cx, cy - 14, R + 30, 28);
+  // 달 (지구 기준 태양 방향 = 왼쪽, 반시계 방향 공전)
+  const a = moonAngle(), mx = cx - Math.cos(a) * R, my = cy + Math.sin(a) * R;
+  g.fillStyle = '#2a2f38'; g.beginPath(); g.arc(mx, my, 11, 0, TAU); g.fill();
+  g.fillStyle = '#f2ead2'; g.beginPath(); g.arc(mx, my, 11, Math.PI / 2, Math.PI * 1.5); g.fill();   // 태양을 향한 왼쪽 반이 밝음
+  label(g, '달', mx, my - 20, {color: '#fff', size: 12, weight: 700});
+  label(g, '북극 위에서 본 모습', 12, 16, {align: 'left', size: 11, color: 'rgba(255,255,255,.75)'});
+  // 지구에서 본 달
+  const vx = S.w * 0.82, vy = S.h * 0.36, vr = Math.min(S.w * 0.11, 64);
+  const day = st.lunar, nearNew = Math.abs(((day - 1 + 14.75) % 29.5) - 14.75) < 0.6, nearFull = Math.abs(day - 15) < 0.6;
+  const aligned = !st.tilt || Math.abs(Math.sin(st.t * 0.05)) < 0.12;
+  if (nearNew && aligned) {   // 일식: 지구에서 본 태양을 달이 가림
+    g.fillStyle = '#ffcf4a'; g.beginPath(); g.arc(vx, vy, vr, 0, TAU); g.fill();
+    const off = (day - 1 + (day > 15 ? -29.5 : 0)) / 0.6 * vr; g.fillStyle = '#0b1220'; g.beginPath(); g.arc(vx + off, vy, vr * 1.02, 0, TAU); g.fill();
+    label(g, '일식 (태양 - 달 - 지구)', vx, vy + vr + 22, {color: '#ffcf4a', weight: 700});
+  } else if (nearFull && aligned) {
+    g.fillStyle = '#9b3b2a'; g.beginPath(); g.arc(vx, vy, vr, 0, TAU); g.fill();
+    label(g, '월식 (태양 - 지구 - 달)', vx, vy + vr + 22, {color: '#ff8a6a', weight: 700});
+  } else {
+    drawPhaseDisk(g, vx, vy, vr, moonAngle());
+    label(g, phaseName(day), vx, vy + vr + 22, {color: '#fff', weight: 700});
+  }
+  label(g, '지구(한국)에서 본 달', vx, vy - vr - 16, {color: 'rgba(255,255,255,.75)', size: 11});
+  if (st.tilt) label(g, (nearNew || nearFull) && !aligned ? '궤도가 기울어져 이번에는 식이 일어나지 않음' : '', vx, vy + vr + 42, {color: 'rgba(255,255,255,.75)', size: 11});
+}
+
+/* ===== 그래프 ===== */
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'planets') {
+    const md = st.axis === 'md';
+    const m = axes(G, md ? {x: [-2, 3, 1, '질량 (지구=1, 로그 눈금 10ⁿ)'], y: [0, 6, 1, '평균 밀도 (g/cm³)']} : {x: [0, 12, 2, '반지름 (지구=1)'], y: [0, 6, 1, '평균 밀도 (g/cm³)']});
+    PL.forEach((p, i) => { const x = md ? Math.log10(p.m) : p.r; g.fillStyle = st.grp ? (p.type === 'T' ? C.earth : C.phy) : C.ink;
+      g.beginPath(); g.arc(m.X(x), m.Y(p.rho), i === st.sel ? 7 : 5, 0, TAU); g.fill(); label(g, p.n, m.X(x) + 8, m.Y(p.rho) - 8, {align: 'left', size: 11}); });
+    if (st.grp) { label(g, '지구형 행성', m.X(md ? -1 : 1.5), m.Y(5.9), {color: C.earth, weight: 700, size: 12}); label(g, '목성형 행성', m.X(md ? 2 : 8), m.Y(2.4), {color: C.phy, weight: 700, size: 12}); }
+  } else if (st.mode === 'sun') {
+    const m = axes(G, {x: [2008, 2030, 4, '연도'], y: [0, 160, 40, '흑점 수 (모형)']});
+    const pts = []; for (let y = 2008; y <= 2030; y += 0.25) pts.push([y, sunspotN(y)]); line(G, pts, m, C.earth);
+    g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.year), m.Y(sunspotN(st.year)), 6, 0, TAU); g.fill();
+  } else if (st.mode === 'rot' && st.rot === 'daily') {
+    const m = axes(G, {x: [0, 10, 2, '관측 시간 (시간)'], y: [0, 150, 30, '별이 움직인 각도 (°)']});
+    line(G, [[0, 0], [10, 150]], m, C.earth); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.hours), m.Y(st.hours * 15), 6, 0, TAU); g.fill();
+  } else if (st.mode === 'rot') {
+    const m = axes(G, {x: [1, 12, 1, '월'], y: [0, 360, 90, '태양의 위치 (황경, °)']});
+    const pts = []; for (let k = 1; k <= 12; k += 0.25) pts.push([k, sunLon(k)]);
+    g.fillStyle = C.earth; pts.forEach(p => { g.fillRect(m.X(p[0]) - 1.5, m.Y(p[1]) - 1.5, 3, 3); });
+    g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.month), m.Y(sunLon(st.month)), 6, 0, TAU); g.fill();
+  } else {
+    const m = axes(G, {x: [1, 30, 7, '음력 날짜'], y: [0, 100, 25, '밝게 보이는 부분 (%)']});
+    const pts = []; for (let d = 1; d <= 30; d += 0.25) pts.push([d, (1 - Math.cos((d - 1) / 29.5 * TAU)) / 2 * 100]); line(G, pts, m, C.earth);
+    g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.lunar), m.Y((1 - Math.cos(moonAngle())) / 2 * 100), 6, 0, TAU); g.fill();
+  }
+}
+
+/* ===== 계기판과 표 ===== */
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'planets') {
+    const p = PL[st.sel];
+    s = stat('반지름', p.r, '지구=1') + stat('질량', p.m, '지구=1') + stat('평균 밀도', p.rho, 'g/cm³') + stat('고리 · 위성', p.ring + ' · ' + p.moon);
+    e = `<b>${p.n}</b>은 ${p.type === 'T' ? '<b>지구형 행성</b>: 크기와 질량이 작고 밀도가 크며, 단단한 암석 표면이 있습니다. 위성이 없거나 적고 고리가 없습니다.' : '<b>목성형 행성</b>: 크기와 질량이 크고 밀도가 작으며, 주로 기체로 이루어져 단단한 표면이 없습니다. 위성이 많고 고리가 있습니다.'}`;
+    t = '태양계에는 태양과 8개의 행성, 왜소행성(명왕성 등), 소행성(주로 화성과 목성 사이), 위성, 혜성이 있습니다.';
+  } else if (st.mode === 'sun') {
+    const N = sunspotN(st.year), act = N > 110 ? '활발 (극대기 무렵)' : N < 40 ? '조용 (극소기 무렵)' : '보통';
+    s = stat('흑점 수 (모형)', N, '개') + stat('태양 활동', act);
+    e = '<b>흑점</b>은 주변보다 온도가 낮아 어둡게 보이는 부분입니다. 흑점 수가 많을 때 태양 활동이 활발하여 <b>홍염</b>과 <b>플레어</b>가 자주 일어나고 <b>코로나</b>가 커집니다.';
+    t = '[관측 날짜]를 넘기면 흑점이 동쪽에서 서쪽으로 이동합니다. 이것은 태양이 자전하기 때문입니다. 태양 활동이 활발하면 지구에 오로라, 자기 폭풍, 통신 장애, 인공위성 고장이 생길 수 있습니다.';
+  } else if (st.mode === 'rot' && st.rot === 'daily') {
+    s = stat('경과 시간', st.hours.toFixed(1), '시간') + stat('움직인 각도', (st.hours * 15).toFixed(0), '°');
+    e = '<b>일주 운동</b>: 지구가 하루에 한 바퀴 서쪽에서 동쪽으로 <b>자전</b>하기 때문에, 천체가 하루에 한 바퀴 동쪽에서 서쪽으로 도는 것처럼 보이는 운동입니다. 1시간에 약 <b>15°</b>씩 움직입니다.';
+    t = {N:'북쪽 하늘: 별들이 북극성을 중심으로 시계 반대 방향으로 돕니다.', E:'동쪽 하늘: 별들이 비스듬히 떠오릅니다.', S:'남쪽 하늘: 별들이 동쪽에서 서쪽으로(왼쪽에서 오른쪽으로) 움직입니다.', W:'서쪽 하늘: 별들이 비스듬히 집니다.'}[st.face];
+  } else if (st.mode === 'rot') {
+    const sl = sunLon(st.month);
+    s = stat('태양이 지나는 별자리', zodAt(sl) + '자리') + stat('한밤중 남쪽 하늘', zodAt((sl + 180) % 360) + '자리');
+    e = '<b>연주 운동</b>: 지구가 태양 둘레를 1년에 한 바퀴 <b>공전</b>하기 때문에, 태양이 별자리 사이를 하루에 약 1°씩 서쪽에서 동쪽으로 이동하는 것처럼 보이는 운동입니다. 태양이 지나는 길의 별자리를 <b>황도 12궁</b>이라고 합니다.';
+    t = '태양 쪽에 있는 별자리는 낮에 떠 있어 보이지 않고, 태양 반대쪽의 별자리가 한밤중에 남쪽 하늘에 보입니다.';
+  } else {
+    const n = phaseName(st.lunar);
+    s = stat('음력', st.lunar, '일') + stat('달의 모양', n);
+    e = '달은 스스로 빛을 내지 못하고 햇빛을 반사합니다. 달이 지구 둘레를 <b>공전</b>하면서 태양, 지구, 달의 상대적 위치가 바뀌어 지구에서 보이는 밝은 부분의 모양이 달라지는 것을 <b>달의 위상 변화</b>라고 합니다.';
+    t = '삭일 때 태양-달-지구가 일직선이면 일식, 망일 때 태양-지구-달이 일직선이면 월식이 일어납니다. 일식은 달이 태양을 가리는 것이고, 월식은 달이 지구의 그림자에 들어가는 것입니다.';
+  }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>';
+  $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
+function table(){
+  if (st.mode === 'planets') setTable('행성 자료 (지구 = 1)', ['행성', '반지름', '질량', '밀도', '고리', '위성'], PL.map(p => [p.n, p.r, p.m, p.rho, p.ring, p.moon]));
+  else if (st.mode === 'sun') setTable('태양의 표면과 대기', ['구분', '현상', '특징'], [['표면 (광구)', '흑점', '주변보다 온도가 낮아 어둡다'], ['', '쌀알 무늬', '광구 아래의 대류로 생긴다'], ['대기', '채층', '광구 위의 붉은 층 (개기 일식 때 보임)'], ['', '코로나', '채층 위의 진주색 대기층'], ['', '홍염', '채층에서 솟아오르는 불꽃 모양'], ['', '플레어', '흑점 부근의 폭발 현상']]);
+  else if (st.mode === 'rot' && st.rot === 'daily') setTable('일주 운동 정리', ['하늘', '별의 움직임'], [['북쪽', '북극성 중심, 시계 반대 방향 회전'], ['동쪽', '오른쪽 위로 비스듬히 떠오름'], ['남쪽', '동→서, 왼쪽에서 오른쪽으로 이동'], ['서쪽', '오른쪽 아래로 비스듬히 짐']]);
+  else if (st.mode === 'rot') setTable('월별 별자리 (모형)', ['월', '태양이 지나는 별자리', '한밤중 남쪽 하늘'], [1, 3, 5, 7, 9, 11].map(m => [m + '월', zodAt(sunLon(m)) + '자리', zodAt((sunLon(m) + 180) % 360) + '자리']));
+  else setTable('달의 위상 정리', ['음력', '이름', '배열'], [['1일', '삭', '태양-달-지구 (보이지 않음)'], ['2~3일', '초승달', '저녁 서쪽 하늘'], ['7~8일', '상현달', '오른쪽 반이 밝음'], ['15일', '망 (보름달)', '태양-지구-달'], ['22~23일', '하현달', '왼쪽 반이 밝음'], ['27~28일', '그믐달', '새벽 동쪽 하늘']]);
+  $('gTitle').textContent = {planets: '행성의 물리적 특성', sun: '흑점 수의 변화', daily: '시간과 일주 운동', annual: '월과 태양의 위치', moon: '음력 날짜와 달의 밝은 부분'}[st.mode === 'rot' ? st.rot : st.mode];
+  $('gSub').textContent = {planets: '점들이 두 무리로 나뉘는지 살펴보세요.', sun: '흑점 수는 약 11년을 주기로 늘었다 줄어듭니다.', daily: '1시간에 약 15°씩 움직입니다.', annual: '태양은 별자리 사이를 한 달에 약 30°씩 이동합니다.', moon: '약 한 달(29.5일)을 주기로 반복합니다.'}[st.mode === 'rot' ? st.rot : st.mode];
+}
+
+/* ===== 조작 ===== */
+$('pchips').innerHTML = PL.map((p, i) => `<button type="button" data-pi="${i}">${p.n}</button>`).join('');
+Kit.seg($('pchips'), 'pi', v => { st.sel = +v; })('2');
+$('axis').onchange = e => st.axis = e.target.value;
+$('grp').onchange = e => st.grp = e.target.checked;
+$('year').oninput = e => { st.year = +e.target.value; $('yearOut').textContent = st.year + '년'; };
+$('day').oninput = e => { st.day = +e.target.value; $('dayOut').textContent = (st.day + 1) + '일째'; };
+Kit.seg($('rotSeg'), 'rot', v => { st.rot = v; st.hours = 0; $('faceWrap').hidden = v !== 'daily' || st.mode !== 'rot'; $('monthWrap').hidden = v !== 'annual' || st.mode !== 'rot'; table(); })('daily');
+Kit.seg($('faceSeg'), 'face', v => { st.face = v; st.hours = 0; ledger(); })('S');
+$('month').oninput = e => { st.month = +e.target.value; $('monthOut').textContent = st.month + '월'; };
+$('lunar').oninput = e => { st.lunar = +e.target.value; $('lunarOut').textContent = st.lunar + '일'; };
+$('tilt').onchange = e => st.tilt = e.target.checked;
+
+function step(dt){
+  st.t += dt;
+  if (st.mode === 'rot' && st.rot === 'daily') { st.hours += dt * 0.6; if (st.hours > 10) st.hours = 0; }
+  if (st.mode === 'moon' && !st.tilt) {}
+}
+Kit.tabs(m => { st.mode = m; table();
+  $('faceWrap').hidden = !(m === 'rot' && st.rot === 'daily'); $('monthWrap').hidden = !(m === 'rot' && st.rot === 'annual'); }, ['planets', 'sun', 'rot', 'moon']);
+Kit.loop(step, () => {
+  ({planets: drawPlanets, sun: drawSun, rot: () => (st.rot === 'daily' ? drawDaily : drawAnnual)(), moon: drawMoon})[st.mode]();
+  drawGraph(); ledger();
+}, $('play'));
+})();
+</script>
+</body>
+</html>

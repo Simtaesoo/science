@@ -35,7 +35,7 @@ window.addEventListener('DOMContentLoaded', () => {
         let name = '', body = ser.trim();
         if (body.includes('=')) [name, body] = body.split('=');
         const pts = body.trim().split(/\s+/).map(p => p.split(':').map(Number));
-        s += `<polyline fill="none" stroke="#d2412f" stroke-width="1.6" ${k ? 'stroke-dasharray="4 3"' : ''} points="${pts.map(p => X(p[0]) + ',' + Y(p[1])).join(' ')}"/>`;
+        if (!svg.hasAttribute('data-scatter')) s += `<polyline fill="none" stroke="#d2412f" stroke-width="1.6" ${k ? 'stroke-dasharray="4 3"' : ''} points="${pts.map(p => X(p[0]) + ',' + Y(p[1])).join(' ')}"/>`;
         if (!svg.hasAttribute('data-smooth')) s += pts.map(p => `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="2.6" fill="#d2412f"/>`).join('');
         if (name) { const q = pts[pts.length - 1]; s += `<text x="${X(q[0]) - 2}" y="${Y(q[1]) - 5}" font-size="9" fill="#d2412f" text-anchor="end">${name}</text>`; }
       });
