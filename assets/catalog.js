@@ -86,7 +86,7 @@ window.CATALOG = [
  ]},
  { id:'phys', level:'고', grade:'고2', book:'물리학', units:[
   { no:37, disp:1, area:'phy', title:'힘과 운동', code:'물리학 Ⅰ', dir:'p/motion', items:[{kind:'sim', title:'1차시 등가속도 운동', href:'p/motion/sim.html#accel'}, {kind:'sim', title:'2차시 뉴턴 운동 법칙', href:'p/motion/sim.html#newton'}, {kind:'sim', title:'3차시 운동량 보존과 충돌', href:'p/motion/sim.html#momentum'}, {kind:'ws', title:'학습지', href:'p/motion/worksheet.html'}]},
-  { no:38, disp:2, area:'phy', title:'에너지와 열', code:'물리학 Ⅰ', dir:'p/energy', items:[{kind:'sim', title:'1차시 역학적 에너지 보존', href:''}, {kind:'sim', title:'2차시 열역학 제1법칙', href:''}, {kind:'sim', title:'3차시 열기관과 열효율', href:''}, {kind:'ws', title:'학습지', href:''}]},
+  { no:38, disp:2, area:'phy', title:'에너지와 열', code:'물리학 Ⅰ', dir:'p/energy', items:[{kind:'sim', title:'1차시 역학적 에너지 보존', href:'p/energy/sim.html#mech'}, {kind:'sim', title:'2차시 열역학 제1법칙', href:'p/energy/sim.html#thermo'}, {kind:'sim', title:'3차시 열기관과 열효율', href:'p/energy/sim.html#engine'}, {kind:'ws', title:'학습지', href:'p/energy/worksheet.html'}]},
   { no:39, disp:3, area:'phy', title:'전기와 자기', code:'물리학 Ⅱ', dir:'p/em', items:[{kind:'sim', title:'1차시 원자의 에너지 준위와 스펙트럼', href:''}, {kind:'sim', title:'2차시 에너지띠와 반도체·다이오드', href:''}, {kind:'sim', title:'3차시 전류에 의한 자기장', href:''}, {kind:'sim', title:'4차시 전자기 유도', href:''}, {kind:'ws', title:'학습지', href:''}]},
   { no:40, disp:4, area:'phy', title:'빛과 물질', code:'물리학 Ⅲ', dir:'p/light', items:[{kind:'sim', title:'1차시 굴절과 전반사', href:''}, {kind:'sim', title:'2차시 파동의 간섭', href:''}, {kind:'sim', title:'3차시 빛의 입자성 (광전 효과)', href:''}, {kind:'sim', title:'4차시 물질파와 전자 현미경', href:''}, {kind:'ws', title:'학습지', href:''}]}
  ]},

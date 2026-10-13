@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>에너지와 열 실험실 · 물리학</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="물리학|02 에너지와 열" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>물리학 · 02 에너지와 열 <span class="code">물리학 Ⅰ</span></div>
+      <h1>에너지와 열 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="mech">1. 역학적 에너지 보존</button>
+      <button type="button" data-mode="thermo">2. 열역학 제1법칙</button>
+      <button type="button" data-mode="engine">3. 열기관과 열효율</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="에너지 실험 장치"></canvas></div>
+      <div class="controls">
+        <label class="field" data-only="mech" for="kx">용수철 압축 <input type="range" id="kx" min="0.1" max="0.5" step="0.05" value="0.3"><output id="kxOut">0.3 m</output></label>
+        <label class="field" data-only="mech" for="km">용수철 상수 <input type="range" id="km" min="100" max="800" step="50" value="400"><output id="kmOut">400 N/m</output></label>
+        <label class="field" data-only="mech" for="mm">질량 <input type="range" id="mm" min="0.5" max="3" step="0.5" value="1"><output id="mmOut">1 kg</output></label>
+        <div class="field" data-only="mech"><label><input type="checkbox" id="fric"> 수평면 마찰 있음 (μ = 0.2, 1 m 구간)</label></div>
+        <div class="field" data-only="thermo"><div class="seg" id="prSeg"><button type="button" data-pr="isobar">등압 팽창 (가열)</button><button type="button" data-pr="isochor">등적 가열</button><button type="button" data-pr="adiab">단열 압축</button><button type="button" data-pr="isotherm">등온 팽창</button></div></div>
+        <label class="field" data-only="thermo" for="qin">출입 에너지 <input type="range" id="qin" min="100" max="1000" step="100" value="500"><output id="qinOut">500 J</output></label>
+        <label class="field" data-only="engine" for="th">고열원 온도 <input type="range" id="th" min="400" max="1200" step="50" value="800"><output id="thOut">800 K</output></label>
+        <label class="field" data-only="engine" for="tl">저열원 온도 <input type="range" id="tl" min="250" max="400" step="10" value="300"><output id="tlOut">300 K</output></label>
+        <label class="field" data-only="engine" for="eff">실제 기관의 손실 <input type="range" id="eff" min="0" max="0.6" step="0.05" value="0.3"><output id="effOut">30 %</output></label>
+        <button class="btn primary" type="button" id="go">실행</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>용수철을 2배로 더 압축하면 물체가 올라가는 높이는 몇 배가 될까?</summary><p>탄성 퍼텐셜 에너지 ½kx²가 4배가 되므로, 마찰이 없다면 mgh도 4배 → 높이가 4배가 됩니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>자전거 타이어에 공기를 빠르게 넣으면 펌프가 뜨거워지는 까닭은?</summary><p>공기를 빠르게 압축하면 열이 빠져나갈 시간이 없어 거의 단열 압축이 됩니다. 외부에서 해 준 일이 모두 기체의 내부 에너지 증가로 이어져 온도가 올라갑니다(Q = 0 → ΔU = −W, W < 0).</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>열효율이 100 %인 열기관을 만들 수 없는 까닭은?</summary><p>열역학 제2법칙에 따르면 열기관은 고열원에서 받은 열의 일부를 반드시 저열원으로 방출해야 합니다. 받은 열을 모두 일로 바꾸는 기관은 존재할 수 없으므로 열효율은 항상 1보다 작습니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="g = 9.8 m/s². 이상 기체(단원자) 1 mol 모형."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2, g9 = 9.8;
+const st = {mode: 'mech', x: .3, k: 400, m: 1, fric: false, t: 0, run: false, pr: 'isobar', q: 500, Th: 800, Tl: 300, loss: .3};
+/* ===== 1. 역학적 에너지 ===== */
+const Es = () => .5 * st.k * st.x * st.x, Wf = () => st.fric ? .2 * st.m * g9 * 1 : 0, hmax = () => Math.max(0, (Es() - Wf()) / (st.m * g9));
+// 경로: 용수철(−x..0) → 수평 1 m(0..1) → 30° 빗면
+function mechState(t){ const E0 = Es(), m = st.m, v1 = Math.sqrt(2 * E0 / m); // 용수철 풀릴 때(단순화: 0.2 s 동안 선형 진행)
+  const tl = .25; if (t < tl) { const u = t / tl, xs = -st.x * Math.cos(u * Math.PI / 2), pe = .5 * st.k * xs * xs; return {pos: xs, h: 0, es: pe, ke: E0 - pe, q: 0}; }
+  let tt = t - tl, x = 0; const vA = v1; const mu = st.fric ? .2 : 0; let v = vA, q = 0;
+  // 수평 1 m: a = −μg
+  const a1 = -mu * g9; let t1; if (a1 === 0) t1 = 1 / vA; else { const disc = vA * vA + 2 * a1; if (disc <= 0) { const ts = -vA / a1; const tu = Math.min(tt, ts); x = vA * tu + .5 * a1 * tu * tu; v = vA + a1 * tu; return {pos: x, h: 0, es: 0, ke: .5 * m * v * v, q: mu * m * g9 * x}; } t1 = (vA - Math.sqrt(disc)) / -a1; }
+  if (tt < t1) { x = vA * tt + .5 * a1 * tt * tt; v = vA + a1 * tt; return {pos: x, h: 0, es: 0, ke: .5 * m * v * v, q: mu * m * g9 * x}; }
+  tt -= t1; const vB = Math.sqrt(Math.max(0, vA * vA + 2 * a1)); q = mu * m * g9; const a2 = -g9 * .5, tup = vB / -a2; const tc = tt % (2 * tup + .0001), up = tc <= tup ? tc : 2 * tup - tc; const s = vB * up + .5 * a2 * up * up, h = s * .5, vv = Math.sqrt(Math.max(0, vB * vB - 2 * g9 * h)); return {pos: 1 + s * Math.cos(Math.PI / 6), h, es: 0, ke: .5 * m * vv * vv, q, top: tc > tup * .98 && tc < tup * 1.02}; }
+function drawMech(){ const g = S.g, W = S.w, H = S.h, s = mechState(st.run ? st.t : 0), gy = H * .78, hm0 = Math.max(1, hmax() * 1.15), u0 = Math.min(W * .12, (gy - 50) / hm0, W * .5 / (1.6 + 1.75 * hm0)), X = x => W * .08 + (x + .6) * u0, Y = h => gy - h * u0, rampS = hm0 * 2;
+  g.fillStyle = '#b9a58a'; g.beginPath(); g.moveTo(0, gy); g.lineTo(X(1), gy); g.lineTo(X(1 + rampS * Math.cos(Math.PI / 6)), Y(rampS / 2)); g.lineTo(X(1 + rampS * Math.cos(Math.PI / 6)), H); g.lineTo(0, H); g.fill(); if (st.fric) { g.fillStyle = 'rgba(160,110,60,.6)'; g.fillRect(X(0), gy - 3, X(1) - X(0), 5); label(g, '마찰 구간 1 m', X(.5), gy + 14, {size: 10, color: '#8a5a2a'}); }
+  g.fillStyle = '#666'; g.fillRect(X(-.6) - 8, gy - 40, 8, 40); const sx0 = X(-.6), sx1 = X(Math.min(0, s.pos)); g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); for (let i = 0; i <= 16; i++) g.lineTo(sx0 + (sx1 - sx0) * i / 16, gy - 18 + (i % 2 ? -8 : 8) * (i > 0 && i < 16 ? 1 : 0)); g.stroke();
+  const bx = X(s.pos), by = s.pos > 1 ? Y(s.h) : gy; g.save(); g.translate(bx, by); if (s.pos > 1) g.rotate(-Math.PI / 6); g.fillStyle = '#4a7fd6'; g.fillRect(0, -26, 30, 26); label(g, st.m + 'kg', 15, -13, {size: 10, color: '#fff', weight: 700}); g.restore();
+  const hm = hmax(); g.strokeStyle = C.hot; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(X(.8), Y(hm)); g.lineTo(W - 20, Y(hm)); g.stroke(); g.setLineDash([]); label(g, `최고 높이 ${hm.toFixed(3)} m`, W - 24, Y(hm) - 10, {size: 11, color: C.hot, align: 'right'});
+  // 막대
+  const E0 = Es(), bxx = W * .62, bw = 40, bh = H * .38, by0 = H * .44, sc = bh / Math.max(E0, .01), bars = [['탄성 퍼텐셜', s.es, '#9a7ad0'], ['운동', s.ke, C.hot], ['중력 퍼텐셜', st.m * g9 * s.h, C.phy], ['열', s.q, C.muted]];
+  bars.forEach(([n, v, c], i) => { const x = bxx + i * (bw + 12); g.fillStyle = c; g.fillRect(x, by0 - v * sc, bw, v * sc); label(g, n, x + bw / 2, by0 + 12, {size: 9}); label(g, v.toFixed(1), x + bw / 2, by0 - v * sc - 8, {size: 10, weight: 700}); });
+  g.strokeStyle = C.ink; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(bxx - 4, by0 - E0 * sc); g.lineTo(bxx + 4 * (bw + 12), by0 - E0 * sc); g.stroke(); g.setLineDash([]); label(g, `전체 ${E0.toFixed(1)} J`, bxx + 2 * (bw + 12), by0 - E0 * sc - 12, {size: 11, weight: 700}); }
+/* ===== 2. 열역학 제1법칙 ===== */
+const R8 = 8.314;
+function proc(){ const n = 1, Cv = 1.5 * R8, Q = st.q, T0 = 300, V0 = 24.9, P0 = n * R8 * T0 / (V0 / 1000) / 1000; // V L, P kPa
+  if (st.pr === 'isobar') { const dT = Q / (2.5 * R8), W = n * R8 * dT, dU = Cv * dT; return {Q, W, dU, T1: T0 + dT, path: t => { const T = T0 + dT * t, V = V0 * T / T0; return [V, P0]; }}; }
+  if (st.pr === 'isochor') { const dT = Q / Cv; return {Q, W: 0, dU: Q, T1: T0 + dT, path: t => [V0, P0 * (T0 + dT * t) / T0]}; }
+  if (st.pr === 'adiab') { const W = -Q, dU = Q, dT = dU / Cv, T1 = T0 + dT, V1 = V0 * Math.pow(T0 / T1, 1.5); return {Q: 0, W, dU, T1, path: t => { const V = V0 + (V1 - V0) * t, T = T0 * Math.pow(V0 / V, 2 / 3); return [V, n * R8 * T / V]; }}; }
+  const W = Q, V1 = V0 * Math.exp(W / (n * R8 * T0)); return {Q, W, dU: 0, T1: T0, path: t => { const V = V0 + (V1 - V0) * t; return [V, n * R8 * T0 / V]; }}; }
+function drawThermo(){ const g = S.g, W = S.w, H = S.h, P = proc(), u = Math.min(1, st.t / 3), [V, Pk] = P.path(u), T = 300 + (P.T1 - 300) * u, cx = W * .26, cw = 140, base = H * .86, ch = Math.min(H * .7, V / 40 * H * .7 + 30);
+  g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.moveTo(cx - cw / 2, base - H * .75); g.lineTo(cx - cw / 2, base); g.lineTo(cx + cw / 2, base); g.lineTo(cx + cw / 2, base - H * .75); g.stroke();
+  g.fillStyle = Kit.tempColor(T, 250, 700); g.globalAlpha = .25; g.fillRect(cx - cw / 2, base - ch, cw, ch); g.globalAlpha = 1; g.fillStyle = '#777'; g.fillRect(cx - cw / 2, base - ch - 12, cw, 12); g.fillRect(cx - 4, base - ch - 60, 8, 48);
+  if (st.pr === 'isochor') { g.fillStyle = '#c0504a'; g.fillRect(cx - cw / 2 - 6, base - ch - 18, 8, 10); g.fillRect(cx + cw / 2 - 2, base - ch - 18, 8, 10); label(g, '고정', cx + cw / 2 + 8, base - ch - 14, {size: 10, align: 'left'}); }
+  let seed = 3; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647, sp = Math.sqrt(T / 300), t = performance.now() / 1000; for (let i = 0; i < 40; i++) { const x = cx - cw / 2 + 6 + ((r() * (cw - 12) + t * 60 * sp * (r() - .5) * 2) % (cw - 12) + cw - 12) % (cw - 12), y = base - 6 - ((r() * (ch - 12) + t * 50 * sp * (r() - .5) * 2) % (ch - 12) + ch - 12) % (ch - 12); g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(x, y, 3, 0, TAU); g.fill(); }
+  if (st.pr !== 'adiab') { for (let k = 0; k < 3; k++) label(g, '🔥', cx - 40 + k * 40, base + 16, {size: 18}); label(g, `Q = +${P.Q} J`, cx, base + 34, {size: 12, weight: 700, color: C.hot}); } else { arrow(g, cx, base - ch - 110, cx, base - ch - 64, C.phy, 4); label(g, '빠르게 압축 (단열: Q = 0)', cx, base - ch - 120, {size: 11, weight: 700, color: C.phy}); g.strokeStyle = '#999'; g.setLineDash([4, 3]); g.strokeRect(cx - cw / 2 - 10, base - H * .78, cw + 20, H * .78 + 6); g.setLineDash([]); }
+  const rx = W * .7; label(g, `Q = ΔU + W`, rx, H * .2, {size: 20, weight: 700, color: C.accent}); label(g, `${(P.Q * u).toFixed(0)} = ${(P.dU * u).toFixed(0)} + ${(P.W * u).toFixed(0)} (J)`, rx, H * .2 + 30, {size: 16, weight: 700}); label(g, `온도 ${T.toFixed(0)} K · 부피 ${V.toFixed(1)} L · 압력 ${Pk.toFixed(0)} kPa`, rx, H * .2 + 60, {size: 12}); }
+/* ===== 3. 열기관 ===== */
+const carnot = () => 1 - st.Tl / st.Th, real = () => carnot() * (1 - st.loss);
+function drawEngine(){ const g = S.g, W = S.w, H = S.h, cx = W * .3, Q1 = 1000, e = real(), Wk = Q1 * e, Q2 = Q1 - Wk, t = performance.now() / 1000;
+  g.fillStyle = Kit.tempColor(st.Th, 250, 1200); g.globalAlpha = .7; g.fillRect(cx - 120, 20, 240, 50); g.globalAlpha = 1; label(g, `고열원 T₁ = ${st.Th} K`, cx, 45, {size: 14, weight: 700, color: '#fff'}); g.fillStyle = Kit.tempColor(st.Tl, 250, 1200); g.globalAlpha = .7; g.fillRect(cx - 120, H - 70, 240, 50); g.globalAlpha = 1; label(g, `저열원 T₂ = ${st.Tl} K`, cx, H - 45, {size: 14, weight: 700, color: '#fff'});
+  g.fillStyle = '#9aa6b8'; g.beginPath(); g.arc(cx, H / 2, 50, 0, TAU); g.fill(); label(g, '열기관', cx, H / 2, {size: 14, weight: 700}); g.strokeStyle = '#555'; g.lineWidth = 4; g.beginPath(); g.arc(cx, H / 2, 38, t * 3, t * 3 + 4); g.stroke();
+  const w = v => 4 + v / 1000 * 40; g.fillStyle = 'rgba(224,83,63,.6)'; g.fillRect(cx - w(Q1) / 2, 70, w(Q1), H / 2 - 120); label(g, `Q₁ = ${Q1} J`, cx + w(Q1) / 2 + 8, 110, {size: 13, weight: 700, color: C.hot, align: 'left'});
+  g.fillStyle = 'rgba(120,150,200,.6)'; g.fillRect(cx - w(Q2) / 2, H / 2 + 50, w(Q2), H / 2 - 120); label(g, `Q₂ = ${Q2.toFixed(0)} J`, cx + w(Q2) / 2 + 8, H - 110, {size: 13, weight: 700, color: C.phy, align: 'left'});
+  g.fillStyle = 'rgba(46,125,79,.6)'; g.fillRect(cx + 50, H / 2 - w(Wk) / 2, W * .22, w(Wk)); arrow(g, cx + 50 + W * .22, H / 2, cx + 70 + W * .22, H / 2, C.bio, 4); label(g, `일 W = ${Wk.toFixed(0)} J`, cx + 60 + W * .11, H / 2 - w(Wk) / 2 - 12, {size: 13, weight: 700, color: C.bio});
+  const rx = W * .78; label(g, `열효율 e = W / Q₁ = ${(e * 100).toFixed(1)} %`, rx, H * .7, {size: 15, weight: 700, color: C.accent}); label(g, `이론적 최대(카르노) = 1 − T₂/T₁ = ${(carnot() * 100).toFixed(1)} %`, rx, H * .7 + 26, {size: 12}); }
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'mech') { const m = axes(G, {x: [0, 3, .5, '시간 (s)'], y: [0, Math.max(10, Math.ceil(Es() / 10) * 10), Math.max(2, Math.ceil(Es() / 50) * 10), '에너지 (J)']}); const K = [], U = [], E = [], T = st.run ? st.t : 3; for (let t = 0; t <= Math.min(3, T); t += .02) { const s = mechState(t); K.push([t, s.ke]); U.push([t, st.m * g9 * s.h + s.es]); E.push([t, s.ke + st.m * g9 * s.h + s.es]); } line(G, U, m, C.phy, 2.2); line(G, K, m, C.hot, 2.2); line(G, E, m, C.ink, 2, [5, 4]); label(g, '빨강: 운동 · 파랑: 퍼텐셜(탄성+중력) · 점선: 역학적 에너지', m.X(1.5), m.Y(Es() * .05) - 8, {size: 10, color: C.muted}); }
+  else if (st.mode === 'thermo') { const m = axes(G, {x: [10, 60, 10, '부피 (L)'], y: [0, 300, 50, '압력 (kPa)']}); const P = proc(), path = []; for (let u = 0; u <= 1.0001; u += .02) path.push(P.path(u)); line(G, path, m, C.accent, 2.6); const [V, Pk] = P.path(Math.min(1, st.t / 3)); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(V), m.Y(Pk), 5, 0, TAU); g.fill(); if (st.pr !== 'isochor') { g.fillStyle = 'rgba(80,120,220,.15)'; g.beginPath(); g.moveTo(m.X(path[0][0]), m.Y(0)); path.forEach(p => g.lineTo(m.X(p[0]), m.Y(p[1]))); g.lineTo(m.X(path[path.length - 1][0]), m.Y(0)); g.closePath(); g.fill(); label(g, '넓이 = 기체가 한 일(또는 받은 일)', m.X(45), m.Y(270), {size: 10, color: C.muted}); } }
+  else { const m = axes(G, {x: [400, 1200, 200, '고열원 온도 (K)'], y: [0, 100, 20, '열효율 (%)']}); const P1 = [], P2 = []; for (let T = 400; T <= 1200; T += 10) { P1.push([T, (1 - st.Tl / T) * 100]); P2.push([T, (1 - st.Tl / T) * (1 - st.loss) * 100]); } line(G, P1, m, C.line, 2, [5, 4]); line(G, P2, m, C.accent, 2.5); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.Th), m.Y(real() * 100), 5, 0, TAU); g.fill(); label(g, '점선: 이론적 최대 효율', m.X(1000), m.Y(90), {size: 10, color: C.muted}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
+  if (st.mode === 'mech') { s.innerHTML = `<div><b>${Es().toFixed(1)} J</b><span>탄성 퍼텐셜 에너지 ½kx²</span></div><div><b>${hmax().toFixed(3)} m</b><span>최고 높이</span></div>${st.fric ? `<div><b>${Wf().toFixed(2)} J</b><span>마찰로 발생한 열</span></div>` : ''}`; $('explain').innerHTML = '<b>역학적 에너지</b> = 운동 에너지 + 퍼텐셜 에너지(중력·탄성). 마찰이나 공기 저항이 없으면 역학적 에너지는 보존돼요: ½kx² = ½mv² = mgh. 마찰이 있으면 일부가 열에너지로 전환되지만, 열까지 포함한 전체 에너지는 보존돼요.'; $('tip').textContent = '최고 높이 h = ½kx² ÷ mg (마찰 없을 때). 질량이 크면 같은 에너지로 더 낮게 올라가요.';
+    th.innerHTML = '<tr><th>압축 (m)</th><th>탄성 에너지 (J)</th><th>최고 높이 (m)</th></tr>'; tb.innerHTML = [.1, .2, .3, .4, .5].map(x => { const E = .5 * st.k * x * x; return `<tr><td>${x}</td><td>${E.toFixed(1)}</td><td>${Math.max(0, (E - Wf()) / (st.m * g9)).toFixed(3)}</td></tr>`; }).join(''); $('tTitle').textContent = '압축 거리와 최고 높이'; $('gTitle').textContent = '시간에 따른 에너지'; $('gSub').textContent = ''; }
+  else if (st.mode === 'thermo') { const P = proc(); s.innerHTML = `<div><b>${P.Q} J</b><span>흡수한 열 Q</span></div><div><b>${P.dU.toFixed(0)} J</b><span>내부 에너지 변화 ΔU</span></div><div><b>${P.W.toFixed(0)} J</b><span>기체가 한 일 W</span></div>`; $('explain').innerHTML = '<b>열역학 제1법칙</b>: 기체가 흡수한 열 Q = 내부 에너지 증가량 ΔU + 기체가 외부에 한 일 W. 에너지 보존 법칙을 열까지 확장한 것이에요. 이상 기체의 내부 에너지는 <b>온도</b>에만 비례해요.'; $('tip').textContent = '기체가 팽창하면 W > 0(외부에 일을 함), 압축되면 W < 0(외부에서 일을 받음). P–V 그래프 아래 넓이가 일의 크기예요.';
+    th.innerHTML = '<tr><th>과정</th><th>조건</th><th>제1법칙</th></tr>'; tb.innerHTML = [['등압 과정', '압력 일정', 'Q = ΔU + W'], ['등적 과정', '부피 일정 (W = 0)', 'Q = ΔU'], ['등온 과정', '온도 일정 (ΔU = 0)', 'Q = W'], ['단열 과정', '열 출입 없음 (Q = 0)', 'ΔU = −W']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join(''); $('tTitle').textContent = '열역학 과정'; $('gTitle').textContent = '압력–부피 그래프'; $('gSub').textContent = ''; }
+  else { s.innerHTML = `<div><b>${(real() * 100).toFixed(1)} %</b><span>열효율</span></div><div><b>${(carnot() * 100).toFixed(1)} %</b><span>이론적 최대 효율</span></div>`; $('explain').innerHTML = '<b>열기관</b>: 고열원에서 열 Q₁을 흡수해 일 W를 하고, 나머지 열 Q₂를 저열원으로 방출하는 장치. 열효율 e = W/Q₁ = 1 − Q₂/Q₁. <b>열역학 제2법칙</b>에 따라 Q₂는 0이 될 수 없어 열효율은 항상 1(100 %)보다 작아요.'; $('tip').textContent = '고열원 온도를 높이거나 저열원 온도를 낮출수록 최대 효율이 커져요. 자연 현상은 무질서도(엔트로피)가 증가하는 방향으로 일어나요.';
+    th.innerHTML = '<tr><th>열기관</th><th>열효율 (대략)</th></tr>'; tb.innerHTML = [['증기 기관 (초기)', '약 5~10 %'], ['가솔린 기관', '약 25~30 %'], ['디젤 기관', '약 35~45 %'], ['화력 발전소 (증기 터빈)', '약 35~45 %'], ['복합 화력 발전', '약 55~60 %']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = '여러 열기관의 열효율'; $('gTitle').textContent = '고열원 온도와 열효율'; $('gSub').textContent = ''; } }
+const bind = (id, k, f) => { $(id).oninput = e => { st[k] = +e.target.value; $(id + 'Out').textContent = f(st[k]); st.t = 0; st.run = false; render(); }; };
+bind('kx', 'x', v => v + ' m'); bind('km', 'k', v => v + ' N/m'); bind('mm', 'm', v => v + ' kg'); bind('qin', 'q', v => v + ' J'); bind('th', 'Th', v => v + ' K'); bind('tl', 'Tl', v => v + ' K'); bind('eff', 'loss', v => Math.round(v * 100) + ' %');
+$('fric').onchange = e => { st.fric = e.target.checked; st.t = 0; st.run = false; render(); }; Kit.seg($('prSeg'), 'pr', v => { st.pr = v; st.t = 0; st.run = false; $('qinOut').textContent = st.q + ' J'; render(); })('isobar');
+$('go').onclick = () => { st.t = 0; st.run = true; };
+Kit.tabs(m => { st.mode = m; st.t = 0; st.run = false; render(); }, ['mech', 'thermo', 'engine']);
+Kit.loop(dt => { if (st.run) { st.t += dt; if (st.mode === 'thermo' && st.t > 3.2) st.run = false; } }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({mech: drawMech, thermo: drawThermo, engine: drawEngine})[st.mode](); drawGraph(); });
+})();
+</script>
+</body>
+</html>
