@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>재난 탈출 시뮬레이터 · 중3 재난·재해 안전</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'escape', title: '재난 탈출 시뮬레이터', unit: '중3 · 22 재난·재해와 안전', back: '../../index.html#g3', sim: 'sim.html#types', dark: true,
+  lead: '지진, 화재, 태풍, 화학 물질 유출… 실제 상황처럼 <b>제한 시간 안에</b> 올바른 행동을 골라 안전하게 대피하세요. 과학적 근거를 알면 몸이 먼저 움직여요!',
+  howto: ['상황마다 <b>10초</b> 안에 행동을 고르세요. 시간이 지나면 위험 판정!', '틀린 선택을 하면 <b>안전 게이지</b>가 줄어요. 0이 되면 구조 요청 상태가 돼요.', '선택 뒤에 나오는 <b>과학적 이유</b>를 꼭 읽어 보세요.'],
+  options: [{key: 'n', label: '재난 수', choices: [[3, '3가지'], [5, '5가지'], [6, '모두']], def: 5}, {key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '재난·재해는 <b>원인과 피해 특성</b>을 과학적으로 이해하면 대처할 수 있어요. 지진은 흔들림이 멈출 때까지 몸을 보호한 뒤 넓은 곳으로, 화재는 <b>연기가 위로 올라가므로</b> 낮은 자세로, 무거운 유독 기체는 <b>높은 곳·바람이 불어오는 쪽</b>으로, 태풍·호우 때는 하천·지하 공간을 피해야 해요. 감염병은 병원체의 전파 경로(비말·접촉)를 끊는 것이 핵심입니다.',
+  startLabel: '훈련 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+// [이름, 아이콘, 효과, [[상황, [[선택, 정답?, 이유]]]]]
+const SCN = [
+  ['지진', '🏫', 'quake', [
+    ['수업 중 갑자기 교실이 크게 흔들려요!', [['책상 아래로 들어가 책상 다리를 꽉 잡는다', 1, '떨어지는 물건으로부터 머리와 몸을 보호하는 것이 먼저예요.'], ['바로 복도로 뛰어나간다', 0, '흔들리는 중에 이동하면 넘어지거나 낙하물에 다쳐요.'], ['창문 옆에서 바깥 상황을 살핀다', 0, '유리창이 깨질 수 있어 가장 위험한 곳이에요.']]],
+    ['흔들림이 멈췄어요. 이제 어떻게 대피할까요?', [['계단을 이용해 운동장으로 대피한다', 1, '여진에 대비해 건물에서 떨어진 넓은 공간으로 가요.'], ['엘리베이터를 타고 빨리 내려간다', 0, '정전이나 고장으로 갇힐 수 있어요.'], ['교실에 남아 기다린다', 0, '여진으로 건물이 더 손상될 수 있어요.']]],
+    ['운동장으로 가는 길, 무엇을 조심할까요?', [['가방이나 손으로 머리를 보호하고 건물·담장에서 떨어져 걷는다', 1, '벽돌, 간판, 유리 조각이 떨어질 수 있어요.'], ['담장 옆에 붙어 걷는다', 0, '담장은 무너지기 쉬워요.'], ['친구를 찾으러 다른 반으로 간다', 0, '정해진 대피 경로를 따라야 혼란이 적어요.']]]]],
+  ['화재', '🔥', 'fire', [
+    ['복도에 연기가 가득해요!', [['젖은 수건으로 코와 입을 막고 낮은 자세로 이동한다', 1, '뜨거운 연기는 밀도가 작아 위로 올라가므로 바닥 근처의 공기가 비교적 깨끗해요.'], ['숨을 참고 똑바로 서서 빨리 뛴다', 0, '서 있으면 유독 가스를 들이마시기 쉬워요.'], ['창문을 모두 열고 기다린다', 0, '산소가 공급되어 불이 더 커질 수 있어요.']]],
+    ['닫힌 문 앞에 왔어요. 문을 열기 전에?', [['손등으로 문손잡이의 온도를 확인한다', 1, '손잡이가 뜨거우면 문 너머에 불이 있다는 뜻이에요. 다른 길로!'], ['힘껏 문을 열어젖힌다', 0, '갑자기 산소가 들어가 불길이 확 번질(역화) 수 있어요.'], ['문틈으로 안을 들여다본다', 0, '뜨거운 연기에 다칠 수 있어요.']]],
+    ['아래층으로 내려가야 해요.', [['계단으로 내려가 밖으로 대피한다', 1, '화재 시 엘리베이터는 정전·연기 유입으로 매우 위험해요.'], ['엘리베이터를 탄다', 0, '엘리베이터 통로는 굴뚝처럼 연기가 모여요.'], ['옥상으로만 올라간다', 0, '아래로 대피할 수 없을 때만 옥상으로 가요.']]]]],
+  ['태풍·호우', '🌀', 'rain', [
+    ['태풍 특보가 내려졌어요. 집에서 할 일은?', [['창문을 단단히 잠그고 바깥 물건을 고정한다', 1, '강풍에 날아온 물체가 큰 피해를 줘요.'], ['창문에 테이프를 X자로 붙이면 충분하다', 0, '테이프만으로는 유리가 깨지는 것을 막기 어려워요. 창틀 고정이 중요해요.'], ['바람을 구경하러 해안가로 간다', 0, '해일·높은 파도로 매우 위험해요.']]],
+    ['폭우로 도로가 물에 잠기기 시작했어요.', [['높은 곳으로 이동하고 지하 공간을 피한다', 1, '물은 낮은 곳으로 모이고, 지하 공간은 순식간에 잠겨요.'], ['지하 주차장의 차를 옮기러 간다', 0, '지하 주차장은 갇힐 위험이 커요.'], ['하천 다리 위에서 물 높이를 확인한다', 0, '급류에 휩쓸릴 수 있어요.']]]]],
+  ['화학 물질 유출', '☣️', 'gas', [
+    ['근처 공장에서 염소 기체가 새어 나왔어요. 염소는 공기보다 무거워요.', [['건물 위층(높은 곳)으로 대피한다', 1, '공기보다 무거운 기체는 낮은 곳에 고여요.'], ['지하실로 숨는다', 0, '무거운 기체가 지하로 흘러들어 가장 위험해요.'], ['그 자리에 엎드린다', 0, '낮은 자세는 무거운 기체에 더 노출돼요.']]],
+    ['밖으로 대피해야 한다면 어느 방향으로?', [['바람이 불어오는 쪽(바람을 마주 보는 방향)으로', 1, '유출 물질은 바람을 따라 퍼지므로 바람이 불어오는 쪽이 안전해요.'], ['바람이 불어 가는 쪽으로', 0, '유독 기체가 따라와요.'], ['유출 장소 쪽으로 가서 확인한다', 0, '절대 다가가면 안 돼요.']]],
+    ['실내에 머무를 때는?', [['창문을 닫고 틈을 막은 뒤 환기 장치를 끈다', 1, '외부 공기가 들어오지 않게 해야 해요.'], ['창문을 열어 환기한다', 0, '오염된 공기가 들어와요.'], ['선풍기를 창밖으로 향하게 켠다', 0, '실내외 공기 순환이 일어나요.']]]]],
+  ['감염병', '🦠', 'virus', [
+    ['반에서 독감 환자가 생겼어요. 가장 효과적인 개인 예방법은?', [['비누로 30초 이상 손 씻기', 1, '손에 묻은 병원체를 제거해 접촉 전파를 막아요.'], ['항생제를 미리 먹는다', 0, '항생제는 세균에 쓰는 약으로 바이러스에는 효과가 없어요.'], ['창문을 꼭 닫아 둔다', 0, '환기를 해야 공기 중 병원체 농도가 낮아져요.']]],
+    ['기침이 나올 때는?', [['옷소매나 휴지로 입과 코를 가린다', 1, '비말이 퍼지는 것을 막는 기침 예절이에요.'], ['손바닥으로 가린다', 0, '손에 묻은 병원체가 다른 곳으로 옮겨 가요.'], ['고개만 돌린다', 0, '비말은 2 m 가까이 퍼질 수 있어요.']]]]],
+  ['폭염', '☀️', 'heat', [
+    ['기온 35 ℃, 체육 수업 중 친구가 어지럽다고 해요.', [['그늘로 옮겨 옷을 느슨하게 하고 시원한 물을 마시게 한다', 1, '체온을 낮추고 땀으로 잃은 수분을 보충해야 해요.'], ['계속 운동하며 땀을 빼게 한다', 0, '열사병으로 위험해질 수 있어요.'], ['뜨거운 차를 마시게 한다', 0, '체온이 더 올라가요.']]],
+    ['의식이 흐려지고 몸이 매우 뜨거워요.', [['즉시 119에 신고하고 몸을 식힌다', 1, '열사병은 생명이 위험한 응급 상황이에요.'], ['억지로 물을 먹인다', 0, '의식이 흐리면 기도가 막힐 수 있어요.'], ['잠시 쉬면 괜찮아질 거라 기다린다', 0, '빠른 대처가 중요해요.']]]]]];
+let lastOk = true, list, si, step, safe, ui = {}, deadline, locked, fx = [], t0;
+app.onStart = o => { list = SCN.slice().sort(() => Math.random() - .5).slice(0, o.n); si = 0; step = -1; safe = 100; ui.q = app.panel('상황'); ui.s = app.panel('안전 게이지'); app.startTimer(); next(); };
+function gauge(){ ui.s.innerHTML = `<div style="height:14px;border-radius:7px;background:rgba(0,0,0,.3);overflow:hidden"><div style="height:100%;width:${safe}%;background:${safe > 60 ? 'var(--mint)' : safe > 30 ? 'var(--yellow)' : 'var(--coral)'}"></div></div><p style="margin-top:6px">${safe} / 100</p>`; }
+function next(){ step++; if (step >= list[si][3].length) { si++; step = 0; app.nextTurn(); } if (si >= list.length) return end(); const total = list.reduce((a, s) => a + s[3].length, 0), done = list.slice(0, si).reduce((a, s) => a + s[3].length, 0) + step; app.setLevel(done, total);
+  const [txt, ch] = list[si][3][step]; locked = false; deadline = performance.now() + 10000; t0 = performance.now(); const ord = ch.map((_, i) => i).sort(() => Math.random() - .5);
+  ui.q.innerHTML = `<p class="mission"><b>${list[si][1]} ${list[si][0]}</b> · ${txt}</p>` + ord.map(i => `<button class="tool" type="button" data-i="${i}" style="width:100%;margin:5px 0;text-align:left;justify-content:flex-start">${ch[i][0]}</button>`).join('');
+  ui.q.querySelectorAll('[data-i]').forEach(b => b.onclick = () => pick(+b.dataset.i)); gauge(); }
+function pick(i){ if (locked) return; locked = true; const ch = list[si][3][step][1], ok = i >= 0 && ch[i][1], right = ch.find(c => c[1]); lastOk = !!ok;
+  if (ok) { const sec = (performance.now() - t0) / 1000, pts = Math.round(60 + Math.max(0, 10 - sec) * 4); app.addScore(pts); sfx.ok(); toast(`안전! +${pts}`, 'good'); }
+  else { safe = Math.max(0, safe - 20); sfx.bad(); toast(i < 0 ? '시간 초과! 위험해요' : '위험한 선택이에요', 'bad'); fx.push(performance.now()); }
+  ui.q.innerHTML = `<p class="mission">${ok ? '✔' : '✖'} ${i >= 0 ? ch[i][0] : '(시간 초과)'}</p><p class="note-c" style="margin-top:6px">${i >= 0 ? ch[i][2] : ''}${!ok ? `<br>✅ 올바른 행동: <b>${right[0]}</b> — ${right[2]}` : ''}</p><button class="big" type="button" style="width:100%;margin-top:10px">계속 ▶</button>`;
+  ui.q.querySelector('button').onclick = next; gauge(); }
+function end(){ const sc = app.player.score; app.finish({stars: app.multi ? 3 : safe >= 80 ? 3 : safe >= 50 ? 2 : 1, title: !app.multi && safe <= 0 ? '구조를 기다려요…' : null, summary: app.multi ? '모둠별 점수입니다.' : `안전 게이지 <b>${safe}</b> · 점수 <b>${sc}</b>`, best: sc + '점', bestValue: sc}); }
+app.step = () => { if (!list || locked || si >= list.length) return; if (performance.now() > deadline) pick(-1); };
+app.draw = (g, W, H) => { if (!list || si >= list.length) return; const t = performance.now() / 1000, sc = list[si], e = sc[2], left = Math.max(0, (deadline - performance.now()) / 1000);
+  const shake = e === 'quake' && !locked ? Math.sin(t * 40) * 5 : 0; g.save(); g.translate(shake, Math.cos(t * 33) * shake * .5);
+  const BG = {quake: ['#d9c9a8', '#a68a5b'], fire: ['#3a2a28', '#5a3a2a'], rain: ['#3d4a5a', '#2a3440'], gas: ['#9fb07a', '#6f8050'], virus: ['#dbe8f0', '#b8cfe0'], heat: ['#ffd27a', '#e89a4a']}[e];
+  const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, BG[0]); gr.addColorStop(1, BG[1]); g.fillStyle = gr; g.fillRect(-10, -10, W + 20, H + 20);
+  if (e === 'quake') { g.fillStyle = '#8a6a4f'; for (let i = 0; i < 4; i++) { D.rr(g, W * (.12 + i * .2), H * .55, W * .13, H * .08, 4); g.fill(); g.fillRect(W * (.13 + i * .2), H * .63, 6, H * .15); g.fillRect(W * (.24 + i * .2), H * .63, 6, H * .15); } g.fillStyle = '#2f5a3a'; g.fillRect(W * .25, H * .08, W * .5, H * .22); D.text(g, '과학', W * .5, H * .19, {size: 26, display: true, color: '#f2efe4'}); for (let i = 0; i < 8; i++) { const y = ((t * 200 + i * 60) % (H * .5)); D.text(g, ['📚', '🧱', '✏️'][i % 3], W * (.1 + i * .11), y, {size: 18}); } }
+  if (e === 'fire') { for (let i = 0; i < 14; i++) { const p = (t * .25 + i / 14) % 1; g.fillStyle = `rgba(60,60,60,${.5 * (1 - p)})`; g.beginPath(); g.arc(W * (i / 14) + Math.sin(i + t) * 30, H * (.5 - p * .5), 40 + p * 40, 0, 7); g.fill(); } for (let i = 0; i < 6; i++) D.text(g, '🔥', W * (.1 + i * .16), H * .85 + Math.sin(t * 8 + i) * 4, {size: 40}); D.text(g, '연기는 위로 ↑', W * .85, H * .12, {size: 14, color: '#f2efe4', weight: 700}); g.fillStyle = 'rgba(155,227,181,.25)'; g.fillRect(0, H * .72, W, H * .08); D.text(g, '바닥 근처 공기', W * .5, H * .76, {size: 12, color: '#cfe', weight: 700}); }
+  if (e === 'rain') { g.strokeStyle = 'rgba(200,220,255,.6)'; g.lineWidth = 1.5; for (let i = 0; i < 120; i++) { const x = (i * 37 + t * 600) % (W + 100) - 50, y = (i * 53 + t * 900) % H; g.beginPath(); g.moveTo(x, y); g.lineTo(x - 8, y + 18); g.stroke(); } g.fillStyle = 'rgba(80,110,150,.7)'; g.fillRect(0, H * (.78 - .04 * Math.sin(t)), W, H * .3); D.text(g, '🌀', W * .8, H * .2, {size: 60 + Math.sin(t * 3) * 4}); }
+  if (e === 'gas') { for (let i = 0; i < 10; i++) { const p = (t * .1 + i / 10) % 1; g.fillStyle = `rgba(200,230,80,${.35 * (1 - p)})`; g.beginPath(); g.ellipse(W * (.1 + p * .9), H * .8, 80 + p * 60, 30, 0, 0, 7); g.fill(); } D.text(g, '🏭', W * .08, H * .7, {size: 50}); D.text(g, '바람 →', W * .5, H * .15, {size: 18, weight: 700, color: '#2b3a20'}); g.fillStyle = '#c9c0ae'; g.fillRect(W * .6, H * .25, W * .15, H * .5); for (let f = 0; f < 4; f++) { g.fillStyle = '#7fa6c7'; g.fillRect(W * .62, H * (.28 + f * .11), W * .11, H * .06); } D.text(g, '무거운 기체는 아래로 ↓', W * .3, H * .62, {size: 13, color: '#2b3a20', weight: 700}); }
+  if (e === 'virus') { for (let i = 0; i < 14; i++) D.text(g, '🦠', (i * 97 + t * 30) % W, H * .2 + (i * 61) % (H * .6), {size: 16 + (i % 3) * 6}); D.text(g, '🧼', W * .5, H * .5, {size: 70}); }
+  if (e === 'heat') { D.glow(g, W * .8, H * .2, 160, '255,240,150', .9); D.text(g, '☀️', W * .8, H * .2, {size: 70}); D.text(g, '🌡️ 35 ℃', W * .25, H * .3, {size: 36, display: true, color: '#a5462f'}); for (let i = 0; i < 6; i++) { g.strokeStyle = 'rgba(255,255,255,.3)'; g.lineWidth = 2; g.beginPath(); for (let x = 0; x < W; x += 10) g.lineTo(x, H * (.6 + i * .06) + Math.sin(x * .03 + t * 3 + i) * 4); g.stroke(); } }
+  const who = locked ? (lastOk ? (e === 'fire' ? '🧎' : '🙆') : '😵') : '🧍', wy = e === 'rain' ? H * .7 : H * .66; D.glow(g, W * .45, wy, 50, '255,255,255', .25); D.text(g, who, W * .45 + (locked && lastOk ? Math.sin(t * 4) * 3 : 0), wy, {size: 54});
+  g.restore();
+  D.text(g, `${sc[1]} ${sc[0]}`, 16, 26, {size: 22, display: true, color: '#fff', align: 'left', stroke: 'rgba(0,0,0,.5)', strokeW: 5});
+  if (!locked) { const f = left / 10; g.fillStyle = 'rgba(0,0,0,.35)'; D.rr(g, W - 120, 14, 104, 18, 9); g.fill(); g.fillStyle = f > .4 ? '#9be3b5' : '#f28c7a'; D.rr(g, W - 118, 16, 100 * f, 14, 7); g.fill(); D.text(g, Math.ceil(left) + '초', W - 130, 23, {size: 14, color: '#fff', weight: 700, align: 'right', stroke: 'rgba(0,0,0,.5)', strokeW: 4}); }
+  fx = fx.filter(f => performance.now() - f < 500); if (fx.length) { g.fillStyle = `rgba(220,40,40,${.35 * (1 - (performance.now() - fx[0]) / 500)})`; g.fillRect(0, 0, W, H); }
+};
+</script>
+</body>
+</html>
