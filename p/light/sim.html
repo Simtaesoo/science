@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>빛과 물질 실험실 · 물리학</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-phy">
+<div class="wrap">
+  <nav class="topbar" data-topbar="물리학|04 빛과 물질" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>물리학 · 04 빛과 물질 <span class="code">물리학 Ⅲ</span></div>
+      <h1>빛과 물질 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="refract">1. 굴절과 전반사</button>
+      <button type="button" data-mode="interf">2. 빛의 간섭</button>
+      <button type="button" data-mode="photo">3. 광전 효과</button>
+      <button type="button" data-mode="matter">4. 물질파</button>
+    </div>
+  </header>
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="빛 실험 장치"></canvas></div>
+      <div class="controls">
+        <label class="field" data-only="refract" for="m1">처음 매질 <select id="m1"><option value="1.00">공기 (1.00)</option><option value="1.33">물 (1.33)</option><option value="1.50" selected>유리 (1.50)</option><option value="2.42">다이아몬드 (2.42)</option></select></label>
+        <label class="field" data-only="refract" for="m2">나중 매질 <select id="m2"><option value="1.00" selected>공기 (1.00)</option><option value="1.33">물 (1.33)</option><option value="1.50">유리 (1.50)</option><option value="2.42">다이아몬드 (2.42)</option></select></label>
+        <label class="field" data-only="refract" for="ang">입사각 <input type="range" id="ang" min="0" max="85" step="1" value="30"><output id="angOut">30°</output></label>
+        <label class="field" data-only="interf" for="wl">파장 <input type="range" id="wl" min="400" max="700" step="10" value="550"><output id="wlOut">550 nm</output></label>
+        <label class="field" data-only="interf" for="dd">슬릿 간격 <input type="range" id="dd" min="0.1" max="0.5" step="0.05" value="0.25"><output id="ddOut">0.25 mm</output></label>
+        <label class="field" data-only="interf" for="LL">스크린 거리 <input type="range" id="LL" min="0.5" max="2" step="0.1" value="1"><output id="LLOut">1.0 m</output></label>
+        <label class="field" data-only="photo" for="metal">금속판 <select id="metal"><option value="2.1">세슘 (2.1 eV)</option><option value="2.3" selected>나트륨 (2.3 eV)</option><option value="4.3">아연 (4.3 eV)</option></select></label>
+        <label class="field" data-only="photo" for="pl">빛의 파장 <input type="range" id="pl" min="200" max="700" step="10" value="400"><output id="plOut">400 nm</output></label>
+        <label class="field" data-only="photo" for="pi">빛의 세기 <input type="range" id="pi" min="1" max="5" step="1" value="3"><output id="piOut">3</output></label>
+        <label class="field" data-only="matter" for="va">가속 전압 <input type="range" id="va" min="25" max="1000" step="25" value="150"><output id="vaOut">150 V</output></label>
+        <button class="btn" type="button" id="clr" data-only="matter">스크린 지우기</button>
+        <button class="btn" type="button" id="play" data-only="interf photo matter">일시정지</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명"><div class="stats" id="stats"></div><p class="explain" id="explain"></p><p class="note" id="tip"></p></aside>
+  </div>
+  <div class="lower">
+    <section class="panel"><h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p><div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div></section>
+    <section class="panel"><h2 id="tTitle">정리</h2><div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div></section>
+  </div>
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>공기에서 유리로 빛을 비출 때는 전반사가 일어나지 않는 까닭은?</summary><p>전반사는 굴절률이 큰 매질에서 작은 매질로 갈 때만 일어나요. 공기 → 유리는 굴절각이 입사각보다 항상 작아 굴절각이 90°에 도달하지 않기 때문이에요.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>아무리 센 빨간빛을 비춰도 아연판에서 전자가 나오지 않는 까닭은?</summary><p>광전 효과는 광자 하나의 에너지(hf)가 일함수보다 커야 일어나요. 빨간빛 광자 하나의 에너지(약 1.8 eV)는 아연의 일함수(4.3 eV)보다 작아서, 빛의 세기(광자 수)를 늘려도 전자가 튀어나오지 않아요. 빛의 <b>입자성</b>의 증거예요.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>전자를 하나씩 쏘아도 간섭무늬가 생기는 것은 무엇을 뜻할까?</summary><p>전자 하나하나가 두 슬릿을 모두 지나는 파동처럼 행동한다는 뜻이에요. 도착은 점(입자)으로 하지만, 모이면 간섭무늬(파동)가 나타나요. 물질도 파동성과 입자성을 함께 가져요.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="hc ≈ 1240 eV·nm. 전자의 물질파 파장 λ ≈ 1.226/√V nm (비상대론적)."></footer>
+</div>
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label} = Kit;
+const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2, D = Math.PI / 180;
+const st = {mode: 'refract', n1: 1.5, n2: 1, a: 30, wl: 550, d: .25, L: 1, W: 2.3, pl: 400, pi: 3, V: 150, t: 0, hits: [], pe: []};
+function wlColor(nm){ if (nm < 380 || nm > 750) return null; let r = 0, g = 0, b = 0;
+  if (nm < 440) { r = (440 - nm) / 60; b = 1; } else if (nm < 490) { g = (nm - 440) / 50; b = 1; } else if (nm < 510) { g = 1; b = (510 - nm) / 20; } else if (nm < 580) { r = (nm - 510) / 70; g = 1; } else if (nm < 645) { r = 1; g = (645 - nm) / 65; } else r = 1;
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)]; }
+const rgb = a => a ? `rgb(${a[0]},${a[1]},${a[2]})` : '#8e5bd6';
+
+/* ===== 1. 굴절과 전반사 ===== */
+const crit = () => st.n1 > st.n2 ? Math.asin(st.n2 / st.n1) / D : null, refr = a => { const s = st.n1 * Math.sin(a * D) / st.n2; return s > 1 ? null : Math.asin(s) / D; };
+const mname = n => ({1: '공기', 1.33: '물', 1.5: '유리', 2.42: '다이아몬드'})[n];
+function drawRefract(){ const g = S.g, W = S.w, H = S.h, cx = W * .45, cy = H * .5, R = Math.min(W * .4, H * .44), b = refr(st.a), tir = b === null;
+  const shade = n => `rgba(80,140,220,${(n - 1) * .22 + .04})`; g.fillStyle = shade(st.n1); g.fillRect(0, 0, W, cy); g.fillStyle = shade(st.n2); g.fillRect(0, cy, W, H - cy);
+  label(g, `${mname(st.n1)} n₁ = ${st.n1.toFixed(2)}`, 14, 20, {align: 'left', size: 12, weight: 700}); label(g, `${mname(st.n2)} n₂ = ${st.n2.toFixed(2)}`, 14, H - 18, {align: 'left', size: 12, weight: 700});
+  g.strokeStyle = C.muted; g.setLineDash([5, 4]); g.lineWidth = 1; g.beginPath(); g.moveTo(cx, cy - R); g.lineTo(cx, cy + R); g.stroke(); g.setLineDash([]); label(g, '법선', cx + 4, cy - R + 8, {size: 10, color: C.muted, align: 'left'});
+  const ix = cx - R * Math.sin(st.a * D), iy = cy - R * Math.cos(st.a * D), col = '#e0533f';
+  const pulse = (st.t * .8) % 1;
+  g.lineWidth = 4; g.strokeStyle = col; g.beginPath(); g.moveTo(ix, iy); g.lineTo(cx, cy); g.stroke(); arrow(g, ix + (cx - ix) * .45, iy + (cy - iy) * .45, ix + (cx - ix) * .55, iy + (cy - iy) * .55, col, 3);
+  // 반사광: 전반사면 100 %, 아니면 프레넬 근사로 약하게
+  let Rf = 1; if (!tir) { const c1 = Math.cos(st.a * D), c2 = Math.cos(b * D), rs = (st.n1 * c1 - st.n2 * c2) / (st.n1 * c1 + st.n2 * c2), rp = (st.n1 * c2 - st.n2 * c1) / (st.n1 * c2 + st.n2 * c1); Rf = (rs * rs + rp * rp) / 2; }
+  const rx = cx + R * Math.sin(st.a * D), ry = cy - R * Math.cos(st.a * D); g.globalAlpha = Math.max(.15, Rf); g.lineWidth = 4; g.beginPath(); g.moveTo(cx, cy); g.lineTo(rx, ry); g.stroke(); arrow(g, cx + (rx - cx) * .5, cy + (ry - cy) * .5, cx + (rx - cx) * .6, cy + (ry - cy) * .6, col, 3); g.globalAlpha = 1;
+  if (!tir) { const tx = cx + R * Math.sin(b * D), ty = cy + R * Math.cos(b * D); g.globalAlpha = Math.max(.2, 1 - Rf); g.beginPath(); g.moveTo(cx, cy); g.lineTo(tx, ty); g.stroke(); arrow(g, cx + (tx - cx) * .5, cy + (ty - cy) * .5, cx + (tx - cx) * .6, cy + (ty - cy) * .6, col, 3); g.globalAlpha = 1;
+    g.strokeStyle = C.accent; g.lineWidth = 1.5; g.beginPath(); g.arc(cx, cy, 46, Math.PI / 2 - b * D, Math.PI / 2); g.stroke(); label(g, `굴절각 ${b.toFixed(1)}°`, cx + 54, cy + 50, {size: 12, weight: 700, color: C.accent, align: 'left'}); }
+  g.strokeStyle = C.accent; g.lineWidth = 1.5; g.beginPath(); g.arc(cx, cy, 40, -Math.PI / 2 - st.a * D, -Math.PI / 2); g.stroke(); label(g, `입사각 ${st.a}°`, cx - 48, cy - 50, {size: 12, weight: 700, color: C.accent, align: 'right'});
+  if (tir) label(g, '전반사! 빛이 모두 반사된다', cx, cy + 40, {size: 16, weight: 700, color: C.hot});
+  const c = crit(); label(g, c ? `임계각 ${c.toFixed(1)}°` : '임계각 없음 (n₁ ≤ n₂)', W - 16, 20, {size: 13, weight: 700, color: c ? C.hot : C.muted, align: 'right'}); if (!tir) label(g, `반사율 약 ${(Rf * 100).toFixed(0)} %`, W - 16, 40, {size: 11, color: C.muted, align: 'right'}); }
+
+/* ===== 2. 이중 슬릿 간섭 ===== */
+let off = null; const fringe = () => st.L * st.wl * 1e-9 / (st.d * 1e-3) * 1000; // mm
+function drawInterf(){ const g = S.g, W = S.w, H = S.h, sx = W * .12, scrX = W * .78, cy = H * .5, rgbA = wlColor(st.wl), lamPx = 10 + (st.wl - 400) / 300 * 10, dPx = 20 + st.d / .5 * 100;
+  // 물결 그림 (저해상도 픽셀)
+  const cw = Math.round((scrX - sx) / 3), ch = Math.round(H / 3); if (!off || off.width !== cw || off.height !== ch) { off = document.createElement('canvas'); off.width = cw; off.height = ch; }
+  const og = off.getContext('2d'), img = og.createImageData(cw, ch), k = TAU / lamPx, ph = st.t * 6;
+  for (let j = 0; j < ch; j++) for (let i = 0; i < cw; i++) { const x = i * 3, y = j * 3 - cy, r1 = Math.hypot(x, y - dPx / 2), r2 = Math.hypot(x, y + dPx / 2), v = (Math.sin(k * r1 - ph) / Math.sqrt(r1 / 30 + 1) + Math.sin(k * r2 - ph) / Math.sqrt(r2 / 30 + 1)) / 2, a = Math.max(0, v) , o = (j * cw + i) * 4; img.data[o] = rgbA[0]; img.data[o + 1] = rgbA[1]; img.data[o + 2] = rgbA[2]; img.data[o + 3] = Math.round(a * 230); }
+  og.putImageData(img, 0, 0); g.imageSmoothingEnabled = true; g.drawImage(off, sx, 0, scrX - sx, H);
+  // 슬릿 판
+  g.fillStyle = C.ink; g.fillRect(sx - 6, 0, 6, cy - dPx / 2 - 3); g.fillRect(sx - 6, cy - dPx / 2 + 3, 6, dPx - 6); g.fillRect(sx - 6, cy + dPx / 2 + 3, 6, H - cy - dPx / 2 - 3);
+  for (let y = 10; y < H; y += 22) arrow(g, 6, y, sx - 12, y, rgb(rgbA), 1.5);
+  // 스크린 밝기 (계산값)
+  const fr = fringe(), mmPx = 14; for (let y = 0; y < H; y += 2) { const ymm = (y - cy) / mmPx, I = Math.cos(Math.PI * ymm / fr) ** 2; g.fillStyle = `rgba(${rgbA[0]},${rgbA[1]},${rgbA[2]},${I})`; g.fillRect(scrX + 6, y, 26, 2); }
+  g.strokeStyle = C.ink; g.strokeRect(scrX + 6, 0, 26, H); label(g, '스크린', scrX + 19, H - 10, {size: 10, color: C.muted});
+  // 무늬 간격 표시
+  const y1 = cy, y2 = cy - fr * mmPx; g.strokeStyle = C.accent; g.lineWidth = 2; g.beginPath(); g.moveTo(scrX + 38, y1); g.lineTo(scrX + 46, y1); g.moveTo(scrX + 38, y2); g.lineTo(scrX + 46, y2); g.moveTo(scrX + 42, y1); g.lineTo(scrX + 42, y2); g.stroke(); label(g, `Δx = ${fr.toFixed(2)} mm`, scrX + 50, (y1 + y2) / 2, {size: 12, weight: 700, color: C.accent, align: 'left'});
+  label(g, '밝은 선: 보강 간섭 · 어두운 곳: 상쇄 간섭', (sx + scrX) / 2, 16, {size: 11, color: C.ink, weight: 700}); label(g, '(물결 그림은 보기 쉽게 확대함)', (sx + scrX) / 2, H - 12, {size: 10, color: C.muted}); }
+
+/* ===== 3. 광전 효과 ===== */
+const Eph = () => 1240 / st.pl, Kmax = () => Math.max(0, Eph() - st.W);
+function drawPhoto(){ const g = S.g, W = S.w, H = S.h, px = W * .2, py = H * .2, ph = H * .55, col = rgb(wlColor(st.pl)), t = st.t, emit = Eph() > st.W;
+  // 진공관
+  g.strokeStyle = C.line; g.lineWidth = 2; g.beginPath(); g.ellipse(W * .45, H * .48, W * .34, H * .38, 0, 0, TAU); g.stroke(); label(g, '진공', W * .45, H * .14, {size: 10, color: C.muted});
+  g.fillStyle = '#9aa6b8'; g.fillRect(px, py, 16, ph); label(g, '금속판', px + 8, py + ph + 14, {size: 11, weight: 700}); g.fillStyle = '#9aa6b8'; g.fillRect(W * .66, py + 20, 10, ph - 40); label(g, '전극', W * .66 + 5, py + ph - 6, {size: 11});
+  // 광자
+  const n = st.pi * 3; for (let i = 0; i < n; i++) { const u = ((t * .9 + i / n) % 1), x = W * .02 + u * (px - W * .02), y = py + 20 + ((i * 37) % (ph - 40)) - u * 40; g.strokeStyle = col; g.lineWidth = 2; g.beginPath(); for (let s = -14; s <= 0; s += 1) { const yy = y + s * .6 * -40 / (px) + Math.sin(s * 2 * 400 / st.pl) * 3; s === -14 ? g.moveTo(x + s, yy) : g.lineTo(x + s, yy); } g.stroke(); }
+  // 광전자
+  if (emit) { const v = Math.sqrt(Kmax()); st.pe.forEach(e => { g.fillStyle = C.phy; g.beginPath(); g.arc(e.x, e.y, 4, 0, TAU); g.fill(); }); }
+  label(g, emit ? '광전자 방출!' : '전자가 나오지 않음', W * .45, H * .9, {size: 16, weight: 700, color: emit ? C.bio : C.hot});
+  label(g, `광자 1개의 에너지 ${Eph().toFixed(2)} eV`, W * .02, H * .08, {size: 12, weight: 700, align: 'left', color: C.accent}); }
+function stepPhoto(dt){ const S0 = S, emit = Eph() > st.W; if (emit && Math.random() < st.pi * dt * 6) st.pe.push({x: S0.w * .2 + 18, y: S0.h * .25 + Math.random() * S0.h * .45, v: 60 + Math.sqrt(Kmax()) * 120}); st.pe.forEach(e => e.x += e.v * dt); st.pe = st.pe.filter(e => e.x < S0.w * .66); if (!emit) st.pe = []; }
+
+/* ===== 4. 물질파 (전자 이중 슬릿) ===== */
+const lamE = () => 1.226 / Math.sqrt(st.V); // nm
+function stepMatter(dt){ const n = Math.round(dt * 120); for (let i = 0; i < n; i++) { // 간섭 무늬 분포에서 표본 뽑기 (거절 표집)
+    let y; for (let k = 0; k < 50; k++) { y = (Math.random() - .5) * 2; const fr = lamE() / .1 * .25, env = Math.exp(-y * y * 3), I = Math.cos(Math.PI * y / fr) ** 2 * env; if (Math.random() < I) break; } st.hits.push([Math.random(), y]); } if (st.hits.length > 6000) st.hits.splice(0, st.hits.length - 6000); }
+function drawMatter(){ const g = S.g, W = S.w, H = S.h, gx = W * .06, sx = W * .38, scX = W * .6, scW = W * .34, cy = H * .5;
+  g.fillStyle = '#555'; g.fillRect(gx, cy - 20, 40, 40); label(g, '전자총', gx + 20, cy + 34, {size: 11}); label(g, `${st.V} V`, gx + 20, cy - 30, {size: 11, weight: 700});
+  g.fillStyle = C.ink; g.fillRect(sx, 0, 6, cy - 16); g.fillRect(sx, cy - 10, 6, 20); g.fillRect(sx, cy + 16, 6, H - cy - 16); label(g, '이중 슬릿', sx + 12, H - 10, {size: 10, color: C.muted, align: 'left'});
+  const t = st.t; for (let i = 0; i < 4; i++) { const u = (t * 1.5 + i / 4) % 1, x = gx + 40 + u * (sx - gx - 40); g.fillStyle = C.phy; g.beginPath(); g.arc(x, cy + Math.sin(i * 7) * 6, 3, 0, TAU); g.fill(); }
+  g.fillStyle = '#0d1420'; g.fillRect(scX, 10, scW, H - 20); st.hits.forEach(([u, y]) => { const yy = cy + y * (H / 2 - 20); if (yy < 12 || yy > H - 12) return; g.fillStyle = 'rgba(120,230,255,.85)'; g.fillRect(scX + 2 + u * (scW - 4), yy, 1.6, 1.6); });
+  label(g, `도착한 전자 ${st.hits.length}개`, scX + scW / 2, 24, {size: 11, color: '#cfe', weight: 700}); label(g, '하나씩은 점(입자)으로 도착', (gx + sx) / 2 + 20, H * .78, {size: 11, color: C.muted}); label(g, '→ 모이면 간섭무늬(파동)', (gx + sx) / 2 + 20, H * .78 + 18, {size: 11, color: C.muted}); }
+
+/* ===== 그래프·표 ===== */
+function drawGraph(){ const g = G.g;
+  if (st.mode === 'refract') { const m = axes(G, {x: [0, 90, 15, '입사각 (°)'], y: [0, 90, 15, '굴절각 (°)']}); const P = []; for (let a = 0; a <= 90; a += .5) { const b = refr(a); if (b === null) break; P.push([a, b]); } line(G, P, m, C.accent, 2.5); const c = crit(); if (c) { g.strokeStyle = C.hot; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(m.X(c), m.Y(0)); g.lineTo(m.X(c), m.Y(90)); g.stroke(); g.setLineDash([]); label(g, '임계각', m.X(c) + 4, m.Y(80), {size: 10, color: C.hot, align: 'left'}); label(g, '전반사 구간', m.X((c + 90) / 2), m.Y(40), {size: 11, color: C.hot, weight: 700}); } const b = refr(st.a); if (b !== null) { g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.a), m.Y(b), 5, 0, TAU); g.fill(); } }
+  else if (st.mode === 'interf') { const m = axes(G, {x: [-8, 8, 2, '스크린 위치 (mm)'], y: [0, 1, .5, '밝기 (상대값)']}); const fr = fringe(), col = rgb(wlColor(st.wl)), P = []; for (let y = -8; y <= 8; y += .02) P.push([y, Math.cos(Math.PI * y / fr) ** 2]); line(G, P, m, col, 2.5); }
+  else if (st.mode === 'photo') { const m = axes(G, {x: [0, 1.5, .25, '진동수 (×10¹⁵ Hz)'], y: [0, 4, 1, '최대 운동 에너지 (eV)']}); const h = 4.136; [[2.1, '#8e5bd6', '세슘'], [2.3, C.accent, '나트륨'], [4.3, C.muted, '아연']].forEach(([W0, c, n]) => { const f0 = W0 / h; line(G, [[f0, 0], [1.5, h * 1.5 - W0]], m, c, st.W === W0 ? 3 : 1.5); label(g, n, m.X(f0) + 2, m.Y(0) - 10, {size: 10, color: c, align: 'left'}); }); const f = 299.79 / st.pl; g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(Math.min(1.5, f)), m.Y(Math.min(4, Kmax())), 5, 0, TAU); g.fill(); label(g, '기울기 = 플랑크 상수 h (모든 금속에서 같다)', m.X(.75), m.Y(3.6), {size: 10, color: C.muted}); }
+  else { const m = axes(G, {x: [0, 1000, 200, '가속 전압 (V)'], y: [0, .3, .05, '물질파 파장 (nm)']}); const P = []; for (let V = 20; V <= 1000; V += 5) P.push([V, Math.min(.3, 1.226 / Math.sqrt(V))]); line(G, P, m, C.phy, 2.5); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.V), m.Y(lamE()), 5, 0, TAU); g.fill(); label(g, '가시광선 파장(400~700 nm)보다 수천 배 짧다', m.X(600), m.Y(.25), {size: 10, color: C.muted}); } }
+function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody'), set = (gt, gs, tt) => { $('gTitle').textContent = gt; $('gSub').textContent = gs; $('tTitle').textContent = tt; };
+  if (st.mode === 'refract') { const b = refr(st.a), c = crit(); s.innerHTML = `<div><b>${b === null ? '전반사' : b.toFixed(1) + '°'}</b><span>굴절각</span></div><div><b>${c ? c.toFixed(1) + '°' : '없음'}</b><span>임계각</span></div>`;
+    $('explain').innerHTML = '<b>굴절</b>: 빛이 매질의 경계에서 꺾이는 현상. <b>스넬 법칙</b> n₁sinθ₁ = n₂sinθ₂. 굴절률이 큰 매질에서 작은 매질로 갈 때 입사각이 <b>임계각</b>보다 크면 빛이 모두 반사되는 <b>전반사</b>가 일어나요. sinθc = n₂/n₁.'; $('tip').textContent = '광섬유는 굴절률이 큰 코어를 굴절률이 작은 클래딩이 감싸 전반사로 빛을 멀리 보내요. 다이아몬드가 반짝이는 것도 임계각이 작아(약 24°) 전반사가 잘 일어나서예요.';
+    th.innerHTML = '<tr><th>경계 (n₁ → n₂)</th><th>임계각</th></tr>'; tb.innerHTML = [[1.33, 1], [1.5, 1], [2.42, 1], [1.5, 1.33]].map(([a, b]) => `<tr><td>${mname(a)} → ${mname(b)}</td><td>${(Math.asin(b / a) / D).toFixed(1)}°</td></tr>`).join(''); set('입사각과 굴절각', `${mname(st.n1)} → ${mname(st.n2)}`, '여러 경계의 임계각'); }
+  else if (st.mode === 'interf') { s.innerHTML = `<div><b>${fringe().toFixed(2)} mm</b><span>밝은 무늬 사이 간격 Δx</span></div><div><b>${st.wl} nm</b><span>빛의 파장</span></div>`;
+    $('explain').innerHTML = '<b>빛의 간섭</b>: 두 슬릿을 지난 빛이 만나 경로차가 파장의 정수배(mλ)인 곳은 <b>보강 간섭</b>(밝은 무늬), 반파장의 홀수배인 곳은 <b>상쇄 간섭</b>(어두운 무늬)이 일어나요. 간섭은 빛의 <b>파동성</b>의 증거예요. 무늬 간격 Δx = Lλ/d.'; $('tip').textContent = '파장이 길수록, 스크린이 멀수록, 슬릿 간격이 좁을수록 무늬 간격이 넓어져요. 비눗방울·CD 표면의 무지개색, 무반사 코팅도 간섭이에요.';
+    th.innerHTML = '<tr><th>파장 (nm)</th><th>Δx (mm)</th></tr>'; tb.innerHTML = [400, 500, 600, 700].map(w => `<tr><td>${w}</td><td>${(st.L * w * 1e-9 / (st.d * 1e-3) * 1000).toFixed(2)}</td></tr>`).join(''); set('스크린의 밝기 분포', `d = ${st.d} mm, L = ${st.L.toFixed(1)} m`, '파장과 무늬 간격'); }
+  else if (st.mode === 'photo') { s.innerHTML = `<div><b>${Eph().toFixed(2)} eV</b><span>광자 1개의 에너지 hf</span></div><div><b>${Eph() > st.W ? Kmax().toFixed(2) + ' eV' : '방출 없음'}</b><span>광전자 최대 운동 에너지</span></div>`;
+    $('explain').innerHTML = '<b>광전 효과</b>: 금속에 빛을 비추면 전자가 튀어나오는 현상. 빛의 진동수가 <b>문턱 진동수</b>보다 커야만 일어나고, 광전자의 최대 운동 에너지 Eₖ = hf − W (W: 일함수). 빛의 세기는 광전자의 <b>수</b>만 바꿔요. 아인슈타인은 빛을 에너지 hf를 가진 <b>광자</b>의 흐름으로 설명했어요.'; $('tip').textContent = '빛의 세기를 올려 보세요: 전자 수만 늘고 속력은 그대로예요. 파장을 짧게(진동수를 크게) 하면 속력이 커져요.';
+    th.innerHTML = '<tr><th>파장 (nm)</th><th>광자 에너지 (eV)</th><th>Eₖ 최대 (eV)</th></tr>'; tb.innerHTML = [250, 350, 450, 550, 650].map(l => { const e = 1240 / l; return `<tr><td>${l}</td><td>${e.toFixed(2)}</td><td>${e > st.W ? (e - st.W).toFixed(2) : '방출 없음'}</td></tr>`; }).join(''); set('진동수와 광전자의 최대 운동 에너지', '굵은 선: 선택한 금속', `금속판 (일함수 ${st.W} eV)`); }
+  else { s.innerHTML = `<div><b>${(lamE() * 1000).toFixed(1)} pm</b><span>전자의 물질파 파장</span></div><div><b>${st.V} eV</b><span>전자의 운동 에너지</span></div>`;
+    $('explain').innerHTML = '<b>물질파</b>: 드브로이는 입자도 파동성을 가진다고 제안했어요. 파장 λ = h/p = h/mv. 전자를 이중 슬릿에 하나씩 쏘면 점으로 도착하지만, 많이 모이면 <b>간섭무늬</b>가 나타나요. 전압을 높이면 운동량이 커져 파장이 짧아지고 무늬 간격이 좁아져요.'; $('tip').textContent = '전자 현미경은 가시광선보다 훨씬 짧은 전자의 물질파를 이용해 분해능이 높아요. 1 pm = 10⁻³ nm.';
+    th.innerHTML = '<tr><th>가속 전압 (V)</th><th>파장 (pm)</th></tr>'; tb.innerHTML = [50, 100, 150, 400, 1000].map(V => `<tr><td>${V}</td><td>${(1226 / Math.sqrt(V)).toFixed(1)}</td></tr>`).join(''); set('가속 전압과 물질파 파장', 'λ = h / √(2meV)', '가속 전압과 파장'); } }
+const bind = (id, k, f, reset) => { $(id).oninput = e => { st[k] = +e.target.value; if ($(id + 'Out')) $(id + 'Out').textContent = f(st[k]); if (reset) st.hits = []; render(); }; };
+bind('ang', 'a', v => v + '°'); bind('wl', 'wl', v => v + ' nm'); bind('dd', 'd', v => v.toFixed(2) + ' mm'); bind('LL', 'L', v => v.toFixed(1) + ' m'); bind('pl', 'pl', v => v + ' nm'); bind('pi', 'pi', v => v); bind('va', 'V', v => v + ' V', true);
+$('m1').onchange = e => { st.n1 = +e.target.value; render(); }; $('m2').onchange = e => { st.n2 = +e.target.value; render(); }; $('metal').onchange = e => { st.W = +e.target.value; render(); }; $('clr').onclick = () => { st.hits = []; };
+Kit.tabs(m => { st.mode = m; render(); }, ['refract', 'interf', 'photo', 'matter']);
+Kit.loop(dt => { st.t += dt; if (st.mode === 'photo') stepPhoto(dt); if (st.mode === 'matter') stepMatter(dt); }, () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({refract: drawRefract, interf: drawInterf, photo: drawPhoto, matter: drawMatter})[st.mode](); drawGraph(); if (st.mode === 'refract') st.t += 1 / 60; }, $('play'));
+})();
+</script>
+</body>
+</html>
