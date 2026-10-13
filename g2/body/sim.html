@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>인체 탐험 · 중2 동물과 에너지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-bio">
+<div class="wrap">
+  <nav class="topbar" data-topbar="2학년|13 동물과 에너지" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 2 · 13 동물과 에너지 <span class="code">9과13-01</span><span class="code">9과13-02</span><span class="code">9과13-03</span><span class="code">9과13-04</span><span class="code">9과13-05</span></div>
+      <h1>인체 탐험</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="dig">1. 소화</button>
+      <button type="button" data-mode="circ">2. 순환</button>
+      <button type="button" data-mode="breath">3. 호흡</button>
+      <button type="button" data-mode="excr">4. 배설</button>
+      <button type="button" data-mode="all">5. 세포 호흡과 통합</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="인체 모형">
+      <div class="canvas-box"><canvas id="scene" aria-label="인체 기관 모형"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <div class="field" data-only="dig">음식 <div class="seg" id="foodSeg"><button type="button" data-food="carb">밥 (녹말)</button><button type="button" data-food="prot">고기 (단백질)</button><button type="button" data-food="fat">버터 (지방)</button></div></div>
+        <button class="btn" type="button" id="eat" data-only="dig">먹기</button>
+        <div class="field" data-only="circ"><div class="seg" id="loopSeg"><button type="button" data-loop="both">전체</button><button type="button" data-loop="body">온몸 순환</button><button type="button" data-loop="lung">폐순환</button></div></div>
+        <label class="field" data-only="circ all" for="ex">운동 강도 <input type="range" id="ex" min="0" max="100" step="10" value="0"><output id="exOut">휴식</output></label>
+        <div class="field" data-only="breath"><div class="seg" id="brSeg"><button type="button" data-br="model">호흡 운동 모형</button><button type="button" data-br="alv">폐포의 기체 교환</button></div></div>
+        <button class="btn" type="button" id="pull" data-only="breath">고무 막 당기기 / 놓기</button>
+        <div class="field" data-only="excr"><label for="sugar"><input type="checkbox" id="sugar"> 혈액 속 포도당이 아주 많을 때</label></div>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">정리</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>밥을 오래 씹으면 단맛이 나는 까닭은?</summary>
+        <p>침 속의 아밀레이스가 녹말을 엿당으로 분해하기 때문입니다. 엿당은 단맛이 납니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>운동하면 숨이 가쁘고 심장이 빨리 뛰는 까닭은?</summary>
+        <p>근육 세포가 세포 호흡을 더 많이 하려면 산소와 영양소가 더 필요하고, 이산화 탄소를 빨리 내보내야 하기 때문입니다. 호흡계와 순환계가 함께 일을 늘립니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>오줌에 포도당이 나오면 왜 건강을 살펴야 할까?</summary>
+        <p>건강한 사람은 콩팥에서 걸러진 포도당이 모두 다시 흡수됩니다. 오줌에 포도당이 나온다면 혈액 속 포도당이 너무 많다는 신호일 수 있습니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="인체 그림은 기관의 위치와 연결을 보여 주기 위해 단순화했습니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+const st = {mode:'dig', t:0, food:'carb', bolus:null, loop:'both', ex:0, br:'model', pulled:false, pullK:0, sugar:false};
+
+/* ===== 1. 소화 ===== */
+const PATH = [['입', .5, .1], ['식도', .5, .25], ['위', .58, .38], ['작은창자', .5, .62], ['큰창자', .42, .75], ['항문', .5, .9]];
+const DIG = {
+  carb: {n:'녹말', steps:{'입':'아밀레이스(침) → 녹말 일부가 엿당으로', '작은창자':'아밀레이스(이자액)·소장 효소 → 포도당'}, end:'포도당'},
+  prot: {n:'단백질', steps:{'위':'펩신(위액) → 단백질이 작게 분해', '작은창자':'트립신(이자액)·소장 효소 → 아미노산'}, end:'아미노산'},
+  fat: {n:'지방', steps:{'작은창자':'쓸개즙이 지방을 작은 알갱이로 → 라이페이스(이자액) → 지방산 + 모노글리세리드'}, end:'지방산, 모노글리세리드'}
+};
+function bodyOutline(g, cx, top, h){
+  const w = h * .42; g.fillStyle = C.soft; g.strokeStyle = C.line; g.lineWidth = 2;
+  g.beginPath(); g.arc(cx, top + h * .08, h * .07, 0, TAU); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(cx - w * .32, top + h * .17); g.quadraticCurveTo(cx - w * .5, top + h * .5, cx - w * .3, top + h * .95); g.lineTo(cx + w * .3, top + h * .95); g.quadraticCurveTo(cx + w * .5, top + h * .5, cx + w * .32, top + h * .17); g.closePath(); g.fill(); g.stroke();
+}
+function drawDig(){
+  const g = S.g, h = S.h - 20, top = 10, cx = S.w * .35, P = ([n, u, v]) => [cx + (u - .5) * h * .6, top + v * h];
+  bodyOutline(g, cx, top, h);
+  // 소화관
+  g.strokeStyle = '#d27a6a'; g.lineWidth = 10; g.lineCap = 'round'; g.beginPath();
+  const pts = PATH.map(P); g.moveTo(...pts[0]); g.lineTo(...pts[1]); g.quadraticCurveTo(pts[2][0] + 30, pts[2][1] - 10, pts[2][0], pts[2][1] + 10);
+  for (let i = 0; i < 5; i++) g.lineTo(pts[3][0] + (i % 2 ? 26 : -26), pts[3][1] - 26 + i * 12); g.lineTo(...pts[4]); g.lineTo(...pts[5]); g.stroke(); g.lineCap = 'butt';
+  // 간·이자·쓸개
+  const liv = P(['', .42, .36]); g.fillStyle = 'rgba(150,70,50,.55)'; g.beginPath(); g.ellipse(liv[0], liv[1], 28, 16, -.3, 0, TAU); g.fill(); label(g, '간', liv[0] - 30, liv[1] - 4, {size: 11});
+  const pan = P(['', .55, .47]); g.fillStyle = 'rgba(230,170,90,.7)'; g.beginPath(); g.ellipse(pan[0], pan[1], 22, 7, .2, 0, TAU); g.fill(); label(g, '이자', pan[0] + 34, pan[1], {size: 11});
+  PATH.forEach(p => { const [x, y] = P(p); label(g, p[0], x + 60, y, {align: 'left', size: 12, weight: 600}); g.strokeStyle = C.line; g.lineWidth = 1; g.beginPath(); g.moveTo(x + 12, y); g.lineTo(x + 56, y); g.stroke(); });
+  // 음식 덩어리
+  if (st.bolus) { const b = st.bolus, i = Math.min(PATH.length - 1, Math.floor(b.k)), f = b.k - i, a = P(PATH[i]), c = P(PATH[Math.min(PATH.length - 1, i + 1)]);
+    const x = a[0] + (c[0] - a[0]) * f, y = a[1] + (c[1] - a[1]) * f, size = Math.max(4, 14 - b.broken * 9);
+    g.fillStyle = {carb: '#f2e6c8', prot: '#c46a5a', fat: '#f0d050'}[st.food]; g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath(); g.arc(x, y, size, 0, TAU); g.fill(); g.stroke();
+    if (b.broken > .5) for (let k = 0; k < 6; k++) { g.fillStyle = C.warn; g.beginPath(); g.arc(x + Math.cos(k + st.t * 3) * 18, y + Math.sin(k + st.t * 3) * 18, 3, 0, TAU); g.fill(); } }
+  // 설명 상자
+  const here = st.bolus ? PATH[Math.min(PATH.length - 1, Math.floor(st.bolus.k))][0] : '';
+  const msg = st.bolus ? (DIG[st.food].steps[here] || (here === '작은창자' ? '' : here === '큰창자' ? '물이 흡수된다' : here === '식도' ? '꿈틀 운동으로 위로 이동' : here === '항문' ? '소화되지 않은 찌꺼기 배출' : '')) : '[먹기]를 누르세요';
+  g.fillStyle = C.surface; g.strokeStyle = C.line; g.fillRect(S.w * .6, 30, S.w * .37, 90); g.strokeRect(S.w * .6, 30, S.w * .37, 90);
+  label(g, here || '대기 중', S.w * .6 + 10, 46, {align: 'left', weight: 700, color: C.bio});
+  wrap(g, msg, S.w * .6 + 10, 70, S.w * .35, 16);
+  if (st.bolus && st.bolus.k >= 3.6) label(g, `융털에서 흡수: ${DIG[st.food].end}`, S.w * .78, 145, {weight: 700, color: C.hot, size: 12});
+}
+function wrap(g, txt, x, y, w, lh){ g.font = font(12); g.fillStyle = C.ink; g.textAlign = 'left'; g.textBaseline = 'top'; let line = '', yy = y; for (const ch of txt) { if (g.measureText(line + ch).width > w) { g.fillText(line, x, yy); line = ch; yy += lh; } else line += ch; } g.fillText(line, x, yy); }
+function stepDig(dt){ if (!st.bolus) return; const b = st.bolus, here = PATH[Math.min(PATH.length - 1, Math.floor(b.k))][0];
+  const slow = DIG[st.food].steps[here] ? .25 : .7; b.k += dt * slow; if (DIG[st.food].steps[here]) b.broken = Math.min(1, b.broken + dt * .25); if (b.k >= PATH.length - 1) st.bolus = null; }
+
+/* ===== 2. 순환 ===== */
+function drawCirc(){
+  const g = S.g, cx = S.w * .42, cy = S.h * .5, rate = 70 + st.ex * .9, beat = (Math.sin(st.t * rate / 60 * TAU) + 1) / 2;
+  // 폐 (위), 온몸 (아래)
+  const lung = [cx, cy - S.h * .33], body = [cx, cy + S.h * .33];
+  g.fillStyle = 'rgba(240,160,170,.45)'; g.beginPath(); g.ellipse(lung[0] - 60, lung[1], 50, 30, 0, 0, TAU); g.ellipse(lung[0] + 60, lung[1], 50, 30, 0, 0, TAU); g.fill(); label(g, '폐', lung[0], lung[1] - 40, {weight: 700});
+  g.fillStyle = 'rgba(200,190,170,.5)'; g.fillRect(body[0] - 110, body[1] - 22, 220, 44); label(g, '온몸 (조직 세포)', body[0], body[1] + 36, {weight: 700});
+  // 심장 네 칸
+  const s = 1 + beat * .06, hw = 46 * s, hh = 40 * s;
+  const ch = {RA: [cx - hw / 2 - 2, cy - hh / 2 - 2, '우심방'], LA: [cx + hw / 2 + 2, cy - hh / 2 - 2, '좌심방'], RV: [cx - hw / 2 - 2, cy + hh / 2 + 2, '우심실'], LV: [cx + hw / 2 + 2, cy + hh / 2 + 2, '좌심실']};
+  label(g, '(그림의 왼쪽이 몸의 오른쪽)', cx, cy + hh + 34, {size: 10, color: C.muted});
+  // 혈관 경로
+  const paths = {
+    lung: [[ch.RV, [cx - 110, cy + 20], [cx - 110, lung[1]], [lung[0] - 60, lung[1]], C.cold, '폐동맥'], [[lung[0] + 60, lung[1]], [cx + 110, lung[1]], [cx + 110, cy - 30], ch.LA, C.hot, '폐정맥']],
+    body: [[ch.LV, [cx + 160, cy + 30], [cx + 160, body[1]], [body[0] + 110, body[1]], C.hot, '대동맥'], [[body[0] - 110, body[1]], [cx - 160, body[1]], [cx - 160, cy - 30], ch.RA, C.cold, '대정맥']]
+  };
+  const show = st.loop === 'both' ? ['lung', 'body'] : [st.loop];
+  show.forEach(k => paths[k].forEach(seg => {
+    const pts = seg.slice(0, 4).map(p => [p[0], p[1]]), col = seg[4];
+    g.strokeStyle = col; g.lineWidth = 6; g.globalAlpha = .55; g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(...p) : g.moveTo(...p)); g.stroke(); g.globalAlpha = 1;
+    const mid = pts[1]; label(g, seg[5], mid[0] + (mid[0] > cx ? 8 : -8), mid[1] - 12, {size: 11, align: mid[0] > cx ? 'left' : 'right', weight: 600, color: col});
+    // 흐르는 혈구
+    const L = []; for (let i = 0; i < 3; i++) L.push(Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1])); const tot = L.reduce((a, b) => a + b);
+    for (let n = 0; n < 6; n++) { let d = ((st.t * rate * 1.2 + n * tot / 6) % tot); let i = 0; while (d > L[i]) { d -= L[i]; i++; } const f = d / L[i]; const x = pts[i][0] + (pts[i + 1][0] - pts[i][0]) * f, y = pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f; g.fillStyle = col; g.beginPath(); g.arc(x, y, 5, 0, TAU); g.fill(); }
+  }));
+  Object.entries(ch).forEach(([k, [x, y, n]]) => { g.fillStyle = k[0] === 'R' ? 'rgb(90,118,205)' : 'rgb(208,72,56)'; g.fillRect(x - hw / 2, y - hh / 2, hw, hh); g.strokeStyle = C.ink; g.lineWidth = 1; g.strokeRect(x - hw / 2, y - hh / 2, hw, hh); label(g, n, x, y, {size: 11, color: '#fff', weight: 700}); });
+  label(g, `심장 박동 약 ${Math.round(rate)}회/분`, S.w - 12, 18, {align: 'right', weight: 700, color: C.hot});
+}
+
+/* ===== 3. 호흡 ===== */
+function drawBreath(){
+  const g = S.g;
+  if (st.br === 'alv') {
+    const cx = S.w * .4, cy = S.h * .5, R = Math.min(S.w, S.h) * .25;
+    g.fillStyle = 'rgba(240,160,170,.35)'; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill(); g.strokeStyle = '#c86a7a'; g.lineWidth = 2; g.stroke(); label(g, '폐포', cx, cy - R * .4, {weight: 700});
+    g.strokeStyle = 'rgba(210,65,47,.7)'; g.lineWidth = 14; g.beginPath(); g.arc(cx, cy, R + 14, Math.PI * .1, Math.PI * .9); g.stroke(); label(g, '모세 혈관', cx, cy + R + 40, {size: 12, color: C.hot});
+    for (let i = 0; i < 5; i++) { const a = Math.PI * (.2 + i * .14), f = (st.t * .5 + i * .2) % 1;
+      const x0 = cx + Math.cos(a) * R * .5, y0 = cy + Math.sin(a) * R * .5, x1 = cx + Math.cos(a) * (R + 14), y1 = cy + Math.sin(a) * (R + 14);
+      g.fillStyle = C.phy; g.beginPath(); g.arc(x0 + (x1 - x0) * f, y0 + (y1 - y0) * f, 5, 0, TAU); g.fill();
+      g.fillStyle = C.muted; g.beginPath(); g.arc(x1 + (x0 - x1) * f + 10, y1 + (y0 - y1) * f, 5, 0, TAU); g.fill(); }
+    label(g, '파랑: 산소 (폐포 → 혈액) · 회색: 이산화 탄소 (혈액 → 폐포)', S.w / 2, S.h - 12, {size: 11, color: C.muted});
+    label(g, '기체는 농도가 높은 곳에서 낮은 곳으로 이동 (확산)', S.w * .78, S.h * .3, {size: 12, weight: 600}); return;
+  }
+  // 호흡 운동 모형: 종 모양 병 + 고무 막
+  const k = st.pullK, cx = S.w * .35, top = 40, w = 180, h = S.h - 165;
+  g.strokeStyle = C.ink; g.lineWidth = 2.5; g.beginPath(); g.moveTo(cx - 14, top); g.lineTo(cx - 14, top + 30); g.quadraticCurveTo(cx - w / 2, top + 40, cx - w / 2, top + h); g.moveTo(cx + 14, top); g.lineTo(cx + 14, top + 30); g.quadraticCurveTo(cx + w / 2, top + 40, cx + w / 2, top + h); g.stroke();
+  g.strokeStyle = C.ink; g.lineWidth = 3; g.beginPath(); g.moveTo(cx, top - 20); g.lineTo(cx, top + 70); g.lineTo(cx - 30, top + 90); g.moveTo(cx, top + 70); g.lineTo(cx + 30, top + 90); g.stroke();
+  const lr = 26 + k * 18; g.fillStyle = 'rgba(240,140,160,.8)'; [-1, 1].forEach(s => { g.beginPath(); g.ellipse(cx + s * 40, top + 90 + lr * .6, lr * .8, lr, 0, 0, TAU); g.fill(); });
+  const my = top + h + k * 40; g.strokeStyle = '#7a4fb0'; g.lineWidth = 4; g.beginPath(); g.moveTo(cx - w / 2, top + h); g.quadraticCurveTo(cx, my, cx + w / 2, top + h); g.stroke();
+  if (k > .05) { g.fillStyle = C.ink; g.fillRect(cx - 4, my - 4, 8, 30 * k + 10); }
+  label(g, '고무 막 (가로막)', cx + w / 2 + 12, top + h, {align: 'left', size: 12, color: '#7a4fb0'}); label(g, '고무풍선 (폐)', cx + 80, top + 90, {align: 'left', size: 12}); label(g, 'Y자 관 (기관)', cx + 20, top - 10, {align: 'left', size: 12});
+  arrow(g, cx - 60, top - 10, cx - 20, top + 10 * (st.pulled ? 1 : -1) + 10, st.pulled ? C.phy : C.muted, 2);
+  label(g, st.pulled ? '들숨: 가로막이 내려감 → 부피 증가 → 압력 감소 → 공기가 들어옴' : '날숨: 가로막이 올라감 → 부피 감소 → 압력 증가 → 공기가 나감', S.w / 2, S.h - 14, {weight: 700, size: 12});
+}
+
+/* ===== 4. 배설 ===== */
+function drawExcr(){
+  const g = S.g, x0 = 40, y0 = 50, w = S.w - 80, h = S.h - 110;
+  // 네프론 단순도: 사구체(왼쪽 위) → 세뇨관(가운데) → 집합관(오른쪽)
+  const glo = [x0 + 60, y0 + 50];
+  g.strokeStyle = C.hot; g.lineWidth = 6; g.beginPath(); g.arc(glo[0], glo[1], 22, 0, TAU); g.stroke(); label(g, '사구체', glo[0], glo[1] - 34, {size: 12, weight: 700});
+  g.strokeStyle = '#d6b84a'; g.lineWidth = 3; g.beginPath(); g.arc(glo[0], glo[1], 32, Math.PI * .25, Math.PI * 1.75, true); g.stroke(); label(g, '보먼주머니', glo[0], glo[1] + 46, {size: 11});
+  const tube = [[glo[0] + 32, glo[1]], [x0 + w * .55, glo[1]], [x0 + w * .55, y0 + h * .8], [x0 + w * .75, y0 + h * .8], [x0 + w * .75, glo[1]], [x0 + w, glo[1]], [x0 + w, y0 + h]];
+  g.strokeStyle = '#d6b84a'; g.lineWidth = 12; g.beginPath(); tube.forEach((p, i) => i ? g.lineTo(...p) : g.moveTo(...p)); g.stroke();
+  g.strokeStyle = 'rgba(210,65,47,.45)'; g.lineWidth = 6; g.beginPath(); tube.slice(0, 5).forEach((p, i) => i ? g.lineTo(p[0] + 14, p[1] + 14) : g.moveTo(p[0] + 14, p[1] + 14)); g.stroke();
+  label(g, '세뇨관', x0 + w * .38, glo[1] - 16, {size: 12, weight: 700}); label(g, '모세 혈관 (재흡수)', x0 + w * .64, y0 + h * .8 + 26, {size: 11, color: C.hot}); label(g, '오줌 → 콩팥 깔때기 → 오줌관 → 방광', x0 + w - 4, y0 + h + 16, {size: 11, align: 'right'});
+  // 입자: 물(파랑), 포도당(노랑), 요소(보라), 단백질(회색, 걸러지지 않음)
+  const L = []; for (let i = 0; i < tube.length - 1; i++) L.push(Math.hypot(tube[i + 1][0] - tube[i][0], tube[i + 1][1] - tube[i][1])); const tot = L.reduce((a, b) => a + b);
+  const kinds = [['water', C.phy, .9], ['glu', C.warn, st.sugar ? .6 : 1.0], ['urea', C.chem, 0]];
+  for (let n = 0; n < 30; n++) { const [k, col, reab] = kinds[n % 3]; let d = (st.t * 60 + n * tot / 30) % tot; const fr = d / tot;
+    // 재흡수: 일정 비율은 세뇨관 중간에서 사라짐
+    if (fr > .45 && ((n * 37) % 100) / 100 < reab) continue;
+    let i = 0; while (d > L[i]) { d -= L[i]; i++; } const f = d / L[i]; const x = tube[i][0] + (tube[i + 1][0] - tube[i][0]) * f, y = tube[i][1] + (tube[i + 1][1] - tube[i][1]) * f;
+    g.fillStyle = col; g.beginPath(); g.arc(x, y, 4, 0, TAU); g.fill(); }
+  for (let i = 0; i < 5; i++) { g.fillStyle = C.muted; g.beginPath(); g.arc(glo[0] - 10 + (i % 3) * 10, glo[1] - 6 + Math.floor(i / 3) * 10, 5, 0, TAU); g.fill(); }
+  label(g, '파랑: 물 · 노랑: 포도당 · 보라: 요소 · 회색: 단백질·혈구 (걸러지지 않음)', S.w / 2, 18, {size: 11});
+}
+
+/* ===== 5. 통합 ===== */
+function drawAll(){
+  const g = S.g, cx = S.w / 2, cy = S.h / 2, R = Math.min(S.w, S.h) * .34, k = 1 + st.ex / 50;
+  const nodes = {dig: [cx - R * 1.1, cy - R * .6, '소화계', '영양소 흡수'], resp: [cx + R * 1.1, cy - R * .6, '호흡계', 'O₂ 흡수 · CO₂ 배출'], circ: [cx, cy - R * .1, '순환계', '물질 운반'], cell: [cx, cy + R * .75, '조직 세포', '세포 호흡'], exc: [cx + R * 1.1, cy + R * .55, '배설계', '요소 배출']};
+  const links = [['dig', 'circ', C.warn, '영양소'], ['resp', 'circ', C.phy, '산소'], ['circ', 'cell', C.hot, '영양소 + 산소'], ['cell', 'circ', C.muted, 'CO₂ · 노폐물'], ['circ', 'resp', C.muted, 'CO₂'], ['circ', 'exc', C.chem, '요소']];
+  links.forEach(([a, b, col, n], i) => { const A = nodes[a], B = nodes[b], off = (a === 'cell' || (a === 'circ' && b === 'resp')) ? 10 : -10;
+    g.strokeStyle = col; g.lineWidth = 2; g.globalAlpha = .6; g.beginPath(); g.moveTo(A[0] + off, A[1] + off); g.lineTo(B[0] + off, B[1] + off); g.stroke(); g.globalAlpha = 1;
+    for (let j = 0; j < 3; j++) { const f = (st.t * .5 * k + j / 3) % 1; g.fillStyle = col; g.beginPath(); g.arc(A[0] + off + (B[0] - A[0]) * f, A[1] + off + (B[1] - A[1]) * f, 4, 0, TAU); g.fill(); }
+    const lx = A[0] + (B[0] - A[0]) * .5 + off * 2.6, ly = A[1] + (B[1] - A[1]) * .5 + off * 1.6; g.font = Kit.font(11, 600); const tw = g.measureText(n).width; g.fillStyle = C.surface; g.globalAlpha = .92; g.fillRect(lx - tw / 2 - 4, ly - 9, tw + 8, 18); g.globalAlpha = 1; label(g, n, lx, ly, {size: 11, color: col, weight: 600}); });
+  Object.values(nodes).forEach(([x, y, n, d]) => { g.fillStyle = C.surface; g.strokeStyle = C.bio; g.lineWidth = 2; g.beginPath(); g.ellipse(x, y, 62, 28, 0, 0, TAU); g.fill(); g.stroke(); label(g, n, x, y - 6, {weight: 700}); label(g, d, x, y + 10, {size: 10, color: C.muted}); });
+  label(g, '세포 호흡: 영양소 + 산소 → 이산화 탄소 + 물 + 에너지', cx, 20, {weight: 700, color: C.bio});
+}
+
+/* ===== 그래프·표·설명 ===== */
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'dig') { const m = axes(G, {x: [0, 5, 1, '소화관 위치 (입 → 항문)'], y: [0, 100, 25, '분해된 정도 (%)']});
+    const curves = {carb: [[0, 0], [.5, 20], [1, 25], [2, 25], [3, 100], [5, 100]], prot: [[0, 0], [2, 0], [2.6, 40], [3, 100], [5, 100]], fat: [[0, 0], [3, 0], [3.5, 100], [5, 100]]};
+    const cols = {carb: C.warn, prot: C.hot, fat: C.phy}; Object.entries(curves).forEach(([k, p]) => line(G, p, m, cols[k], k === st.food ? 3 : 1.5));
+    PATH.forEach((p, i) => label(g, p[0], m.X(i), m.T + 6, {size: 9, color: C.muted})); }
+  else if (st.mode === 'circ' || st.mode === 'all') { const m = axes(G, {x: [0, 100, 25, '운동 강도'], y: [0, 200, 50, '1분당 횟수']}); line(G, [[0, 70], [100, 160]], m, C.hot); line(G, [[0, 16], [100, 45]], m, C.phy);
+    g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.ex), m.Y(70 + st.ex * .9), 5, 0, TAU); g.fill(); g.beginPath(); g.arc(m.X(st.ex), m.Y(16 + st.ex * .29), 5, 0, TAU); g.fill();
+    label(g, '심장 박동', m.X(90), m.Y(150) - 12, {size: 11, color: C.hot}); label(g, '호흡', m.X(90), m.Y(42) - 12, {size: 11, color: C.phy}); }
+  else if (st.mode === 'breath') { const m = axes(G, {x: [0, 10, 2, '시간 (초)'], y: [-1, 1, .5, '폐 속 압력 − 대기압']}); const p = []; for (let t = 0; t <= 10; t += .05) p.push([t, -Math.sin(t / 4 * TAU) * .8]); line(G, p, m, C.phy); label(g, '0보다 낮을 때 들숨', m.X(1), m.Y(-.9), {size: 11, color: C.muted}); }
+  else { const m = axes(G, {x: [0, 3, 1, ''], y: [0, 100, 25, '농도 (상대값)']});
+    [['혈장', [100, 100, 3]], ['여과액', [100, 100, 3]], ['오줌', [st.sugar ? 30 : 0, 0, 100]]].forEach(([n, v], i) => { ['포도당', '단백질', '요소'].forEach((s, j) => { const val = n === '여과액' && s === '단백질' ? 0 : n === '혈장' && s === '단백질' ? 100 : n === '오줌' && s === '단백질' ? 0 : v[j === 2 ? 2 : j === 0 ? 0 : 1]; g.fillStyle = [C.warn, C.muted, C.chem][j]; g.fillRect(m.X(i + .15 + j * .24), m.Y(val), m.X(.2) - m.X(0), m.Y(0) - m.Y(val)); }); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 11}); }); }
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>'; $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
+function table(){
+  if (st.mode === 'dig') setTable('소화 효소', ['소화액', '효소', '작용'], [['침', '아밀레이스', '녹말 → 엿당'], ['위액', '펩신', '단백질 분해'], ['이자액', '아밀레이스, 트립신, 라이페이스', '녹말, 단백질, 지방 분해'], ['쓸개즙', '(효소 없음)', '지방을 작은 알갱이로'], ['소장 효소', '탄수화물·단백질 분해 효소', '포도당, 아미노산까지']]);
+  else if (st.mode === 'circ') setTable('혈액 순환', ['순환', '경로', '하는 일'], [['온몸 순환', '좌심실 → 대동맥 → 온몸 → 대정맥 → 우심방', '조직 세포에 산소·영양소 공급'], ['폐순환', '우심실 → 폐동맥 → 폐 → 폐정맥 → 좌심방', '이산화 탄소 배출, 산소 받음']]);
+  else if (st.mode === 'breath') setTable('들숨과 날숨', ['구분', '갈비뼈', '가로막', '흉강 부피', '폐 속 압력'], [['들숨', '올라감', '내려감', '커짐', '낮아짐'], ['날숨', '내려감', '올라감', '작아짐', '높아짐']]);
+  else if (st.mode === 'excr') setTable('오줌이 만들어지는 과정', ['과정', '일어나는 곳', '내용'], [['여과', '사구체 → 보먼주머니', '혈액 속 작은 물질이 빠져나감'], ['재흡수', '세뇨관 → 모세 혈관', '포도당, 아미노산, 물 등 필요한 물질을 다시 흡수'], ['분비', '모세 혈관 → 세뇨관', '미처 걸러지지 않은 노폐물을 보냄']]);
+  else setTable('기관계의 협력', ['기관계', '세포 호흡과의 관계'], [['소화계', '영양소를 흡수'], ['호흡계', '산소를 흡수하고 이산화 탄소를 배출'], ['순환계', '영양소와 산소를 세포로, 노폐물을 배출 기관으로 운반'], ['배설계', '세포 호흡 결과 생긴 요소 등을 오줌으로 배출']]);
+}
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'dig') { s = stat('음식 속 영양소', DIG[st.food].n) + stat('최종 산물', DIG[st.food].end);
+    e = '<b>소화</b>: 음식물 속 큰 영양소를 몸에 흡수될 수 있는 작은 물질로 분해하는 과정. 소화관을 따라 이동하며 소화액 속 <b>소화 효소</b>의 작용으로 분해되고, <b>작은창자의 융털</b>에서 흡수됩니다.';
+    t = '음식을 바꿔 가며 어느 기관에서 분해가 일어나는지 비교하세요. 큰창자에서는 주로 물이 흡수됩니다.'; }
+  else if (st.mode === 'circ') { s = stat('심장 박동', Math.round(70 + st.ex * .9), '회/분') + stat('운동 강도', st.ex);
+    e = '<b>순환계</b>는 심장, 혈관, 혈액으로 이루어집니다. 심장은 2심방 2심실이며, 심실이 수축하면 혈액이 동맥으로 나갑니다. 산소가 많은 혈액(동맥혈, 빨강)과 이산화 탄소가 많은 혈액(정맥혈, 파랑)이 따로 흐릅니다.';
+    t = '폐동맥에는 정맥혈이, 폐정맥에는 동맥혈이 흐르는 점에 주의하세요.'; }
+  else if (st.mode === 'breath') { s = st.br === 'model' ? stat('상태', st.pulled ? '들숨' : '날숨') + stat('가로막', st.pulled ? '내려감' : '올라감') : stat('폐포 → 혈액', '산소') + stat('혈액 → 폐포', '이산화 탄소');
+    e = st.br === 'model' ? '<b>호흡 운동</b>: 폐는 근육이 없어 스스로 움직이지 못합니다. 갈비뼈와 가로막이 움직여 흉강의 부피와 압력이 변하면서 공기가 드나듭니다.' : '<b>폐포</b>에서 산소는 폐포에서 모세 혈관으로, 이산화 탄소는 모세 혈관에서 폐포로 이동합니다. 폐포가 매우 많아 기체 교환이 일어나는 표면적이 넓습니다.';
+    t = st.br === 'model' ? '[고무 막 당기기]를 눌러 풍선(폐)이 커지는 모습을 보세요.' : '기체는 농도가 높은 쪽에서 낮은 쪽으로 이동합니다.'; }
+  else if (st.mode === 'excr') { s = stat('오줌 속 포도당', st.sugar ? '검출됨' : '없음') + stat('오줌 속 요소', '농축됨');
+    e = '<b>배설</b>: 세포 호흡 결과 생긴 노폐물을 몸 밖으로 내보내는 과정. 단백질이 분해될 때 생긴 <b>암모니아</b>는 간에서 독성이 약한 <b>요소</b>로 바뀌고, 콩팥에서 걸러져 오줌으로 나갑니다.';
+    t = '[혈액 속 포도당이 아주 많을 때]를 켜면 재흡수되지 못한 포도당이 오줌으로 나옵니다.'; }
+  else { s = stat('운동 강도', st.ex) + stat('필요한 에너지', st.ex > 60 ? '많음' : st.ex > 20 ? '보통' : '적음');
+    e = '<b>세포 호흡</b>: 세포에서 영양소가 산소와 반응하여 생명 활동에 필요한 에너지를 얻는 과정. 소화계, 호흡계, 순환계, 배설계가 서로 협력해야 세포가 에너지를 얻을 수 있습니다.';
+    t = '운동 강도를 높이면 모든 기관계의 물질 이동이 빨라지는 것을 확인하세요.'; }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 조작 ===== */
+Kit.seg($('foodSeg'), 'food', v => { st.food = v; st.bolus = null; })('carb');
+$('eat').onclick = () => { st.bolus = {k: 0, broken: 0}; };
+Kit.seg($('loopSeg'), 'loop', v => st.loop = v)('both');
+$('ex').oninput = e => { st.ex = +e.target.value; $('exOut').textContent = st.ex === 0 ? '휴식' : st.ex < 50 ? '가벼운 운동' : '격렬한 운동'; };
+Kit.seg($('brSeg'), 'br', v => { st.br = v; $('pull').hidden = v !== 'model'; })('model');
+$('pull').onclick = () => { st.pulled = !st.pulled; };
+$('sugar').onchange = e => st.sugar = e.target.checked;
+Kit.tabs(m => { st.mode = m; table(); $('pull').hidden = !(m === 'breath' && st.br === 'model');
+  $('gTitle').textContent = {dig: '소화관 위치에 따른 영양소 분해', circ: '운동과 심장 박동·호흡', breath: '호흡할 때 폐 속 압력', excr: '혈장, 여과액, 오줌의 성분 비교', all: '운동과 심장 박동·호흡'}[m];
+  $('gSub').textContent = {dig: '노랑: 녹말 · 빨강: 단백질 · 파랑: 지방', circ: '', breath: '', excr: '노랑: 포도당 · 회색: 단백질 · 보라: 요소', all: ''}[m]; }, ['dig', 'circ', 'breath', 'excr', 'all']);
+Kit.loop(dt => { st.t += dt; if (st.mode === 'dig') stepDig(dt); st.pullK += ((st.pulled ? 1 : 0) - st.pullK) * Math.min(1, dt * 3); },
+  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({dig: drawDig, circ: drawCirc, breath: drawBreath, excr: drawExcr, all: drawAll})[st.mode](); drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>

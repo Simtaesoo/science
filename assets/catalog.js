@@ -53,7 +53,7 @@ window.CATALOG = [
   { no:12, area:'bio', title:'식물과 에너지', code:'9과12', items:[
     {kind:'sim', title:'1차시 광합성과 환경 요인 (실험 설계)', href:'g2/plant/sim.html#photo'}, {kind:'sim', title:'2차시 광합성과 호흡 (BTB 실험)', href:'g2/plant/sim.html#resp'},
     {kind:'sim', title:'3차시 광합성 산물의 저장과 이용', href:'g2/plant/sim.html#store'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g2/plant/worksheet.html'} ]},
-  { no:13, area:'bio', title:'동물과 에너지', code:'9과13', items:[{kind:'sim', title:'소화·순환·호흡·배설 연결 지도'}]},
+  { no:13, area:'bio', title:'동물과 에너지', code:'9과13', items:[{kind:'sim', title:'1차시 소화 · 소화 효소와 흡수', href:'g2/body/sim.html#dig'}, {kind:'sim', title:'2차시 순환 · 온몸 순환과 폐순환', href:'g2/body/sim.html#circ'}, {kind:'sim', title:'3차시 호흡 · 호흡 운동 모형', href:'g2/body/sim.html#breath'}, {kind:'sim', title:'4차시 배설 · 오줌의 생성', href:'g2/body/sim.html#excr'}, {kind:'sim', title:'5차시 세포 호흡과 기관계의 통합', href:'g2/body/sim.html#all'}, {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g2/body/worksheet.html'}]},
   { no:14, area:'phy', title:'전기와 자기', code:'9과14', items:[{kind:'sim', title:'전압·전류·저항 회로 실험'}, {kind:'sim', title:'전동기의 원리'}]},
   { no:15, area:'earth', title:'별과 우주', code:'9과15', items:[{kind:'sim', title:'연주 시차와 별의 거리'}, {kind:'sim', title:'팽창하는 우주 풍선 모형'}]}
  ]},
