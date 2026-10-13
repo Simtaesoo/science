@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>퀴즈 배틀 · 골든벨</title>
+<link rel="stylesheet" href="../assets/app.css">
+<script src="../assets/app.js"></script>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/quizbank.js"></script>
+<style>.teams{display:grid;gap:6px}.teams .tool{justify-content:space-between;width:100%}</style>
+</head>
+<body>
+<script>
+const U = (new URLSearchParams(location.search).get('u') || '1').split(',').map(Number).filter(n => QB[n]);
+const units = CATALOG.flatMap(g => g.units.map(u => ({...u, grade: g.grade, gid: g.id}))), info = units.filter(u => U.includes(u.no));
+const app = AppKit({
+  id: 'bell' + U.join('_'), title: '퀴즈 배틀 · 골든벨', unit: info.map(u => `${u.grade} ${String(u.no).padStart(2, '0')} ${u.title}`).join(' / '), back: '../index.html' + (info[0] ? '#' + info[0].gid : ''), dark: true,
+  lead: '<b>골든벨 모드</b>: 선생님이 화면을 띄우고 진행해요. 학생들은 보드판에 답을 쓰고, 정답을 공개한 뒤 맞힌 모둠을 눌러 점수를 줘요.<br><b>개인 모드</b>: 혼자 보기를 눌러 풀어요.',
+  howto: ['문제마다 제한 시간이 있어요. 시간이 끝나면 정답이 자동 공개돼요.', '골든벨 모드에서는 오른쪽 모둠 버튼으로 점수를 줘요. 마지막 문제는 <b>점수 2배</b>!', '해설까지 읽고 다음 문제로 넘어가세요.'],
+  options: [{key: 'mode', label: '모드', choices: [['bell', '골든벨(교사 진행)'], ['solo', '개인 풀이']], def: 'bell'}, {key: 'sec', label: '제한 시간', choices: [[10, '10초'], [20, '20초'], [30, '30초']], def: 20}, {key: 'players', label: '모둠', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 4}],
+  recap: '틀린 문제의 해설을 다시 읽고, 시뮬레이션과 학습지로 개념을 복습해 보세요.', startLabel: '퀴즈 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+let qs, qi, deadline, revealed, ui = {}, ord, picked, right = 0, ticked = 0;
+app.onStart = o => { qs = U.flatMap(n => QB[n]).slice().sort(() => Math.random() - .5).slice(0, 10); qi = -1; right = 0; ui.c = app.panel(o.mode === 'bell' ? '진행' : '보기'); if (o.mode === 'bell') { ui.t = app.panel('맞힌 모둠에 점수 주기'); } next(); };
+function next(){ if (qi >= 0 && app.opts.mode === 'solo') app.nextTurn(); qi++; if (qi >= qs.length) return end(); revealed = false; picked = -1; ticked = 0; ord = qs[qi][1].map((_, i) => i).sort(() => Math.random() - .5); deadline = performance.now() + app.opts.sec * 1000; app.setLevel(qi, qs.length);
+  if (app.opts.mode === 'bell') { ui.c.innerHTML = `<button class="big" type="button" id="rv" style="width:100%">정답 공개</button><button class="tool" type="button" id="add" style="width:100%;margin-top:8px">⏱ 시간 +10초</button>`; ui.c.querySelector('#rv').onclick = reveal; ui.c.querySelector('#add').onclick = () => { deadline += 10000; sfx.click(); }; teams(); }
+  else { ui.c.innerHTML = ord.map((i, k) => `<button class="tool" type="button" data-i="${i}" style="width:100%;margin:4px 0;text-align:left;justify-content:flex-start">${'①②③④⑤'[k]} ${qs[qi][1][i]}</button>`).join(''); ui.c.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { if (revealed) return; picked = +b.dataset.i; reveal(); }); } }
+function teams(){ if (!ui.t) return; const dbl = qi === qs.length - 1 ? 2 : 1; ui.t.innerHTML = '<div class="teams">' + app.state.players.map((p, i) => `<button class="tool" type="button" data-p="${i}" ${revealed ? '' : 'disabled'}><span>${p.name}</span><b>+${10 * dbl}</b></button>`).join('') + '</div><p class="note-c" style="margin-top:6px">정답 공개 후 맞힌 모둠을 눌러요 (여러 번 누르면 취소)</p>';
+  ui.t.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { const i = +b.dataset.p, on = b.getAttribute('aria-pressed') === 'true', p = app.state.players[i]; p.score += (on ? -1 : 1) * 10 * dbl; b.setAttribute('aria-pressed', String(!on)); const t = app.state.turn; app.state.turn = i; app.addScore(0); app.state.turn = t; sfx.pop(); }); }
+function reveal(){ if (revealed) return; revealed = true; const q = qs[qi], ok = picked === q[2];
+  if (app.opts.mode === 'solo') { if (ok) { right++; app.addScore(10); sfx.ok(); } else { sfx.bad(); } ui.c.querySelectorAll('[data-i]').forEach(b => { const i = +b.dataset.i; b.disabled = true; if (i === q[2]) b.style.background = '#2f6b4f'; if (i === picked && !ok) b.style.background = '#7a3a3a'; }); }
+  else { sfx.win(); teams(); }
+  ui.c.insertAdjacentHTML('beforeend', `${q[3] ? `<p class="note-c" style="margin-top:8px">💡 ${q[3]}</p>` : ''}<button class="big alt" type="button" id="nx" style="width:100%;margin-top:10px">${qi + 1 < qs.length ? '다음 문제 ▶' : '결과 보기'}</button>`); ui.c.querySelector('#rv') && ui.c.querySelector('#rv').remove(); ui.c.querySelector('#add') && ui.c.querySelector('#add').remove(); ui.c.querySelector('#nx').onclick = next; }
+function end(){ const solo = app.opts.mode === 'solo'; app.finish({stars: solo && !app.multi ? (right >= 9 ? 3 : right >= 6 ? 2 : 1) : 3, title: !solo ? '골든벨 종료!' : null, summary: solo && app.multi ? '모둠별 점수입니다 (모둠이 번갈아 풀었어요).' : solo ? `10문제 중 <b>${right}개</b> 정답` : '모둠별 점수입니다.', best: solo ? right + '/10' : null, bestValue: right}); }
+app.step = () => { if (!qs || revealed || qi >= qs.length) return; const left = (deadline - performance.now()) / 1000; if (left <= 5 && Math.ceil(left) !== ticked && left > 0) { ticked = Math.ceil(left); sfx.tick(); } if (left <= 0) { if (app.opts.mode === 'solo') picked = -1; reveal(); } };
+function wrap(g, txt, maxW, size){ g.font = `700 ${size}px 'IBM Plex Sans KR',sans-serif`; const out = []; let line = ''; [...txt].forEach(ch => { if (g.measureText(line + ch).width > maxW && line) { out.push(line); line = ch; } else line += ch; }); if (line) out.push(line); return out; }
+app.draw = (g, W, H) => { if (!qs || qi >= qs.length) return; const q = qs[qi], left = Math.max(0, (deadline - performance.now()) / 1000), t = performance.now() / 1000;
+  const bg = g.createLinearGradient(0, 0, W, H); bg.addColorStop(0, '#1d2f5a'); bg.addColorStop(1, '#3a1d5a'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  D.text(g, `Q${qi + 1}${qi === qs.length - 1 && app.opts.mode === 'bell' ? ' · 마지막 문제 (점수 2배!)' : ''}`, 20, 26, {size: 20, display: true, color: '#f6d365', align: 'left'});
+  // 타이머
+  const f = left / app.opts.sec; g.fillStyle = 'rgba(255,255,255,.15)'; D.rr(g, W - 220, 14, 200, 22, 11); g.fill(); g.fillStyle = f > .3 ? '#9be3b5' : '#f28c7a'; D.rr(g, W - 220, 14, 200 * f, 22, 11); g.fill(); D.text(g, revealed ? '정답 공개' : Math.ceil(left) + '초', W - 230, 25, {size: 15, weight: 700, color: '#fff', align: 'right'});
+  const size = Math.max(18, Math.min(30, W / 26)), lines = wrap(g, q[0], W - 60, size); lines.forEach((l, i) => D.text(g, l, W / 2, H * .2 + i * size * 1.35, {size, weight: 700, color: '#fff'}));
+  const top = H * .2 + lines.length * size * 1.35 + 10, ch = (H - top - 16) / ord.length - 8, cs = Math.max(15, Math.min(22, ch * .42));
+  ord.forEach((i, k) => { const y = top + k * (ch + 8), ans = revealed && i === q[2], wrongPick = revealed && i === picked && picked !== q[2]; g.fillStyle = ans ? '#2fbf6a' : wrongPick ? '#c0504a' : 'rgba(255,255,255,.1)'; D.rr(g, 30, y, W - 60, ch, 12); g.fill();
+    if (ans) { g.strokeStyle = `rgba(255,255,255,${.5 + .4 * Math.sin(t * 6)})`; g.lineWidth = 3; g.stroke(); }
+    D.text(g, '①②③④⑤'[k], 54, y + ch / 2, {size: cs + 4, weight: 700, color: '#f6d365'}); let fs = cs, ls = wrap(g, q[1][i], W - 150, fs); if (ls.length > 1) { fs = Math.max(13, Math.min(cs, ch * .32)); ls = wrap(g, q[1][i], W - 150, fs).slice(0, 2); } ls.forEach((l, j) => D.text(g, l, 82, y + ch / 2 + (j - (ls.length - 1) / 2) * fs * 1.25, {size: fs, weight: 700, color: '#fff', align: 'left'})); });
+};
+</script>
+</body>
+</html>
