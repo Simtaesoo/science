@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>감각과 반응 실험실 · 중3 자극과 반응</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-bio">
+<div class="wrap">
+  <nav class="topbar" data-topbar="3학년|20 자극과 반응" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 3 · 20 자극과 반응 <span class="code">9과20</span></div>
+      <h1>감각과 반응 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="eye">1. 눈</button>
+      <button type="button" data-mode="sense">2. 귀·코·혀·피부</button>
+      <button type="button" data-mode="nerve">3. 신경계</button>
+      <button type="button" data-mode="react">4. 자극에서 반응까지</button>
+      <button type="button" data-mode="homeo">5. 호르몬과 항상성</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="모형">
+      <div class="canvas-box"><canvas id="scene" aria-label="감각 기관과 신경계 모형" tabindex="0"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <label class="field" data-only="eye" for="objD">물체 거리 <input type="range" id="objD" min="0" max="100" step="5" value="80"><output id="objDOut">먼 곳</output></label>
+        <label class="field" data-only="eye" for="light">밝기 <input type="range" id="light" min="0" max="100" step="5" value="50"><output id="lightOut">보통</output></label>
+        <div class="field" data-only="sense"><div class="seg" id="snSeg"><button type="button" data-sn="ear">귀</button><button type="button" data-sn="nose">코</button><button type="button" data-sn="tongue">혀</button><button type="button" data-sn="skin">피부</button></div></div>
+        <button class="btn" type="button" id="snGo" data-only="sense">자극 주기</button>
+        <div class="field" data-only="sense" id="pinchF"><label for="pinch"><input type="checkbox" id="pinch"> 코를 막고 먹기</label></div>
+        <div class="field" data-only="sense" id="partF"><div class="seg" id="partSeg"><button type="button" data-part="finger">손가락 끝</button><button type="button" data-part="palm">손바닥</button><button type="button" data-part="arm">팔</button><button type="button" data-part="back">등</button></div></div>
+        <div class="field" data-only="nerve"><div class="seg" id="nvSeg"><button type="button" data-nv="neuron">뉴런</button><button type="button" data-nv="cns">뇌와 척수</button><button type="button" data-nv="auto">자율 신경</button></div></div>
+        <div class="field" data-only="nerve" id="regF"><div class="seg" id="regSeg"><button type="button" data-reg="cere">대뇌</button><button type="button" data-reg="cbl">소뇌</button><button type="button" data-reg="dien">간뇌</button><button type="button" data-reg="mid">중간뇌</button><button type="button" data-reg="med">연수</button><button type="button" data-reg="spin">척수</button></div></div>
+        <div class="field" data-only="nerve" id="stateF"><div class="seg" id="stSeg"><button type="button" data-ss="calm">편안할 때</button><button type="button" data-ss="tense">긴장할 때</button></div></div>
+        <button class="btn" type="button" id="nvGo" data-only="nerve">신호 보내기</button>
+        <div class="field" data-only="react"><div class="seg" id="rxSeg"><button type="button" data-rx="test">반응 시간 측정</button><button type="button" data-rx="con">의식적 반응</button><button type="button" data-rx="ref">무조건 반사</button></div></div>
+        <button class="btn" type="button" id="rxGo" data-only="react">시작</button>
+        <button class="btn" type="button" id="rxHit" data-only="react">지금! (스페이스바)</button>
+        <div class="field" data-only="homeo"><div class="seg" id="hmSeg"><button type="button" data-hm="sugar">혈당량 조절</button><button type="button" data-hm="temp">체온 조절</button></div></div>
+        <button class="btn" type="button" id="meal" data-only="homeo">식사하기</button>
+        <button class="btn" type="button" id="fast" data-only="homeo">운동하기</button>
+        <div class="field" data-only="homeo" id="diaF"><label for="dia"><input type="checkbox" id="dia"> 인슐린이 부족하다면</label></div>
+        <label class="field" data-only="homeo" id="envF" for="env">바깥 온도 <input type="range" id="env" min="0" max="40" step="2" value="22"><output id="envOut">22 ℃</output></label>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">정리</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>어두운 극장에 들어가면 처음엔 안 보이다가 점점 보이는 까닭은?</summary>
+        <p>어두운 곳에서는 홍채가 수축하여 동공이 커지면서 눈으로 들어오는 빛의 양이 늘어나기 때문입니다. 동공이 커지는 데 시간이 걸려 처음에는 잘 보이지 않습니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>뜨거운 냄비를 만지면 ‘앗 뜨거’라고 느끼기 전에 손을 먼저 떼는 까닭은?</summary>
+        <p>척수가 중추인 무조건 반사이기 때문입니다. 자극이 대뇌까지 가지 않고 척수에서 바로 운동 신경으로 명령이 전달되어, 대뇌가 뜨거움을 느끼기 전에 손을 뗍니다. 위험으로부터 몸을 빠르게 보호합니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>밥을 먹은 뒤 혈당량이 높아졌다가 다시 원래대로 돌아오는 까닭은?</summary>
+        <p>혈당량이 높아지면 이자에서 인슐린이 분비되어 간에서 포도당을 글리코젠으로 바꾸어 저장하고 세포가 포도당을 흡수하게 하므로 혈당량이 낮아집니다. 이처럼 몸의 상태를 일정하게 유지하는 것을 항상성이라고 합니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="기관 그림은 구조와 연결을 보여 주기 위해 단순화했습니다. 반응 시간 측정 결과는 기기와 화면에 따라 조금 달라질 수 있습니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+const st = {mode:'eye', t:0, objD:80, light:50, lens:0, pupil:.5, sn:'ear', snT:-1, pinch:false, part:'finger', nv:'neuron', reg:'cere', ss:'calm', nvT:-1, rx:'test', rxState:'idle', rxStart:0, rxWait:0, recs:[], rxT:-1, hm:'sugar', G:90, I:0, Gc:0, dia:false, gh:[], env:22, bodyT:37, th:[]};
+
+function pathAnim(g, pts, f, col){ const L = []; for (let i = 0; i < pts.length - 1; i++) L.push(Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1])); const tot = L.reduce((a, b) => a + b, 0);
+  g.strokeStyle = col; g.lineWidth = 3; g.globalAlpha = .35; g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(...p) : g.moveTo(...p)); g.stroke(); g.globalAlpha = 1;
+  if (f < 0) return; let d = Math.min(1, f) * tot, i = 0; g.beginPath(); g.moveTo(...pts[0]); while (i < L.length && d > L[i]) { d -= L[i]; i++; g.lineTo(...pts[i]); } if (i < L.length) { const k = d / L[i]; const p = [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * k, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * k]; g.lineTo(...p); g.stroke(); g.fillStyle = col; g.beginPath(); g.arc(p[0], p[1], 6, 0, TAU); g.fill(); } else { g.strokeStyle = col; g.lineWidth = 3; g.stroke(); } g.lineWidth = 3; g.strokeStyle = col; g.stroke(); }
+function tag(g, txt, x, y, tx, ty, col){ g.strokeStyle = C.muted; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y); g.lineTo(tx, ty); g.stroke(); label(g, txt, tx + (tx > x ? 4 : -4), ty, {size: 11, align: tx > x ? 'left' : 'right', color: col || C.ink, weight: 600}); }
+
+/* ===== 1. 눈 ===== */
+function drawEye(){
+  const g = S.g, cx = S.w * .58, cy = S.h * .48, R = Math.min(S.w * .26, S.h * .36);
+  const near = 1 - st.objD / 100, lensW = 10 + near * 12; st.lens += (lensW - st.lens) * .1;
+  const pupilR = 14 - st.light / 100 * 10; st.pupil += (pupilR - st.pupil) * .08;
+  // 공막·맥락막·망막
+  g.fillStyle = '#fbf6ef'; g.strokeStyle = '#c9b8a0'; g.lineWidth = 6; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill(); g.stroke();
+  g.strokeStyle = '#7a4a3a'; g.lineWidth = 3; g.beginPath(); g.arc(cx, cy, R - 5, -Math.PI * .78, Math.PI * .78); g.stroke();
+  g.strokeStyle = '#e0866a'; g.lineWidth = 3; g.beginPath(); g.arc(cx, cy, R - 9, -Math.PI * .72, Math.PI * .72); g.stroke();
+  // 각막
+  const fx = cx - R; g.strokeStyle = '#9ac8e8'; g.lineWidth = 3; g.beginPath(); g.arc(fx + 18, cy, 40, Math.PI * .72, Math.PI * 1.28); g.stroke();
+  // 홍채
+  const lx = cx - R * .62; g.fillStyle = '#5a7a4a'; g.fillRect(lx - 4, cy - 42, 6, 42 - st.pupil); g.fillRect(lx - 4, cy + st.pupil, 6, 42 - st.pupil);
+  // 섬모체
+  g.fillStyle = '#b07a6a'; g.beginPath(); g.ellipse(lx + 6, cy - 50, 10, 8, 0, 0, TAU); g.ellipse(lx + 6, cy + 50, 10, 8, 0, 0, TAU); g.fill();
+  // 수정체
+  g.fillStyle = 'rgba(200,225,255,.85)'; g.strokeStyle = '#6a8ab8'; g.lineWidth = 1.5; g.beginPath(); g.ellipse(lx + 8, cy, st.lens, 34, 0, 0, TAU); g.fill(); g.stroke();
+  g.strokeStyle = '#b07a6a'; g.lineWidth = 1; g.beginPath(); g.moveTo(lx + 8, cy - 34); g.lineTo(lx + 6, cy - 44); g.moveTo(lx + 8, cy + 34); g.lineTo(lx + 6, cy + 44); g.stroke();
+  // 시각 신경·맹점·황반
+  const bx = cx + R, by = cy + R * .22; g.fillStyle = '#e8d070'; g.fillRect(bx - 6, by - 10, 70, 20); g.fillStyle = '#d0b050'; g.beginPath(); g.arc(cx + R - 9, by, 6, 0, TAU); g.fill();
+  g.fillStyle = '#d0603a'; g.beginPath(); g.arc(cx + R - 10, cy - 4, 4, 0, TAU); g.fill();
+  // 물체와 광선
+  const ox = 20 + (lx - 120) * (st.objD / 100) * .0 + 30, oy = cy, D = 40 + st.objD * 2.4, objX = lx - D;
+  g.fillStyle = C.hot; g.beginPath(); g.moveTo(Math.max(14, objX), cy - 26); g.lineTo(Math.max(14, objX) - 8, cy); g.lineTo(Math.max(14, objX) + 8, cy); g.fill(); g.fillRect(Math.max(14, objX) - 2, cy, 4, 20);
+  const ret = [cx + R - 10, cy + 14], top = [Math.max(14, objX), cy - 26];
+  const bright = .25 + st.light / 140;
+  [-28, -10, 10, 28].forEach(dy => { if (Math.abs(dy) > st.pupil + 6) return; const p = [lx + 8, cy + dy]; g.strokeStyle = `rgba(230,120,40,${bright})`; g.lineWidth = 1.5; g.beginPath(); g.moveTo(...top); g.lineTo(...p); g.lineTo(...ret); g.stroke(); });
+  if (Math.abs(st.lens - lensW) > 1.5) label(g, '초점 맞추는 중…', cx, cy + R + 22, {size: 12, color: C.hot}); else label(g, '망막에 거꾸로 선 상이 맺힘', cx, cy + R + 22, {size: 12, color: C.bio});
+  tag(g, '각막', fx + 2, cy - 30, fx - 20, cy - 80); tag(g, '홍채', lx - 2, cy - 30, lx - 30, cy - 110); tag(g, '동공', lx, cy, lx - 50, cy + 70); tag(g, '수정체', lx + 10, cy + 20, lx + 30, cy + 100); tag(g, '섬모체', lx + 10, cy - 54, lx + 40, cy - 110);
+  tag(g, '망막', cx + R * .7, cy - R * .62, cx + R * .9, cy - R - 10); tag(g, '맥락막', cx + R * .3, cy - R * .92, cx + R * .3, cy - R - 26); tag(g, '공막', cx - R * .2, cy - R, cx - R * .3, cy - R - 26);
+  tag(g, '맹점', cx + R - 9, by + 4, cx + R + 20, by + 50); tag(g, '시각 신경', bx + 40, by, bx + 50, by + 30); tag(g, '유리체', cx, cy + R * .5, cx - 10, cy + R * .5, '#6a8ab8');
+  // 앞에서 본 동공
+  const px = 60, py = 60; g.fillStyle = '#fff'; g.beginPath(); g.ellipse(px, py, 44, 26, 0, 0, TAU); g.fill(); g.strokeStyle = C.line; g.stroke(); g.fillStyle = '#5a7a4a'; g.beginPath(); g.arc(px, py, 22, 0, TAU); g.fill(); g.fillStyle = '#111'; g.beginPath(); g.arc(px, py, st.pupil * 1.3, 0, TAU); g.fill(); label(g, '앞에서 본 동공', px, py + 40, {size: 10, color: C.muted});
+  if (st.light > 70) { g.fillStyle = 'rgba(255,230,120,.25)'; g.fillRect(0, 0, S.w, S.h); }
+}
+
+/* ===== 2. 귀·코·혀·피부 ===== */
+const TWO = {finger: 3, palm: 10, arm: 38, back: 45};
+function drawSense(){
+  const g = S.g, f = st.snT;
+  if (st.sn === 'ear') { const y = S.h * .45;
+    // 귓바퀴, 외이도
+    g.fillStyle = '#f0c8a8'; g.beginPath(); g.ellipse(70, y, 30, 70, 0, 0, TAU); g.fill(); g.fillStyle = '#e8b898'; g.fillRect(90, y - 12, 120, 24);
+    g.strokeStyle = '#a07a5a'; g.lineWidth = 4; g.beginPath(); g.moveTo(212, y - 30); g.lineTo(212, y + 30); g.stroke();
+    // 귓속뼈
+    g.strokeStyle = '#ddd'; g.lineWidth = 6; g.beginPath(); g.moveTo(214, y); g.lineTo(240, y - 14); g.lineTo(262, y - 4); g.lineTo(286, y + 4); g.stroke();
+    // 달팽이관
+    g.strokeStyle = '#d8a0c0'; g.lineWidth = 8; g.beginPath(); for (let a = 0; a < 5 * Math.PI; a += .1) { const r = 34 - a * 2; g.lineTo(330 + Math.cos(a) * r, y + 30 + Math.sin(a) * r); } g.stroke();
+    // 반고리관
+    g.strokeStyle = '#a0c8e8'; g.lineWidth = 5; [[300, y - 50, 22], [322, y - 62, 18], [340, y - 44, 20]].forEach(([x, yy, r]) => { g.beginPath(); g.arc(x, yy, r, 0, TAU); g.stroke(); });
+    g.fillStyle = '#c8e0a0'; g.beginPath(); g.ellipse(304, y - 10, 16, 12, 0, 0, TAU); g.fill();
+    g.strokeStyle = '#e0c060'; g.lineWidth = 4; g.beginPath(); g.moveTo(360, y + 30); g.lineTo(S.w * .78, y + 30); g.stroke();
+    g.strokeStyle = '#c8a0a0'; g.lineWidth = 6; g.beginPath(); g.moveTo(240, y + 12); g.lineTo(270, y + 110); g.stroke();
+    tag(g, '귓바퀴', 60, y - 60, 40, y - 100); tag(g, '외이도', 150, y + 12, 150, y + 60); tag(g, '고막', 212, y + 30, 200, y + 90); tag(g, '귓속뼈', 250, y - 10, 230, y - 90); tag(g, '반고리관 (회전 감지)', 330, y - 80, 380, y - 120, '#3a7ab8'); tag(g, '전정 기관 (기울기 감지)', 314, y - 10, 400, y - 30, '#5a8a3a'); tag(g, '달팽이관 (소리 자극 수용)', 340, y + 50, 400, y + 90, '#a04a7a'); tag(g, '귀인두관 (압력 조절)', 262, y + 90, 300, y + 130); tag(g, '청각 신경', S.w * .7, y + 30, S.w * .72, y + 70);
+    // 음파
+    for (let k = 0; k < 4; k++) { const r = ((st.t * 40 + k * 20) % 80); g.strokeStyle = `rgba(80,120,220,${1 - r / 80})`; g.lineWidth = 2; g.beginPath(); g.arc(10, y, r, -.6, .6); g.stroke(); }
+    pathAnim(g, [[40, y], [210, y], [286, y + 4], [330, y + 30], [S.w * .78, y + 30], [S.w * .9, y - 60]], f, C.hot);
+    label(g, '대뇌', S.w * .9, y - 76, {weight: 700});
+    label(g, '소리 → 귓바퀴 → 외이도 → 고막 → 귓속뼈 → 달팽이관 → 청각 신경 → 대뇌', S.w / 2, 20, {size: 12, weight: 600}); return; }
+  if (st.sn === 'nose') { const cx = S.w * .35, y = S.h * .5;
+    g.fillStyle = '#f0c8a8'; g.beginPath(); g.moveTo(cx - 120, y - 100); g.quadraticCurveTo(cx - 140, y + 20, cx - 100, y + 80); g.lineTo(cx + 120, y + 80); g.lineTo(cx + 120, y - 100); g.closePath(); g.fill();
+    g.fillStyle = '#fbe2d4'; g.beginPath(); g.moveTo(cx - 100, y + 60); g.quadraticCurveTo(cx - 60, y - 70, cx + 110, y - 60); g.lineTo(cx + 110, y + 60); g.closePath(); g.fill();
+    g.fillStyle = '#e0a040'; g.fillRect(cx - 10, y - 74, 110, 12); tag(g, '후각 상피 (후각 세포)', cx + 40, y - 74, cx + 140, y - 120, '#a06a20');
+    g.strokeStyle = '#e0c060'; g.lineWidth = 3; g.beginPath(); g.moveTo(cx + 50, y - 74); g.lineTo(cx + 50, y - 110); g.lineTo(S.w * .8, y - 110); g.stroke(); label(g, '후각 신경 → 대뇌', S.w * .8, y - 126, {size: 12, weight: 700});
+    for (let i = 0; i < 14; i++) { const ph = (st.t * .2 + i / 14) % 1, x = cx - 110 + ph * 200, yy = y + 40 - ph * 110 + Math.sin(i * 3 + st.t * 3) * 10; g.fillStyle = 'rgba(160,90,200,.7)'; g.beginPath(); g.arc(x, yy, 4, 0, TAU); g.fill(); }
+    const sens = Math.max(.1, 1 - Math.max(0, st.snT) * .9); label(g, `냄새를 느끼는 정도: ${Math.round(sens * 100)}%`, S.w * .72, y + 30, {weight: 700, color: C.bio});
+    label(g, '같은 냄새를 계속 맡으면 후각이 쉽게 피로해진다', S.w * .72, y + 54, {size: 12, color: C.muted});
+    label(g, '기체 상태의 화학 물질 → 후각 세포 → 후각 신경 → 대뇌', S.w / 2, 20, {size: 12, weight: 600}); return; }
+  if (st.sn === 'tongue') { const cx = S.w * .3, y = S.h * .5;
+    g.fillStyle = '#e88a8a'; g.beginPath(); g.ellipse(cx, y, 90, 140, 0, 0, TAU); g.fill(); seed = 3; for (let i = 0; i < 40; i++) { g.fillStyle = 'rgba(255,255,255,.5)'; g.beginPath(); g.arc(cx - 70 + rnd() * 140, y - 110 + rnd() * 220, 3, 0, TAU); g.fill(); }
+    g.strokeStyle = C.ink; g.beginPath(); g.arc(cx + 20, y - 20, 18, 0, TAU); g.stroke(); g.beginPath(); g.moveTo(cx + 36, y - 30); g.lineTo(S.w * .55, y - 120); g.stroke();
+    const zx = S.w * .66, zy = y - 80; g.fillStyle = '#f2b0b0'; g.beginPath(); g.ellipse(zx, zy, 50, 60, 0, 0, TAU); g.fill(); for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + (i - 3) * .3; g.fillStyle = '#d06a8a'; g.beginPath(); g.ellipse(zx + Math.cos(a) * 26, zy + Math.sin(a) * 20 + 10, 6, 14, a + Math.PI / 2, 0, TAU); g.fill(); }
+    label(g, '맛봉오리 (맛세포)', zx, zy + 76, {size: 12, weight: 700});
+    const tastes = st.pinch ? '단맛 (딸기 향은 거의 느껴지지 않음)' : '단맛 + 상큼한 딸기 향';
+    if (st.snT >= 0) { label(g, '딸기 맛 사탕을 먹으면?', S.w * .66, S.h * .7, {weight: 700}); label(g, tastes, S.w * .66, S.h * .7 + 24, {size: 13, color: st.pinch ? C.hot : C.bio, weight: 700}); }
+    label(g, '액체 상태의 화학 물질 → 맛세포 → 미각 신경 → 대뇌', S.w / 2, 20, {size: 12, weight: 600});
+    label(g, '기본 맛: 단맛, 짠맛, 신맛, 쓴맛, 감칠맛 (매운맛·떫은맛은 피부 감각)', S.w / 2, S.h - 14, {size: 12, color: C.muted}); return; }
+  // 피부
+  const y0 = S.h * .2; g.fillStyle = '#f6d6bc'; g.fillRect(30, y0, S.w * .5, 30); g.fillStyle = '#f0c0a0'; g.fillRect(30, y0 + 30, S.w * .5, 140); g.fillStyle = '#f8e8c0'; g.fillRect(30, y0 + 170, S.w * .5, 60);
+  label(g, '표피', 36, y0 + 15, {size: 11, align: 'left'}); label(g, '진피', 36, y0 + 100, {size: 11, align: 'left'}); label(g, '피하 지방', 36, y0 + 200, {size: 11, align: 'left'});
+  [['통점', '#d04a3a', 10, 28], ['압점', '#4a6ad0', 50, 6], ['촉점', '#8a4ad0', 70, 6], ['냉점', '#3aa0d0', 30, 3], ['온점', '#e09030', 90, 1]].forEach(([n, col, x, cnt], i) => { for (let k = 0; k < Math.min(cnt, 8); k++) { g.fillStyle = col; g.beginPath(); g.arc(80 + (x + k * 37) % (S.w * .45), y0 + 40 + (i * 23 + k * 11) % 120, 4, 0, TAU); g.fill(); } });
+  const lx = S.w * .6; [['통점', '#d04a3a', '아픔 (가장 많음)'], ['압점', '#4a6ad0', '누르는 느낌'], ['촉점', '#8a4ad0', '닿는 느낌'], ['냉점', '#3aa0d0', '차가움'], ['온점', '#e09030', '따뜻함 (가장 적음)']].forEach(([n, col, d], i) => { g.fillStyle = col; g.beginPath(); g.arc(lx, y0 + 10 + i * 24, 5, 0, TAU); g.fill(); label(g, `${n}: ${d}`, lx + 12, y0 + 10 + i * 24, {size: 12, align: 'left'}); });
+  // 두 점 역치
+  const thr = TWO[st.part], px = S.w * .3, py = S.h * .82, gap = 20, sc = 3; g.strokeStyle = C.ink; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(px - gap * sc / 2, py - 40); g.lineTo(px - gap * sc / 2, py); g.moveTo(px + gap * sc / 2, py - 40); g.lineTo(px + gap * sc / 2, py); g.stroke(); label(g, `두 점 사이 ${gap} mm로 동시에 찌르기`, px, py - 52, {size: 11});
+  if (st.snT >= 0) label(g, gap >= thr ? '두 점으로 느낌' : '한 점으로 느낌', px, py + 18, {weight: 700, color: gap >= thr ? C.bio : C.hot});
+  label(g, `${{finger: '손가락 끝', palm: '손바닥', arm: '팔', back: '등'}[st.part]}: 두 점으로 느끼는 최소 거리 약 ${thr} mm`, S.w * .72, py, {size: 12, weight: 600});
+  label(g, '감각점이 많이 분포한 곳일수록 예민하다', S.w * .72, py + 20, {size: 11, color: C.muted});
+}
+let seed = 1; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+/* ===== 3. 신경계 ===== */
+const REG = {cere: ['대뇌', '감각과 기억, 판단, 추리 등 정신 활동, 의식적인 행동을 조절', [.42, .3]], cbl: ['소뇌', '근육 운동을 조절하여 몸의 자세와 균형 유지', [.6, .56]], dien: ['간뇌', '체온, 혈당량, 체액의 농도 조절 (항상성 유지)', [.44, .45]], mid: ['중간뇌', '눈의 움직임과 동공의 크기 조절', [.47, .52]], med: ['연수', '심장 박동, 호흡 운동, 소화 운동 조절 · 기침·재채기·하품 등 반사의 중추', [.48, .62]], spin: ['척수', '뇌와 몸의 각 부분 사이의 신호 전달 통로 · 무릎 반사 등 반사의 중추', [.48, .8]]};
+function drawNerve(){
+  const g = S.g, f = st.nvT;
+  if (st.nv === 'neuron') { const y = S.h * .5;
+    const neuron = (x0, x1, col, n, cellAt) => { const cx = x0 + (x1 - x0) * cellAt; g.strokeStyle = col; g.lineWidth = 3; g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
+      for (let k = -2; k <= 2; k++) { g.beginPath(); g.moveTo(cx, y); g.lineTo(cx - 22, y + k * 10 - 8); g.stroke(); }
+      g.fillStyle = col; g.beginPath(); g.arc(cx, y, 12, 0, TAU); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(cx, y, 4, 0, TAU); g.fill();
+      for (let k = -1; k <= 1; k++) { g.beginPath(); g.moveTo(x1, y); g.lineTo(x1 + 12, y + k * 10); g.stroke(); } label(g, n, (x0 + x1) / 2, y - 40, {weight: 700, color: col}); };
+    const a = S.w * .04, b = S.w * .36, c = S.w * .4, d = S.w * .58, e = S.w * .62, h = S.w * .95;
+    neuron(a, b, '#3a7ab8', '감각 뉴런', .3); neuron(c, d, '#5a8a3a', '연합 뉴런', .2); neuron(e, h, '#c04a3a', '운동 뉴런', .08);
+    label(g, '감각 기관 (자극 수용)', a + 10, y + 50, {size: 11, align: 'left'}); label(g, '뇌·척수 (판단·명령)', (c + d) / 2, y + 50, {size: 11}); label(g, '근육 (반응)', h, y + 50, {size: 11, align: 'right'});
+    tag(g, '가지 돌기', a + (b - a) * .3 - 20, y - 12, a + 40, y - 90); tag(g, '신경 세포체', a + (b - a) * .3, y + 12, a + 80, y + 100); tag(g, '축삭 돌기', a + (b - a) * .7, y, a + (b - a) * .8, y - 90);
+    pathAnim(g, [[a, y], [b, y], [c, y], [d, y], [e, y], [h, y]], f, '#f0b030');
+    label(g, '뉴런: 신경계를 구성하는 기본 단위 · 자극은 가지 돌기 → 신경 세포체 → 축삭 돌기 방향으로 전달', S.w / 2, 22, {size: 12, weight: 600}); return; }
+  if (st.nv === 'cns') { const W = S.w * .7, x0 = 20, y0 = 10, H = S.h - 20, P = ([u, v]) => [x0 + u * W, y0 + v * H];
+    g.fillStyle = '#f2d8d0'; g.beginPath(); g.ellipse(...P([.42, .32]), W * .3, H * .26, 0, 0, TAU); g.fill();
+    const hl = k => k === st.reg ? 'rgba(220,90,60,.75)' : 'rgba(200,160,150,.6)';
+    g.fillStyle = hl('cere'); g.beginPath(); g.ellipse(...P([.42, .3]), W * .29, H * .24, 0, Math.PI, TAU); g.ellipse(...P([.42, .3]), W * .29, H * .12, 0, 0, Math.PI); g.fill();
+    g.fillStyle = hl('dien'); g.beginPath(); g.ellipse(...P([.44, .45]), 22, 14, 0, 0, TAU); g.fill();
+    g.fillStyle = hl('mid'); g.beginPath(); g.ellipse(...P([.47, .52]), 16, 12, 0, 0, TAU); g.fill();
+    g.fillStyle = hl('cbl'); g.beginPath(); g.ellipse(...P([.6, .56]), 46, 30, 0, 0, TAU); g.fill();
+    g.fillStyle = hl('med'); g.fillRect(P([.48, .58])[0] - 12, P([.48, .58])[1], 24, H * .08);
+    g.fillStyle = hl('spin'); g.fillRect(P([.48, .66])[0] - 9, P([.48, .66])[1], 18, H * .34);
+    Object.entries(REG).forEach(([k, [n, d, uv]]) => { const [x, y] = P(uv); label(g, n, x + (k === 'cere' ? 0 : 40), y + (k === 'cere' ? -20 : 0), {size: 12, weight: 700, align: k === 'cere' ? 'center' : 'left', color: k === st.reg ? C.hot : C.ink}); });
+    const r = REG[st.reg]; g.fillStyle = C.soft; g.fillRect(S.w * .7, S.h * .3, S.w * .28, 120); label(g, r[0], S.w * .84, S.h * .3 + 20, {weight: 700, size: 15, color: C.hot});
+    wrapT(g, r[1], S.w * .71, S.h * .3 + 44, S.w * .26); return; }
+  // 자율 신경
+  const calm = st.ss === 'calm', items = [['동공', calm ? '작아짐' : '커짐'], ['심장 박동', calm ? '느려짐' : '빨라짐'], ['호흡', calm ? '느려짐' : '빨라짐'], ['소화 운동', calm ? '촉진' : '억제'], ['방광', calm ? '수축 (배뇨 촉진)' : '이완']];
+  label(g, calm ? '부교감 신경 작용 (편안할 때)' : '교감 신경 작용 (긴장·위급할 때)', S.w / 2, 24, {weight: 700, size: 15, color: calm ? C.bio : C.hot});
+  items.forEach(([n, v], i) => { const y = 70 + i * (S.h - 110) / 5; g.fillStyle = C.soft; g.fillRect(S.w * .2, y, S.w * .6, (S.h - 130) / 5); label(g, n, S.w * .3, y + 20, {weight: 700}); label(g, v, S.w * .62, y + 20, {weight: 700, color: calm ? C.bio : C.hot});
+    if (f >= 0) { const k = Math.min(1, Math.max(0, f * 5 - i)); g.fillStyle = calm ? C.bio : C.hot; g.fillRect(S.w * .2, y + (S.h - 130) / 5 - 4, S.w * .6 * k, 4); } });
+  label(g, '자율 신경은 대뇌의 직접적인 명령 없이 내장 기관을 조절하며, 교감 신경과 부교감 신경은 서로 반대로 작용한다', S.w / 2, S.h - 14, {size: 11, color: C.muted});
+}
+function wrapT(g, txt, x, y, w){ g.font = font(12); let line = '', yy = y; for (const ch of txt) { if (g.measureText(line + ch).width > w) { label(g, line, x, yy, {size: 12, align: 'left'}); line = ch; yy += 18; } else line += ch; } label(g, line, x, yy, {size: 12, align: 'left'}); }
+
+/* ===== 4. 자극에서 반응까지 ===== */
+function body(g, cx, top, h){ g.strokeStyle = C.line; g.lineWidth = 2; g.fillStyle = C.soft; g.beginPath(); g.arc(cx, top + h * .08, h * .08, 0, TAU); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(cx, top + h * .16); g.lineTo(cx, top + h * .55); g.moveTo(cx, top + h * .25); g.lineTo(cx - h * .18, top + h * .45); g.moveTo(cx, top + h * .25); g.lineTo(cx + h * .2, top + h * .35); g.moveTo(cx, top + h * .55); g.lineTo(cx - h * .1, top + h * .95); g.moveTo(cx, top + h * .55); g.lineTo(cx + h * .12, top + h * .75); g.lineTo(cx + h * .14, top + h * .95); g.stroke(); }
+function drawReact(){
+  const g = S.g;
+  if (st.rx === 'test') {
+    const col = st.rxState === 'go' ? '#3ab86a' : st.rxState === 'wait' ? '#d8483a' : st.rxState === 'early' ? '#e0a030' : C.soft;
+    g.fillStyle = col; g.fillRect(20, 20, S.w - 40, S.h * .6);
+    const msg = {idle: '[시작]을 누른 뒤, 화면이 초록색으로 바뀌면 바로 [지금!] 또는 스페이스바/화면 클릭', wait: '기다리세요… (초록색이 되면 누르기)', go: '지금!', done: `반응 시간 ${st.recs.length ? st.recs[st.recs.length - 1] : 0} ms`, early: '너무 빨랐어요! 다시 [시작]'}[st.rxState];
+    label(g, msg, S.w / 2, 20 + S.h * .3, {weight: 700, size: st.rxState === 'go' ? 40 : 16, color: st.rxState === 'idle' ? C.ink : '#fff'});
+    if (st.recs.length) { const avg = st.recs.reduce((a, b) => a + b, 0) / st.recs.length, dcm = .5 * 9.8 * Math.pow(avg / 1000, 2) * 100;
+      label(g, `평균 ${avg.toFixed(0)} ms (${st.recs.length}회)`, S.w / 2, S.h * .72, {weight: 700, size: 15}); label(g, `자 떨어뜨리기 실험이라면 약 ${dcm.toFixed(1)} cm 떨어진 뒤 잡는 셈`, S.w / 2, S.h * .72 + 24, {size: 12, color: C.muted}); }
+    label(g, '경로: 눈 → 감각 신경 → 대뇌 → 척수 → 운동 신경 → 손가락 근육', S.w / 2, S.h - 16, {size: 12, color: C.muted}); return; }
+  const cx = S.w * .35, top = 20, h = S.h - 40; body(g, cx, top, h);
+  const brain = [cx, top + h * .07], spine = [cx, top + h * .4];
+  g.fillStyle = 'rgba(220,120,120,.4)'; g.beginPath(); g.arc(...brain, h * .055, 0, TAU); g.fill(); g.strokeStyle = '#e0c060'; g.lineWidth = 4; g.beginPath(); g.moveTo(cx, top + h * .14); g.lineTo(cx, top + h * .55); g.stroke();
+  label(g, '대뇌', cx - h * .1, brain[1], {size: 12, weight: 700, align: 'right'}); label(g, '척수', cx - 10, spine[1], {size: 12, weight: 700, align: 'right'});
+  if (st.rx === 'con') { const eye = [cx + 8, top + h * .07], hand = [cx + h * .2, top + h * .35];
+    g.fillStyle = C.hot; g.beginPath(); g.arc(cx + h * .45, top + h * .1 + Math.min(1, Math.max(0, st.rxT)) * h * .2, 10, 0, TAU); g.fill(); label(g, '날아오는 공', cx + h * .45, top + h * .05, {size: 11});
+    pathAnim(g, [eye, [brain[0] + 6, brain[1] - 4], [cx + 3, top + h * .16], [cx + 3, top + h * .25], hand], st.rxT, '#e08a30');
+    label(g, '눈 → 시각 신경 → 대뇌 (판단) → 척수 → 운동 신경 → 팔 근육', S.w * .72, S.h * .3, {size: 12, weight: 700}); label(g, '의식적 반응: 대뇌가 판단하여 명령', S.w * .72, S.h * .3 + 24, {size: 12, color: C.muted}); }
+  else { const knee = [cx + h * .12, top + h * .75];
+    g.strokeStyle = C.ink; g.lineWidth = 3; const hx = knee[0] + 30, hy = knee[1] - 10 - (st.rxT > 0 && st.rxT < .2 ? 0 : 0); g.beginPath(); g.moveTo(hx + 30, hy - 20); g.lineTo(hx, hy); g.stroke(); label(g, '고무망치', hx + 30, hy - 30, {size: 11});
+    pathAnim(g, [knee, [cx + 6, top + h * .6], [cx + 4, spine[1] + 40], [cx - 4, top + h * .6], [knee[0] - 6, knee[1] + 6]], st.rxT, '#3a9a5a');
+    if (st.rxT >= 1) { g.strokeStyle = C.hot; g.lineWidth = 3; g.beginPath(); g.moveTo(...knee); g.lineTo(knee[0] + h * .14, knee[1] + h * .12); g.stroke(); label(g, '다리가 올라감!', knee[0] + h * .16, knee[1] + h * .1, {size: 12, color: C.hot, weight: 700, align: 'left'}); }
+    label(g, '무릎 → 감각 신경 → 척수 → 운동 신경 → 다리 근육', S.w * .72, S.h * .3, {size: 12, weight: 700}); label(g, '무조건 반사: 대뇌를 거치지 않아 매우 빠름', S.w * .72, S.h * .3 + 24, {size: 12, color: C.muted}); }
+}
+
+/* ===== 5. 호르몬과 항상성 ===== */
+function drawHomeo(){
+  const g = S.g;
+  if (st.hm === 'sugar') { const cx = S.w * .25, cy = S.h * .5;
+    // 이자, 간, 혈관
+    g.fillStyle = '#e8b0a0'; g.beginPath(); g.ellipse(cx, cy + 60, 80, 20, -.2, 0, TAU); g.fill(); label(g, '이자', cx, cy + 60, {weight: 700});
+    g.fillStyle = '#a8584a'; g.beginPath(); g.ellipse(cx + 10, cy - 80, 90, 40, .1, 0, TAU); g.fill(); label(g, '간', cx + 10, cy - 80, {weight: 700, color: '#fff'});
+    g.strokeStyle = '#d04a3a'; g.lineWidth = 10; g.globalAlpha = .4; g.beginPath(); g.moveTo(cx + 120, cy + 140); g.lineTo(cx + 120, cy - 140); g.stroke(); g.globalAlpha = 1; label(g, '혈관', cx + 140, cy - 140, {size: 11, align: 'left'});
+    const n = Math.round(st.G / 10); for (let i = 0; i < n; i++) { const y = cy + 130 - ((st.t * 40 + i * 28) % 270); g.fillStyle = C.warn; g.beginPath(); g.arc(cx + 120 + Math.sin(i) * 3, y, 4, 0, TAU); g.fill(); }
+    if (st.I > .05) { for (let i = 0; i < 5; i++) { const ph = (st.t * .6 + i / 5) % 1; g.fillStyle = `rgba(60,120,220,${st.I})`; g.beginPath(); g.arc(cx + 40 + ph * 80, cy + 50 - ph * 10, 5, 0, TAU); g.fill(); } label(g, '인슐린 분비', cx - 10, cy + 100, {size: 12, color: '#3a6ad8', weight: 700}); label(g, '포도당 → 글리코젠 (간에 저장)', cx + 10, cy - 30, {size: 11, color: '#3a6ad8'}); }
+    if (st.Gc > .05) { for (let i = 0; i < 5; i++) { const ph = (st.t * .6 + i / 5) % 1; g.fillStyle = `rgba(220,120,40,${st.Gc})`; g.beginPath(); g.arc(cx + 40 + ph * 80, cy + 50 - ph * 10, 5, 0, TAU); g.fill(); } label(g, '글루카곤 분비', cx - 10, cy + 100, {size: 12, color: '#d07820', weight: 700}); label(g, '글리코젠 → 포도당 (혈액으로)', cx + 10, cy - 30, {size: 11, color: '#d07820'}); }
+    const rx = S.w * .72; label(g, `혈당량 ${st.G.toFixed(0)} mg/dL`, rx, S.h * .3, {weight: 700, size: 18, color: st.G > 140 ? C.hot : st.G < 70 ? C.cold : C.bio});
+    label(g, '정상 범위: 약 70~140 (공복 약 100 이하)', rx, S.h * .3 + 28, {size: 12, color: C.muted});
+    if (st.dia) label(g, '인슐린 부족 → 혈당량이 높게 유지 (당뇨병)', rx, S.h * .3 + 54, {size: 12, color: C.hot, weight: 700}); return; }
+  // 체온
+  const cx = S.w * .32, top = 30, h = S.h - 60, hot = st.env > 30, cold = st.env < 14;
+  const bg = Kit.tempColor(st.env, 0, 40); g.globalAlpha = .15; g.fillStyle = bg; g.fillRect(0, 0, S.w, S.h); g.globalAlpha = 1;
+  body(g, cx, top, h);
+  if (hot) for (let i = 0; i < 8; i++) { const y = top + h * .2 + ((st.t * 40 + i * 37) % (h * .6)); g.fillStyle = '#5ab0e8'; g.beginPath(); g.arc(cx - 30 + (i % 4) * 20, y, 3, 0, TAU); g.fill(); }
+  if (cold) { g.save(); g.translate(Math.sin(st.t * 40) * 2, 0); body(g, cx, top, h); g.restore(); }
+  const resp = hot ? [['피부 근처 혈관', '확장 → 열 방출 증가'], ['땀 분비', '증가 → 증발하며 열 방출'], ['물질대사', '감소']] : cold ? [['피부 근처 혈관', '수축 → 열 방출 감소'], ['근육', '떨림 → 열 발생'], ['물질대사', '증가 (티록신 분비 증가)']] : [['피부 근처 혈관', '보통'], ['땀 분비', '보통'], ['물질대사', '보통']];
+  label(g, '간뇌가 체온 변화를 감지하여 조절', S.w * .72, S.h * .2, {weight: 700, size: 13});
+  resp.forEach(([n, v], i) => { label(g, n, S.w * .6, S.h * .32 + i * 30, {size: 12, align: 'left', weight: 700}); label(g, v, S.w * .97, S.h * .32 + i * 30, {size: 12, align: 'right', color: hot ? C.hot : cold ? C.cold : C.ink}); });
+  label(g, `체온 ${st.bodyT.toFixed(1)} ℃`, S.w * .72, S.h * .7, {weight: 700, size: 18, color: C.bio});
+}
+function stepHomeo(dt){
+  if (st.hm === 'sugar') { const ins = st.dia ? .05 : 1; st.I += ((st.G > 110 ? Math.min(1, (st.G - 110) / 60) : 0) - st.I) * dt * 1.5; st.Gc += ((st.G < 80 ? Math.min(1, (80 - st.G) / 20) : 0) - st.Gc) * dt * 1.5;
+    st.G += (-st.I * ins * (st.G - 85) * .35 + st.Gc * 12 - (st.G - 95) * .02) * dt; if (st.meal > 0) { st.G += 60 * dt; st.meal -= dt; } if (st.ex > 0) { st.G -= 25 * dt; st.ex -= dt; }
+    st.gh.push(st.G); if (st.gh.length > 900) st.gh.shift(); }
+  else { const target = 37 + (st.env - 22) * .006; st.bodyT += (target - st.bodyT) * dt; st.th.push([st.env, st.bodyT]); if (st.th.length > 300) st.th.shift(); }
+}
+
+/* ===== 그래프 ===== */
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'eye') { const m = axes(G, {x: [0, 100, 25, '밝기'], y: [0, 15, 5, '동공의 크기 (상대값)']}); line(G, [[0, 14], [100, 4]], m, C.bio, 2.5); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.light), m.Y(14 - st.light / 10), 5, 0, TAU); g.fill(); label(g, '밝을수록 동공이 작아짐', m.X(60), m.Y(12), {size: 11, color: C.muted}); }
+  else if (st.mode === 'sense') { if (st.sn === 'skin') { const m = axes(G, {x: [0, 4, 1, ''], y: [0, 50, 10, '두 점 역치 (mm)']}); Object.entries(TWO).forEach(([k, v], i) => { g.fillStyle = k === st.part ? C.bio : C.line; g.fillRect(m.X(i + .2), m.Y(v), m.X(.6) - m.X(0), m.Y(0) - m.Y(v)); label(g, {finger: '손가락 끝', palm: '손바닥', arm: '팔', back: '등'}[k], m.X(i + .5), m.T + m.h + 12, {size: 11}); }); }
+    else if (st.sn === 'nose') { const m = axes(G, {x: [0, 60, 15, '같은 냄새를 맡은 시간 (초)'], y: [0, 100, 25, '느끼는 정도 (%)']}); const p = []; for (let t = 0; t <= 60; t++) p.push([t, 100 * Math.max(.1, Math.exp(-t / 25))]); line(G, p, m, C.chem, 2.5); }
+    else { const m = axes(G, {x: [0, 5, 1, ''], y: [0, 100, 25, '감각 (모형)']}); ['청각', '평형', '후각', '미각', '피부'].forEach((n, i) => { g.fillStyle = C.line; g.fillRect(m.X(i + .2), m.Y(70), m.X(.6) - m.X(0), m.Y(0) - m.Y(70)); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 11}); }); label(g, '각 감각 기관은 특정한 자극만 받아들인다 (적합 자극)', m.X(2.5), m.Y(90), {size: 11, color: C.muted}); } }
+  else if (st.mode === 'nerve') { const m = axes(G, {x: [0, 3, 1, ''], y: [0, 100, 25, '전달 속도 (m/s, 대략)']}); [['감각 뉴런', 60], ['운동 뉴런', 100], ['자율 신경', 5]].forEach(([n, v], i) => { g.fillStyle = C.bio; g.fillRect(m.X(i + .25), m.Y(v), m.X(.5) - m.X(0), m.Y(0) - m.Y(v)); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 11}); }); }
+  else if (st.mode === 'react') { const n = Math.max(5, st.recs.length), m = axes(G, {x: [0, n, 1, '측정 회차'], y: [0, 600, 100, '반응 시간 (ms)']}); st.recs.forEach((v, i) => { g.fillStyle = C.bio; g.fillRect(m.X(i + .2), m.Y(v), m.X(.6) - m.X(0), m.Y(0) - m.Y(v)); }); line(G, [[0, 50], [n, 50]], m, C.hot, 1.2, [4, 4]); label(g, '무조건 반사 (약 50 ms)', m.X(n * .7), m.Y(50) - 10, {size: 10, color: C.hot}); }
+  else { if (st.hm === 'sugar') { const m = axes(G, {x: [0, 30, 5, '시간 (모형)'], y: [40, 260, 40, '혈당량 (mg/dL)']}); g.fillStyle = 'rgba(80,170,100,.12)'; g.fillRect(m.X(0), m.Y(140), m.X(30) - m.X(0), m.Y(70) - m.Y(140)); line(G, st.gh.map((v, i) => [i / 30, v]), m, C.hot, 2.5); }
+    else { const m = axes(G, {x: [0, 40, 10, '바깥 온도 (℃)'], y: [30, 42, 2, '체온 (℃)']}); line(G, [[0, 37], [40, 37]], m, C.bio, 2.5); line(G, [[0, 0 + 30], [40, 40 + 2]].map(([x]) => [x, Math.min(42, 30 + x * .3)]), m, C.line, 1.2, [4, 4]); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.env), m.Y(st.bodyT), 5, 0, TAU); g.fill(); label(g, '바깥 온도가 변해도 체온은 거의 일정', m.X(20), m.Y(39.5), {size: 11, color: C.muted}); } }
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>'; $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
+function table(){
+  if (st.mode === 'eye') setTable('눈의 조절 작용', ['상황', '변화'], [['가까운 곳을 볼 때', '섬모체 수축 → 수정체 두꺼워짐'], ['먼 곳을 볼 때', '섬모체 이완 → 수정체 얇아짐'], ['밝을 때', '홍채 확장 → 동공 작아짐'], ['어두울 때', '홍채 수축 → 동공 커짐']]);
+  else if (st.mode === 'sense') setTable('감각 기관과 자극', ['감각', '자극', '수용 세포·구조'], [['시각', '빛', '망막의 시각 세포'], ['청각', '소리 (진동)', '달팽이관의 청각 세포'], ['평형 감각', '회전, 기울기', '반고리관, 전정 기관'], ['후각', '기체 상태의 화학 물질', '후각 상피의 후각 세포'], ['미각', '액체 상태의 화학 물질', '맛봉오리의 맛세포'], ['피부 감각', '아픔, 압력, 접촉, 차가움, 따뜻함', '감각점']]);
+  else if (st.mode === 'nerve') setTable('신경계의 구성', ['구분', '구성', '하는 일'], [['중추 신경계', '뇌 (대뇌, 소뇌, 간뇌, 중간뇌, 연수), 척수', '자극을 판단하고 반응 명령'], ['말초 신경계', '감각 신경, 운동 신경, 자율 신경 (교감·부교감)', '중추 신경계와 몸의 각 부분 연결']]);
+  else if (st.mode === 'react') { if (st.rx === 'test') setTable('반응 시간 기록', ['회차', '반응 시간 (ms)'], st.recs.length ? st.recs.map((v, i) => [i + 1, v]) : [['-', '[시작]을 눌러 측정하세요']]);
+    else setTable('의식적 반응과 무조건 반사', ['구분', '중추', '예'], [['의식적 반응', '대뇌', '공을 보고 잡기, 신호등을 보고 건너기'], ['무조건 반사', '척수', '무릎 반사, 뜨거운 것에서 손 떼기'], ['무조건 반사', '연수', '재채기, 기침, 하품, 침 분비'], ['무조건 반사', '중간뇌', '동공 반사']]); }
+  else setTable('주요 호르몬', ['내분비샘', '호르몬', '기능'], [['뇌하수체', '생장 호르몬', '몸의 생장 촉진'], ['갑상샘', '티록신', '세포 호흡(물질대사) 촉진'], ['이자', '인슐린 / 글루카곤', '혈당량 낮춤 / 높임'], ['부신', '아드레날린', '심장 박동 촉진, 혈당량 높임'], ['정소·난소', '테스토스테론·에스트로젠', '2차 성징 발현']]);
+}
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'eye') { s = stat('수정체', st.objD < 40 ? '두꺼움' : '얇음') + stat('동공', st.light > 60 ? '작아짐' : st.light < 40 ? '커짐' : '보통');
+    e = '빛은 <b>각막 → 수정체 → 유리체</b>를 지나 <b>망막</b>에 상을 맺고, 시각 세포가 받아들인 자극은 시각 신경을 통해 대뇌로 전달됩니다. <b>섬모체</b>가 수정체의 두께를, <b>홍채</b>가 동공의 크기를 조절합니다. 시각 신경이 나가는 <b>맹점</b>에는 시각 세포가 없어 상이 맺혀도 보이지 않습니다.';
+    t = '물체 거리와 밝기를 바꾸며 수정체와 동공의 변화를 관찰하세요.'; }
+  else if (st.mode === 'sense') { const d = {ear: ['귀', '소리는 <b>고막</b>을 진동시키고 <b>귓속뼈</b>에서 증폭되어 <b>달팽이관</b>의 청각 세포를 자극합니다. <b>반고리관</b>은 회전, <b>전정 기관</b>은 기울어짐을 감지하고, <b>귀인두관</b>은 고막 안팎의 압력을 같게 합니다.'], nose: ['코', '기체 상태의 화학 물질이 <b>후각 상피</b>의 후각 세포를 자극합니다. 후각은 매우 예민하지만 <b>쉽게 피로</b>해져 같은 냄새를 계속 맡으면 잘 느끼지 못합니다.'], tongue: ['혀', '액체 상태의 화학 물질이 <b>맛봉오리</b>의 맛세포를 자극합니다. 기본 맛은 단맛, 짠맛, 신맛, 쓴맛, 감칠맛이며, 음식 맛은 미각과 <b>후각</b>을 함께 느끼는 것입니다.'], skin: ['피부', '피부에는 통점, 압점, 촉점, 냉점, 온점의 <b>감각점</b>이 있습니다. 통점이 가장 많고 온점이 가장 적으며, 감각점이 많이 분포한 곳일수록 예민합니다.']}[st.sn];
+    s = stat('감각 기관', d[0]) + stat('자극', {ear: '소리·회전·기울기', nose: '기체 화학 물질', tongue: '액체 화학 물질', skin: '접촉·압력·온도·통증'}[st.sn]); e = d[1]; t = '[자극 주기]를 눌러 자극이 전달되는 과정을 관찰하세요.'; }
+  else if (st.mode === 'nerve') { s = stat('보기', {neuron: '뉴런', cns: REG[st.reg][0], auto: st.ss === 'calm' ? '부교감 신경' : '교감 신경'}[st.nv]) + stat('구분', st.nv === 'cns' ? '중추 신경계' : st.nv === 'auto' ? '말초 신경계' : '기본 단위');
+    e = st.nv === 'neuron' ? '<b>뉴런</b>은 신경 세포체, 가지 돌기, 축삭 돌기로 이루어지며, <b>감각 뉴런 → 연합 뉴런 → 운동 뉴런</b> 순으로 자극이 전달됩니다. 연합 뉴런은 뇌와 척수를 이룹니다.' : st.nv === 'cns' ? '<b>중추 신경계</b>는 뇌와 척수로 이루어지며, 감각 신경에서 온 정보를 종합·판단하여 운동 신경으로 명령을 내립니다.' : '<b>자율 신경</b>은 대뇌의 직접적인 조절을 받지 않고 내장 기관의 운동을 조절합니다. <b>교감 신경</b>은 몸을 긴장 상태로, <b>부교감 신경</b>은 원래의 안정된 상태로 되돌립니다.';
+    t = st.nv === 'cns' ? '각 부분을 골라 기능을 확인하세요.' : '[신호 보내기]를 눌러 보세요.'; }
+  else if (st.mode === 'react') { const avg = st.recs.length ? st.recs.reduce((a, b) => a + b, 0) / st.recs.length : 0; s = stat('평균 반응 시간', st.recs.length ? avg.toFixed(0) : '-', ' ms') + stat('측정 횟수', st.recs.length);
+    e = '<b>의식적 반응</b>: 대뇌의 판단을 거쳐 일어나는 반응. <b>무조건 반사</b>: 대뇌를 거치지 않고 척수, 연수, 중간뇌가 중추가 되어 일어나는 반응으로, 매우 빨라 위험으로부터 몸을 보호합니다.';
+    t = st.rx === 'test' ? '여러 번 측정하면 반응 시간이 줄어드나요? 연습의 효과를 확인해 보세요.' : '[시작]을 눌러 자극이 전달되는 경로를 따라가 보세요.'; }
+  else { s = st.hm === 'sugar' ? stat('혈당량', st.G.toFixed(0), ' mg/dL') + stat('분비', st.I > .05 ? '인슐린' : st.Gc > .05 ? '글루카곤' : '-') : stat('체온', st.bodyT.toFixed(1), ' ℃') + stat('바깥 온도', st.env, ' ℃');
+    e = st.hm === 'sugar' ? '<b>호르몬</b>: 내분비샘에서 만들어져 혈액을 따라 이동하며 특정 기관에 작용하는 물질. <b>항상성</b>: 몸 안팎의 환경이 변해도 몸의 상태를 일정하게 유지하는 성질. 혈당량이 높으면 이자에서 <b>인슐린</b>이, 낮으면 <b>글루카곤</b>이 분비되어 혈당량을 조절합니다.' : '체온은 <b>간뇌</b>가 조절합니다. 더울 때는 피부 근처 혈관이 확장되고 땀이 많이 나서 열 방출이 늘고, 추울 때는 혈관이 수축하고 몸을 떨며 물질대사가 활발해져 열 발생이 늘어납니다.';
+    t = st.hm === 'sugar' ? '[식사하기]와 [운동하기]를 눌러 혈당량 그래프를 관찰하고, 인슐린이 부족할 때와 비교하세요.' : '바깥 온도를 바꾸며 몸의 반응을 확인하세요.'; }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 조작 ===== */
+$('objD').oninput = e => { st.objD = +e.target.value; $('objDOut').textContent = st.objD < 40 ? '가까운 곳' : '먼 곳'; };
+$('light').oninput = e => { st.light = +e.target.value; $('lightOut').textContent = st.light > 60 ? '밝음' : st.light < 40 ? '어두움' : '보통'; };
+function syncSn(){ const on = st.mode === 'sense'; $('pinchF').hidden = !on || st.sn !== 'tongue'; $('partF').hidden = !on || st.sn !== 'skin'; if (on) $('gTitle').textContent = {ear: '감각 기관과 적합 자극', nose: '후각의 피로', tongue: '감각 기관과 적합 자극', skin: '몸의 부위별 두 점 역치'}[st.sn]; }
+Kit.seg($('snSeg'), 'sn', v => { st.sn = v; st.snT = -1; syncSn(); })('ear');
+$('snGo').onclick = () => st.snT = 0; $('pinch').onchange = e => st.pinch = e.target.checked;
+Kit.seg($('partSeg'), 'part', v => { st.part = v; st.snT = -1; })('finger');
+function syncNv(){ const on = st.mode === 'nerve'; $('regF').hidden = !on || st.nv !== 'cns'; $('stateF').hidden = !on || st.nv !== 'auto'; $('nvGo').hidden = !on || st.nv === 'cns'; }
+Kit.seg($('nvSeg'), 'nv', v => { st.nv = v; st.nvT = -1; syncNv(); })('neuron');
+Kit.seg($('regSeg'), 'reg', v => st.reg = v)('cere'); Kit.seg($('stSeg'), 'ss', v => { st.ss = v; st.nvT = -1; })('calm');
+$('nvGo').onclick = () => st.nvT = 0;
+function syncRx(){ const on = st.mode === 'react'; $('rxHit').hidden = !on || st.rx !== 'test'; table(); }
+Kit.seg($('rxSeg'), 'rx', v => { st.rx = v; st.rxT = -1; st.rxState = 'idle'; syncRx(); })('test');
+$('rxGo').onclick = () => { if (st.rx === 'test') { st.rxState = 'wait'; st.rxWait = performance.now() + 1500 + Math.random() * 2500; } else st.rxT = 0; };
+function hit(){ if (st.mode !== 'react' || st.rx !== 'test') return; if (st.rxState === 'wait') st.rxState = 'early'; else if (st.rxState === 'go') { st.recs.push(Math.round(performance.now() - st.rxStart)); if (st.recs.length > 10) st.recs.shift(); st.rxState = 'done'; table(); } }
+$('rxHit').onclick = hit; $('scene').addEventListener('pointerdown', hit);
+document.addEventListener('keydown', e => { if (e.code === 'Space' && st.mode === 'react' && st.rx === 'test') { e.preventDefault(); hit(); } });
+function syncHm(){ const on = st.mode === 'homeo', s = st.hm === 'sugar'; $('meal').hidden = !on || !s; $('fast').hidden = !on || !s; $('diaF').hidden = !on || !s; $('envF').hidden = !on || s; if (on) $('gTitle').textContent = s ? '시간에 따른 혈당량' : '바깥 온도와 체온'; table(); }
+Kit.seg($('hmSeg'), 'hm', v => { st.hm = v; syncHm(); })('sugar');
+$('meal').onclick = () => st.meal = 1.5; $('fast').onclick = () => st.ex = 1.5; $('dia').onchange = e => st.dia = e.target.checked;
+$('env').oninput = e => { st.env = +e.target.value; $('envOut').textContent = st.env + ' ℃'; };
+Kit.tabs(m => { st.mode = m; table(); syncSn(); syncNv(); syncRx(); syncHm();
+  if (m === 'eye') $('gTitle').textContent = '밝기와 동공의 크기'; if (m === 'nerve') $('gTitle').textContent = '신경의 신호 전달 속도'; if (m === 'react') $('gTitle').textContent = '나의 반응 시간';
+  $('gSub').textContent = {eye: '', sense: '', nerve: '종류에 따라 다름 (대략적인 값)', react: '점선: 무조건 반사 수준', homeo: ''}[m]; }, ['eye', 'sense', 'nerve', 'react', 'homeo']);
+Kit.loop(dt => { st.t += dt;
+    if (st.snT >= 0) st.snT += dt * .35; if (st.nvT >= 0) st.nvT += dt * .4; if (st.rxT >= 0) st.rxT = Math.min(1.5, st.rxT + dt * (st.rx === 'ref' ? 1.2 : .4));
+    if (st.mode === 'homeo') stepHomeo(dt); },
+  () => { if (st.rxState === 'wait' && performance.now() > st.rxWait) { st.rxState = 'go'; st.rxStart = performance.now(); }
+    S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({eye: drawEye, sense: drawSense, nerve: drawNerve, react: drawReact, homeo: drawHomeo})[st.mode](); drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>
