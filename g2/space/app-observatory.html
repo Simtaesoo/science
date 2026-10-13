@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>별 탐정 관측소 · 중2 별과 우주</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'observatory', title: '별 탐정 관측소', unit: '중2 · 15 별과 우주', back: '../../index.html#g2', sim: 'sim.html#parallax', dark: true,
+  lead: '천문대의 망원경으로 관측 의뢰를 해결하세요! 6개월 간격 사진을 <b>깜빡여</b> 가까운 별을 찾고 <b>연주 시차</b>로 거리를 구하고, <b>등급</b>과 <b>색</b>으로 별의 정체를 밝혀요.',
+  howto: ['<b>시차 의뢰</b>: 1월·7월 사진이 번갈아 보여요. 위치가 바뀌는 별을 눌러 찾은 뒤 거리를 계산하세요.', '<b>밝기 의뢰</b>: 겉보기 등급과 거리를 보고 실제로 더 밝은(절대 등급이 작은) 별을 고르세요.', '<b>색 의뢰</b>: 표면 온도가 높은 별부터 차례로 누르세요.'],
+  options: [{key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
+  recap: '<b>연주 시차</b>는 지구가 공전하며 6개월 간격으로 관측한 별의 시차의 ½입니다. 별까지의 거리(pc) = 1 / 연주 시차(″). 별의 밝기는 <b>등급</b>으로 나타내며 등급이 작을수록 밝고, 1등급 차이는 약 2.5배, 5등급 차이는 100배입니다. <b>겉보기 등급</b>은 눈에 보이는 밝기, <b>절대 등급</b>은 10 pc 거리에 두었을 때의 밝기예요. 별의 <b>색</b>은 표면 온도에 따라 달라 청색 → 청백색 → 백색 → 황색 → 주황색 → 적색 순으로 온도가 낮아요.',
+  startLabel: '관측 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const COLORS = [['청색', '#9bb8ff', 30000], ['청백색', '#cfdcff', 15000], ['백색', '#ffffff', 9000], ['황백색', '#fff4d6', 7000], ['황색', '#ffe08a', 5800], ['주황색', '#ffb36b', 4500], ['적색', '#ff7a5a', 3200]];
+let rounds, ri, R, ui = {}, field, locked, blink = 0;
+const rnd = (a, b) => a + Math.random() * (b - a);
+function makeField(){ field = Array.from({length: 70}, () => ({x: Math.random(), y: Math.random(), m: Math.random(), c: COLORS[Math.floor(Math.random() * 7)][1]})); }
+app.onStart = () => { const types = ['par', 'par', 'par', 'bri', 'bri', 'bri', 'col', 'col', 'mag', 'mag']; rounds = types.sort(() => Math.random() - .5); ri = -1; makeField(); ui.q = app.panel('관측 의뢰'); ui.k = app.panel('관측 수첩', '<p class="note-c">거리(pc) = 1 ÷ 연주 시차(″)<br>절대 등급 = 겉보기 등급 + 5 − 5 log(거리)<br>· 10 pc → 두 등급이 같음<br>· 100 pc → 절대 등급이 5 작음(더 밝음)<br>· 1 pc → 절대 등급이 5 큼<br>등급 1 차이 ≈ 2.5배, 5 차이 = 100배</p>'); app.startTimer(); next(); };
+function next(){ ri++; if (ri >= rounds.length) return end(); locked = false; app.setLevel(ri, rounds.length); makeField(); const t = rounds[ri];
+  if (t === 'par') { const p = [0.5, 0.25, 0.2, 0.1][Math.floor(Math.random() * 4)]; R = {t, p, sx: rnd(.3, .7), sy: rnd(.3, .7), found: false, tries: 0}; ui.q.innerHTML = '<p class="mission">🔭 1월과 7월 사진이 번갈아 보여요.<br><b>위치가 바뀌는 별</b>을 찾아 누르세요!</p>'; }
+  if (t === 'bri') { const ds = [1, 10, 100], A = {m: Math.round(rnd(0, 5)), d: ds[Math.floor(Math.random() * 3)]}, B = {m: Math.round(rnd(0, 5)), d: ds[Math.floor(Math.random() * 3)]};
+    const M = s => s.m + 5 - 5 * Math.log10(s.d); if (Math.abs(M(A) - M(B)) < .5) B.d = B.d === 100 ? 1 : 100; R = {t, s: [A, B].map((s, i) => ({...s, M: M(s), x: i ? .7 : .3, y: .5, c: COLORS[2 + i * 2][1]}))};
+    ui.q.innerHTML = '<p class="mission">✨ 두 별 중 <b>실제로 더 밝은 별</b>(절대 등급이 작은 별)을 누르세요.</p><p class="note-c">겉보기 밝기에 속지 마세요!</p>'; }
+  if (t === 'col') { const pick = COLORS.slice().sort(() => Math.random() - .5).slice(0, 4); R = {t, s: pick.map((c, i) => ({c, x: .2 + i * .2 + rnd(-.04, .04), y: rnd(.35, .65), done: false})), order: pick.slice().sort((a, b) => b[2] - a[2]), step: 0};
+    ui.q.innerHTML = '<p class="mission">🌈 <b>표면 온도가 높은 별부터</b> 차례로 누르세요.</p>'; }
+  if (t === 'mag') { const Q = [['1등급 별은 6등급 별보다 약 몇 배 밝을까요?', ['100배', '5배', '6배', '2.5배'], 0, '5등급 차이 = 100배 (1등급 차이 ≈ 2.5배)'], ['−1등급 별과 1등급 별 중 더 밝은 별은?', ['−1등급 별', '1등급 별', '같다'], 0, '등급은 작을수록 밝아요. 음수 등급도 있어요!'],
+      ['겉보기 등급이 3, 절대 등급이 3인 별까지의 거리는?', ['10 pc', '3 pc', '1 pc', '100 pc'], 0, '10 pc에 있는 별은 겉보기 등급 = 절대 등급'], ['겉보기 등급이 절대 등급보다 작은 별은 10 pc보다…', ['가깝다', '멀다', '같은 거리'], 0, '가까울수록 실제보다 밝게(등급이 작게) 보여요.'],
+      ['태양이 하늘에서 가장 밝게 보이는 까닭은?', ['지구와 아주 가까워서', '절대 등급이 가장 작아서', '표면 온도가 가장 높아서'], 0, '태양의 절대 등급은 약 4.8로 평범한 별이에요.'], ['연주 시차가 0.5″인 별까지의 거리는?', ['2 pc', '0.5 pc', '5 pc', '50 pc'], 0, '1 ÷ 0.5 = 2 pc']];
+    const q = Q[Math.floor(Math.random() * Q.length)]; R = {t}; app.quiz(ui.q, '❓ ' + q[0], q[1], q[2], {explain: q[3], onRight: tr => win(tr === 1 ? 80 : 30), onWrong: () => app.addScore(-10)}); } }
+function win(pts, msg){ if (locked) return; locked = true; app.addScore(pts); sfx.ok(); if (msg) toast(msg, 'good'); setTimeout(() => { app.nextTurn(); next(); }, 1800); }
+function end(){ const sc = app.player.score; app.finish({stars: app.multi ? 3 : sc >= 700 ? 3 : sc >= 450 ? 2 : 1, summary: app.multi ? '모둠별 점수입니다.' : `관측 점수 <b>${sc}</b>`, best: sc + '점', bestValue: sc}); }
+const view = () => { const W = S.w, H = S.h, r = Math.min(W, H) * .46; return {cx: W / 2, cy: H / 2, r}; };
+const toXY = (x, y) => { const v = view(); return [v.cx + (x - .5) * 2 * v.r * .9, v.cy + (y - .5) * 2 * v.r * .9]; };
+app.pointer({tap(x, y){ if (locked || !R) return;
+  if (R.t === 'par' && !R.found) { const [sx, sy] = toXY(R.sx, R.sy), off = shift(); if (Math.hypot(x - sx, y - sy) < 26 || Math.hypot(x - sx - off, y - sy) < 26) { R.found = true; sfx.pop(); const ch = ['2 pc', '4 pc', '5 pc', '10 pc'], ans = {0.5: 0, 0.25: 1, 0.2: 2, 0.1: 3}[R.p];
+      app.quiz(ui.q, `찾았다! 6개월 사이 이 별은 <b>${(R.p * 2).toFixed(1)}″</b> 움직였어요.<br>(눈금 1칸 = 0.1″) 이 별까지의 거리는?`, ch, ans, {explain: `연주 시차 = ${(R.p * 2).toFixed(1)}″ ÷ 2 = ${R.p}″ → 거리 = 1 ÷ ${R.p} = ${1 / R.p} pc`, onRight: tr => win(tr === 1 ? 100 : 40), onWrong: () => app.addScore(-10)}); }
+    else { R.tries++; app.addScore(-5); sfx.bad(); toast('그 별은 움직이지 않아요', 'bad'); } }
+  if (R.t === 'bri') { const i = R.s.findIndex(s => { const [sx, sy] = toXY(s.x, s.y); return Math.hypot(x - sx, y - sy) < 50; }); if (i < 0) return; const best = R.s[0].M < R.s[1].M ? 0 : 1;
+    const ex = R.s.map((s, k) => `별 ${'AB'[k]}: ${s.m} + 5 − 5 log ${s.d} = <b>${s.M.toFixed(0)}</b>`).join('<br>');
+    if (i === best) { ui.q.innerHTML = `<p>✔ 정답! 절대 등급<br>${ex}</p>`; win(80); } else { ui.q.innerHTML = `<p>✖ 아쉬워요. 절대 등급<br>${ex}</p>`; sfx.bad(); locked = true; app.addScore(-10); setTimeout(() => { app.nextTurn(); next(); }, 2600); } }
+  if (R.t === 'col') { const s = R.s.find(s => { const [sx, sy] = toXY(s.x, s.y); return !s.done && Math.hypot(x - sx, y - sy) < 34; }); if (!s) return;
+    if (s.c === R.order[R.step]) { s.done = true; R.step++; sfx.pop(); if (R.step === 4) { ui.q.innerHTML = `<p>✔ ${R.order.map(c => `${c[0]}(${c[2].toLocaleString()} K)`).join(' > ')}</p>`; win(80); } }
+    else { sfx.bad(); app.addScore(-10); toast(`${s.c[0]} 별보다 더 뜨거운 별이 남았어요`, 'bad'); } } }});
+const shift = () => { const v = view(); return R.p * 2 * 10 * v.r * .045; }; // 0.1″ = 눈금 한 칸
+app.step = dt => { blink += dt; };
+function star(g, x, y, r, c, lbl){ D.glow(g, x, y, r * 4, hexrgb(c), .5); g.fillStyle = c; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); if (lbl) D.text(g, lbl, x, y + r * 4 + 6, {size: 13, color: '#cfe3ff', weight: 700}); }
+function hexrgb(h){ const n = parseInt(h.slice(1), 16); return `${n >> 16},${n >> 8 & 255},${n & 255}`; }
+app.draw = (g, W, H) => { if (!R) return; const v = view(), t = performance.now() / 1000;
+  g.fillStyle = '#05070d'; g.fillRect(0, 0, W, H); g.save(); g.beginPath(); g.arc(v.cx, v.cy, v.r, 0, 7); g.clip(); g.fillStyle = '#0a1020'; g.fillRect(0, 0, W, H);
+  field.forEach(s => { const [x, y] = toXY(s.x, s.y); g.fillStyle = s.c; g.globalAlpha = .4 + s.m * .5; g.beginPath(); g.arc(x, y, .6 + s.m * 1.4, 0, 7); g.fill(); }); g.globalAlpha = 1;
+  if (R.t === 'par') { const jul = Math.floor(blink / .7) % 2 === 1, [sx, sy] = toXY(R.sx, R.sy), off = shift(); g.fillStyle = '#fff4d6'; g.globalAlpha = .9; g.beginPath(); g.arc(sx + (jul ? off : 0), sy, 1.9, 0, 7); g.fill(); g.globalAlpha = 1;
+    D.text(g, jul ? '7월 사진' : '1월 사진', v.cx, v.cy - v.r + 24, {size: 15, display: true, color: jul ? '#f28c7a' : '#8ecdf2'});
+    // 눈금자
+    const u = v.r * .045, bx = v.cx - u * 5, by = v.cy + v.r * .75; g.strokeStyle = '#9be3b5'; g.lineWidth = 2; g.beginPath(); g.moveTo(bx, by); g.lineTo(bx + u * 10, by); g.stroke(); for (let i = 0; i <= 10; i++) { g.beginPath(); g.moveTo(bx + i * u, by - (i % 5 ? 4 : 8)); g.lineTo(bx + i * u, by); g.stroke(); } D.text(g, '눈금 1칸 = 0.1″', v.cx, by + 14, {size: 11, color: '#9be3b5'});
+    if (R.found) { g.strokeStyle = '#f6d365'; g.lineWidth = 2; g.beginPath(); g.arc(sx + off / 2, sy, off / 2 + 18, 0, 7); g.stroke(); g.globalAlpha = .45; star(g, sx, sy, 2.4, '#8ecdf2'); star(g, sx + off, sy, 2.4, '#f28c7a'); g.globalAlpha = 1; } }
+  if (R.t === 'bri') R.s.forEach((s, i) => { const [x, y] = toXY(s.x, s.y), r = Math.max(2, 9 - s.m * 1.4); star(g, x, y, r, s.c); D.text(g, `별 ${'AB'[i]}`, x, y - 46, {size: 16, display: true, color: '#f2efe4'}); D.text(g, `겉보기 ${s.m}등급`, x, y + 44, {size: 13, color: '#cfe3ff'}); D.text(g, `거리 ${s.d} pc`, x, y + 62, {size: 13, color: '#cfe3ff'}); if (locked) D.text(g, `절대 ${s.M.toFixed(0)}등급`, x, y + 82, {size: 14, weight: 700, color: '#f6d365'}); });
+  if (R.t === 'col') R.s.forEach(s => { const [x, y] = toXY(s.x, s.y); star(g, x, y, 7 + Math.sin(t * 3 + x) * .6, s.c[1], s.done ? `${R.order.indexOf(s.c) + 1}위` : ''); if (s.done) { g.strokeStyle = '#9be3b5'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 22, 0, 7); g.stroke(); } });
+  if (R.t === 'mag') { [[-.35, -1], [-.1, 1], [.15, 3], [.38, 6]].forEach(([dx, m]) => { const x = v.cx + dx * v.r * 1.6, r = Math.max(1.5, 9 - m * 1.3); star(g, x, v.cy, r, '#fff'); D.text(g, `${m}등급`, x, v.cy + 40, {size: 13, color: '#cfe3ff'}); }); }
+  g.restore();
+  // 망원경 테두리
+  g.strokeStyle = '#2c3e5c'; g.lineWidth = 10; g.beginPath(); g.arc(v.cx, v.cy, v.r, 0, 7); g.stroke(); g.strokeStyle = 'rgba(155,227,181,.25)'; g.lineWidth = 1; g.beginPath(); g.moveTo(v.cx - v.r, v.cy); g.lineTo(v.cx + v.r, v.cy); g.moveTo(v.cx, v.cy - v.r); g.lineTo(v.cx, v.cy + v.r); g.stroke();
+  D.text(g, `의뢰 ${ri + 1} · ${{par: '연주 시차', bri: '절대 등급', col: '별의 색과 온도', mag: '별의 등급'}[R.t]}`, 16, 22, {size: 14, align: 'left', color: '#9fb0d0', weight: 700});
+};
+</script>
+</body>
+</html>
