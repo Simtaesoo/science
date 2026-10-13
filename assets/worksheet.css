@@ -111,3 +111,5 @@ table.ws{border-collapse:collapse;width:100%;font-size:9.5pt}
   .sheet:last-child{page-break-after:auto;break-after:auto}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+.memo{display:flex;flex-direction:column;gap:1mm}
+.memo-t{font-size:8.5pt;color:var(--muted);font-weight:700;letter-spacing:.04em}

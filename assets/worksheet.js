@@ -13,6 +13,27 @@ window.addEventListener('DOMContentLoaded', () => {
   const sheets = document.querySelectorAll('.sheet');
   sheets.forEach((s, i) => { const n = s.querySelector('[data-page]'); if (n) n.textContent = `${i + 1} / ${sheets.length}`; });
 
+  // 남는 공간을 '탐구 메모' 줄칸으로 채운다 (A4 폭으로 보일 때만)
+  const fillMemo = () => {
+    document.querySelectorAll('.memo').forEach(m => m.remove());
+    const had = document.body.classList.contains('show-ans'); document.body.classList.add('show-ans');   // 정답이 보일 때를 기준으로 잰다
+    const mm = document.createElement('div'); mm.style.height = '100mm'; document.body.appendChild(mm); const px = mm.offsetHeight / 100; mm.remove();
+    sheets.forEach(s => {
+      if (s.offsetWidth < 200 * px) return;
+      const foot = s.querySelector('.pfoot'); if (!foot) return;
+      const prev = foot.previousElementSibling; if (!prev) return;
+      const free = foot.offsetTop - (prev.offsetTop + prev.offsetHeight) - 2 * 4.5 * px;
+      if (free < 24 * px) return;
+      const n = Math.floor((free - 8 * px) / (7.5 * px)); if (n < 2) return;
+      const memo = document.createElement('div'); memo.className = 'memo';
+      memo.innerHTML = '<div class="memo-t">탐구 메모</div><div class="lines">' + '<i></i>'.repeat(n) + '</div>';
+      s.insertBefore(memo, foot);
+    });
+    if (!had) document.body.classList.remove('show-ans');
+  };
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => setTimeout(fillMemo, 50));
+  window.addEventListener('resize', () => { clearTimeout(window.__memoT); window.__memoT = setTimeout(fillMemo, 200); });
+
   // 그래프 칸: data-x="최소,최대,간격,이름" data-y="..." data-ans="x:y x:y" (정답 점, 정답 보기에서만 보임)
   document.querySelectorAll('svg[data-graph]').forEach(svg => {
     const [x0, x1, xs, xl] = svg.dataset.x.split(','), [y0, y1, ys, yl] = svg.dataset.y.split(',');

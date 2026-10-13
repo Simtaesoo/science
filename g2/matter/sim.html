@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>물질 특성 실험실 · 중2 물질의 특성</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+</head>
+<body data-root="../../" class="area-chem">
+<div class="wrap">
+  <nav class="topbar" data-topbar="2학년|08 물질의 특성" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 2 · 08 물질의 특성 <span class="code">9과08-01</span><span class="code">9과08-02</span><span class="code">9과08-03</span></div>
+      <h1>물질 특성 실험실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="dens">1. 밀도</button>
+      <button type="button" data-mode="sol">2. 용해도</button>
+      <button type="button" data-mode="mp">3. 녹는점·끓는점</button>
+      <button type="button" data-mode="mix">4. 순물질과 혼합물</button>
+      <button type="button" data-mode="sep">5. 혼합물의 분리</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="실험 장치">
+      <div class="canvas-box"><canvas id="scene" aria-label="실험 장치 그림"></canvas></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <!-- 1 -->
+        <div class="field" data-only="dens">시료 <select id="sample"><option value="al">알루미늄</option><option value="fe">철</option><option value="cu">구리</option><option value="wood">나무</option><option value="ice">얼음</option></select></div>
+        <div class="field" data-only="dens">크기 <div class="seg" id="sizeSeg"><button type="button" data-size="1">작게</button><button type="button" data-size="2">중간</button><button type="button" data-size="3">크게</button></div></div>
+        <button class="btn" type="button" id="dmeasure" data-only="dens">질량·부피 측정</button>
+        <!-- 2 -->
+        <div class="field" data-only="sol">용질 <select id="solute"><option value="kno3">질산 칼륨</option><option value="nacl">염화 나트륨</option><option value="cuso4">황산 구리(Ⅱ)</option></select></div>
+        <label class="field" data-only="sol" for="stemp">물의 온도 <input type="range" id="stemp" min="0" max="80" step="5" value="40"><output id="stempOut">40 °C</output></label>
+        <button class="btn" type="button" id="add10" data-only="sol">용질 10 g 넣기</button>
+        <button class="btn" type="button" id="solReset" data-only="sol">새 물 100 g</button>
+        <!-- 3 -->
+        <div class="field" data-only="mp"><div class="seg" id="mpSeg"><button type="button" data-mpk="melt">녹는점</button><button type="button" data-mpk="boil">끓는점</button></div></div>
+        <div class="field" data-only="mp">물질 <select id="mpSub"></select></div>
+        <div class="field" data-only="mp">양 <div class="seg" id="amtSeg"><button type="button" data-amt="1">적게</button><button type="button" data-amt="2">많게</button></div></div>
+        <button class="btn" type="button" id="mpRun" data-only="mp">가열 시작</button>
+        <!-- 4 -->
+        <div class="field" data-only="mix"><div class="seg" id="mixSeg"><button type="button" data-mx="boil">가열 (끓을 때)</button><button type="button" data-mx="freeze">냉각 (얼 때)</button></div></div>
+        <button class="btn" type="button" id="mixRun" data-only="mix">실험 시작</button>
+        <!-- 5 -->
+        <div class="field" data-only="sep"><div class="seg" id="sepSeg"><button type="button" data-sp="dist">끓는점 차 (증류)</button><button type="button" data-sp="dens">밀도 차</button><button type="button" data-sp="recr">용해도 차 (재결정)</button><button type="button" data-sp="chrom">크로마토그래피</button></div></div>
+        <button class="btn" type="button" id="sepRun" data-only="sep">분리 시작</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="측정값">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <div class="headrow"><h2 id="tTitle">기록</h2><button class="btn" id="clear" type="button">표 비우기</button></div>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>쇠못 한 개와 쇠막대 한 개의 밀도는 다를까?</summary>
+        <p>같습니다. 질량과 부피는 양에 따라 달라지지만 그 비인 밀도는 같은 물질이면 일정합니다. 그래서 밀도는 물질을 구별하는 특성이 됩니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>라면을 끓일 때 물에 스프를 먼저 넣으면 끓는 온도가 달라질까?</summary>
+        <p>스프를 넣은 물은 혼합물이 되어 순수한 물보다 조금 높은 온도에서 끓습니다. 혼합물은 성분 물질의 비율에 따라 끓는 온도가 달라집니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>바닷물에서 소금을 얻을 때와 마실 물을 얻을 때 쓰는 방법은 같을까?</summary>
+        <p>소금은 물을 증발시켜 얻고, 마실 물은 바닷물을 끓여 나온 수증기를 다시 액화시키는 증류로 얻습니다. 얻고 싶은 물질에 따라 분리 방법이 달라집니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="밀도, 용해도, 녹는점, 끓는점은 1기압에서의 대표값을 사용했습니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+const st = {mode:'dens', t:0, rows:{dens:[], sol:[], mp:[], mix:[], sep:[]},
+  sample:'al', size:2, onScale:false, dropT:0,
+  solute:'kno3', T:40, added:0, crystalsVis:0,
+  mpk:'melt', mpSub:'palm', amt:1, runs:[], mpT:0, mpQ:0, running:false,
+  mx:'boil', mixRuns:null, mixT:0,
+  sp:'dist', sepT:0, sepRun:false};
+
+/* ===== 1. 밀도 ===== */
+const DENS = {al:{n:'알루미늄', d:2.70, c:'#b7bec7'}, fe:{n:'철', d:7.87, c:'#6d737a'}, cu:{n:'구리', d:8.96, c:'#c4753a'}, wood:{n:'나무', d:0.50, c:'#c9a26b'}, ice:{n:'얼음', d:0.92, c:'#cfe8f7'}};
+const VOL = {1: 4, 2: 8, 3: 12};   // cm³
+function measureDens(){
+  const s = DENS[st.sample], V = VOL[st.size], m = +(s.d * V).toFixed(1);
+  st.rows.dens.push([s.n, m, V, (m / V).toFixed(2)]); if (st.rows.dens.length > 12) st.rows.dens.shift();
+  st.dropT = 0.001; table();
+}
+function drawDens(){
+  const g = S.g, s = DENS[st.sample], V = VOL[st.size], m = s.d * V, side = 18 + st.size * 9;
+  // 전자저울
+  const sx = S.w * 0.24, sy = S.h * 0.66;
+  g.fillStyle = C.line; g.fillRect(sx - 70, sy, 140, 34); g.fillStyle = C.ink; g.fillRect(sx - 40, sy + 8, 80, 18);
+  g.fillStyle = '#7dffa0'; g.font = font(13, 600); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(m.toFixed(1) + ' g', sx, sy + 17);
+  g.fillStyle = C.muted; g.fillRect(sx - 60, sy - 4, 120, 4);
+  g.fillStyle = s.c; g.strokeStyle = C.ink; g.lineWidth = 1.5; g.fillRect(sx - side / 2, sy - 4 - side, side, side); g.strokeRect(sx - side / 2, sy - 4 - side, side, side);
+  label(g, '전자저울', sx, sy + 50, {size: 12, color: C.muted});
+  // 눈금실린더
+  const cx = S.w * 0.68, top = 30, bot = S.h - 30, w = 64, mlPx = (bot - top) / 60;
+  const floats = s.d < 1, sub = floats ? V * s.d : V, drop = Math.min(1, st.dropT * 1.5), level = 30 + sub * drop;
+  g.fillStyle = 'rgba(80,150,230,.3)'; g.fillRect(cx - w / 2, bot - level * mlPx, w, level * mlPx);
+  g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - w / 2, top); g.lineTo(cx - w / 2, bot); g.lineTo(cx + w / 2, bot); g.lineTo(cx + w / 2, top); g.stroke();
+  for (let ml = 0; ml <= 60; ml += 2) { const y = bot - ml * mlPx; g.lineWidth = 1; g.beginPath(); g.moveTo(cx - w / 2, y); g.lineTo(cx - w / 2 + (ml % 10 ? 8 : 16), y); g.stroke(); if (ml % 10 === 0) label(g, ml + ' mL', cx - w / 2 - 8, y, {align: 'right', size: 10, color: C.muted}); }
+  if (st.dropT > 0) {
+    const yTarget = floats ? bot - level * mlPx - side * (1 - s.d) : bot - side, y = top - side + (yTarget - top + side) * drop;
+    g.fillStyle = s.c; g.strokeStyle = C.ink; g.fillRect(cx - side / 2, y, side, side); g.strokeRect(cx - side / 2, y, side, side);
+  }
+  label(g, `물 30 mL → ${(30 + (st.dropT > 0 ? sub : 0)).toFixed(1)} mL`, cx, bot + 18, {size: 12, weight: 600});
+  if (floats && st.dropT > .6) label(g, '물에 뜬다 (밀도 < 1 g/cm³)', cx + w / 2 + 10, S.h * .3, {align: 'left', size: 12, color: C.chem});
+}
+
+/* ===== 2. 용해도 ===== */
+const SOLD = {kno3:{n:'질산 칼륨', v:[13.3, 31.6, 63.9, 110, 169], c:'#f4f6f8'}, nacl:{n:'염화 나트륨', v:[35.7, 36.0, 36.6, 37.3, 38.4], c:'#f4f6f8'}, cuso4:{n:'황산 구리(Ⅱ)', v:[14.3, 20.7, 28.5, 40.0, 55.0], c:'#3f84d6'}};
+function solub(k, T){ const v = SOLD[k].v, i = Math.min(3, Math.floor(T / 20)), f = (T - i * 20) / 20; return v[i] + (v[i + 1] - v[i]) * f; }
+function drawSol(){
+  const g = S.g, cx = S.w * 0.42, top = 40, w = Math.min(220, S.w * .4), h = S.h - 110, s = solub(st.solute, st.T);
+  const dissolved = Math.min(st.added, s), extra = Math.max(0, st.added - s), blue = st.solute === 'cuso4';
+  g.fillStyle = blue ? `rgba(50,120,220,${0.15 + dissolved / 60})` : 'rgba(80,150,230,.22)'; g.fillRect(cx - w / 2, top + h * .25, w, h * .75);
+  g.strokeStyle = C.ink; g.lineWidth = 2.5; g.beginPath(); g.moveTo(cx - w / 2, top); g.lineTo(cx - w / 2, top + h); g.lineTo(cx + w / 2, top + h); g.lineTo(cx + w / 2, top); g.stroke();
+  // 녹지 않은 용질 (바닥 결정)
+  const n = Math.round(extra / 2.5); for (let i = 0; i < n; i++) { const x = cx - w / 2 + 12 + (i * 37) % (w - 24), y = top + h - 6 - Math.floor(i * 37 / (w - 24)) * 7; g.fillStyle = blue ? '#2a5fb0' : '#ffffff'; g.strokeStyle = C.muted; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y - 5); g.lineTo(x + 5, y); g.lineTo(x, y + 5); g.lineTo(x - 5, y); g.closePath(); g.fill(); g.stroke(); }
+  // 용해된 입자
+  const k = Math.round(dissolved * 0.8); for (let i = 0; i < k; i++) { const x = cx - w / 2 + 8 + ((i * 53.7 + st.t * 9) % (w - 16)), y = top + h * .28 + ((i * 29.3 + st.t * 5 * (i % 3 + 1)) % (h * .68)); g.fillStyle = blue ? '#1d4fa0' : C.chem; g.beginPath(); g.arc(x, y, 2, 0, TAU); g.fill(); }
+  label(g, `물 100 g · ${st.T} °C`, cx, top + h + 22, {weight: 600});
+  // 온도계
+  const tx = cx + w / 2 + 40; g.fillStyle = C.surface; g.strokeStyle = C.ink; g.strokeRect(tx - 4, top, 8, h); g.fillStyle = C.hot; g.fillRect(tx - 2, top + h - h * st.T / 100, 4, h * st.T / 100); label(g, st.T + ' °C', tx + 10, top + h - h * st.T / 100, {align: 'left', size: 12});
+  label(g, extra > 0 ? `포화 용액 · 녹지 않은 ${SOLD[st.solute].n} ${extra.toFixed(1)} g` : st.added > 0 ? '불포화 용액 (더 녹일 수 있음)' : '물만 있음', cx, 20, {weight: 700, color: extra > 0 ? C.hot : C.chem});
+}
+
+/* ===== 3. 녹는점·끓는점 ===== */
+const MPS = {melt: {palm:['팔미트산', 63, 25, 100], para:['파라-다이클로로벤젠', 53, 25, 100], naph:['나프탈렌', 80, 25, 110]},
+             boil: {water:['물', 100, 20, 110], eth:['에탄올', 78, 20, 110], ace:['아세톤', 56, 20, 110]}};
+function fillMpSub(){ $('mpSub').innerHTML = Object.entries(MPS[st.mpk]).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join(''); st.mpSub = Object.keys(MPS[st.mpk])[0]; st.runs = []; }
+// 일정한 세기로 가열: 온도 상승 → 상태 변화 동안 일정 → 다시 상승 (양이 많으면 모두 느림)
+function mpTemp(Q, sub, amt){
+  const [, p, T0, Tmax] = MPS[st.mpk][sub], c1 = 1.0 * amt, L = 18 * amt, c2 = 1.2 * amt;
+  const q1 = (p - T0) * c1; if (Q < q1) return [T0 + Q / c1, 0];
+  if (Q < q1 + L) return [p, (Q - q1) / L];
+  return [Math.min(Tmax, p + (Q - q1 - L) / c2), 1];
+}
+function startMp(){ const run = {sub: st.mpSub, amt: st.amt, pts: [], Q: 0, t: 0, done: false}; st.runs.push(run); if (st.runs.length > 4) st.runs.shift(); st.running = true; }
+function stepMp(dt){
+  st.runs.forEach(r => { if (r.done) return; r.Q += 9 * dt; r.t += dt; const [T, f] = mpTemp(r.Q, r.sub, r.amt); r.T = T; r.f = f; r.pts.push([r.t, T]);
+    if (T >= MPS[st.mpk][r.sub][3] - 0.01) { r.done = true; st.rows.mp.push([MPS[st.mpk][r.sub][0], r.amt === 1 ? '적게' : '많게', MPS[st.mpk][r.sub][1] + ' °C']); table(); } });
+}
+function drawMp(){
+  const g = S.g, r = st.runs[st.runs.length - 1], cx = S.w * 0.4, top = 50, w = 120, h = S.h - 130;
+  g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - w / 2, top); g.lineTo(cx - w / 2, top + h); g.lineTo(cx + w / 2, top + h); g.lineTo(cx + w / 2, top); g.stroke();
+  if (r) {
+    const fill = st.mpk === 'melt' ? (r.amt === 1 ? .3 : .55) : (r.amt === 1 ? .4 : .7), f = r.f || 0;
+    if (st.mpk === 'melt') {
+      g.fillStyle = 'rgba(240,230,200,.95)'; g.fillRect(cx - w / 2 + 2, top + h - h * fill * (1 - f), w - 4, h * fill * (1 - f));
+      g.fillStyle = 'rgba(240,210,120,.5)'; g.fillRect(cx - w / 2 + 2, top + h - h * fill, w - 4, h * fill * f);
+    } else {
+      g.fillStyle = 'rgba(80,150,230,.3)'; g.fillRect(cx - w / 2 + 2, top + h - h * fill * (1 - f * .9), w - 4, h * fill * (1 - f * .9));
+      if (f > 0 && f < 1) for (let i = 0; i < 12; i++) { g.strokeStyle = C.muted; g.beginPath(); g.arc(cx - w / 2 + 12 + (i * 17) % (w - 20), top + h - ((i * 23 + st.t * 60) % (h * fill)), 3, 0, TAU); g.stroke(); }
+    }
+    label(g, `${(r.T || 0).toFixed(1)} °C`, cx + w / 2 + 50, top + 20, {weight: 700, size: 16});
+    label(g, f > 0 && f < 1 ? (st.mpk === 'melt' ? '녹는 중: 온도 일정' : '끓는 중: 온도 일정') : '', cx, top - 18, {weight: 700, color: C.chem});
+  }
+  g.fillStyle = C.hot; g.globalAlpha = st.runs.some(x => !x.done) ? .8 : .2; g.fillRect(cx - w / 2, top + h + 10, w, 8); g.globalAlpha = 1;
+  label(g, st.mpk === 'melt' ? '시험관 속 고체를 물중탕으로 가열' : '가지 달린 시험관 속 액체를 가열', cx, S.h - 14, {size: 11, color: C.muted});
+}
+
+/* ===== 4. 순물질과 혼합물 ===== */
+function startMix(){ st.mixRuns = {pure: [], mix: []}; st.mixT = 0; st.mixQ = 0; }
+function mixTemps(Q){
+  if (st.mx === 'boil') { const pure = Q < 80 ? 20 + Q : 100, mixT = Q < 82 ? 20 + Q : Math.min(108, 102 + (Q - 82) * 0.06); return [pure, mixT]; }
+  const pure = Q < 20 ? 20 - Q : (Q < 70 ? 0 : Math.max(-15, -(Q - 70))), mixT = Q < 22 ? 20 - Q : Math.max(-15, -2 - (Q - 22) * 0.12);
+  return [pure, mixT];
+}
+function stepMix(dt){ if (!st.mixRuns) return; st.mixT += dt; st.mixQ += 8 * dt; if (st.mixT > 22) return; const [a, b] = mixTemps(st.mixQ); st.mixRuns.pure.push([st.mixT, a]); st.mixRuns.mix.push([st.mixT, b]); }
+function drawMix(){
+  const g = S.g, P = st.mixRuns ? st.mixRuns.pure.slice(-1)[0] : null, M = st.mixRuns ? st.mixRuns.mix.slice(-1)[0] : null;
+  [['순수한 물 (순물질)', S.w * .28, P, false], ['소금물 (혼합물)', S.w * .72, M, true]].forEach(([n, cx, p, salt]) => {
+    const top = 50, w = 110, h = S.h - 140;
+    g.fillStyle = 'rgba(80,150,230,.28)'; g.fillRect(cx - w / 2, top + h * .3, w, h * .7);
+    g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - w / 2, top); g.lineTo(cx - w / 2, top + h); g.lineTo(cx + w / 2, top + h); g.lineTo(cx + w / 2, top); g.stroke();
+    for (let i = 0; i < 26; i++) { const x = cx - w / 2 + 8 + (i * 31.7) % (w - 16), y = top + h * .33 + (i * 19.3) % (h * .64); g.fillStyle = C.cold; g.beginPath(); g.arc(x, y, 3, 0, TAU); g.fill(); }
+    if (salt) for (let i = 0; i < 9; i++) { const x = cx - w / 2 + 14 + (i * 41.3) % (w - 28), y = top + h * .36 + (i * 37.1) % (h * .6); g.fillStyle = C.chem; g.beginPath(); g.arc(x, y, 4, 0, TAU); g.fill(); }
+    label(g, n, cx, top + h + 20, {weight: 600}); label(g, p ? p[1].toFixed(1) + ' °C' : '-', cx, top - 16, {weight: 700, size: 16});
+  });
+}
+
+/* ===== 5. 혼합물의 분리 ===== */
+function drawSep(){
+  const g = S.g, t = st.sepT, k = Math.min(1, t / 8);
+  if (st.sp === 'dist') {
+    const fx = S.w * .25, fy = S.h * .55, r = 52, T = t < 3 ? 20 + t * 20 : t < 7 ? 78 + (t - 3) * 0.8 : Math.min(100, 81 + (t - 7) * 10);
+    g.fillStyle = 'rgba(80,150,230,.3)'; g.beginPath(); g.arc(fx, fy, r, 0, TAU); g.fill(); g.strokeStyle = C.ink; g.lineWidth = 2; g.stroke();
+    g.beginPath(); g.moveTo(fx, fy - r); g.lineTo(fx, fy - r - 40); g.lineTo(S.w * .7, fy - r - 10); g.stroke();
+    g.strokeRect(fx - 4, fy - r - 70, 8, 30); label(g, `${T.toFixed(0)} °C`, fx + 12, fy - r - 60, {align: 'left', weight: 700});
+    g.fillStyle = C.hot; g.globalAlpha = st.sepRun ? .8 : .2; g.fillRect(fx - r, fy + r + 10, 2 * r, 8); g.globalAlpha = 1;
+    const ex = S.w * .72, ey = S.h * .78, coll = Math.min(1, Math.max(0, (t - 2.5) / 5));
+    g.fillStyle = 'rgba(200,150,240,.4)'; g.fillRect(ex - 24, ey - 60 * coll, 48, 60 * coll); g.strokeStyle = C.ink; g.strokeRect(ex - 24, ey - 64, 48, 64);
+    label(g, '모인 액체: 주로 에탄올', ex, ey + 18, {size: 12}); label(g, '물 + 에탄올 혼합물', fx, fy + r + 34, {size: 12});
+    st.sepNote = t < 3 ? '가열 중' : t < 7 ? '에탄올이 먼저 끓어 나와 액화된다 (약 78 °C 부근)' : '에탄올이 거의 다 나오면 온도가 다시 올라 물이 끓기 시작한다';
+  } else if (st.sp === 'dens') {
+    const cx = S.w * .4, top = 30, w = 120, h = S.h * .55, drain = Math.min(1, Math.max(0, (t - 1) / 6));
+    g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - w / 2, top); g.lineTo(cx - w / 2, top + h * .7); g.lineTo(cx - 6, top + h); g.lineTo(cx - 6, top + h + 40); g.moveTo(cx + 6, top + h + 40); g.lineTo(cx + 6, top + h); g.lineTo(cx + w / 2, top + h * .7); g.lineTo(cx + w / 2, top); g.stroke();
+    const waterH = h * .4 * (1 - drain);
+    g.fillStyle = 'rgba(80,150,230,.4)'; g.fillRect(cx - w / 2 + 2, top + h * .7 - waterH, w - 4, waterH);
+    g.fillStyle = 'rgba(230,180,40,.55)'; g.fillRect(cx - w / 2 + 2, top + h * .7 - waterH - h * .25, w - 4, h * .25);
+    label(g, '식용유 (밀도 작음)', cx + w / 2 + 10, top + h * .7 - waterH - h * .12, {align: 'left', size: 12}); if (waterH > 4) label(g, '물 (밀도 큼)', cx + w / 2 + 10, top + h * .7 - waterH / 2, {align: 'left', size: 12});
+    g.fillStyle = 'rgba(80,150,230,.4)'; g.fillRect(cx - 30, S.h - 30 - 50 * drain, 60, 50 * drain); g.strokeStyle = C.ink; g.strokeRect(cx - 30, S.h - 82, 60, 52);
+    label(g, '분별 깔때기', cx, top - 12, {size: 12, color: C.muted});
+    st.sepNote = drain < 1 ? '밀도가 큰 물이 아래층이 되어 먼저 빠져나온다' : '꼭지를 잠그면 식용유만 남는다';
+  } else if (st.sp === 'recr') {
+    const T = Math.max(0, 80 - t * 10), cx = S.w * .4, top = 40, w = 160, h = S.h - 120, kno3 = 100, nacl = 10;
+    const kCry = Math.max(0, kno3 - solub('kno3', T)), nCry = Math.max(0, nacl - solub('nacl', T));
+    g.fillStyle = 'rgba(80,150,230,.25)'; g.fillRect(cx - w / 2, top + h * .25, w, h * .75);
+    g.strokeStyle = C.ink; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - w / 2, top); g.lineTo(cx - w / 2, top + h); g.lineTo(cx + w / 2, top + h); g.lineTo(cx + w / 2, top); g.stroke();
+    for (let i = 0; i < Math.round(kCry / 3); i++) { const x = cx - w / 2 + 10 + (i * 23) % (w - 20), y = top + h - 6 - Math.floor(i * 23 / (w - 20)) * 9; g.fillStyle = '#fff'; g.strokeStyle = C.chem; g.beginPath(); g.moveTo(x - 6, y); g.lineTo(x, y - 4); g.lineTo(x + 6, y); g.lineTo(x, y + 4); g.closePath(); g.fill(); g.stroke(); }
+    label(g, `${T.toFixed(0)} °C`, cx + w / 2 + 30, top + 10, {weight: 700, size: 16});
+    label(g, `석출된 질산 칼륨 ${kCry.toFixed(1)} g · 염화 나트륨 ${nCry.toFixed(1)} g`, cx, top + h + 22, {size: 12, weight: 600});
+    st.sepNote = '물 100 g에 질산 칼륨 100 g과 염화 나트륨 10 g을 80 °C에서 녹인 뒤 식힌다. 온도에 따라 용해도가 크게 변하는 질산 칼륨만 결정으로 나온다.';
+  } else {
+    const x0 = S.w * .2, w = S.w * .6, top = 30, bot = S.h - 40, solv = top + (bot - top) * (1 - 0.15 - 0.75 * k);
+    g.fillStyle = '#fafafa'; g.fillRect(x0, top, w, bot - top); g.strokeStyle = C.line; g.strokeRect(x0, top, w, bot - top);
+    g.fillStyle = 'rgba(80,150,230,.25)'; g.fillRect(x0, solv, w, bot - solv);
+    g.fillStyle = 'rgba(80,150,230,.5)'; g.fillRect(x0 - 10, bot - (bot - top) * .1, w + 20, (bot - top) * .1);
+    const base = bot - (bot - top) * .2, travel = (base - solv);
+    [['검은색 사인펜', [[C.warn, .85], [C.hot, .55], ['#3f84d6', .3]]], ['빨간색 사인펜', [[C.hot, .55], ['#e05aa0', .75]]], ['파란색 사인펜', [['#3f84d6', .3], [C.chem, .6]]]].forEach(([n, comps], i) => {
+      const x = x0 + w * (0.2 + i * 0.3);
+      comps.forEach(([c, sp]) => { const y = base - travel * sp * k; g.fillStyle = c; g.globalAlpha = .75; g.beginPath(); g.ellipse(x, y, 9, 6 + 4 * k, 0, 0, TAU); g.fill(); g.globalAlpha = 1; });
+      label(g, n, x, bot + 14, {size: 11});
+    });
+    g.setLineDash([3, 3]); g.strokeStyle = C.muted; g.beginPath(); g.moveTo(x0, base); g.lineTo(x0 + w, base); g.stroke(); g.setLineDash([]);
+    st.sepNote = '용매(물)가 거름종이를 따라 올라가면서 성분 물질이 이동하는 속도가 달라 분리된다. 아주 적은 양의 혼합물도 분리할 수 있다.';
+  }
+}
+
+/* ===== 그래프 ===== */
+function legend(items, m){ const g = G.g; let x = m.L + 8; g.font = font(11); items.forEach(([n, c]) => { g.fillStyle = c; g.fillRect(x, m.T + 6, 14, 3); g.fillStyle = C.ink; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(n, x + 18, m.T + 8); x += g.measureText(n).width + 34; }); }
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'dens') {
+    const m = axes(G, {x: [0, 14, 2, '부피 (cm³)'], y: [0, 120, 20, '질량 (g)']}), cols = {al: C.muted, fe: C.ink, cu: C.earth, wood: C.warn, ice: C.cold};
+    Object.entries(DENS).forEach(([k, d]) => { if (!st.rows.dens.some(r => r[0] === d.n)) return; line(G, [[0, 0], [14, Math.min(120, d.d * 14)]], m, cols[k], 1.2, [4, 4]); });
+    st.rows.dens.forEach(r => { const k = Object.keys(DENS).find(q => DENS[q].n === r[0]); g.fillStyle = cols[k]; g.beginPath(); g.arc(m.X(r[2]), m.Y(r[1]), 5, 0, TAU); g.fill(); });
+  } else if (st.mode === 'sol') {
+    const m = axes(G, {x: [0, 80, 20, '온도 (°C)'], y: [0, 180, 30, '용해도 (g/물 100 g)']}), cols = {kno3: C.chem, nacl: C.ink, cuso4: C.phy};
+    Object.keys(SOLD).forEach(k => { const p = []; for (let T = 0; T <= 80; T += 2) p.push([T, solub(k, T)]); line(G, p, m, cols[k], k === st.solute ? 3 : 1.5); });
+    g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.T), m.Y(Math.min(180, st.added)), 6, 0, TAU); g.fill();
+    legend(Object.keys(SOLD).map(k => [SOLD[k].n, cols[k]]), m);
+  } else if (st.mode === 'mp') {
+    const tm = Math.max(20, Math.ceil(Math.max(0, ...st.runs.map(r => r.t)) / 10) * 10), m = axes(G, {x: [0, tm, tm / 5, '가열 시간 (초)'], y: [0, 120, 20, '온도 (°C)']});
+    const cols = [C.chem, C.hot, C.phy, C.earth];
+    st.runs.forEach((r, i) => line(G, r.pts, m, cols[i % 4], r.amt === 1 ? 2 : 3.5));
+    legend(st.runs.map((r, i) => [`${MPS[st.mpk][r.sub][0]} (${r.amt === 1 ? '적게' : '많게'})`, cols[i % 4]]), m);
+  } else if (st.mode === 'mix') {
+    const m = axes(G, {x: [0, 22, 5, '시간 (초)'], y: st.mx === 'boil' ? [0, 120, 20, '온도 (°C)'] : [-20, 25, 5, '온도 (°C)']});
+    if (st.mixRuns) { line(G, st.mixRuns.pure, m, C.phy); line(G, st.mixRuns.mix, m, C.chem); }
+    legend([['순수한 물', C.phy], ['소금물', C.chem]], m);
+  } else {
+    if (st.sp === 'dist') { const m = axes(G, {x: [0, 12, 2, '가열 시간'], y: [0, 120, 20, '온도 (°C)']}); const p = []; for (let t = 0; t <= Math.min(12, st.sepT); t += .1) p.push([t, t < 3 ? 20 + t * 20 : t < 7 ? 78 + (t - 3) * .8 : Math.min(100, 81 + (t - 7) * 10)]); line(G, p, m, C.chem); }
+    else if (st.sp === 'recr') { const m = axes(G, {x: [0, 80, 20, '온도 (°C)'], y: [0, 180, 30, '용해도 (g/물 100 g)']}); const a = [], b = []; for (let T = 0; T <= 80; T += 2) { a.push([T, solub('kno3', T)]); b.push([T, solub('nacl', T)]); } line(G, a, m, C.chem); line(G, b, m, C.ink); legend([['질산 칼륨', C.chem], ['염화 나트륨', C.ink]], m); }
+    else { G.g.fillStyle = C.surface; G.g.fillRect(0, 0, G.w, G.h); label(g, st.sp === 'dens' ? '서로 섞이지 않고 밀도가 다른 액체 혼합물: 분별 깔때기 · 고체 혼합물: 키질, 좁쌀과 콩 분리' : '크로마토그래피: 잉크 성분 분석, 운동선수 도핑 검사, 식품 속 색소 검출', G.w / 2, G.h / 2, {size: 13}); }
+  }
+}
+
+/* ===== 표·설명 ===== */
+const HEAD = {dens:['시료', '질량 (g)', '부피 (cm³)', '밀도 (g/cm³)'], sol:['용질', '온도', '넣은 양 (g)', '녹은 양 (g)', '상태'], mp:['물질', '양', '일정한 온도'], mix:['구분', '끓을(얼) 때 온도 변화'], sep:['분리 방법', '이용하는 성질', '예']};
+const TITLE = {dens:'밀도 측정 기록', sol:'용해 기록', mp:'상태 변화 온도 기록', mix:'순물질과 혼합물 비교', sep:'혼합물 분리 방법 정리'};
+function table(){
+  const k = st.mode; $('tTitle').textContent = TITLE[k]; $('thead').innerHTML = '<tr>' + HEAD[k].map(h => `<th>${h}</th>`).join('') + '</tr>';
+  let rows = st.rows[k];
+  if (k === 'mix') rows = [['순물질', '끓는 동안(어는 동안) 온도 일정'], ['혼합물', '끓는 동안 온도가 계속 조금씩 오름, 순물질보다 높은 온도에서 끓고 낮은 온도에서 얾']];
+  if (k === 'sep') rows = [['증류', '끓는점 차', '바닷물 → 식수, 원유 분리'], ['분별 깔때기', '밀도 차', '물과 식용유'], ['재결정', '용해도 차', '천일염 정제, 질산 칼륨 정제'], ['크로마토그래피', '이동 속도 차', '잉크 색소, 도핑 검사']];
+  $('clear').hidden = k === 'mix' || k === 'sep';
+  $('tbody').innerHTML = rows.length ? rows.map(r => '<tr>' + r.map(x => `<td>${x}</td>`).join('') + '</tr>').join('') : `<tr class="empty"><td colspan="${HEAD[k].length}">실험을 하면 여기에 기록됩니다.</td></tr>`;
+}
+$('clear').onclick = () => { st.rows[st.mode] = []; if (st.mode === 'mp') st.runs = []; table(); };
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'dens') { const d = DENS[st.sample], V = VOL[st.size];
+    s = stat('질량', (d.d * V).toFixed(1), 'g') + stat('부피', V, 'cm³') + stat('밀도', d.d.toFixed(2), 'g/cm³') + stat('물에서', d.d < 1 ? '뜬다' : '가라앉는다');
+    e = '<b>물질의 특성</b>: 물질의 종류에 따라 다르고, 양에 관계없이 일정한 성질. <b>밀도</b> = 질량 ÷ 부피 (단위 g/cm³). 같은 물질은 크기가 달라도 밀도가 같습니다.';
+    t = '불규칙한 고체의 부피는 물이 든 눈금실린더에 넣어 늘어난 부피로 잽니다. 같은 물질을 크기별로 측정해 그래프의 기울기를 비교하세요.';
+  } else if (st.mode === 'sol') { const sv = solub(st.solute, st.T);
+    s = stat('용해도', sv.toFixed(1), 'g/물 100 g') + stat('넣은 양', st.added, 'g') + stat('녹은 양', Math.min(st.added, sv).toFixed(1), 'g') + stat('용액', st.added >= sv ? '포화' : '불포화');
+    e = '<b>용해도</b>: 일정한 온도에서 용매 100 g에 최대로 녹을 수 있는 용질의 g 수. 용질의 종류와 온도에 따라 다릅니다. 대부분 고체는 온도가 높을수록 용해도가 큽니다.';
+    t = '포화 용액을 만든 뒤 온도를 낮추면 더 녹아 있을 수 없는 양만큼 결정이 생깁니다. 염화 나트륨은 온도에 따른 용해도 변화가 아주 작습니다.';
+  } else if (st.mode === 'mp') { const r = st.runs[st.runs.length - 1], p = MPS[st.mpk][st.mpSub];
+    s = stat('물질', p[0]) + stat(st.mpk === 'melt' ? '녹는점' : '끓는점', p[1], '°C') + stat('현재 온도', r ? r.T.toFixed(1) : '-', '°C');
+    e = st.mpk === 'melt' ? '<b>녹는점</b>: 고체가 녹아 액체로 변하는 동안 일정하게 유지되는 온도. 같은 물질의 어는점과 녹는점은 같습니다. 물질의 양이 많아도 녹는점은 같고, 녹는 데 걸리는 시간만 길어집니다.'
+      : '<b>끓는점</b>: 액체가 끓는 동안 일정하게 유지되는 온도. 물질마다 다르며 양에 관계없이 일정합니다. 외부 압력이 높으면 끓는점이 높아집니다(압력솥).';
+    t = '같은 물질을 [적게], [많게] 두 번 가열해 그래프에서 평평한 구간의 온도와 길이를 비교하세요.';
+  } else if (st.mode === 'mix') { const P = st.mixRuns && st.mixRuns.pure.slice(-1)[0], M = st.mixRuns && st.mixRuns.mix.slice(-1)[0];
+    s = stat('순수한 물', P ? P[1].toFixed(1) : '-', '°C') + stat('소금물', M ? M[1].toFixed(1) : '-', '°C');
+    e = '<b>순물질</b>: 한 가지 물질로만 이루어져 녹는점·끓는점·밀도가 일정합니다. <b>혼합물</b>: 두 가지 이상의 순물질이 섞여 있어 성분비에 따라 특성이 달라집니다.';
+    t = st.mx === 'boil' ? '소금물은 순수한 물보다 높은 온도에서 끓기 시작하고, 끓는 동안 온도가 계속 조금씩 올라갑니다.' : '소금물은 0 °C보다 낮은 온도에서 얼기 시작합니다. 겨울철 도로에 염화 칼슘을 뿌리는 까닭입니다.';
+  } else {
+    s = stat('분리 방법', {dist: '증류', dens: '분별 깔때기', recr: '재결정', chrom: '크로마토그래피'}[st.sp]) + stat('이용하는 차이', {dist: '끓는점', dens: '밀도', recr: '용해도', chrom: '이동 속도'}[st.sp]);
+    e = '혼합물은 성분 물질의 <b>특성 차이</b>를 이용해 분리합니다. 분리하려는 물질의 어떤 특성이 서로 다른지 먼저 찾는 것이 중요합니다.';
+    t = st.sepNote || '[분리 시작]을 눌러 보세요.';
+  }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 조작 ===== */
+$('sample').onchange = e => { st.sample = e.target.value; st.dropT = 0; };
+Kit.seg($('sizeSeg'), 'size', v => { st.size = +v; st.dropT = 0; })('2');
+$('dmeasure').onclick = measureDens;
+$('solute').onchange = e => { st.solute = e.target.value; st.added = 0; };
+$('stemp').oninput = e => { st.T = +e.target.value; $('stempOut').textContent = st.T + ' °C'; };
+$('add10').onclick = () => { st.added += 10; const sv = solub(st.solute, st.T); st.rows.sol.push([SOLD[st.solute].n, st.T + ' °C', st.added, Math.min(st.added, sv).toFixed(1), st.added > sv ? '포화' : '불포화']); if (st.rows.sol.length > 12) st.rows.sol.shift(); table(); };
+$('solReset').onclick = () => { st.added = 0; };
+Kit.seg($('mpSeg'), 'mpk', v => { st.mpk = v; fillMpSub(); table(); })('melt');
+$('mpSub').onchange = e => { st.mpSub = e.target.value; };
+Kit.seg($('amtSeg'), 'amt', v => { st.amt = +v; })('1');
+$('mpRun').onclick = startMp;
+Kit.seg($('mixSeg'), 'mx', v => { st.mx = v; st.mixRuns = null; })('boil');
+$('mixRun').onclick = startMix;
+Kit.seg($('sepSeg'), 'sp', v => { st.sp = v; st.sepT = 0; st.sepRun = false; })('dist');
+$('sepRun').onclick = () => { st.sepT = 0; st.sepRun = true; };
+
+Kit.tabs(m => { st.mode = m; table();
+  $('gTitle').textContent = {dens: '부피와 질량', sol: '용해도 곡선', mp: '가열 곡선', mix: '온도 변화 비교', sep: '분리 과정'}[m];
+  $('gSub').textContent = {dens: '같은 물질의 점은 원점을 지나는 한 직선 위에 놓입니다.', sol: '빨간 점은 지금 넣은 양입니다. 곡선보다 위에 있으면 녹지 않은 용질이 남습니다.', mp: '평평한 구간의 온도가 녹는점(끓는점)입니다.', mix: '파랑: 순물질, 보라: 혼합물', sep: ''}[m]; }, ['dens', 'sol', 'mp', 'mix', 'sep']);
+Kit.loop(dt => { st.t += dt; if (st.dropT > 0) st.dropT += dt;
+  if (st.mode === 'mp') stepMp(dt); if (st.mode === 'mix') stepMix(dt); if (st.mode === 'sep' && st.sepRun) st.sepT += dt; },
+  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h);
+    ({dens: drawDens, sol: drawSol, mp: drawMp, mix: drawMix, sep: drawSep})[st.mode](); drawGraph(); ledger(); }, $('play'));
+})();
+</script>
+</body>
+</html>
