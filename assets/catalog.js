@@ -11,7 +11,9 @@ window.CATALOG = [
   { no:1, area:'gen', title:'과학과 인류의 지속가능한 삶', code:'9과01', items:[
     {kind:'sim', title:'변인 통제 실험 설계하기'}, {kind:'sim', title:'우리 반 탄소 발자국 계산기'} ]},
   { no:2, area:'bio', title:'생물의 구성과 다양성', code:'9과02', items:[
-    {kind:'sim', title:'동물 세포와 식물 세포 탐색기'}, {kind:'sim', title:'세포에서 개체까지 확대해 보기'}, {kind:'sim', title:'5계 분류 게임'} ]},
+    {kind:'sim', title:'1차시 세포의 구조와 기능', href:'g1/life/sim.html#cell'}, {kind:'sim', title:'2차시 생물의 구성 단계', href:'g1/life/sim.html#level'},
+    {kind:'sim', title:'3차시 변이와 생물다양성', href:'g1/life/sim.html#vary'}, {kind:'sim', title:'4차시 종의 개념과 5계 분류', href:'g1/life/sim.html#classify'},
+    {kind:'sim', title:'5차시 생물다양성 보전', href:'g1/life/sim.html#protect'}, {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g1/life/worksheet.html'} ]},
   { no:3, area:'phy', title:'열', code:'9과03', items:[
     {kind:'sim', title:'1차시 온도와 열평형', href:'g1/heat/sim.html#eq'}, {kind:'sim', title:'2차시 열의 이동 (전도·대류·복사)', href:'g1/heat/sim.html#move'},
     {kind:'sim', title:'3차시 비열과 열팽창', href:'g1/heat/sim.html#cap'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/heat/worksheet.html'} ]},

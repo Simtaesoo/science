@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>생물 탐구실 · 중1 생물의 구성과 다양성</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/simkit.js"></script>
+<style>
+.html-scene{padding:14px;display:flex;flex-direction:column;gap:12px;min-height:360px}
+.cards{display:flex;flex-wrap:wrap;gap:6px}
+.card{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 10px;font:500 13px var(--f-body);cursor:pointer;color:var(--ink)}
+.card[aria-pressed="true"]{outline:2px solid var(--area);border-color:var(--area)}
+.card.ok{background:var(--soft);color:var(--muted);cursor:default}
+.kingdoms{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+@media (max-width:700px){.kingdoms{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kingdom{border:1.5px dashed var(--line);border-radius:10px;padding:8px;min-height:120px;display:flex;flex-direction:column;gap:4px;background:var(--surface);cursor:pointer;text-align:left;font:inherit;color:inherit}
+.kingdom b{font-size:13px}
+.kingdom small{color:var(--muted);font-size:11px;line-height:1.35}
+.kingdom .in{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.kingdom .in span{font-size:12px;background:var(--soft);border-radius:6px;padding:1px 6px}
+.flash{font-size:13px;min-height:20px}
+.cross{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:8px;align-items:center;text-align:center}
+.cross .box{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--soft)}
+@media (max-width:600px){.cross{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-root="../../" class="area-bio">
+<div class="wrap">
+  <nav class="topbar" data-topbar="1학년|02 생물의 구성과 다양성" data-ws="worksheet.html"></nav>
+  <header class="page">
+    <div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 1 · 02 생물의 구성과 다양성 <span class="code">9과02-01</span><span class="code">9과02-02</span><span class="code">9과02-03</span><span class="code">9과02-04</span><span class="code">9과02-05</span></div>
+      <h1>생물 탐구실</h1>
+    </div>
+    <div class="seg" role="group" aria-label="차시 고르기">
+      <button type="button" data-mode="cell">1. 세포</button>
+      <button type="button" data-mode="level">2. 구성 단계</button>
+      <button type="button" data-mode="vary">3. 변이와 다양성</button>
+      <button type="button" data-mode="classify">4. 종과 5계</button>
+      <button type="button" data-mode="protect">5. 다양성 보전</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section class="panel scene" aria-label="탐구 화면">
+      <div class="canvas-box" id="cbox"><canvas id="scene" aria-label="생물 모형"></canvas></div>
+      <div class="html-scene" id="hscene" hidden></div>
+      <div class="controls">
+        <button class="btn primary" id="play" type="button">일시정지</button>
+        <div class="field" data-only="cell"><div class="seg" id="cellSeg"><button type="button" data-ct="animal">동물 세포</button><button type="button" data-ct="plant">식물 세포</button><button type="button" data-ct="special">여러 가지 세포</button></div></div>
+        <div class="field" data-only="level"><div class="seg" id="orgSeg"><button type="button" data-org="animal">동물 (사람)</button><button type="button" data-org="plant">식물</button></div></div>
+        <label class="field" data-only="level" for="lv">구성 단계 <input type="range" id="lv" min="0" max="4" step="1" value="0"><output id="lvOut">세포</output></label>
+        <div class="field" data-only="vary">나무껍질 색 <div class="seg" id="bgSeg"><button type="button" data-bg="light">밝은 색</button><button type="button" data-bg="dark">어두운 색</button></div></div>
+        <button class="btn" type="button" id="gen" data-only="vary">한 세대 진행</button>
+        <button class="btn" type="button" id="resetVary" data-only="vary">처음으로</button>
+        <button class="btn" type="button" id="resetCls" data-only="classify">다시 하기</button>
+        <div class="field" data-only="protect">위협 요인
+          <label for="th1"><input type="checkbox" id="th1"> 서식지 파괴</label><label for="th2"><input type="checkbox" id="th2"> 외래종</label><label for="th3"><input type="checkbox" id="th3"> 남획</label><label for="th4"><input type="checkbox" id="th4"> 환경 오염</label></div>
+        <div class="field" data-only="protect">보전 노력
+          <label for="sv1"><input type="checkbox" id="sv1"> 보호 구역 지정</label><label for="sv2"><input type="checkbox" id="sv2"> 생태 통로</label><label for="sv3"><input type="checkbox" id="sv3"> 외래종 관리</label></div>
+        <button class="btn" type="button" id="resetEco" data-only="protect">처음으로</button>
+      </div>
+    </section>
+    <aside class="panel ledger" aria-label="설명">
+      <div class="stats" id="stats"></div>
+      <p class="explain" id="explain"></p>
+      <p class="note" id="tip"></p>
+    </aside>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2 id="gTitle">그래프</h2><p class="sub" id="gSub"></p>
+      <div class="graph-box" style="margin-top:8px"><canvas id="graph" aria-label="그래프"></canvas></div>
+    </section>
+    <section class="panel">
+      <h2 id="tTitle">정리</h2>
+      <div class="tbl-wrap"><table class="data"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+    </section>
+  </div>
+
+  <section aria-label="생각해 보기">
+    <h2 style="margin-bottom:10px">생각해 보기</h2>
+    <div class="think">
+      <details class="q"><summary><span class="qnum">Q1</span>신경세포는 왜 길게 뻗어 있을까?</summary>
+        <p>몸의 먼 곳까지 신호를 빠르게 전달해야 하기 때문입니다. 세포의 모양은 그 세포가 하는 일과 관련이 있습니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>말과 당나귀 사이에서 태어난 노새는 왜 새로운 종이 아닐까?</summary>
+        <p>노새는 생식 능력이 없어 자손을 남길 수 없습니다. 자연에서 짝짓기하여 생식 능력이 있는 자손을 낳을 수 있는 무리를 같은 종이라고 합니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>같은 종인데도 생김새가 조금씩 다른 까닭은?</summary>
+        <p>같은 종의 개체 사이에도 형질이 조금씩 다른 변이가 있기 때문입니다. 변이는 환경이 변해도 살아남는 개체가 있게 하여 생물다양성의 바탕이 됩니다.</p></details>
+    </div>
+  </section>
+  <footer class="site" data-footer data-extra="종은 생물학적 종 개념, 분류 체계는 5계를 기준으로 합니다."></footer>
+</div>
+
+<script>
+(() => {
+const {C, $, canvas, axes, line, arrow, label, font} = Kit;
+const S = canvas($('scene')), G = canvas($('graph'));
+const TAU = Math.PI * 2;
+const st = {mode:'cell', t:0, ct:'animal', pick:null, org:'animal', lv:0, bg:'dark', moths:[], gens:[], kingdomOf:{}, sel:null,
+  eco:null, ecoHist:[]};
+
+/* ===== 1. 세포 ===== */
+const ORG = {
+  nucleus: ['핵', '유전 물질(DNA)이 있어 생명 활동을 조절한다.', 'both'],
+  membrane: ['세포막', '세포를 둘러싸고 물질이 드나드는 것을 조절한다.', 'both'],
+  mito: ['마이토콘드리아', '양분을 분해하여 생명 활동에 필요한 에너지를 만든다.', 'both'],
+  wall: ['세포벽', '세포막 바깥을 둘러싸 세포를 보호하고 모양을 일정하게 유지한다.', 'plant'],
+  chloro: ['엽록체', '초록색 색소가 있어 빛을 받아 광합성을 한다.', 'plant'],
+  cyto: ['세포질', '세포막 안쪽에서 핵을 제외한 부분으로, 여러 세포 소기관이 있다.', 'both']
+};
+let hits = [];
+function drawCell(){
+  const g = S.g, cx = S.w / 2, cy = S.h / 2, R = Math.min(S.w, S.h) * 0.36; hits = [];
+  const hl = k => st.pick === k;
+  if (st.ct === 'special') return drawSpecial();
+  if (st.ct === 'animal') {
+    g.fillStyle = 'rgba(240,200,180,.55)'; g.beginPath();
+    for (let a = 0; a <= TAU + .01; a += .1) { const r = R * (1 + .06 * Math.sin(a * 3) + .04 * Math.cos(a * 5)); a ? g.lineTo(cx + Math.cos(a) * r * 1.2, cy + Math.sin(a) * r * .85) : g.moveTo(cx + Math.cos(a) * r * 1.2, cy + Math.sin(a) * r * .85); }
+    g.closePath(); g.fill(); g.strokeStyle = hl('membrane') ? C.hot : C.ink; g.lineWidth = hl('membrane') ? 4 : 2; g.stroke();
+    hits.push(['membrane', (x, y) => { const d = Math.hypot((x - cx) / (R * 1.2), (y - cy) / (R * .85)); return d > .9 && d < 1.12; }]);
+    hits.push(['cyto', (x, y) => Math.hypot((x - cx) / (R * 1.2), (y - cy) / (R * .85)) < .9]);
+  } else {
+    const w = R * 2.3, h = R * 1.7, x0 = cx - w / 2, y0 = cy - h / 2;
+    g.fillStyle = 'rgba(120,180,90,.35)'; g.fillRect(x0, y0, w, h);
+    g.strokeStyle = hl('wall') ? C.hot : '#4b7a2c'; g.lineWidth = hl('wall') ? 10 : 8; g.strokeRect(x0, y0, w, h);
+    g.strokeStyle = hl('membrane') ? C.hot : C.ink; g.lineWidth = hl('membrane') ? 3 : 1.5; g.strokeRect(x0 + 8, y0 + 8, w - 16, h - 16);
+    g.fillStyle = 'rgba(190,220,250,.6)'; g.fillRect(x0 + w * .35, y0 + h * .2, w * .5, h * .6);
+    label(g, '액포', x0 + w * .6, y0 + h * .5, {size: 12, color: C.muted});
+    hits.push(['wall', (x, y) => (x > x0 - 6 && x < x0 + w + 6 && y > y0 - 6 && y < y0 + h + 6) && !(x > x0 + 5 && x < x0 + w - 5 && y > y0 + 5 && y < y0 + h - 5)]);
+    hits.push(['membrane', (x, y) => (x > x0 + 4 && x < x0 + w - 4 && y > y0 + 4 && y < y0 + h - 4) && !(x > x0 + 12 && x < x0 + w - 12 && y > y0 + 12 && y < y0 + h - 12)]);
+    // 엽록체
+    const cps = [[.12, .2], [.2, .75], [.88, .15], [.9, .8], [.15, .45], [.6, .88], [.62, .1]];
+    cps.forEach(([u, v]) => { g.fillStyle = hl('chloro') ? C.hot : '#3c9a3c'; g.beginPath(); g.ellipse(x0 + u * w, y0 + v * h, 16, 9, .4, 0, TAU); g.fill(); });
+    hits.push(['chloro', (x, y) => cps.some(([u, v]) => Math.hypot(x - (x0 + u * w), y - (y0 + v * h)) < 16)]);
+    hits.push(['cyto', (x, y) => x > x0 + 12 && x < x0 + w - 12 && y > y0 + 12 && y < y0 + h - 12]);
+  }
+  // 핵
+  const nx = st.ct === 'animal' ? cx - R * .15 : cx - R * .7, ny = cy;
+  g.fillStyle = hl('nucleus') ? C.hot : '#7a4fb0'; g.beginPath(); g.arc(nx, ny, R * .26, 0, TAU); g.fill();
+  hits.unshift(['nucleus', (x, y) => Math.hypot(x - nx, y - ny) < R * .26]);
+  // 마이토콘드리아
+  const mts = st.ct === 'animal' ? [[.45, -.35], [.55, .3], [-.6, .4], [-.55, -.35], [.15, .5]] : [[-.4, .5], [.2, -.55], [.5, .55]];
+  mts.forEach(([u, v]) => { const x = cx + u * R, y = cy + v * R * .8; g.fillStyle = hl('mito') ? C.hot : '#e0731a'; g.beginPath(); g.ellipse(x, y, 15, 7, .6, 0, TAU); g.fill(); g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1; g.beginPath(); g.moveTo(x - 10, y - 4); g.lineTo(x + 10, y + 4); g.stroke(); });
+  hits.unshift(['mito', (x, y) => mts.some(([u, v]) => Math.hypot(x - (cx + u * R), y - (cy + v * R * .8)) < 15)]);
+  const ORDER = ['nucleus', 'mito', 'chloro', 'membrane', 'wall', 'cyto'];   // 겹치는 곳은 작은 소기관을 먼저 고른다
+  hits.sort((a, b) => ORDER.indexOf(a[0]) - ORDER.indexOf(b[0]));
+  label(g, '세포 소기관을 눌러 보세요', 12, 16, {align: 'left', size: 12, color: C.muted});
+  if (st.pick) label(g, ORG[st.pick][0], S.w - 14, 16, {align: 'right', weight: 700, color: C.hot});
+}
+const SPECIAL = [
+  {n:'적혈구', f:'가운데가 오목한 원반 모양으로, 산소를 운반한다.', draw:(g, x, y, s) => { g.fillStyle = '#d2412f'; g.beginPath(); g.ellipse(x, y, s, s * .9, 0, 0, TAU); g.fill(); g.fillStyle = '#a5281f'; g.beginPath(); g.ellipse(x, y, s * .45, s * .4, 0, 0, TAU); g.fill(); }},
+  {n:'신경 세포', f:'길게 뻗은 가지가 있어 먼 곳까지 신호를 전달한다.', draw:(g, x, y, s) => { g.strokeStyle = '#7a4fb0'; g.lineWidth = 3; g.beginPath(); g.moveTo(x - s * .4, y); g.lineTo(x + s * 2, y); g.stroke(); for (let k = 0; k < 6; k++) { g.beginPath(); g.moveTo(x - s * .3, y); g.lineTo(x - s * .3 + Math.cos(k) * s * .9, y + Math.sin(k * 1.7) * s * .8); g.stroke(); } g.fillStyle = '#7a4fb0'; g.beginPath(); g.arc(x - s * .3, y, s * .35, 0, TAU); g.fill(); }},
+  {n:'근육 세포', f:'길쭉한 모양으로, 늘어나고 줄어들어 몸을 움직인다.', draw:(g, x, y, s) => { g.fillStyle = '#e88a7a'; g.beginPath(); g.ellipse(x + s * .5, y, s * 1.6, s * .3, 0, 0, TAU); g.fill(); g.fillStyle = '#7a4fb0'; g.beginPath(); g.arc(x + s * .5, y, 5, 0, TAU); g.fill(); }},
+  {n:'상피 세포', f:'납작하고 빽빽하게 붙어 있어 몸의 표면을 덮고 보호한다.', draw:(g, x, y, s) => { g.strokeStyle = '#c4653a'; g.lineWidth = 1.5; for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) { g.strokeRect(x - s + i * s * .55, y - s * .3 + j * s * .35, s * .55, s * .35); } }},
+  {n:'공변세포', f:'식물 잎 표면에 두 개가 짝을 이루어 기공을 열고 닫는다.', draw:(g, x, y, s) => { g.fillStyle = '#3c9a3c'; g.beginPath(); g.ellipse(x - s * .25, y, s * .3, s * .8, 0, 0, TAU); g.fill(); g.beginPath(); g.ellipse(x + s * .25, y, s * .3, s * .8, 0, 0, TAU); g.fill(); }},
+  {n:'뿌리털 세포', f:'가늘고 긴 털 모양이라 흙과 닿는 면적이 넓어 물을 잘 흡수한다.', draw:(g, x, y, s) => { g.fillStyle = 'rgba(190,150,90,.8)'; g.fillRect(x - s * .6, y - s * .4, s * .7, s * .8); g.fillRect(x + s * .1, y - s * .08, s * 1.6, s * .16); }}
+];
+function drawSpecial(){
+  const g = S.g, cols = 3, cw = S.w / cols, rh = S.h / 2;
+  SPECIAL.forEach((c, i) => {
+    const x = (i % cols) * cw + cw / 2 - 20, y = Math.floor(i / cols) * rh + rh * .42, s = Math.min(cw, rh) * .22;
+    c.draw(g, x, y, s); label(g, c.n, x + 20, y + rh * .4, {weight: 700, color: st.pick === 'sp' + i ? C.hot : C.ink});
+    hits.push(['sp' + i, (px, py) => px > (i % cols) * cw && px < (i % cols + 1) * cw && py > Math.floor(i / cols) * rh && py < (Math.floor(i / cols) + 1) * rh]);
+  });
+}
+$('scene').addEventListener('click', e => {
+  if (st.mode !== 'cell') return;
+  const r = $('scene').getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  const h = hits.find(([k, f]) => f(x, y)); st.pick = h ? h[0] : null;
+});
+
+/* ===== 2. 구성 단계 ===== */
+const LV = {animal: ['세포', '조직', '기관', '기관계', '개체'], plant: ['세포', '조직', '조직계', '기관', '개체']};
+const LVX = {
+  animal: ['근육 세포 하나', '근육 조직: 모양과 기능이 비슷한 세포의 모임', '위: 여러 조직이 모여 특정 기능을 하는 기관', '소화계: 관련된 기관들(입, 식도, 위, 작은창자 등)의 모임', '사람: 여러 기관계가 모여 이루어진 하나의 생물'],
+  plant: ['표피 세포 하나', '표피 조직: 비슷한 세포의 모임', '표피 조직계: 여러 조직이 모여 일정한 기능을 하는 단계 (식물에만 있음)', '잎: 광합성을 하는 영양 기관', '식물 한 그루: 여러 기관이 모인 개체']
+};
+function drawLevel(){
+  const g = S.g, cx = S.w / 2, cy = S.h / 2, s = Math.min(S.w, S.h) * 0.36, lv = st.lv, plant = st.org === 'plant';
+  const col = plant ? '#3c9a3c' : '#d27a6a';
+  if (lv === 0) { g.fillStyle = col; g.globalAlpha = .4; g.beginPath(); g.ellipse(cx, cy, s * .9, s * .35, 0, 0, TAU); g.fill(); g.globalAlpha = 1; g.strokeStyle = C.ink; g.lineWidth = 2; g.stroke(); g.fillStyle = '#7a4fb0'; g.beginPath(); g.arc(cx, cy, s * .12, 0, TAU); g.fill(); }
+  else if (lv === 1) { for (let i = 0; i < 5; i++) for (let j = 0; j < 6; j++) { const x = cx - s + i * s * .5 + (j % 2) * s * .25, y = cy - s * .8 + j * s * .3; g.fillStyle = col; g.globalAlpha = .4; g.beginPath(); g.ellipse(x, y, s * .24, s * .1, 0, 0, TAU); g.fill(); g.globalAlpha = 1; g.strokeStyle = C.ink; g.lineWidth = 1; g.stroke(); } }
+  else if (lv === 2) {
+    if (plant) { g.fillStyle = 'rgba(60,154,60,.3)'; g.fillRect(cx - s, cy - s * .5, s * 2, s); g.strokeStyle = C.ink; g.strokeRect(cx - s, cy - s * .5, s * 2, s); label(g, '표피 조직계', cx, cy - s * .6 - 10, {weight: 600}); g.fillStyle = 'rgba(60,154,60,.6)'; g.fillRect(cx - s, cy - s * .5, s * 2, 12); g.fillRect(cx - s, cy + s * .5 - 12, s * 2, 12); label(g, '관다발 조직계 · 기본 조직계', cx, cy, {size: 12, color: C.muted}); }
+    else { g.fillStyle = col; g.beginPath(); g.moveTo(cx - s * .6, cy - s * .7); g.quadraticCurveTo(cx + s * 1.1, cy - s * .9, cx + s * .5, cy + s * .2); g.quadraticCurveTo(cx, cy + s * .8, cx - s * .5, cy + s * .3); g.closePath(); g.fill(); label(g, '위', cx, cy, {weight: 700, color: C.surface, size: 16}); }
+  } else if (lv === 3) {
+    if (plant) { g.fillStyle = '#3c9a3c'; g.beginPath(); g.ellipse(cx, cy, s, s * .5, -.3, 0, TAU); g.fill(); g.strokeStyle = '#2b6b2b'; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - s, cy + s * .3); g.lineTo(cx + s, cy - s * .3); g.stroke(); label(g, '잎', cx, cy + s * .7, {weight: 700}); }
+    else { g.strokeStyle = col; g.lineWidth = 14; g.lineCap = 'round'; g.beginPath(); g.moveTo(cx, cy - s); g.lineTo(cx, cy - s * .4); g.quadraticCurveTo(cx + s * .6, cy - s * .5, cx + s * .2, cy); g.bezierCurveTo(cx - s * .6, cy + s * .2, cx + s * .6, cy + s * .4, cx - s * .2, cy + s * .6); g.lineTo(cx, cy + s); g.stroke(); g.lineCap = 'butt'; label(g, '소화계', cx + s * .7, cy + s * .8, {weight: 700}); }
+  } else {
+    if (plant) { g.strokeStyle = '#6b4a2b'; g.lineWidth = 8; g.beginPath(); g.moveTo(cx, cy + s); g.lineTo(cx, cy - s * .2); g.stroke(); g.fillStyle = '#3c9a3c'; [[-.4, -.3], [.4, -.4], [0, -.7], [-.3, .1], [.35, 0]].forEach(([u, v]) => { g.beginPath(); g.ellipse(cx + u * s, cy + v * s, s * .3, s * .15, u, 0, TAU); g.fill(); }); g.fillStyle = '#d27aa8'; g.beginPath(); g.arc(cx, cy - s * .95, 10, 0, TAU); g.fill(); }
+    else { g.fillStyle = col; g.beginPath(); g.arc(cx, cy - s * .75, s * .2, 0, TAU); g.fill(); g.lineWidth = 16; g.strokeStyle = col; g.lineCap = 'round'; g.beginPath(); g.moveTo(cx, cy - s * .5); g.lineTo(cx, cy + s * .3); g.moveTo(cx - s * .45, cy - s * .2); g.lineTo(cx + s * .45, cy - s * .2); g.moveTo(cx, cy + s * .3); g.lineTo(cx - s * .3, cy + s); g.moveTo(cx, cy + s * .3); g.lineTo(cx + s * .3, cy + s); g.stroke(); g.lineCap = 'butt'; }
+  }
+  // 단계 표시줄
+  const L = LV[st.org], y = S.h - 22;
+  L.forEach((n, i) => { const x = S.w * (0.12 + i * 0.19); g.fillStyle = i === lv ? C.bio : C.line; g.beginPath(); g.arc(x, y, 7, 0, TAU); g.fill(); label(g, n, x, y - 16, {size: 11, weight: i === lv ? 700 : 400, color: i === lv ? C.bio : C.muted}); if (i < L.length - 1) { g.strokeStyle = C.line; g.lineWidth = 1; g.beginPath(); g.moveTo(x + 9, y); g.lineTo(x + S.w * .19 - 9, y); g.stroke(); } });
+}
+
+/* ===== 3. 변이와 생물다양성: 나무껍질 색과 나방 ===== */
+function resetVary(){
+  st.moths = []; for (let i = 0; i < 80; i++) st.moths.push({c: Math.random(), x: Math.random(), y: Math.random()});
+  st.gens = [hist()];
+}
+function hist(){ const h = new Array(5).fill(0); st.moths.forEach(m => h[Math.min(4, Math.floor(m.c * 5))]++); return h; }
+function nextGen(){
+  const bg = st.bg === 'dark' ? 0.85 : 0.15;
+  // 새가 눈에 잘 띄는 나방을 더 많이 잡아먹는다
+  const survivors = st.moths.filter(m => Math.random() > Math.min(0.85, Math.abs(m.c - bg) * 0.95));
+  const pool = survivors.length ? survivors : st.moths;
+  const kids = []; for (let i = 0; i < 80; i++) { const p = pool[Math.floor(Math.random() * pool.length)]; kids.push({c: Math.min(1, Math.max(0, p.c + (Math.random() - .5) * 0.18)), x: Math.random(), y: Math.random()}); }
+  st.moths = kids; st.gens.push(hist()); if (st.gens.length > 12) st.gens.shift();
+}
+const mothColor = c => `hsl(30 ${20 + c * 10}% ${82 - c * 64}%)`;
+function drawVary(){
+  const g = S.g; g.fillStyle = st.bg === 'dark' ? '#3b3530' : '#d8d2c4'; g.fillRect(0, 0, S.w, S.h);
+  for (let i = 0; i < 30; i++) { g.strokeStyle = st.bg === 'dark' ? 'rgba(0,0,0,.25)' : 'rgba(120,110,90,.25)'; g.lineWidth = 3; g.beginPath(); g.moveTo((i * 73) % S.w, 0); g.lineTo((i * 73 + 40) % S.w, S.h); g.stroke(); }
+  st.moths.forEach(m => { const x = 20 + m.x * (S.w - 40), y = 20 + m.y * (S.h - 60); g.fillStyle = mothColor(m.c); g.beginPath(); g.ellipse(x - 7, y, 9, 6, -.4, 0, TAU); g.ellipse(x + 7, y, 9, 6, .4, 0, TAU); g.fill(); g.fillStyle = 'rgba(0,0,0,.4)'; g.fillRect(x - 1, y - 6, 2, 12); });
+  label(g, `${st.gens.length - 1}세대`, 12, S.h - 14, {align: 'left', weight: 700, color: st.bg === 'dark' ? '#fff' : C.ink});
+}
+
+/* ===== 4. 종과 5계 ===== */
+const KD = [
+  {id:'mon', n:'원핵생물계', d:'핵막이 없는 단세포 생물'},
+  {id:'pro', n:'원생생물계', d:'핵막이 있고, 균계·식물계·동물계에 속하지 않는 생물'},
+  {id:'fun', n:'균계', d:'핵막·세포벽이 있고 광합성을 하지 않으며 대부분 균사로 이루어짐'},
+  {id:'pla', n:'식물계', d:'광합성을 하는 다세포 생물, 세포벽이 있음'},
+  {id:'ani', n:'동물계', d:'다세포 생물, 세포벽이 없고 다른 생물을 먹어 양분을 얻음'}
+];
+const ORGS = [['대장균', 'mon'], ['젖산균', 'mon'], ['남세균', 'mon'], ['짚신벌레', 'pro'], ['아메바', 'pro'], ['미역', 'pro'], ['다시마', 'pro'], ['표고버섯', 'fun'], ['푸른곰팡이', 'fun'], ['효모', 'fun'],
+  ['소나무', 'pla'], ['고사리', 'pla'], ['우산이끼', 'pla'], ['민들레', 'pla'], ['고양이', 'ani'], ['개구리', 'ani'], ['해파리', 'ani'], ['나비', 'ani']];
+function renderClassify(){
+  const left = ORGS.filter(([n]) => !st.kingdomOf[n]);
+  $('hscene').innerHTML = `<div><b>생물을 고른 다음, 알맞은 계를 누르세요.</b> <span class="note">(${ORGS.length - left.length} / ${ORGS.length})</span></div>
+    <div class="cards">${ORGS.map(([n]) => `<button type="button" class="card ${st.kingdomOf[n] ? 'ok' : ''}" data-o="${n}" aria-pressed="${st.sel === n}" ${st.kingdomOf[n] ? 'disabled' : ''}>${n}</button>`).join('')}</div>
+    <div class="flash" id="flash"></div>
+    <div class="kingdoms">${KD.map(k => `<button type="button" class="kingdom" data-k="${k.id}"><b>${k.n}</b><small>${k.d}</small><div class="in">${ORGS.filter(([n]) => st.kingdomOf[n] === k.id).map(([n]) => `<span>${n}</span>`).join('')}</div></button>`).join('')}</div>
+    <div class="cross" aria-label="종의 개념">
+      <div class="box">말 ♀</div><div>×</div><div class="box">당나귀 ♂</div><div>→</div><div class="box">노새<br><small>생식 능력 없음</small></div>
+    </div>`;
+  $('hscene').querySelectorAll('.card').forEach(b => b.onclick = () => { st.sel = b.dataset.o; renderClassify(); });
+  $('hscene').querySelectorAll('.kingdom').forEach(b => b.onclick = () => {
+    if (!st.sel) { $('flash').textContent = '먼저 위에서 생물을 하나 고르세요.'; return; }
+    const ans = ORGS.find(([n]) => n === st.sel)[1];
+    if (ans === b.dataset.k) { st.kingdomOf[st.sel] = ans; st.sel = null; renderClassify(); $('flash').textContent = '맞았어요!'; }
+    else $('flash').textContent = `${st.sel}은(는) ${KD.find(k => k.id === b.dataset.k).n}이 아니에요. 핵막, 세포벽, 광합성 여부를 다시 생각해 보세요.`;
+  });
+}
+
+/* ===== 5. 생물다양성 보전 ===== */
+function resetEco(){ st.eco = {sp: 40, hab: 100}; st.ecoHist = [{t: 0, sp: 40}]; st.t = 0; }
+function stepEco(dt){
+  const e = st.eco, th = [1, 2, 3, 4].map(i => $('th' + i).checked), sv = [1, 2, 3].map(i => $('sv' + i).checked);
+  let loss = 0, gain = 0;
+  if (th[0]) loss += sv[0] ? 0.15 : 0.6; if (th[0] && !sv[1]) loss += 0.25;
+  if (th[1]) loss += sv[2] ? 0.08 : 0.5; if (th[2]) loss += sv[0] ? 0.1 : 0.35; if (th[3]) loss += 0.35;
+  if (!th.some(Boolean)) gain = (40 - e.sp) * 0.05;
+  if (sv[0] && sv[1]) gain += (40 - e.sp) * 0.02;
+  e.sp = Math.max(3, Math.min(40, e.sp + (gain - loss) * dt));
+  st.t += dt; if (st.t - st.ecoHist[st.ecoHist.length - 1].t > 0.4) { st.ecoHist.push({t: st.t, sp: e.sp}); if (st.ecoHist.length > 300) st.ecoHist.shift(); }
+}
+function drawProtect(){
+  const g = S.g, e = st.eco, n = Math.round(e.sp);
+  g.fillStyle = '#e7f0e0'; g.fillRect(0, 0, S.w, S.h);
+  const th = [1, 2, 3, 4].map(i => $('th' + i).checked), sv = [1, 2, 3].map(i => $('sv' + i).checked);
+  if (th[0]) { g.fillStyle = '#cdbb9a'; g.fillRect(S.w * .45, 0, S.w * .1, S.h); label(g, '도로·개발', S.w / 2, 14, {size: 11}); if (sv[1]) { g.fillStyle = '#7fb26a'; g.fillRect(S.w * .45, S.h * .4, S.w * .1, S.h * .2); label(g, '생태 통로', S.w / 2, S.h / 2, {size: 11, color: '#fff'}); } }
+  if (th[3]) { g.fillStyle = 'rgba(120,100,60,.25)'; g.fillRect(0, S.h * .75, S.w, S.h * .25); }
+  if (sv[0]) { g.strokeStyle = C.bio; g.setLineDash([6, 4]); g.lineWidth = 2; g.strokeRect(10, 10, S.w * .4, S.h - 20); g.setLineDash([]); label(g, '보호 구역', 16, 24, {align: 'left', size: 11, color: C.bio}); }
+  const shapes = ['#2f8a4e', '#d27a6a', '#e0b030', '#4f6fd8', '#7a4fb0', '#c4653a', '#3fa6a6', '#8a6a3a'];
+  for (let i = 0; i < 40; i++) {
+    const x = 30 + ((i * 61) % 10) * (S.w - 60) / 9, y = 40 + Math.floor(i / 10) * (S.h - 80) / 3.6;
+    g.globalAlpha = i < n ? 1 : 0.12; g.fillStyle = shapes[i % 8]; g.beginPath();
+    if (i % 3 === 0) g.arc(x, y, 9, 0, TAU); else if (i % 3 === 1) { g.moveTo(x, y - 10); g.lineTo(x + 9, y + 7); g.lineTo(x - 9, y + 7); } else g.rect(x - 8, y - 8, 16, 16);
+    g.fill(); g.globalAlpha = 1;
+  }
+  if (th[1]) label(g, '외래종 증가', S.w - 14, S.h - 14, {align: 'right', size: 11, color: C.hot});
+}
+
+/* ===== 그래프·표·설명 ===== */
+function drawGraph(){
+  const g = G.g;
+  if (st.mode === 'vary') {
+    const m = axes(G, {x: [0, 5, 1, '나방 색 (밝음 → 어두움, 5단계)'], y: [0, 80, 20, '개체 수']});
+    const h = st.gens[st.gens.length - 1], h0 = st.gens[0], bw = m.w / 5 * .35;
+    h0.forEach((v, i) => { g.fillStyle = C.line; g.fillRect(m.X(i + .5) - bw, m.Y(v), bw, m.Y(0) - m.Y(v)); });
+    h.forEach((v, i) => { g.fillStyle = mothColor(i / 4); g.strokeStyle = C.ink; g.fillRect(m.X(i + .5), m.Y(v), bw, m.Y(0) - m.Y(v)); g.strokeRect(m.X(i + .5), m.Y(v), bw, m.Y(0) - m.Y(v)); });
+    label(g, '회색: 처음 세대   색 막대: 지금 세대', m.L + m.w, m.T + 8, {align: 'right', size: 11, color: C.muted});
+  } else if (st.mode === 'protect') {
+    const tm = Math.max(30, Math.ceil(st.t / 10) * 10), m = axes(G, {x: [0, tm, tm / 5, '시간'], y: [0, 40, 10, '살아남은 생물 종 수']});
+    line(G, st.ecoHist.map(d => [d.t, d.sp]), m, C.bio);
+  } else if (st.mode === 'level') {
+    const m = axes(G, {x: [0, 4, 1, '구성 단계 (0 세포 → 4 개체)'], y: [0, 4, 1, '복잡한 정도']});
+    line(G, [[0, 0.5], [1, 1.2], [2, 2], [3, 3], [4, 4]], m, C.bio); g.fillStyle = C.hot; g.beginPath(); g.arc(m.X(st.lv), m.Y([0.5, 1.2, 2, 3, 4][st.lv]), 6, 0, TAU); g.fill();
+  } else if (st.mode === 'classify') {
+    const m = axes(G, {x: [0, 5, 5, ''], y: [0, 5, 1, '맞힌 생물 수']});
+    KD.forEach((k, i) => { const v = ORGS.filter(([n]) => st.kingdomOf[n] === k.id).length; g.fillStyle = C.bio; g.fillRect(m.X(i + .2), m.Y(v), m.w / 5 * .6, m.Y(0) - m.Y(v)); label(g, k.n, m.X(i + .5), m.T + m.h + 12, {size: 10}); });
+  } else {
+    G.g.fillStyle = C.surface; G.g.fillRect(0, 0, G.w, G.h);
+    label(g, st.pick && ORG[st.pick] ? `${ORG[st.pick][0]}: ${ORG[st.pick][1]}` : st.pick ? SPECIAL[+st.pick.slice(2)].n + ': ' + SPECIAL[+st.pick.slice(2)].f : '세포 소기관이나 세포를 누르면 여기에 설명이 나옵니다.', G.w / 2, G.h / 2, {size: 13});
+  }
+}
+function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>';
+  $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
+function table(){
+  if (st.mode === 'cell') setTable('동물 세포와 식물 세포', ['구조', '동물 세포', '식물 세포'], [['핵', '○', '○'], ['세포막', '○', '○'], ['마이토콘드리아', '○', '○'], ['세포벽', '×', '○'], ['엽록체', '×', '○']]);
+  else if (st.mode === 'level') setTable('동물과 식물의 구성 단계', ['동물', '식물'], [['세포', '세포'], ['조직', '조직'], ['기관', '조직계'], ['기관계', '기관'], ['개체', '개체']]);
+  else if (st.mode === 'vary') setTable('세대별 나방 수', ['세대', '밝음', '', '중간', '', '어두움'], st.gens.map((h, i) => [i, ...h]));
+  else if (st.mode === 'classify') setTable('5계 분류 기준', ['계', '핵막', '세포벽', '광합성'], [['원핵생물계', '없음', '있음', '일부'], ['원생생물계', '있음', '일부', '일부'], ['균계', '있음', '있음', '안 함'], ['식물계', '있음', '있음', '함'], ['동물계', '있음', '없음', '안 함']]);
+  else setTable('생물다양성 보전 방법', ['수준', '방법'], [['개인', '일회용품 줄이기, 외래 생물 함부로 버리지 않기'], ['사회', '보호 구역 지정, 생태 통로 설치, 법률 제정'], ['국가·국제', '멸종 위기종 지정, 종자 은행, 국제 협약']]);
+}
+function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
+function ledger(){
+  let s = '', e = '', t = '';
+  if (st.mode === 'cell') {
+    s = stat('보고 있는 세포', {animal: '동물 세포', plant: '식물 세포', special: '여러 가지 세포'}[st.ct]) + stat('고른 부분', st.pick ? (ORG[st.pick] ? ORG[st.pick][0] : SPECIAL[+st.pick.slice(2)].n) : '-');
+    e = st.ct === 'special' ? '세포는 하는 일에 따라 <b>모양과 크기</b>가 다릅니다. 세포의 생김새를 보면 그 세포가 하는 일을 짐작할 수 있습니다.'
+      : '<b>세포</b>는 생물을 이루는 기본 단위이자 생명 활동이 일어나는 기본 단위입니다. 식물 세포에는 동물 세포에 없는 <b>세포벽</b>과 <b>엽록체</b>가 있습니다.';
+    t = st.pick ? (ORG[st.pick] ? ORG[st.pick][1] : SPECIAL[+st.pick.slice(2)].f) : '그림의 각 부분을 눌러 이름과 하는 일을 확인하세요.';
+  } else if (st.mode === 'level') {
+    s = stat('지금 단계', LV[st.org][st.lv]) + stat('생물', st.org === 'animal' ? '사람' : '식물');
+    e = `<b>${LV[st.org][st.lv]}</b>: ${LVX[st.org][st.lv]}`;
+    t = st.org === 'animal' ? '동물은 세포 → 조직 → 기관 → 기관계 → 개체로 구성됩니다.' : '식물은 세포 → 조직 → 조직계 → 기관 → 개체로 구성되며, 기관계 대신 조직계가 있습니다.';
+  } else if (st.mode === 'vary') {
+    const h = st.gens[st.gens.length - 1];
+    s = stat('세대', st.gens.length - 1) + stat('가장 많은 색', ['아주 밝음', '밝음', '중간', '어두움', '아주 어두움'][h.indexOf(Math.max(...h))]);
+    e = '같은 종이라도 개체마다 형질이 조금씩 다른 것을 <b>변이</b>라고 합니다. 환경에 잘 맞는 변이를 가진 개체가 더 많이 살아남아 자손을 남기면서, 환경에 따라 서로 다른 특징을 가진 생물 무리가 생겨 <b>생물다양성</b>이 커집니다.';
+    t = '[한 세대 진행]을 여러 번 누르고, 나무껍질 색을 바꾸어 다시 해 보세요. 변이가 없었다면 어떻게 되었을까요?';
+  } else if (st.mode === 'classify') {
+    const done = Object.keys(st.kingdomOf).length;
+    s = stat('분류한 생물', done, '/ ' + ORGS.length) + stat('남은 생물', ORGS.length - done);
+    e = '<b>종</b>: 자연 상태에서 짝짓기를 하여 <b>생식 능력이 있는 자손</b>을 낳을 수 있는 생물 무리. 생물은 핵막, 세포벽, 광합성, 몸의 구성 등을 기준으로 <b>5계</b>로 분류합니다.';
+    t = '분류 단계: 종 < 속 < 과 < 목 < 강 < 문 < 계. 미역과 다시마는 광합성을 하지만 뿌리·줄기·잎이 구분되지 않아 원생생물계에 속합니다.';
+  } else {
+    s = stat('살아남은 종', Math.round(st.eco.sp), '/ 40');
+    e = '<b>생물다양성</b>은 생태계 다양성, 종 다양성, 유전적 다양성을 모두 포함합니다. 생물다양성이 높을수록 생태계가 안정되고, 사람은 생물에게서 식량·의약품·옷감 등을 얻습니다.';
+    t = '위협 요인을 켜서 종 수의 변화를 보고, 보전 노력을 함께 켜 어떤 방법이 효과적인지 비교해 보세요.';
+  }
+  $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
+}
+
+/* ===== 조작 ===== */
+Kit.seg($('cellSeg'), 'ct', v => { st.ct = v; st.pick = null; })('animal');
+Kit.seg($('orgSeg'), 'org', v => { st.org = v; $('lvOut').textContent = LV[v][st.lv]; })('animal');
+$('lv').oninput = e => { st.lv = +e.target.value; $('lvOut').textContent = LV[st.org][st.lv]; };
+Kit.seg($('bgSeg'), 'bg', v => { st.bg = v; })('dark');
+$('gen').onclick = () => { nextGen(); table(); };
+$('resetVary').onclick = () => { resetVary(); table(); };
+$('resetCls').onclick = () => { st.kingdomOf = {}; st.sel = null; renderClassify(); };
+$('resetEco').onclick = resetEco;
+resetVary(); resetEco();
+let auto = 0;
+Kit.tabs(m => {
+  st.mode = m; table();
+  $('cbox').hidden = m === 'classify'; $('hscene').hidden = m !== 'classify';
+  if (m === 'classify') renderClassify();
+  $('gTitle').textContent = {cell: '설명', level: '구성 단계와 복잡한 정도', vary: '나방 색깔별 개체 수', classify: '계별로 분류한 생물', protect: '생물 종 수의 변화'}[m];
+  $('gSub').textContent = {cell: '', level: '단계가 올라갈수록 더 복잡한 구조와 기능을 가집니다.', vary: '나무껍질 색과 비슷한 나방이 새의 눈에 덜 띕니다.', classify: '', protect: '위협 요인과 보전 노력을 바꿔 보세요.'}[m];
+}, ['cell', 'level', 'vary', 'classify', 'protect']);
+Kit.loop(dt => { st.t += 0; if (st.mode === 'protect') stepEco(dt); if (st.mode === 'vary') { auto += dt; } }, () => {
+  S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h);
+  if (st.mode === 'cell') drawCell(); else if (st.mode === 'level') drawLevel(); else if (st.mode === 'vary') drawVary(); else if (st.mode === 'protect') drawProtect();
+  drawGraph(); ledger();
+}, $('play'));
+})();
+</script>
+</body>
+</html>
