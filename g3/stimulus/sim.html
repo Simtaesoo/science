@@ -98,7 +98,7 @@ function tag(g, txt, x, y, tx, ty, col){ g.strokeStyle = C.muted; g.lineWidth = 
 
 /* ===== 1. 눈 ===== */
 function drawEye(){
-  const g = S.g, cx = S.w * .58, cy = S.h * .48, R = Math.min(S.w * .26, S.h * .36);
+  const g = S.g, cx = S.w * .58, cy = S.h * .48, R = Math.min(S.w * .26, S.h * .36); if (R < 20) return;
   const near = 1 - st.objD / 100, lensW = 10 + near * 12; st.lens += (lensW - st.lens) * .1;
   const pupilR = 14 - st.light / 100 * 10; st.pupil += (pupilR - st.pupil) * .08;
   // 공막·맥락막·망막
