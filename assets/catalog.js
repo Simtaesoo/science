@@ -47,8 +47,8 @@ window.CATALOG = [
     {kind:'sim', title:'3차시 빛의 합성과 물체의 색', href:'g2/light/sim.html#color'}, {kind:'deck', title:'수업 슬라이드 · 3차시 빛의 합성과 물체의 색 (22쪽)', href:'g2/light/slides3.html'}, {kind:'sim', title:'4차시 파동과 소리 (소리 듣기)', href:'g2/light/sim.html#wave'}, {kind:'deck', title:'수업 슬라이드 · 4차시 파동과 소리 (22쪽)', href:'g2/light/slides4.html'},
     {kind:'app', title:'게임: 레이저 반사 퍼즐 (1~4모둠)', href:'g2/light/app-laser.html'}, {kind:'quiz', title:'퀴즈 배틀 · 골든벨 (10문항, 모둠 대결)', href:'quiz/bell.html?u=10'}, {kind:'ws', title:'학습지 1~4차시 (8쪽)', href:'g2/light/worksheet.html'} ]},
   { no:11, area:'chem', title:'물질의 구성', code:'9과11', items:[
-    {kind:'sim', title:'1차시 원소와 화합물 (분자 만들기·물의 전기 분해)', href:'g2/atom/sim.html#comp'}, {kind:'sim', title:'2차시 원자의 구조', href:'g2/atom/sim.html#atom'},
-    {kind:'sim', title:'3차시 주기율표와 성질이 비슷한 원소', href:'g2/atom/sim.html#table'}, {kind:'sim', title:'4차시 원자·분자·이온', href:'g2/atom/sim.html#ion'},
+    {kind:'sim', title:'1차시 원소와 화합물 (분자 만들기·물의 전기 분해)', href:'g2/atom/sim.html#comp'}, {kind:'deck', title:'수업 슬라이드 · 1차시 원소와 화합물 (24쪽)', href:'g2/atom/slides1.html'}, {kind:'sim', title:'2차시 원자의 구조', href:'g2/atom/sim.html#atom'}, {kind:'deck', title:'수업 슬라이드 · 2차시 원자의 구조 (23쪽)', href:'g2/atom/slides2.html'},
+    {kind:'sim', title:'3차시 주기율표와 성질이 비슷한 원소', href:'g2/atom/sim.html#table'}, {kind:'deck', title:'수업 슬라이드 · 3차시 주기율표 (22쪽)', href:'g2/atom/slides3.html'}, {kind:'sim', title:'4차시 원자·분자·이온', href:'g2/atom/sim.html#ion'}, {kind:'deck', title:'수업 슬라이드 · 4차시 원자, 분자, 이온 (22쪽)', href:'g2/atom/slides4.html'},
     {kind:'app', title:'게임: 분자 공방 (화학식·분자 모형·이온 만들기)', href:'g2/atom/app-molecule.html'}, {kind:'quiz', title:'퀴즈 배틀 · 골든벨 (10문항, 모둠 대결)', href:'quiz/bell.html?u=11'}, {kind:'ws', title:'학습지 1~4차시 (8쪽)', href:'g2/atom/worksheet.html'} ]},
   { no:12, area:'bio', title:'식물과 에너지', code:'9과12', items:[
     {kind:'sim', title:'1차시 광합성과 환경 요인 (실험 설계)', href:'g2/plant/sim.html#photo'}, {kind:'sim', title:'2차시 광합성과 호흡 (BTB 실험)', href:'g2/plant/sim.html#resp'},
