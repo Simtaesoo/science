@@ -29,8 +29,8 @@ window.CATALOG = [
     {kind:'sim', title:'1차시 압력과 기체의 압력', href:'g1/gas/sim.html#p'}, {kind:'deck', title:'수업 슬라이드 · 1차시 압력과 기체의 압력 (24쪽)', href:'g1/gas/slides1.html'}, {kind:'sim', title:'2차시 압력과 부피의 관계', href:'g1/gas/sim.html#pv'}, {kind:'deck', title:'수업 슬라이드 · 2차시 압력과 부피의 관계 (23쪽)', href:'g1/gas/slides2.html'},
     {kind:'sim', title:'3차시 온도와 부피의 관계', href:'g1/gas/sim.html#tv'}, {kind:'deck', title:'수업 슬라이드 · 3차시 온도와 부피의 관계 (24쪽)', href:'g1/gas/slides3.html'}, {kind:'app', title:'게임: 풍선 동굴 탐험 (온도·압력과 부피)', href:'g1/gas/app-balloon.html'}, {kind:'quiz', title:'퀴즈 배틀 · 골든벨 (10문항, 모둠 대결)', href:'quiz/bell.html?u=6'}, {kind:'ws', title:'학습지 1~3차시 (6쪽)', href:'g1/gas/worksheet.html'} ]},
   { no:7, area:'earth', title:'태양계', code:'9과07', items:[
-    {kind:'sim', title:'1차시 태양계 천체와 행성의 분류', href:'g1/solar/sim.html#planets'}, {kind:'sim', title:'2차시 태양 활동과 지구', href:'g1/solar/sim.html#sun'},
-    {kind:'sim', title:'3차시 지구의 자전과 공전 (일주·연주 운동)', href:'g1/solar/sim.html#rot'}, {kind:'sim', title:'4차시 달의 위상과 일식·월식', href:'g1/solar/sim.html#moon'},
+    {kind:'sim', title:'1차시 태양계 천체와 행성의 분류', href:'g1/solar/sim.html#planets'}, {kind:'deck', title:'수업 슬라이드 · 1차시 태양계 천체와 행성의 분류 (23쪽)', href:'g1/solar/slides1.html'}, {kind:'sim', title:'2차시 태양 활동과 지구', href:'g1/solar/sim.html#sun'}, {kind:'deck', title:'수업 슬라이드 · 2차시 태양 활동과 지구 (22쪽)', href:'g1/solar/slides2.html'},
+    {kind:'sim', title:'3차시 지구의 자전과 공전 (일주·연주 운동)', href:'g1/solar/sim.html#rot'}, {kind:'deck', title:'수업 슬라이드 · 3차시 지구의 자전과 공전 (22쪽)', href:'g1/solar/slides3.html'}, {kind:'sim', title:'4차시 달의 위상과 일식·월식', href:'g1/solar/sim.html#moon'}, {kind:'deck', title:'수업 슬라이드 · 4차시 달의 위상과 일식·월식 (24쪽)', href:'g1/solar/slides4.html'},
     {kind:'app', title:'게임: 달 모양 탐정 (달의 위상)', href:'g1/solar/app-moon.html'}, {kind:'quiz', title:'퀴즈 배틀 · 골든벨 (10문항, 모둠 대결)', href:'quiz/bell.html?u=7'}, {kind:'ws', title:'학습지 1~4차시 (8쪽)', href:'g1/solar/worksheet.html'} ]}
  ]},
  { id:'g2', grade:'2학년', book:'과학 2', units:[
