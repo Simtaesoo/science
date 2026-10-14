@@ -35,9 +35,9 @@ window.CATALOG = [
  ]},
  { id:'g2', grade:'2학년', book:'과학 2', units:[
   { no:8, area:'chem', title:'물질의 특성', code:'9과08', items:[
-    {kind:'sim', title:'1차시 물질의 특성과 밀도', href:'g2/matter/sim.html#dens'}, {kind:'sim', title:'2차시 용해도', href:'g2/matter/sim.html#sol'},
-    {kind:'sim', title:'3차시 녹는점과 끓는점', href:'g2/matter/sim.html#mp'}, {kind:'sim', title:'4차시 순물질과 혼합물', href:'g2/matter/sim.html#mix'},
-    {kind:'sim', title:'5차시 혼합물의 분리', href:'g2/matter/sim.html#sep'}, {kind:'app', title:'가상 실험: 미지 물질 탐정 (밀도·녹는점·끓는점·용해성)', href:'g2/matter/app-detective.html'}, {kind:'quiz', title:'퀴즈 배틀 · 골든벨 (10문항, 모둠 대결)', href:'quiz/bell.html?u=8'}, {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g2/matter/worksheet.html'} ]},
+    {kind:'sim', title:'1차시 물질의 특성과 밀도', href:'g2/matter/sim.html#dens'}, {kind:'deck', title:'수업 슬라이드 · 1차시 물질의 특성과 밀도 (23쪽)', href:'g2/matter/slides1.html'}, {kind:'sim', title:'2차시 용해도', href:'g2/matter/sim.html#sol'}, {kind:'deck', title:'수업 슬라이드 · 2차시 용해도 (24쪽)', href:'g2/matter/slides2.html'},
+    {kind:'sim', title:'3차시 녹는점과 끓는점', href:'g2/matter/sim.html#mp'}, {kind:'deck', title:'수업 슬라이드 · 3차시 녹는점과 끓는점 (23쪽)', href:'g2/matter/slides3.html'}, {kind:'sim', title:'4차시 순물질과 혼합물', href:'g2/matter/sim.html#mix'}, {kind:'deck', title:'수업 슬라이드 · 4차시 순물질과 혼합물 (23쪽)', href:'g2/matter/slides4.html'},
+    {kind:'sim', title:'5차시 혼합물의 분리', href:'g2/matter/sim.html#sep'}, {kind:'deck', title:'수업 슬라이드 · 5차시 혼합물의 분리 (22쪽)', href:'g2/matter/slides5.html'}, {kind:'app', title:'가상 실험: 미지 물질 탐정 (밀도·녹는점·끓는점·용해성)', href:'g2/matter/app-detective.html'}, {kind:'quiz', title:'퀴즈 배틀 · 골든벨 (10문항, 모둠 대결)', href:'quiz/bell.html?u=8'}, {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g2/matter/worksheet.html'} ]},
   { no:9, area:'earth', title:'지권의 변화', code:'9과09', items:[
     {kind:'sim', title:'1차시 지구계와 지권의 층상 구조', href:'g2/earth/sim.html#layer'}, {kind:'sim', title:'2차시 광물의 특성과 활용', href:'g2/earth/sim.html#mineral'},
     {kind:'sim', title:'3차시 암석의 분류와 순환', href:'g2/earth/sim.html#rock'}, {kind:'sim', title:'4차시 풍화 작용과 토양', href:'g2/earth/sim.html#weather'},
