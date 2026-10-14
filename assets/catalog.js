@@ -43,8 +43,8 @@ window.CATALOG = [
     {kind:'sim', title:'3차시 암석의 분류와 순환', href:'g2/earth/sim.html#rock'}, {kind:'deck', title:'수업 슬라이드 · 3차시 암석의 분류와 순환 (23쪽)', href:'g2/earth/slides3.html'}, {kind:'sim', title:'4차시 풍화 작용과 토양', href:'g2/earth/sim.html#weather'}, {kind:'deck', title:'수업 슬라이드 · 4차시 풍화 작용과 토양 (22쪽)', href:'g2/earth/slides4.html'},
     {kind:'sim', title:'5차시 대륙 이동과 판의 경계', href:'g2/earth/sim.html#plate'}, {kind:'deck', title:'수업 슬라이드 · 5차시 대륙 이동과 판의 경계 (23쪽)', href:'g2/earth/slides5.html'}, {kind:'app', title:'게임: 광물 감정소 (조흔색·굳기·염산·자성)', href:'g2/earth/app-mineral.html'}, {kind:'quiz', title:'퀴즈 배틀 · 골든벨 (10문항, 모둠 대결)', href:'quiz/bell.html?u=9'}, {kind:'ws', title:'학습지 1~5차시 (10쪽)', href:'g2/earth/worksheet.html'} ]},
   { no:10, area:'phy', title:'빛과 파동', code:'9과10', items:[
-    {kind:'sim', title:'1차시 빛의 반사와 굴절', href:'g2/light/sim.html#refl'}, {kind:'sim', title:'2차시 거울과 렌즈에 의한 상', href:'g2/light/sim.html#image'},
-    {kind:'sim', title:'3차시 빛의 합성과 물체의 색', href:'g2/light/sim.html#color'}, {kind:'sim', title:'4차시 파동과 소리 (소리 듣기)', href:'g2/light/sim.html#wave'},
+    {kind:'sim', title:'1차시 빛의 반사와 굴절', href:'g2/light/sim.html#refl'}, {kind:'deck', title:'수업 슬라이드 · 1차시 빛의 반사와 굴절 (26쪽)', href:'g2/light/slides1.html'}, {kind:'sim', title:'2차시 거울과 렌즈에 의한 상', href:'g2/light/sim.html#image'}, {kind:'deck', title:'수업 슬라이드 · 2차시 거울과 렌즈에 의한 상 (22쪽)', href:'g2/light/slides2.html'},
+    {kind:'sim', title:'3차시 빛의 합성과 물체의 색', href:'g2/light/sim.html#color'}, {kind:'deck', title:'수업 슬라이드 · 3차시 빛의 합성과 물체의 색 (22쪽)', href:'g2/light/slides3.html'}, {kind:'sim', title:'4차시 파동과 소리 (소리 듣기)', href:'g2/light/sim.html#wave'}, {kind:'deck', title:'수업 슬라이드 · 4차시 파동과 소리 (22쪽)', href:'g2/light/slides4.html'},
     {kind:'app', title:'게임: 레이저 반사 퍼즐 (1~4모둠)', href:'g2/light/app-laser.html'}, {kind:'quiz', title:'퀴즈 배틀 · 골든벨 (10문항, 모둠 대결)', href:'quiz/bell.html?u=10'}, {kind:'ws', title:'학습지 1~4차시 (8쪽)', href:'g2/light/worksheet.html'} ]},
   { no:11, area:'chem', title:'물질의 구성', code:'9과11', items:[
     {kind:'sim', title:'1차시 원소와 화합물 (분자 만들기·물의 전기 분해)', href:'g2/atom/sim.html#comp'}, {kind:'sim', title:'2차시 원자의 구조', href:'g2/atom/sim.html#atom'},
