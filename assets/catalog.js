@@ -117,11 +117,11 @@ window.addEventListener('DOMContentLoaded', () => {
       crumbs.map(c => `<span class="sep">›</span><span>${c}</span>`).join('') +
       `<span class="spacer"></span>` + (bar.dataset.ws ? `<a class="btn" href="${bar.dataset.ws}">학습지</a>` : '') +
       (bar.dataset.sim ? `<a class="btn" href="${bar.dataset.sim}">시뮬레이션</a>` : '') +
-      (window.IS_TEACHER === true ? `<a class="who" href="/teacher" title="교사 모드 관리">교사 모드</a>` : '');
+      (window.ROLE === 'teacher' ? `<a class="who" href="/teacher" title="교사 모드 관리">교사 모드</a>` : '');
   }
   const ft = document.querySelector('[data-footer]');
   if (ft) ft.innerHTML = `${SITE.name} · ${SITE.curriculum} 기준${SITE.author ? ' · 제작 ' + SITE.author : ''}` + (ft.dataset.extra ? ' · ' + ft.dataset.extra : '') + (SITE.copyright ? `<br>${SITE.copyright}` : '') +
-    (window.IS_TEACHER === false ? ` · <a href="/teacher?next=${encodeURIComponent(location.pathname + location.search)}">교사 로그인</a>` : window.IS_TEACHER === true ? ` · <a href="/teacher/logout">교사 모드 끝내기</a>` : '');
+    (window.ROLE === 'student' ? ` · <a href="/board?next=${encodeURIComponent(location.pathname + location.search)}">칠판 수업 시작</a> · <a href="/teacher?next=${encodeURIComponent(location.pathname + location.search)}">교사 로그인</a>` : window.ROLE === 'teacher' ? ` · <a href="/teacher/logout">교사 모드 끝내기</a>` : '');
   // 앱 설치·오프라인용 서비스 워커
   if (document.body.dataset.root && 'serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register(root + 'sw.js').catch(() => {});
 });

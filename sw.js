@@ -2,7 +2,7 @@
    - 우리 사이트 파일: 인터넷이 되면 항상 최신 파일을 받고(받은 것은 저장), 끊겼을 때만 저장본을 씁니다.
      그래서 GitHub에 자료를 올리면 앱에도 바로 반영됩니다. 이 파일을 고칠 필요가 없습니다.
    - 글꼴·QR 라이브러리 같은 외부 파일: 저장본을 먼저 쓰고 뒤에서 새로 받아 둡니다. */
-const CACHE = 'science-v4';
+const CACHE = 'science-v5';
 // 주소 정리(…/a.html → …/a)로 돌아온 응답은 그대로 저장하면 오프라인에서 열리지 않으므로 새 응답으로 감싸 저장한다
 const plain = async res => res.redirected ? new Response(await res.blob(), {status: res.status, statusText: res.statusText, headers: res.headers}) : res;
 const CORE = [
@@ -27,13 +27,14 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (!url.protocol.startsWith('http')) return;
-  if (url.pathname.startsWith('/teacher')) return;   // 교사 로그인 화면은 저장하지 않음
+  if (/^\/(teacher|board|pair)/.test(url.pathname)) return;   // 로그인·칠판 화면은 저장하지 않음
 
   if (url.origin === location.origin) {
     // 최신 우선, 끊기면 저장본
     e.respondWith(
       fetch(req).then(res => {
-        if (res.ok && !(res.url || '').includes('/teacher')) { const copy = res.clone(); plain(copy).then(r => caches.open(CACHE).then(c => c.put(req, r))); }
+        if (res.ok && !(res.url || '').includes('/teacher') && (res.headers.get('x-sci-role') || 'student') === 'student') {   // 교사·칠판 화면(정답 포함)은 저장하지 않음
+          const copy = res.clone(); plain(copy).then(r => caches.open(CACHE).then(c => c.put(req, r))); }
         return res;
       }).catch(async () => (await caches.match(req))
         || (await caches.match(req, {ignoreSearch: true}))

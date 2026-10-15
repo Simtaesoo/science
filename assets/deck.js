@@ -101,7 +101,7 @@
   const act = {prev, next, ov: () => ov.classList.toggle('on'), notes: () => notes.classList.toggle('on'), fs: () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(), print: () => window.print()};
   bar.querySelectorAll('[data-a]').forEach(b => b.onclick = () => act[b.dataset.a]());
   // 교사: 이 슬라이드를 학생에게 공개/비공개
-  if (window.IS_TEACHER === true) {
+  if (window.ROLE === 'teacher') {
     const key = location.pathname.replace(/\.html$/, '');
     const pub = document.createElement('button'); pub.type = 'button';
     const show = on => { pub.setAttribute('aria-pressed', String(on)); pub.textContent = on ? '학생 공개 중' : '학생 비공개'; pub.style.borderColor = on ? '#6cc48a' : ''; pub.style.color = on ? '#6cc48a' : ''; };

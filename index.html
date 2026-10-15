@@ -19,6 +19,8 @@
 <style>
 /* 메인 화면: 앱 막대 → 검색 → 학년 → 단원 카드 */
 .appbar .spacer{flex:1}
+.who-box{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:480px){.who-box .btn.primary{display:none}}
 .intro{display:flex;flex-direction:column;gap:12px;padding-top:6px}
 .intro h1{font-size:clamp(26px,4.4vw,40px);letter-spacing:-.02em;line-height:1.15}
 .intro p{margin:0;color:var(--muted);max-width:52ch}
@@ -88,7 +90,7 @@ mark{background:color-mix(in srgb,var(--warn) 35%,transparent);color:inherit;bor
   <nav class="topbar appbar" aria-label="상단">
     <a class="brand" href="index.html"><img src="icons/icon-192.png" alt=""><span id="siteName">중·고 과학 실험실</span></a>
     <span class="spacer"></span>
-    <span id="who"></span>
+    <span id="who" class="who-box"></span>
   </nav>
 
   <section class="intro">
@@ -120,7 +122,8 @@ mark{background:color-mix(in srgb,var(--warn) 35%,transparent);color:inherit;bor
   const T = window.IS_TEACHER;   // true: 교사, false: 학생, undefined: 잠금 서버 없음
   document.title = SITE.name; $('siteName').textContent = SITE.name;
   $('curr').textContent = `${SITE.curriculum} 중학교 과학, 고등학교 통합과학·물리. 단원마다 시뮬레이션, 수업 슬라이드, 게임, 퀴즈, 학습지가 있어요.`;
-  $('who').innerHTML = T === true ? '<a class="who" href="/teacher">교사 모드</a>' : T === false ? '<a class="btn" href="/teacher?next=/">교사 로그인</a>' : '';
+  const R = window.ROLE;
+  $('who').innerHTML = R === 'teacher' ? '<a class="who" href="/teacher">교사 모드</a>' : R === 'student' ? '<a class="btn primary" href="/board?next=/">칠판 수업 시작</a><a class="btn" href="/teacher?next=/">교사 로그인</a>' : '';
   $('tools').innerHTML = `<a href="tools/class.html"><span class="ic">⏱</span><span><b>수업 진행 도구${T === false ? '<span class="lock">교사</span>' : ''}</b><span class="d">타이머, 발표자 뽑기, 모둠 편성</span></span></a>`;
 
   // 슬라이드: 교사에게는 전부 + '학생 공개' 스위치, 학생에게는 선생님이 공개한 것만
@@ -172,7 +175,7 @@ mark{background:color-mix(in srgb,var(--warn) 35%,transparent);color:inherit;bor
       const acts = [
         ...L.sim.map((s, k) => link(s, 'act sim', k ? '시뮬레이션 ' + (k + 1) : '시뮬레이션')),
         ...L.deck.filter(canSee).map(d => { const p = d.title.match(/\((\d+)쪽\)/); const a = link(d, 'act', '슬라이드' + (L.deck.length > 1 ? ' ' + (range(d.title) || [''])[0] + '차시' : '') + (p ? ' ' + p[1] + '쪽' : ''));
-          if (T !== true || !d.href) return a;
+          if (R !== 'teacher' || !d.href) return a;
           const on = OPEN.has(skey(d.href));
           return a + `<button type="button" class="pub" data-slide="${skey(d.href)}" aria-pressed="${on}" title="학생에게 이 슬라이드 ${on ? '숨기기' : '보여 주기'}">${on ? '학생 공개 중' : '비공개'}</button>`; })
       ].join('');
