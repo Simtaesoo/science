@@ -2,7 +2,8 @@
    area: phy(물리) chem(화학) bio(생명) earth(지구) gen(통합) */
 window.SITE = {
   name: '중·고 과학 실험실',
-  author: '',            // 예: '○○중 홍길동' — 채우면 모든 페이지 아래에 표시됩니다
+  author: '심태수',       // 모든 페이지 아래에 표시됩니다
+  copyright: '© 2026 심태수. 무단 복제·재배포 금지',  // 저작권 문구 (비우면 표시 안 함)
   curriculum: '2022 개정 교육과정'
 };
 
@@ -118,5 +119,7 @@ window.addEventListener('DOMContentLoaded', () => {
       (bar.dataset.sim ? `<a class="btn" href="${bar.dataset.sim}">시뮬레이션</a>` : '');
   }
   const ft = document.querySelector('[data-footer]');
-  if (ft) ft.innerHTML = `${SITE.name} · ${SITE.curriculum} 기준${SITE.author ? ' · 제작 ' + SITE.author : ''}` + (ft.dataset.extra ? ' · ' + ft.dataset.extra : '');
+  if (ft) ft.innerHTML = `${SITE.name} · ${SITE.curriculum} 기준${SITE.author ? ' · 제작 ' + SITE.author : ''}` + (ft.dataset.extra ? ' · ' + ft.dataset.extra : '') + (SITE.copyright ? `<br>${SITE.copyright}` : '');
+  // 앱 설치·오프라인용 서비스 워커
+  if (document.body.dataset.root && 'serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register(root + 'sw.js').catch(() => {});
 });
