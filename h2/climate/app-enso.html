@@ -49,16 +49,16 @@ k.draw((g, W, H) => { const L = k.L(), t = performance.now() / 1000;
     [12, 24].forEach(m => { g.strokeStyle = '#888'; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(A.X(m), A.Y(3)); g.lineTo(A.X(m), A.Y(-2)); g.stroke(); g.setLineDash([]); });
     ['1년 차', '2년 차', '3년 차'].forEach((n, i) => D.text(g, n, A.X(6 + i * 12), A.Y(2.75), {size: 13, weight: 700, color: '#34404e'}));
     k.line(g, IDX.map((v, i) => [A.X(i + .5), A.Y(v)]), '#c0762b', 3); D.text(g, '+0.5', A.X(36) - 4, A.Y(.5) - 8, {size: 11, color: '#d0533f', align: 'right'}); D.text(g, '−0.5', A.X(36) - 4, A.Y(-.5) + 10, {size: 11, color: '#2f6fd0', align: 'right'}); return; }
-  const s = ST[L.s], hard = L.hard, top = H * .3, sea = H - 20, x0 = 30, x1 = W - 30, X = f => x0 + f * (x1 - x0);
+  const s = ST[L.s], hard = L.hard, top = H * .3, sea = H, x0 = 30, x1 = W - 30, X = f => x0 + f * (x1 - x0);
   const sky = g.createLinearGradient(0, 0, 0, top); sky.addColorStop(0, '#cfe8f7'); sky.addColorStop(1, '#eef7fd'); g.fillStyle = sky; g.fillRect(0, 0, W, top);
   g.fillStyle = '#2f5d8a'; g.fillRect(0, top, W, sea - top);
   // 따뜻한 해수층 (서쪽이 두꺼움)
-  const thick = f => Math.max(6, (sea - top) * (.42 * (1 - f) + .06) * (L.s === 'nino' ? .6 + .4 * f * 1.2 : L.s === 'nina' ? 1.15 : 1) + (L.s === 'nino' ? f * (sea - top) * .18 : 0));
+  const thick = f => Math.max(6, (sea - top) * (.3 * (1 - f) + .05) * (L.s === 'nino' ? .6 + .4 * f * 1.2 : L.s === 'nina' ? 1.15 : 1) + (L.s === 'nino' ? f * (sea - top) * .18 : 0));
   g.fillStyle = '#d65a3a'; g.beginPath(); g.moveTo(X(0), top); for (let f = 0; f <= 1.001; f += .02) g.lineTo(X(f), top + thick(f)); g.lineTo(X(1), top); g.closePath(); g.fill();
   g.strokeStyle = 'rgba(255,255,255,.7)'; g.setLineDash([6, 5]); g.lineWidth = 2; g.beginPath(); for (let f = 0; f <= 1.001; f += .02) g.lineTo(X(f), top + thick(f) + 6); g.stroke(); g.setLineDash([]); D.text(g, '수온약층', X(.5), top + thick(.5) + 18, {size: 11, color: '#e8f2ff'});
   // 용승
   const up = s.up * (hard ? .8 : 1); for (let i = 0; i < 4; i++) { const yy = sea - ((t * 30 * up + i * 40) % (sea - top - 10)); g.fillStyle = `rgba(160,210,255,${Math.min(1, .25 * up + .1)})`; g.beginPath(); g.arc(X(.93) + Math.sin(i) * 8, yy, 3 + up * 2, 0, 7); g.fill(); }
-  D.text(g, '용승', X(.93), sea - 12, {size: 11, color: '#e8f2ff', weight: 700});
+  D.text(g, '용승', X(.93), sea - 26, {size: 11, color: '#e8f2ff', weight: 700});
   // 무역풍
   const wl = (x1 - x0) * .13 * s.wind * (hard ? .9 : 1); for (let i = 0; i < 3; i++) { const xs = X(.8 - i * .28), ys = top * .45 + (i % 2) * 18; D.arrow(g, xs, ys, xs - wl, ys, '#2b2a26', 3); }
   D.text(g, '무역풍', X(.5), top * .2, {size: 13, weight: 700});
