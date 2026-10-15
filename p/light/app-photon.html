@@ -58,8 +58,8 @@ k.draw((g, W, H) => { const L = k.L(), t = performance.now() / 1000; g.fillStyle
     const r = tank(L, A.v), t0 = A.v * deg, sx = X(r.xs);
     g.strokeStyle = 'rgba(255,255,255,.35)'; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(sx, sy - 40); g.lineTo(sx, sy + 60); g.stroke(); g.setLineDash([]);
     const beam = shot ? '#ff3b3b' : 'rgba(255,80,80,.4)'; g.strokeStyle = beam; g.lineWidth = shot ? 3 : 2; g.beginPath(); g.moveTo(lx, ly); g.lineTo(sx, sy);
-    if (r.tir) g.lineTo(X(r.xe), Y(1)); else { g.lineTo(X(r.xa), sy - (L.air || 1) * sc); } g.stroke();
-    if (!r.tir) { g.strokeStyle = 'rgba(255,80,80,.25)'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(sx, sy); g.lineTo(X(r.xs * 2), Y(1)); g.stroke(); }
+    if (shot) { if (r.tir) g.lineTo(X(r.xe), Y(1)); else { g.lineTo(X(r.xa), sy - (L.air || 1) * sc); } } g.stroke();
+    if (shot && !r.tir) { g.strokeStyle = 'rgba(255,80,80,.25)'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(sx, sy); g.lineTo(X(r.xs * 2), Y(1)); g.stroke(); }
     D.text(g, `θ = ${A.v.toFixed(1)}° (임계각 ${r.crit.toFixed(1)}°)`, W / 2, 20, {size: 14, weight: 700, color: r.tir ? '#9be3b5' : '#f6d365'}); return; }
   // 광전관
   const c = wl2rgb(Lm.v), cx = W * .25, cy = H * .5; g.fillStyle = 'rgba(255,255,255,.05)'; D.rr(g, W * .15, H * .2, W * .7, H * .6, 30); g.fill(); g.strokeStyle = '#8ea3bd'; g.lineWidth = 2; g.stroke();
