@@ -32,7 +32,7 @@ const k = HS(app, {levels: LV, load(L){ b = null; const q = L.t === 'quiz'; ui.c
   k.mission(ui.g, `용수철 상수 <b>${L.k} N/m</b>, 도막 <b>${L.m} kg</b><br>깃발 높이 <b>${L.h} m</b>에서 멈추게 하세요.${L.mu ? `<br>마찰 구간 ${L.d} m (운동 마찰 계수 ${L.mu})` : ''}`); X.set(.2); info(); }});
 function info(){ const L = k.L(); if (!L || L.t) return; b = null; ui.e.innerHTML = `저장된 탄성 퍼텐셜 에너지 <b>${(.5 * L.k * X.v * X.v).toFixed(2)} J</b>`; }
 app.onStart = () => { ui.g = app.panel('미션'); ui.q = app.panel(''); ui.c = app.panel('용수철');
-  X = k.slider(ui.c, {label: '압축 길이 x', min: 0, max: .6, step: .005, val: .2, fmt: v => v.toFixed(3) + ' m', on: info}); ui.e = document.createElement('p'); ui.e.className = 'note-c'; ui.c.appendChild(ui.e);
+  X = k.slider(ui.c, {label: '압축 길이 x', min: 0, max: .6, step: .005, val: .2, fmt: v => (v * 100).toFixed(1) + ' cm', on: info}); ui.e = document.createElement('p'); ui.e.className = 'note-c'; ui.c.appendChild(ui.e);
   ui.b = app.panel(''); k.btn(ui.b, '🚀 발사', () => { const L = k.L(); b = {s: 0, E0: .5 * L.k * X.v * X.v, heat: 0, v: X.v * Math.sqrt(L.k / L.m), stop: false, peak: 0}; sfx.whoosh(); });
   k.begin(); };
 // 경로: 바닥 0~4 m (마찰 구간 1 ~ 1+d), 그 뒤 30° 경사면
