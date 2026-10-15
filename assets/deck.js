@@ -49,7 +49,7 @@
   });
   // ---------- 그래프 ----------
   const nice = (a, b) => { const r = b - a || 1, st = Math.pow(10, Math.floor(Math.log10(r / 5))), k = [1, 2, 2.5, 5, 10].find(k => r / (st * k) <= 6) * st; return [Math.floor(a / k) * k, Math.ceil(b / k) * k, k]; };
-  function chart(c){ const W = 1300, H = 520, L = 110, R = 30, T = 30, B = 80, all = c.ser.flatMap(s => s.pts), [x0, x1, xs] = nice(Math.min(...all.map(p => p[0]), 0), Math.max(...all.map(p => p[0]))), [y0, y1, ys] = nice(Math.min(...all.map(p => p[1]), 0), Math.max(...all.map(p => p[1])));
+  function chart(c){ const W = 1300, H = 520, L = 110, R = 30, T = 30, B = 80, all = c.ser.flatMap(s => s.pts), [x0, x1, xs] = nice(Math.min(...all.map(p => p[0]), 0), Math.max(...all.map(p => p[0]))), [y0, y1, ys] = (() => { const lo = Math.min(...all.map(p => p[1]), 0), hi = Math.max(...all.map(p => p[1])); return nice(lo, hi + (hi - lo) * .06); })(); // 위쪽 여유: 이름표가 잘리지 않게
     const X = v => L + (v - x0) / (x1 - x0) * (W - L - R), Y = v => T + (H - T - B) - (v - y0) / (y1 - y0) * (H - T - B), cols = ['var(--area)', 'var(--hot)', 'var(--ok)', '#7a3fc4', '#c98a0b'];
     let s = `<svg viewBox="0 0 ${W} ${H}" font-family="IBM Plex Mono, monospace">`;
     for (let v = y0; v <= y1 + 1e-9; v += ys) s += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e4e9ee"/><text x="${L - 14}" y="${Y(v) + 8}" text-anchor="end" font-size="22" fill="#5d6975">${+v.toFixed(3)}</text>`;
