@@ -5,3 +5,5 @@ worker.js
 wrangler.jsonc
 .dev.vars
 .gitignore
+.teacher.js
+build-teacher.mjs

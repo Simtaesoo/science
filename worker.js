@@ -1,13 +1,16 @@
 /* 교사 잠금 (Cloudflare Workers, 설정은 wrangler.jsonc)
    모든 요청이 이 코드를 먼저 거친 뒤 사이트 파일(env.ASSETS)을 받아 옵니다.
-   비밀번호는 코드에 적지 않습니다. Cloudflare 대시보드 → Workers & Pages → science → Settings → Variables and Secrets 에
-   TEACHER_PASSWORD 라는 이름으로 넣어 두세요. 비밀번호를 바꾸면 기존 교사 로그인은 모두 풀립니다.
+   비밀번호는 코드에 적지 않습니다. Cloudflare 대시보드 → science → Settings → Build → Variables and secrets 에
+   TEACHER_PASSWORD (Secret)로 넣고 다시 배포하세요. (워커 실행 변수에 넣어도 됩니다.)
+   비밀번호를 바꾸면 기존 교사 로그인은 모두 풀립니다.
 
    학생(로그인 안 한 사람)에게는 서버에서 아래를 지운 뒤 페이지를 보냅니다. 페이지 소스를 열어도 보이지 않습니다.
    - 학습지: 빈칸 정답, 정답 문장(.ans-only), 정답 그래프(.ans-svg, data-ans), '정답 보기' 버튼
    - 수업 슬라이드: 교사용 메모(% 로 시작하는 줄)
    - 수업 진행 도구(tools/class.html): 교사 로그인 화면으로 보냄
    골든벨 '교사 진행' 모드는 화면에서 숨깁니다(window.IS_TEACHER). */
+
+import {TEACHER_TOKEN} from './.teacher.js';   // 배포 때 build-teacher.mjs가 만듦
 
 const COOKIE = 'sci_teacher';
 const MAX_AGE = 60 * 60 * 24 * 30;          // 30일
@@ -63,11 +66,14 @@ async function hash(s) {
 }
 const token = pw => hash(pw + '|science-teacher-v1');
 
+// 정답 지문: 실행 변수(env.TEACHER_PASSWORD)가 있으면 그것, 없으면 배포 때 만든 지문
+async function expected(env) { return env.TEACHER_PASSWORD ? token(env.TEACHER_PASSWORD) : TEACHER_TOKEN; }
+
 async function checkCookie(request, env) {
-  if (!env.TEACHER_PASSWORD) return false;
+  const exp = await expected(env); if (!exp) return false;
   const m = (request.headers.get('cookie') || '').match(new RegExp(`(?:^|;\\s*)${COOKIE}=([0-9a-f]{64})`));
   if (!m) return false;
-  return same(m[1], await token(env.TEACHER_PASSWORD));
+  return same(m[1], exp);
 }
 function same(a, b) { if (a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; }
 
@@ -75,12 +81,12 @@ function safeNext(n) { return n && n.startsWith('/') && !n.startsWith('//') && !
 
 async function loginRoute(request, env, url) {
   const next = safeNext(url.searchParams.get('next'));
-  if (!env.TEACHER_PASSWORD) return page('교사 비밀번호가 아직 설정되지 않았어요. Cloudflare에서 TEACHER_PASSWORD를 추가해 주세요.', next, true);
+  if (!(await expected(env))) return page('교사 비밀번호가 아직 설정되지 않았어요. Cloudflare Build 설정에 TEACHER_PASSWORD를 넣고 다시 배포해 주세요.', next, true);
   if (request.method === 'POST') {
     const form = await request.formData();
     const pw = String(form.get('pw') || '');
     const to = safeNext(String(form.get('next') || '/'));
-    if (pw && same(await token(pw), await token(env.TEACHER_PASSWORD))) {
+    if (pw && same(await token(pw), await expected(env))) {
       return new Response(null, {status: 303, headers: {Location: to, 'Set-Cookie': `${COOKIE}=${await token(pw)}; Path=/; Max-Age=${MAX_AGE}; HttpOnly; Secure; SameSite=Lax`, 'Cache-Control': 'no-store'}});
     }
     await new Promise(r => setTimeout(r, 800));

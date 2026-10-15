@@ -3,6 +3,7 @@
   "name": "science",
   "main": "worker.js",
   "compatibility_date": "2025-10-01",
+  "build": { "command": "node build-teacher.mjs" },
   "assets": {
     "directory": ".",
     "binding": "ASSETS",

@@ -35,7 +35,7 @@ Cloudflare Workers에서 작동합니다(`worker.js`, 설정은 `wrangler.jsonc`
 - 퀴즈의 '골든벨(교사 진행)' 모드 (학생은 개인 풀이만)
 - 수업 진행 도구(`tools/class.html`) 전체
 
-**비밀번호 설정**: Cloudflare 대시보드 → Workers & Pages → science → Settings → Variables and Secrets → `TEACHER_PASSWORD`를 Secret으로 추가. 비밀번호는 저장소에 적지 않습니다. 바꾸면 기존 교사 로그인이 모두 풀립니다.
+**비밀번호 설정**: Cloudflare 대시보드 → Workers & Pages → science → Settings → **Build** → Variables and secrets → `TEACHER_PASSWORD`를 Secret으로 추가하고 다시 배포(Deployments에서 Retry 또는 GitHub에 아무 커밋). 배포할 때 `build-teacher.mjs`가 비밀번호 대신 확인용 지문만 만들어 씁니다. 비밀번호는 저장소에 적지 않습니다. 바꾸면 기존 교사 로그인이 모두 풀립니다.
 
 **로그인**: 메인 화면 오른쪽 위 '교사 로그인' 또는 `/teacher`. 한 번 로그인하면 그 기기에서 30일 동안 유지되고, 페이지 아래 '교사 모드 끝내기'로 나갈 수 있습니다.
 
