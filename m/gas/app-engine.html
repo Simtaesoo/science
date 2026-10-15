@@ -33,7 +33,7 @@ const k = HS(app, {levels: LV, load(L){ const q = L.t === 'quiz'; ui.c.parentEle
   k.mission(ui.g, [L.W[0] === L.W[1] ? `알짜 일 <b>정확히 ${L.W[0]} J</b>` : L.W[0] ? `알짜 일 <b>${L.W[0]} J 이상</b>` : '', L.e ? `열효율 <b>${L.e} % 이상</b>` : '', L.maxP ? `압력 ≤ ${L.maxP} kPa, 부피 ≤ ${L.maxV} L` : ''].filter(Boolean).join('<br>'));
   Pl.set(100); Ph.set(200); V1.set(1); V2.set(2); info(); }});
 function info(){ const r = calc(); if (!r) { ui.r.innerHTML = '<p style="color:var(--coral)">높은 압력 > 낮은 압력, 나중 부피 > 처음 부피여야 해요.</p>'; return; }
-  const row = (n, x) => `<tr><td>${n}</td><td>${x.Q.toFixed(0)}</td><td>${x.dU.toFixed(0)}</td><td>${x.W.toFixed(0)}</td></tr>`;
+  const row = (n, x) => `<tr><td style="text-align:left">${n}</td><td>${x.Q.toFixed(0)}</td><td>${x.dU.toFixed(0)}</td><td>${x.W.toFixed(0)}</td></tr>`;
   ui.r.innerHTML = `<table style="width:100%;font-size:13px;border-collapse:collapse;text-align:right"><tr style="opacity:.7"><td style="text-align:left">과정</td><td>Q</td><td>ΔU</td><td>W</td></tr>${row('A→B 등적', r.AB)}${row('B→C 등압', r.BC)}${row('C→D 등적', r.CD)}${row('D→A 등압', r.DA)}</table><p style="margin-top:6px">알짜 일 <b>${r.W.toFixed(0)} J</b> · 흡수 열 <b>${r.Qin.toFixed(0)} J</b><br>열효율 <b style="color:var(--yellow)">${r.e.toFixed(1)} %</b></p>`; }
 app.onStart = () => { ui.g = app.panel('대회 규정'); ui.q = app.panel(''); ui.c = app.panel('설계');
   Pl = k.slider(ui.c, {label: '낮은 압력', min: 100, max: 500, step: 100, val: 100, fmt: v => v + ' kPa', on: info});
