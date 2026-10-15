@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>공명 그네 · 고3 역학과 에너지 단진동</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'mswing', title: '공명 그네', unit: '고3 · 역학과 에너지 · 43 단진동', back: '../../index.html#mech', sim: 'sim.html#pend',
+  lead: '그네를 미는 사람이 되어 보세요! 그네의 <b>고유 주기</b>에 맞춰 알맞은 순간에 밀어야 진폭이 커져요. 엉뚱한 순간에 밀면 오히려 그네가 느려져요.',
+  howto: ['무대를 누르거나 <b>스페이스바</b>, <b>[밀기]</b> 단추로 그네를 미세요. (오른쪽으로 미는 힘)', '그네가 <b>내 쪽(왼쪽)으로 와서 멈췄다가 떠나는 순간</b>에 밀면 가장 효과적이에요.', '제한 시간 안에 목표 진폭에 도달하면 성공! 줄 길이와 장소에 따라 박자가 달라요.'],
+  recap: '단진자의 주기 T = 2π√(L/g)는 줄 길이와 중력 가속도로 정해지고 질량·작은 진폭과는 무관하다(등시성). 물체가 가진 <b>고유 진동수</b>와 같은 진동수로 힘을 주면 매번 에너지가 더해져 진폭이 크게 늘어나는데, 이를 <b>공명</b>이라 한다. 진동 방향과 같은 방향으로 밀 때 힘이 양(+)의 일을 해 에너지가 늘고, 반대 방향으로 밀면 음(−)의 일을 해 에너지가 줄어든다. 줄이 길수록, 중력이 약할수록 박자가 느려진다.',
+  startLabel: '그네 타러 가기'
+});
+const {S, sfx, toast} = app, D = Draw;
+const LV = [
+  {L: 2.5, g: 9.8, goal: 30, time: 25, place: '놀이터', why: 'T = 2π√(2.5/9.8) ≈ 3.2 s. 한 번 왕복할 때마다 한 번씩 밀면 에너지가 계속 쌓여요.'},
+  {L: 1, g: 9.8, goal: 30, time: 20, place: '놀이터 (짧은 그네)', why: 'L = 1 m → T ≈ 2.0 s. 줄이 짧으면 박자가 빨라져요.'},
+  {L: 4, g: 9.8, goal: 35, time: 30, place: '공원의 긴 그네', why: 'L = 4 m → T ≈ 4.0 s. 길이가 4배면 주기는 2배!'},
+  {L: 1, g: 1.62, goal: 30, time: 40, place: '달 기지', why: '달에서는 g가 1/6 → T = 2π√(1/1.62) ≈ 4.9 s. 같은 그네도 박자가 약 2.5배 느려요.'},
+  {t: 'calc', g: 9.8, T: 3, why: 'L = g(T/2π)² = 9.8 × (3 ÷ 6.28)² ≈ 2.24 m.'}];
+let ui = {}, th = 0, w = 0, tLeft = 0, push = 0, cool = 0, maxA = 0, LS, hist = [], tt = 0, crossT = [], meas = null;
+const k = HS(app, {levels: LV, load(L){ th = .12; w = 0; push = 0; cool = 0; maxA = 0; hist = []; tt = 0; crossT = []; meas = null;
+  const calc = L.t === 'calc'; ui.l.parentElement.style.display = calc ? '' : 'none'; ui.p.parentElement.style.display = calc ? 'none' : '';
+  if (calc) { k.mission(ui.g, `주기가 정확히 <b>${L.T} s</b>인 그네를 만드세요. (±0.03 s)`); LS.set(1); tLeft = 0; return; }
+  tLeft = L.time; k.mission(ui.g, `<b>${L.place}</b> · 줄 길이 ${L.L} m${L.g < 9 ? ` · g = ${L.g} m/s²` : ''}<br><b>${L.time}초</b> 안에 진폭 <b>${L.goal}°</b>까지 키우세요.`); }});
+function doPush(){ const L = k.L(); if (!L || L.t === 'calc' || k.done || cool > 0 || tLeft <= 0) return; push = .22; cool = .35; sfx.pop(); if (w > 0) toast('좋아요! 에너지 ↑', 'good'); else toast('반대로 움직이는 중… 에너지 ↓', 'bad'); }
+addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); doPush(); } });
+app.pointer({tap(){ doPush(); }});
+app.onStart = () => { ui.g = app.panel('미션'); ui.p = app.panel('밀기'); k.btn(ui.p, '🤲 밀기 (Space)', doPush); ui.s = document.createElement('div'); ui.p.appendChild(ui.s);
+  ui.l = app.panel('그네 만들기'); LS = k.slider(ui.l, {label: '줄 길이', min: .5, max: 5, step: .01, val: 1, fmt: v => v.toFixed(2) + ' m', on: () => { meas = null; th = .15; w = 0; crossT = []; }});
+  k.btn(ui.l, '⏱ 주기 측정 후 제출', () => { const L = k.L(), T = 2 * Math.PI * Math.sqrt(LS.v / L.g); meas = T; if (Math.abs(T - L.T) <= .03) k.win(ui.g, L.why, `${T.toFixed(2)} s`); else k.fail(`주기 ${T.toFixed(2)} s — 목표 ${L.T} s`); });
+  k.begin(); };
+app.step = dt => { const L = k.L(); if (!L) return; const len = L.t === 'calc' ? LS.v : L.L, gg = L.g;
+  for (let i = 0; i < 10; i++) { const h = dt / 10, F = push > 0 ? 1.1 : 0; const a = -(gg / len) * Math.sin(th) - .03 * w + F / len; w += a * h; th += w * h; }
+  push = Math.max(0, push - dt); cool = Math.max(0, cool - dt); tt += dt; maxA = Math.max(maxA * (1 - dt * .02), Math.abs(th) * 180 / Math.PI);
+  if (L.t === 'calc' || k.done) return; tLeft -= dt; ui.s.innerHTML = `<p style="margin-top:8px">현재 진폭 <b>${maxA.toFixed(0)}°</b> / ${L.goal}° · 남은 시간 <b>${Math.max(0, tLeft).toFixed(0)}초</b></p>`;
+  if (maxA >= L.goal) k.win(ui.g, L.why, `${maxA.toFixed(0)}°`); else if (tLeft <= 0) { k.fail(`시간 끝! 진폭 ${maxA.toFixed(0)}° — 박자를 다시 맞춰 보세요`); k.load(); } };
+k.draw((g, W, H) => { const L = k.L(), len = L.t === 'calc' ? LS.v : L.L, px = W * .5, py = 34, sc = (H - 90) / Math.max(4.2, len + .3), r = len * sc, bx = px + r * Math.sin(th), by = py + r * Math.cos(th);
+  const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, L.g < 9 ? '#141a2a' : '#bfe3f7'); sky.addColorStop(1, L.g < 9 ? '#2a3142' : '#eef8ff'); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+  g.fillStyle = L.g < 9 ? '#8a8f99' : '#8fbf7a'; g.fillRect(0, H - 24, W, 24); g.fillStyle = '#6b4a2a'; g.fillRect(px - 90, py - 10, 180, 10); g.fillRect(px - 90, py - 10, 8, H - py - 14); g.fillRect(px + 82, py - 10, 8, H - py - 14);
+  if (L.t !== 'calc') { g.strokeStyle = 'rgba(208,83,63,.35)'; g.setLineDash([4, 5]); [-1, 1].forEach(s => { const a = s * L.goal * Math.PI / 180; g.beginPath(); g.moveTo(px, py); g.lineTo(px + r * Math.sin(a), py + r * Math.cos(a)); g.stroke(); }); g.setLineDash([]); D.text(g, `목표 ${L.goal}°`, px + r * Math.sin(L.goal * Math.PI / 180) + 8, py + r * Math.cos(L.goal * Math.PI / 180), {size: 12, color: '#d0533f', align: 'left', weight: 700}); }
+  g.strokeStyle = '#555'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(px - 6, py); g.lineTo(bx - 6, by); g.moveTo(px + 6, py); g.lineTo(bx + 6, by); g.stroke(); g.fillStyle = '#c0762b'; g.fillRect(bx - 22, by - 4, 44, 8); D.text(g, '🧒', bx, by - 16, {size: 26});
+  if (L.t !== 'calc') { const hx = px - r * Math.sin(.35) - 40; D.text(g, push > 0 ? '🙌' : '🧍', hx, H - 48, {size: 34}); if (push > 0) D.arrow(g, hx + 20, H - 60, hx + 56, H - 60, '#d0533f', 4); }
+  D.text(g, `줄 ${len.toFixed(2)} m · 주기 ${(2 * Math.PI * Math.sqrt(len / L.g)).toFixed(2)} s`.replace(/ · 주기.*/, L.t === 'calc' && !meas ? ' · 주기 ?' : '$&'), W / 2, H - 10, {size: 12, color: L.g < 9 ? '#e8eef6' : '#34404e', weight: 700});
+});
+</script>
+</body>
+</html>
