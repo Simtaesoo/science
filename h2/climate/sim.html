@@ -55,7 +55,7 @@
 const {C, $, canvas, axes, line, arrow, label} = Kit;
 const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
 const st = {mode: 'circ', rot: '1', trade: 1, co2: 420, t: 0};
-function drawCirc(){ const g = S.g, W = S.w, H = S.h, cx = W * .3, cy = H * .52, R = Math.min(W * .26, H * .44), t = st.t;
+function drawCirc(){ const g = S.g, W = S.w, H = S.h, cx = W * .3, cy = H * .52, R = Math.min(W * .26, H * .44), t = st.t; if (R < 30) return;
   const sky = g.createRadialGradient(cx, cy, R * .2, cx, cy, R); sky.addColorStop(0, '#4a8fd0'); sky.addColorStop(1, '#2a5f90'); g.fillStyle = sky; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill();
   const latY = lat => cy - Math.sin(lat * Math.PI / 180) * R; [0, 30, 60, -30, -60].forEach(l => { const y = latY(l), hw = Math.cos(l * Math.PI / 180) * R; g.strokeStyle = 'rgba(255,255,255,.35)'; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(cx - hw, y); g.lineTo(cx + hw, y); g.stroke(); g.setLineDash([]); label(g, (l === 0 ? '0°' : Math.abs(l) + '°' + (l > 0 ? 'N' : 'S')), cx - hw - 6, y, {size: 10, color: C.ink, align: 'right'}); });
   if (st.rot === '0') { [[1, '#f28c7a'], [-1, '#f28c7a']].forEach(([s]) => { const x0 = cx + R * 1.05; g.strokeStyle = '#d0533f'; g.lineWidth = 3; g.beginPath(); g.ellipse(x0 + 30, cy - s * R * .45, 30, R * .45, 0, s > 0 ? Math.PI * .5 : -Math.PI * .5, s > 0 ? Math.PI * 2.5 : Math.PI * 1.5); g.stroke(); }); for (let k = 0; k < 4; k++) { const u = (t * .3 + k / 4) % 1, a = u * TAU; [1, -1].forEach(s => { g.fillStyle = '#d0533f'; g.beginPath(); g.arc(cx + R * 1.05 + 30 + Math.cos(a) * 30 * s, cy - s * R * .45 - Math.sin(a) * R * .45, 4, 0, TAU); g.fill(); }); } label(g, '반구마다 하나의 커다란 순환 (적도 상승 → 극 하강)', W * .72, H * .2, {size: 13, weight: 700}); }
