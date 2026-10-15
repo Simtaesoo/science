@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>스펙트럼 탐정 · 고1 자연의 구성 원소</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'h1spec', title: '스펙트럼 탐정', unit: '고1 · 통합과학1 · 25 자연의 구성 원소', back: '../../index.html#hi1', sim: 'sim.html#spec', dark: true,
+  lead: '멀리 있는 별과 은하에 직접 갈 수는 없지만, 빛의 <b>흡수 스펙트럼</b>에는 그 천체를 이루는 원소의 지문이 찍혀 있어요. 원소의 선 스펙트럼을 겹쳐 보며 천체의 구성 원소를 찾아내세요!',
+  howto: ['아래쪽 원소 단추를 누르면 그 원소의 <b>기준 선 스펙트럼</b>이 별빛 스펙트럼 위에 겹쳐져요.', '별빛의 어두운 흡수선과 <b>모두 꼭 맞는</b> 원소를 골라 <b>[판정]</b>을 누르세요.', '은하 단계에서는 흡수선이 붉은 쪽으로 밀려 있어요. <b>적색 편이</b> 슬라이더로 먼저 위치를 맞추세요.'],
+  recap: '원소마다 고유한 파장의 빛만 흡수·방출하므로 <b>선 스펙트럼</b>은 원소의 지문이다. 별빛의 흡수선을 원소의 선 스펙트럼과 비교하면 별을 구성하는 원소를 알 수 있다 — 대부분의 별에서 <b>수소와 헬륨</b>이 가장 많다. 멀어지는 은하의 빛은 파장이 길어지는 <b>적색 편이</b>를 보인다: 관측 파장 = 원래 파장 × (1 + z), 후퇴 속도 ≈ c × z. 멀리 있는 은하일수록 빨리 멀어진다는 사실은 <b>우주 팽창</b>과 빅뱅 우주론의 증거이다.',
+  startLabel: '관측 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const EL = {
+  H: {n: '수소', c: '#ff6b6b', l: [656.3, 486.1, 434.0, 410.2]},
+  He: {n: '헬륨', c: '#ffd166', l: [667.8, 587.6, 501.6, 447.1]},
+  Na: {n: '나트륨', c: '#fca311', l: [589.0, 589.6]},
+  Ca: {n: '칼슘', c: '#9be3b5', l: [393.4, 396.8, 422.7]},
+  Mg: {n: '마그네슘', c: '#8ecdf2', l: [516.7, 517.3, 518.4]}};
+const LV = [
+  {name: 'A형 별 베가', set: ['H'], z: 0, why: '베가처럼 표면 온도가 약 1만 K인 별은 수소 흡수선(발머 계열)이 매우 진하게 보여요.'},
+  {name: 'B형 별 리겔', set: ['H', 'He'], z: 0, why: '아주 뜨거운 B형 별은 헬륨 흡수선까지 보여요. 587.6 nm 헬륨선은 나트륨선(589 nm)과 가까워 헷갈리기 쉬워요!'},
+  {name: '태양', set: ['H', 'Na', 'Ca', 'Mg'], z: 0, why: '태양 스펙트럼의 흡수선(프라운호퍼선)에서 수소, 나트륨, 칼슘, 마그네슘 등 여러 원소가 발견돼요. 이 원소들은 앞 세대 별이 만든 것이에요.'},
+  {name: '적색 거성', set: ['Na', 'Ca', 'Mg'], z: 0, why: '표면 온도가 낮은 별은 수소선이 약해지고 금속 원소의 흡수선이 두드러져요.'},
+  {name: '가까운 은하', set: ['H', 'Ca'], z: .02, why: 'z = 0.02 → 후퇴 속도 ≈ 0.02 × 30만 km/s = 6000 km/s로 멀어지고 있어요.'},
+  {name: '먼 은하', set: ['H', 'Na', 'Mg'], z: .07, why: 'z = 0.07 → 약 2만 1000 km/s. 더 먼 은하일수록 더 빨리 멀어진다(허블 법칙) → 우주는 팽창하고 있어요!'}];
+let ui = {}, on = new Set(), zs, L0 = 375, L1 = 760;
+const k = HS(app, {levels: LV, load(L){ on = new Set(); k.mission(ui.g, `<b>${L.name}</b>의 흡수 스펙트럼을 분석하세요.${L.z ? '<br>흡수선이 붉은 쪽으로 밀려 있어요 — 적색 편이를 먼저 맞추세요.' : ''}`);
+  ui.zw.style.display = L.z ? '' : 'none'; zs.set(0); tools(); }});
+function tools(){ ui.t.innerHTML = '<div class="tools">' + Object.keys(EL).map(e => `<button class="tool" type="button" aria-pressed="${on.has(e)}" data-e="${e}"><span style="color:${EL[e].c}">▮</span>${EL[e].n}</button>`).join('') + '</div>';
+  ui.t.querySelectorAll('button').forEach(b => b.onclick = () => { const e = b.dataset.e; on.has(e) ? on.delete(e) : on.add(e); sfx.click(); tools(); }); }
+app.onStart = () => { ui.g = app.panel('관측 대상'); ui.t = app.panel('원소 기준 스펙트럼 겹치기'); ui.z = app.panel('적색 편이');
+  ui.zw = ui.z.parentElement; zs = k.slider(ui.z, {label: 'z', min: 0, max: .1, step: .005, val: 0, fmt: v => v.toFixed(3)});
+  ui.b = app.panel(''); k.btn(ui.b, '🔎 판정', () => { const L = k.L(), want = L.set.slice().sort().join(), got = [...on].sort().join();
+    if (L.z && Math.abs(zs.v - L.z) > .0026) return k.fail('기준선이 흡수선과 어긋나 있어요 — 적색 편이를 먼저 맞추세요');
+    if (got !== want) { const miss = L.set.filter(e => !on.has(e)).length, extra = [...on].filter(e => !L.set.includes(e)).length; return k.fail(miss ? `아직 찾지 못한 원소가 있어요 (${miss}개)` : `흡수선이 없는 원소가 섞여 있어요 (${extra}개)`); }
+    k.win(ui.g, L.why, L.z ? `z = ${L.z}` : ''); });
+  k.begin(); };
+function rgb(l){ let r = 0, g = 0, b = 0;
+  if (l < 440) { r = -(l - 440) / 60; b = 1; } else if (l < 490) { g = (l - 440) / 50; b = 1; } else if (l < 510) { g = 1; b = -(l - 510) / 20; } else if (l < 580) { r = (l - 510) / 70; g = 1; } else if (l < 645) { r = 1; g = -(l - 645) / 65; } else r = 1;
+  const f = l < 420 ? .3 + .7 * (l - 380) / 40 : l > 700 ? Math.max(.15, .3 + .7 * (760 - l) / 60) : 1;
+  return `rgb(${Math.round(255 * r * f)},${Math.round(255 * g * f)},${Math.round(255 * b * f)})`; }
+k.draw((g, W, H) => { const L = k.L(), x0 = 40, x1 = W - 30, X = l => x0 + (l - L0) / (L1 - L0) * (x1 - x0), bh = Math.min(110, H * .28), y = H * .42 - bh / 2;
+  g.fillStyle = '#0d1520'; g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 260; i++) { const r = (i * 9301 + 49297) % 233280 / 233280, q = (i * 7919) % 1000 / 1000; g.fillStyle = `rgba(255,255,255,${.15 + .5 * q})`; g.fillRect(r * W, q * H, 1.3, 1.3); }
+  D.text(g, `⭐ ${L.name}의 흡수 스펙트럼`, x0, 22, {size: 14, color: '#f2efe4', weight: 700, align: 'left'});
+  for (let px = Math.floor(x0); px < x1; px++) { const l = L0 + (px - x0) / (x1 - x0) * (L1 - L0); g.fillStyle = rgb(l); g.fillRect(px, y, 1.2, bh); }
+  L.set.forEach(e => EL[e].l.forEach(l => { const xx = X(l * (1 + L.z)); g.fillStyle = 'rgba(0,0,0,.88)'; g.fillRect(xx - 1.2, y, 2.4, bh); }));
+  for (let l = 400; l <= 750; l += 50) { g.strokeStyle = '#8899aa'; g.beginPath(); g.moveTo(X(l), y + bh); g.lineTo(X(l), y + bh + 6); g.stroke(); D.text(g, l + '', X(l), y + bh + 16, {size: 10.5, color: '#b8c4d0'}); }
+  D.text(g, '파장 (nm)', (x0 + x1) / 2, y + bh + 32, {size: 11, color: '#b8c4d0'});
+  // 기준선
+  const ry = y + bh + 50, rh = Math.max(40, H - ry - 26);
+  g.fillStyle = 'rgba(255,255,255,.05)'; g.fillRect(x0, ry, x1 - x0, rh); D.text(g, '원소 기준 선 (실험실, 편이 보정 ' + zs.v.toFixed(3) + ')', x0, ry - 8, {size: 11, color: '#b8c4d0', align: 'left'});
+  const keys = [...on]; keys.forEach((e, j) => { const row = ry + rh * (j + .5) / Math.max(1, keys.length); EL[e].l.forEach(l => { const xx = X(l * (1 + zs.v)); g.strokeStyle = EL[e].c; g.lineWidth = 2; g.beginPath(); g.moveTo(xx, row - rh / Math.max(1, keys.length) / 2 + 3); g.lineTo(xx, row + rh / Math.max(1, keys.length) / 2 - 3); g.stroke(); g.globalAlpha = .35; g.beginPath(); g.moveTo(xx, y); g.lineTo(xx, y + bh); g.stroke(); g.globalAlpha = 1; }); D.text(g, EL[e].n, x1 - 4, row, {size: 11, color: EL[e].c, align: 'right', weight: 700}); });
+  if (!keys.length) D.text(g, '원소 단추를 눌러 기준 선을 겹쳐 보세요', (x0 + x1) / 2, ry + rh / 2, {size: 13, color: '#8899aa'});
+});
+</script>
+</body>
+</html>
