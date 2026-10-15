@@ -6,15 +6,14 @@
 
    학생(로그인 안 한 사람)에게는 서버에서 아래를 지운 뒤 페이지를 보냅니다. 페이지 소스를 열어도 보이지 않습니다.
    - 학습지: 빈칸 정답, 정답 문장(.ans-only), 정답 그래프(.ans-svg, data-ans), '정답 보기' 버튼
-   - 수업 슬라이드: 교사용 메모(% 로 시작하는 줄)
-   - 수업 진행 도구(tools/class.html): 교사 로그인 화면으로 보냄
+   - 수업 슬라이드(slides*.html), 수업 진행 도구(tools/class.html): 교사 로그인 화면으로 보냄
    골든벨 '교사 진행' 모드는 화면에서 숨깁니다(window.IS_TEACHER). */
 
 import {TEACHER_TOKEN} from './.teacher.js';   // 배포 때 build-teacher.mjs가 만듦
 
 const COOKIE = 'sci_teacher';
 const MAX_AGE = 60 * 60 * 24 * 30;          // 30일
-const TEACHER_ONLY = [/^\/tools\/class(\.html)?$/];
+const TEACHER_ONLY = [/^\/tools\/class(\.html)?$/, /\/slides\d*(\.html)?$/];   // 수업 진행 도구, 수업 슬라이드 전체
 
 export default {
   fetch(request, env) { return handle(request, env); }
@@ -100,9 +99,9 @@ function esc(s) { return String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': 
 
 function page(msg, next, disabled, already) {
   const body = already
-    ? `<h1>교사 모드로 들어와 있어요</h1><p class="d">학습지 정답, 슬라이드 메모, 골든벨 진행, 수업 진행 도구를 쓸 수 있어요. 이 기기에서 30일 동안 유지돼요.</p>
+    ? `<h1>교사 모드로 들어와 있어요</h1><p class="d">학습지 정답, 수업 슬라이드, 골든벨 진행, 수업 진행 도구를 쓸 수 있어요. 이 기기에서 30일 동안 유지돼요.</p>
        <a class="go" href="${esc(next)}">계속하기</a><a class="out" href="/teacher/logout">교사 모드 끝내기</a>`
-    : `<h1>교사 로그인</h1><p class="d">학습지 정답, 슬라이드 메모, 골든벨 진행, 수업 진행 도구는 선생님만 볼 수 있어요.</p>
+    : `<h1>교사 로그인</h1><p class="d">학습지 정답, 수업 슬라이드, 골든벨 진행, 수업 진행 도구는 선생님만 볼 수 있어요.</p>
        ${msg ? `<p class="err" role="alert">${esc(msg)}</p>` : ''}
        <form method="post" action="/teacher"><input type="hidden" name="next" value="${esc(next)}">
        <label for="pw">교사 비밀번호</label><input id="pw" name="pw" type="password" autocomplete="current-password" required ${disabled ? 'disabled' : 'autofocus'}>

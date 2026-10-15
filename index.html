@@ -63,6 +63,7 @@ a.lt:hover{color:var(--area);text-decoration:underline;text-underline-offset:3px
 @container (max-width:480px){.lessons li{grid-template-columns:26px minmax(0,1fr);align-items:start;padding:9px 0}.lessons .ln{grid-row:span 2;line-height:1.5}.acts{justify-content:flex-start;margin-top:4px}}
 .act{font-size:12px;font-weight:500;text-decoration:none;border-radius:999px;padding:3px 10px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;min-height:26px;display:inline-flex;align-items:center}
 .act:hover{border-color:var(--area);color:var(--area)}
+.act.locked::after{content:'교사';font-size:10px;font-weight:700;margin-left:5px;padding:0 5px;border-radius:999px;background:var(--soft);color:var(--muted)}
 .act.sim{background:var(--area);border-color:var(--area);color:var(--surface)}
 .act.sim:hover{color:var(--surface);filter:brightness(1.08)}
 
@@ -164,7 +165,7 @@ mark{background:color-mix(in srgb,var(--warn) 35%,transparent);color:inherit;bor
       const main = L.sim[0] && L.sim[0].href ? `<a class="lt" href="${L.sim[0].href}">${hi(title)}</a>` : `<span class="lt">${hi(title)}</span>`;
       const acts = [
         ...L.sim.map((s, k) => link(s, 'act sim', k ? '시뮬레이션 ' + (k + 1) : '시뮬레이션')),
-        ...L.deck.map(d => { const p = d.title.match(/\((\d+)쪽\)/); return link(d, 'act', '슬라이드' + (L.deck.length > 1 ? ' ' + (range(d.title) || [''])[0] + '차시' : '') + (p ? ' ' + p[1] + '쪽' : '')); })
+        ...L.deck.map(d => { const p = d.title.match(/\((\d+)쪽\)/); return link(d, T === false ? 'act locked' : 'act', '슬라이드' + (L.deck.length > 1 ? ' ' + (range(d.title) || [''])[0] + '차시' : '') + (p ? ' ' + p[1] + '쪽' : '')); })
       ].join('');
       return `<li><span class="ln${String(n).length > 2 ? ' wide' : ''}">${n}</span>${main}<span class="acts">${acts}</span></li>`;
     }).join('');
