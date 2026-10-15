@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>감염병 방역 본부 · 고1 과학과 미래 사회</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'h2sir', title: '감염병 방역 본부', unit: '고1 · 통합과학2 · 36 과학과 미래 사회', back: '../../index.html#hi2', sim: 'sim.html#sir',
+  lead: '새로운 감염병이 퍼지기 시작했어요! 방역 본부장이 되어 <b>거리 두기, 마스크, 백신</b>을 조합해 병상이 넘치지 않게 하세요. 방역에는 사회적 비용이 들어요 — 예산 안에서 최선의 정책을 찾아야 해요.',
+  howto: ['정책을 정하고 <b>[300일 예측]</b>을 누르면 감수성자(S)·감염자(I)·회복자(R) 그래프가 그려져요.', '목표(감염자 최고 비율, 누적 감염 비율)와 <b>예산</b>을 모두 만족하면 성공!', '이 게임의 모형: 기초 감염 재생산수 R₀ = 3 (감염자 1명이 평균 3명을 감염시킴).'],
+  recap: '<b>SIR 모형</b>: 인구를 감수성자(S), 감염자(I), 회복자(R)로 나누어 감염병의 확산을 예측한다. 감염자 1명이 평균 몇 명을 감염시키는지가 <b>재생산수</b>이며, 1보다 크면 확산되고 1보다 작으면 줄어든다. 거리 두기와 마스크는 접촉·전파 확률을 낮춰 재생산수를 줄이고, 백신은 감수성자를 미리 면역 상태로 바꾼다. 인구의 일정 비율(R₀ = 3이면 약 2/3) 이상이 면역을 가지면 감염자가 늘지 못하는 <b>집단 면역</b>이 형성된다. 이처럼 과학적 모형과 데이터는 사회의 의사 결정을 돕는다.',
+  startLabel: '본부 가동'
+});
+const {S, sfx, toast} = app, D = Draw;
+const LV = [
+  {lock: ['m', 'v'], peak: 12, why: '거리 두기 40 %로 접촉이 줄어 재생산수가 3 → 1.8로 낮아졌어요. 감염 곡선이 낮고 넓게 퍼지는 “곡선 평탄화”!'},
+  {lock: ['v'], peak: 6, cost: 40, why: '마스크(전파 30 % 감소)와 거리 두기를 함께 쓰면 적은 비용으로 큰 효과를 내요.'},
+  {inf: 30, cost: 40, why: '백신 50 %는 감염될 수 있는 사람 자체를 줄여요. 누적 감염을 줄이는 데는 백신이 효과적이에요.'},
+  {inf: 5, cost: 45, why: '면역 비율이 충분히 높아 재생산수가 1보다 작아지면 유행이 시작되지도 못해요 — 집단 면역!'},
+  {t: 'quiz', q: '인터넷 검색량(빅데이터)으로 감염병 유행을 예측할 때 주의할 점으로 가장 알맞은 것은?', ch: ['데이터 양이 많으면 항상 정확하다', '검색량은 언론 보도 등 다른 이유로도 늘 수 있어 실제 환자 자료와 비교·검증해야 한다', '빅데이터는 과학 탐구에 쓸 수 없다', '검색량과 환자 수는 항상 같다'], a: 1, why: '상관관계가 인과 관계를 뜻하지는 않아요. 빅데이터 분석 결과도 실제 관측 자료로 검증해야 해요.'}];
+let ui = {}, Dd, Mm, Vv, run = null, prog = 0;
+const cost = () => Dd.v * 100 + (Mm.v ? 5 : 0) + Vv.v * 60;
+function sim(d, m, v){ let s = 1 - v - .001, i = .001, r = v, pk = 0; const b = .3 * (1 - d) * (m ? .7 : 1), gm = .1, P = [[0, s, i, r]];
+  for (let t = 1; t <= 300; t++) { for (let q = 0; q < 10; q++) { const ni = b * s * i * .1, nr = gm * i * .1; s -= ni; i += ni - nr; r += nr; } pk = Math.max(pk, i); if (t % 2 === 0) P.push([t, s, i, r]); }
+  return {P, pk: pk * 100, inf: (r - v) * 100, R: 3 * (1 - d) * (m ? .7 : 1) * (1 - v)}; }
+const k = HS(app, {levels: LV, load(L){ run = null; const q = L.t === 'quiz'; ui.q.parentElement.style.display = q ? '' : 'none'; ui.p.parentElement.style.display = q ? 'none' : ''; ui.b.parentElement.style.display = q ? 'none' : '';
+  if (q) { k.mission(ui.g, '데이터 판단'); app.quiz(ui.q, L.q, L.ch, L.a, {explain: L.why, onWrong: () => { k.fails++; app.addScore(-10); }, onRight: () => k.win(ui.g, '')}); return; }
+  ui.q.innerHTML = ''; k.mission(ui.g, [L.peak ? `감염자 최고 비율 <b>${L.peak} % 이하</b> (병상 한계)` : '', L.inf ? `누적 감염 <b>${L.inf} % 이하</b>` : '', L.cost ? `비용 <b>${L.cost} 이하</b>` : ''].filter(Boolean).join('<br>'));
+  [['d', Dd], ['m', Mm], ['v', Vv]].forEach(([n, s]) => { const lk = (L.lock || []).includes(n); s.el.disabled = lk; s.wrap.style.opacity = lk ? .35 : 1; s.set(0); }); info(); }});
+function info(){ const L = k.L(); run = null; ui.c.innerHTML = `재생산수 <b>${(3 * (1 - Dd.v) * (Mm.v ? .7 : 1) * (1 - Vv.v)).toFixed(2)}</b> · 비용 <b style="color:${L.cost && cost() > L.cost ? 'var(--coral)' : 'var(--yellow)'}">${cost().toFixed(0)}</b>${L.cost ? ' / ' + L.cost : ''}`; }
+app.onStart = () => { ui.g = app.panel('방역 목표'); ui.q = app.panel(''); ui.p = app.panel('정책');
+  Dd = k.slider(ui.p, {label: '거리 두기', min: 0, max: .6, step: .1, val: 0, fmt: v => Math.round(v * 100) + ' %', on: info});
+  Mm = k.slider(ui.p, {label: '마스크', min: 0, max: 1, step: 1, val: 0, fmt: v => v ? '의무' : '권고 없음', on: info});
+  Vv = k.slider(ui.p, {label: '백신 접종률', min: 0, max: .8, step: .1, val: 0, fmt: v => Math.round(v * 100) + ' %', on: info});
+  ui.c = document.createElement('p'); ui.c.className = 'note-c'; ui.p.appendChild(ui.c);
+  ui.b = app.panel(''); k.btn(ui.b, '▶ 300일 예측', () => { run = sim(Dd.v, Mm.v, Vv.v); prog = 0; sfx.whoosh(); });
+  k.begin(); };
+function judge(){ const L = k.L(), r = run;
+  if (L.cost && cost() > L.cost + 1e-9) return k.fail(`비용 ${cost().toFixed(0)} — 예산 초과`);
+  if (L.peak && r.pk > L.peak) return k.fail(`감염자 최고 ${r.pk.toFixed(1)} % — 병상이 넘쳐요!`);
+  if (L.inf && r.inf > L.inf) return k.fail(`누적 감염 ${r.inf.toFixed(1)} % — 목표 초과`);
+  k.win(ui.g, L.why, L.peak ? `최고 ${r.pk.toFixed(1)} %` : `누적 ${r.inf.toFixed(1)} %`); }
+app.step = dt => { if (run && prog < 1) { prog = Math.min(1, prog + dt / 2.2); if (prog >= 1) judge(); } };
+k.draw((g, W, H) => { const L = k.L(); g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, W, H);
+  if (L.t === 'quiz') { D.text(g, '📈 🔍 🏥', W / 2, H / 2, {size: Math.min(W, H) * .14}); return; }
+  const A = k.axes(g, {x: 56, y: 26, w: W - 80, h: H - 72}, [0, 300, 50], [0, 100, 20], '날짜 (일)', '인구 비율 (%)');
+  if (L.peak) { g.fillStyle = 'rgba(208,83,63,.1)'; g.fillRect(A.X(0), A.Y(100), A.X(300) - A.X(0), A.Y(L.peak) - A.Y(100)); g.strokeStyle = '#d0533f'; g.setLineDash([6, 4]); g.lineWidth = 2; g.beginPath(); g.moveTo(A.X(0), A.Y(L.peak)); g.lineTo(A.X(300), A.Y(L.peak)); g.stroke(); g.setLineDash([]); D.text(g, `병상 한계 ${L.peak} %`, A.X(296), A.Y(L.peak) - 9, {size: 11.5, color: '#d0533f', align: 'right', weight: 700}); }
+  if (!run) { D.text(g, '정책을 정하고 [300일 예측]을 누르세요', W / 2, H / 2, {size: 14, color: '#55606e'}); return; }
+  const n = Math.max(2, Math.floor(run.P.length * prog)), seg = run.P.slice(0, n);
+  [[1, '#2f6fd0', 'S 감수성자'], [2, '#d0533f', 'I 감염자'], [3, '#2f8a55', 'R 회복·면역']].forEach(([c, col, nm], j) => { k.line(g, seg.map(p => [A.X(p[0]), A.Y(p[c] * 100)]), col, c === 2 ? 3.5 : 2.5); g.fillStyle = col; g.fillRect(A.X(8) + j * 112, A.Y(97) - 5, 12, 10); D.text(g, nm, A.X(8) + j * 112 + 16, A.Y(97), {size: 11.5, align: 'left', weight: 700}); });
+  const e = seg[seg.length - 1]; D.text(g, `${e[0]}일: 감염자 ${(e[2] * 100).toFixed(1)} %`, W - 30, A.Y(88), {size: 13, weight: 700, align: 'right', color: '#d0533f'});
+});
+</script>
+</body>
+</html>
