@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>열기관 설계 대회 · 고3 역학과 에너지 열역학</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'mengine', title: '열기관 설계 대회', unit: '고3 · 역학과 에너지 · 44 열역학', back: '../../index.html#mech', sim: 'sim.html#cycle',
+  lead: '단원자 이상 기체로 움직이는 <b>사각형 순환 열기관</b>을 설계하세요. P–V 그래프의 네 꼭짓점을 정해 대회 규정에 맞는 <b>일</b>과 <b>열효율</b>을 달성하면 우승!',
+  howto: ['낮은 압력·높은 압력, 처음 부피·나중 부피를 정하면 순환 A→B→C→D→A(시계 방향)가 그려져요.', '오른쪽에 각 과정의 열(Q), 내부 에너지 변화(ΔU), 일(W)이 계산돼요. kPa × L = J', '규정을 모두 만족하면 <b>[출전]</b>!'],
+  recap: '열역학 제1법칙 Q = ΔU + W. 단원자 이상 기체의 내부 에너지 U = (3/2)nRT = (3/2)PV. 등적 과정은 W = 0, 등압 과정은 W = PΔV. 순환 과정에서는 처음 상태로 돌아오므로 ΔU = 0이고, 알짜 일 = P–V 그래프의 닫힌 넓이 = 흡수한 열 − 방출한 열. <b>열효율</b> e = W / Q흡수. 사각형 순환에서 효율을 높이려면 넓이를 크게 하면서 흡수하는 열(특히 높은 압력의 등압 팽창)을 줄이는 설계가 필요하다. 어떤 열기관도 흡수한 열을 모두 일로 바꿀 수 없다(열역학 제2법칙).',
+  startLabel: '설계 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const LV = [
+  {W: [400, 400], why: '(300 − 100) kPa × (3 − 1) L = 400 J처럼 닫힌 넓이가 곧 알짜 일이에요. 넓이가 같은 다른 사각형도 정답!'},
+  {W: [600, 1e9], e: 20, maxP: 400, maxV: 4, why: '넓이를 키우되 흡수 열이 너무 커지지 않게: 예) 100–400 kPa, 1–3 L → W = 600 J, e = 600 ÷ 2450 ≈ 24.5 %.'},
+  {W: [400, 1e9], e: 25, maxP: 500, maxV: 5, why: '처음 부피를 작게, 부피 변화를 크게 하면 등적 가열에 드는 열이 상대적으로 줄어 효율이 올라가요.'},
+  {W: [0, 1e9], e: 28, maxP: 500, maxV: 5, why: '최고 효율 설계: 100–500 kPa, 1–5 L → W = 1600 J, Q흡수 = 600 + 5000 = 5600 J → 28.6 %. 그래도 흡수한 열의 70 % 이상은 버려져요!'},
+  {t: 'quiz', q: '열효율이 100 %인 열기관을 만들 수 없는 까닭으로 옳은 것은?', ch: ['기체의 질량이 보존되기 때문에', '흡수한 열의 일부를 반드시 저온부로 방출해야 하기 때문에', '내부 에너지가 항상 증가하기 때문에', '압력이 일정하지 않기 때문에'], a: 1, why: '열역학 제2법칙: 순환하는 열기관은 흡수한 열을 모두 일로 바꿀 수 없고, 일부를 저온부로 방출해야 해요.'}];
+let ui = {}, Pl, Ph, V1, V2;
+function calc(){ const pl = Pl.v, ph = Ph.v, v1 = V1.v, v2 = V2.v; if (ph <= pl || v2 <= v1) return null;
+  const AB = {Q: 1.5 * v1 * (ph - pl), dU: 1.5 * v1 * (ph - pl), W: 0}, BC = {W: ph * (v2 - v1), dU: 1.5 * ph * (v2 - v1)}, CD = {W: 0, dU: -1.5 * v2 * (ph - pl)}, DA = {W: -pl * (v2 - v1), dU: -1.5 * pl * (v2 - v1)};
+  BC.Q = BC.W + BC.dU; CD.Q = CD.dU; DA.Q = DA.W + DA.dU; const W = (ph - pl) * (v2 - v1), Qin = AB.Q + BC.Q; return {AB, BC, CD, DA, W, Qin, e: W / Qin * 100}; }
+const k = HS(app, {levels: LV, load(L){ const q = L.t === 'quiz'; ui.c.parentElement.style.display = q ? 'none' : ''; ui.b.parentElement.style.display = q ? 'none' : ''; ui.q.parentElement.style.display = q ? '' : 'none';
+  if (q) { k.mission(ui.g, '심사 위원 질문'); app.quiz(ui.q, L.q, L.ch, L.a, {explain: L.why, onWrong: () => { k.fails++; app.addScore(-10); }, onRight: () => k.win(ui.g, '')}); return; }
+  k.mission(ui.g, [L.W[0] === L.W[1] ? `알짜 일 <b>정확히 ${L.W[0]} J</b>` : L.W[0] ? `알짜 일 <b>${L.W[0]} J 이상</b>` : '', L.e ? `열효율 <b>${L.e} % 이상</b>` : '', L.maxP ? `압력 ≤ ${L.maxP} kPa, 부피 ≤ ${L.maxV} L` : ''].filter(Boolean).join('<br>'));
+  Pl.set(100); Ph.set(200); V1.set(1); V2.set(2); info(); }});
+function info(){ const r = calc(); if (!r) { ui.r.innerHTML = '<p style="color:var(--coral)">높은 압력 > 낮은 압력, 나중 부피 > 처음 부피여야 해요.</p>'; return; }
+  const row = (n, x) => `<tr><td>${n}</td><td>${x.Q.toFixed(0)}</td><td>${x.dU.toFixed(0)}</td><td>${x.W.toFixed(0)}</td></tr>`;
+  ui.r.innerHTML = `<table style="width:100%;font-size:13px;border-collapse:collapse;text-align:right"><tr style="opacity:.7"><td style="text-align:left">과정</td><td>Q</td><td>ΔU</td><td>W</td></tr>${row('A→B 등적', r.AB)}${row('B→C 등압', r.BC)}${row('C→D 등적', r.CD)}${row('D→A 등압', r.DA)}</table><p style="margin-top:6px">알짜 일 <b>${r.W.toFixed(0)} J</b> · 흡수 열 <b>${r.Qin.toFixed(0)} J</b><br>열효율 <b style="color:var(--yellow)">${r.e.toFixed(1)} %</b></p>`; }
+app.onStart = () => { ui.g = app.panel('대회 규정'); ui.q = app.panel(''); ui.c = app.panel('설계');
+  Pl = k.slider(ui.c, {label: '낮은 압력', min: 100, max: 500, step: 100, val: 100, fmt: v => v + ' kPa', on: info});
+  Ph = k.slider(ui.c, {label: '높은 압력', min: 100, max: 500, step: 100, val: 200, fmt: v => v + ' kPa', on: info});
+  V1 = k.slider(ui.c, {label: '처음 부피', min: 1, max: 5, step: 1, val: 1, fmt: v => v + ' L', on: info});
+  V2 = k.slider(ui.c, {label: '나중 부피', min: 1, max: 5, step: 1, val: 2, fmt: v => v + ' L', on: info});
+  ui.r = document.createElement('div'); ui.c.appendChild(ui.r);
+  ui.b = app.panel(''); k.btn(ui.b, '🏁 출전', () => { const L = k.L(), r = calc(); if (!r) return k.fail('순환이 만들어지지 않았어요');
+    if (L.maxP && (Ph.v > L.maxP || V2.v > L.maxV)) return k.fail('규정 위반! 압력·부피 한도를 확인하세요');
+    if (r.W < L.W[0] || r.W > L.W[1]) return k.fail(`알짜 일 ${r.W.toFixed(0)} J — 규정에 맞지 않아요`); if (L.e && r.e < L.e) return k.fail(`열효율 ${r.e.toFixed(1)} % — ${L.e} % 이상이어야 해요`);
+    k.win(ui.g, L.why, `W ${r.W.toFixed(0)} J, e ${r.e.toFixed(1)} %`); });
+  k.begin(); };
+k.draw((g, W, H) => { const L = k.L(), t = performance.now() / 1000; g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, W, H);
+  if (L.t === 'quiz') { D.text(g, '🔥 → ⚙️ → ❄️', W / 2, H / 2, {size: Math.min(W, H) * .12}); return; }
+  const A = k.axes(g, {x: 64, y: 24, w: W - 92, h: H - 70}, [0, 6, 1], [0, 600, 100], '부피 (L)', '압력 (kPa)');
+  if (L.maxP) { g.fillStyle = 'rgba(208,83,63,.08)'; g.fillRect(A.X(0), A.Y(600), A.X(6) - A.X(0), A.Y(L.maxP) - A.Y(600)); g.fillRect(A.X(L.maxV), A.Y(L.maxP), A.X(6) - A.X(L.maxV), A.Y(0) - A.Y(L.maxP)); }
+  const r = calc(); if (!r) return; const P = [[V1.v, Pl.v], [V1.v, Ph.v], [V2.v, Ph.v], [V2.v, Pl.v]];
+  g.fillStyle = 'rgba(246,180,0,.28)'; g.beginPath(); P.forEach(([v, p], i) => i ? g.lineTo(A.X(v), A.Y(p)) : g.moveTo(A.X(v), A.Y(p))); g.closePath(); g.fill();
+  P.forEach((p, i) => { const q = P[(i + 1) % 4]; D.arrow(g, A.X(p[0]), A.Y(p[1]), A.X(q[0]), A.Y(q[1]), i < 2 ? '#d0533f' : '#2f6fd0', 3); D.text(g, 'ABCD'[i], A.X(p[0]) + (i < 2 ? -12 : 12), A.Y(p[1]) + (i % 3 ? -12 : 12), {size: 14, weight: 700}); });
+  D.text(g, `W = ${r.W.toFixed(0)} J`, A.X((V1.v + V2.v) / 2), A.Y((Pl.v + Ph.v) / 2), {size: 15, weight: 700, color: '#6b4a00'});
+  const f = (t * .25) % 1, seg = Math.floor(f * 4), u = f * 4 - seg, a = P[seg], b = P[(seg + 1) % 4]; g.fillStyle = '#1d3a58'; g.beginPath(); g.arc(A.X(a[0] + (b[0] - a[0]) * u), A.Y(a[1] + (b[1] - a[1]) * u), 6, 0, 7); g.fill();
+  D.text(g, '빨강: 열 흡수 · 파랑: 열 방출', A.X(6) - 4, A.Y(580), {size: 11.5, align: 'right', color: '#55606e'});
+});
+</script>
+</body>
+</html>
