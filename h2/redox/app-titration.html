@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>중화 적정 챌린지 · 고1 화학 변화</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'h2titr', title: '중화 적정 챌린지', unit: '고1 · 통합과학2 · 32 화학 변화', back: '../../index.html#hi2', sim: 'sim.html#acid',
+  lead: '뷰렛으로 수산화 나트륨 수용액을 한 방울씩 떨어뜨려 산을 <b>정확히 중화</b>하세요. 지시약의 색이 바뀌는 순간 멈추는 것이 기술! 마지막에는 산화·환원 판정 문제도 있어요.',
+  howto: ['<b>＋5 mL, ＋1 mL, ＋0.1 mL</b> 단추로 염기 수용액을 넣으세요. 중화점 근처에서는 한 방울씩!', '지시약 색과 오른쪽 pH 그래프를 보고 중화점이라고 생각되면 <b>[적정 완료]</b>.', '중화점과의 차이가 <b>0.15 mL 이내</b>면 성공. 지나치게 넣으면 다시 해야 해요.'],
+  recap: '<b>중화 반응</b>: H⁺ + OH⁻ → H₂O. 산의 H⁺ 수와 염기의 OH⁻ 수가 같아지는 점이 중화점이다: (산의 가수) × (몰 농도) × (부피) = (염기의 가수) × (몰 농도) × (부피). 강산과 강염기의 중화점 근처에서는 pH가 급격히 변하므로 지시약 색이 한 방울에 바뀐다 — BTB(노랑 → 초록 → 파랑), 페놀프탈레인(무색 → 붉은색). 황산(H₂SO₄)은 2가 산이라 같은 몰 농도의 염산보다 염기가 2배 필요하다. <b>산화·환원</b>: 산소를 얻거나 전자를 잃으면 산화, 산소를 잃거나 전자를 얻으면 환원이며 항상 동시에 일어난다.',
+  startLabel: '실험 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const LV = [
+  {acid: '염산 HCl', va: 20, ca: .1, nH: 1, cb: .1, ind: 'BTB', why: '0.1 M × 20 mL = 0.1 M × V → V = 20.0 mL. 중화점에서 BTB는 초록색, 한 방울 더 넣으면 파란색!'},
+  {acid: '염산 HCl', va: 25, ca: .1, nH: 1, cb: .2, ind: 'PP', why: '염기 농도가 2배라 부피는 절반: 0.1 × 25 = 0.2 × V → V = 12.5 mL.'},
+  {acid: '황산 H₂SO₄', va: 20, ca: .05, nH: 2, cb: .1, ind: 'BTB', why: '황산은 H⁺를 2개 내놓는 2가 산: 2 × 0.05 × 20 = 0.1 × V → V = 20.0 mL.'},
+  {acid: '농도를 모르는 염산', va: 10, ca: .15, nH: 1, cb: .1, ind: 'PP', unk: true, why: '15.0 mL에서 중화 → 산의 농도 = 0.1 × 15 ÷ 10 = 0.15 M. 적정으로 모르는 농도를 알아냈어요!'},
+  {t: 'quiz', q: '2Mg + O₂ → 2MgO 반응에서 산화되는 물질은?', ch: ['Mg', 'O₂', 'MgO', '없다'], a: 0, why: 'Mg은 산소를 얻고 전자를 잃어 Mg²⁺가 되므로 산화된다. 이때 O₂는 환원된다.'},
+  {t: 'quiz', q: 'CuO + H₂ → Cu + H₂O 반응에서 환원제(다른 물질을 환원시키는 물질)는?', ch: ['CuO', 'H₂', 'Cu', 'H₂O'], a: 1, why: 'H₂는 산소를 얻어 산화되면서 CuO를 Cu로 환원시킨다 → 환원제.'}];
+let ui = {}, vb = 0, pts = [], drops = [];
+const veq = L => L.nH * L.ca * L.va / L.cb;
+function pH(L, v){ const nh = L.nH * L.ca * L.va, nb = L.cb * v, vt = (L.va + v) / 1000, d = (nh - nb) / 1000;
+  if (Math.abs(d) < 1e-12) return 7; if (d > 0) return -Math.log10(d / vt); return 14 + Math.log10(-d / vt); }
+function col(L, p){ if (L.ind === 'BTB') return p < 6 ? '#f2d14a' : p < 7.6 ? '#5bbf6a' : '#3f6fd8'; return p < 8.2 ? 'rgba(235,240,250,.85)' : p < 10 ? '#f08cc4' : '#d6439a'; }
+const k = HS(app, {levels: LV, load(L){ vb = 0; pts = [[0, L.t ? 1 : pH(L, 0)]]; drops = [];
+  ui.t.parentElement.style.display = L.t ? 'none' : ''; ui.b.parentElement.style.display = L.t ? 'none' : '';
+  if (L.t) { k.mission(ui.g, '산화·환원 판정'); app.quiz(ui.q, L.q, L.ch, L.a, {explain: L.why, onWrong: () => { k.fails++; app.addScore(-10); }, onRight: () => k.win(ui.g, '')}); return; }
+  ui.q.innerHTML = '';
+  k.mission(ui.g, `${L.acid} ${L.unk ? '' : L.ca + ' M '}<b>${L.va} mL</b>를 ${L.cb} M NaOH로 중화하세요.<br>지시약: <b>${L.ind === 'BTB' ? 'BTB' : '페놀프탈레인'}</b>`); info(); }});
+function info(){ const L = k.L(); ui.t.innerHTML = `<p>넣은 NaOH <b>${vb.toFixed(1)} mL</b></p><p>현재 pH <b>${pH(L, vb).toFixed(2)}</b></p>`; }
+function add(v){ const L = k.L(); if (L.t || k.done) return; vb = Math.round((vb + v) * 10) / 10; pts.push([vb, pH(L, vb)]); drops.push({y: 0}); sfx.drip(); info();
+  if (vb > veq(L) + .15) { k.fail(`너무 많이 넣었어요! ${vb.toFixed(1)} mL — 처음부터 다시`); setTimeout(() => k.load(), 900); } }
+app.onStart = () => { ui.g = app.panel('적정 과제'); ui.t = app.panel('측정'); ui.q = app.panel(''); ui.b = app.panel('');
+  ui.b.innerHTML = '<div class="tools" style="justify-content:center"></div>'; const tl = ui.b.firstChild;
+  [['＋5 mL', 5], ['＋1 mL', 1], ['＋0.1 mL 💧', .1]].forEach(([n, v]) => { const b = document.createElement('button'); b.className = 'tool'; b.type = 'button'; b.textContent = n; b.onclick = () => add(v); tl.appendChild(b); });
+  k.btn(ui.b, '✋ 적정 완료', () => { const L = k.L(), e = veq(L);
+    if (Math.abs(vb - e) <= .15) k.win(ui.g, L.why, `${vb.toFixed(1)} mL`); else k.fail(vb < e ? '아직 산이 남아 있어요 — 지시약 색을 보세요' : '중화점을 지났어요'); });
+  k.begin(); };
+app.step = dt => drops.forEach(d => d.y += dt * 2.2);
+k.draw((g, W, H) => { const L = k.L(); g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, W, H);
+  if (L.t) { D.text(g, L.a === 0 ? '🔥 Mg + O₂' : '⚗️ CuO + H₂', W / 2, H / 2, {size: Math.min(W, H) * .1, weight: 700}); return; }
+  const bx = W * .2, top = 20, bh = H * .42;
+  g.fillStyle = 'rgba(255,255,255,.8)'; g.strokeStyle = '#555'; g.lineWidth = 2; g.fillRect(bx - 9, top, 18, bh); g.strokeRect(bx - 9, top, 18, bh);
+  const lev = Math.min(1, vb / 50); g.fillStyle = 'rgba(160,200,255,.7)'; g.fillRect(bx - 7, top + lev * bh, 14, bh - lev * bh);
+  for (let i = 0; i <= 50; i += 10) { D.text(g, i + '', bx + 24, top + i / 50 * bh, {size: 10, color: '#55606e'}); g.beginPath(); g.moveTo(bx + 9, top + i / 50 * bh); g.lineTo(bx + 14, top + i / 50 * bh); g.stroke(); }
+  g.beginPath(); g.moveTo(bx, top + bh); g.lineTo(bx, top + bh + 22); g.stroke(); D.text(g, 'NaOH', bx, top - 8 + 0, {size: 11, weight: 700});
+  const fy = H - 26, fw = Math.min(W * .3, 170), fh = H * .36, lq = pH(L, vb);
+  drops.forEach(d => { if (d.y < 1) { g.fillStyle = '#7fb0ff'; g.beginPath(); g.arc(bx, top + bh + 24 + d.y * (fy - fh * .45 - top - bh - 24), 3.5, 0, 7); g.fill(); } }); drops = drops.filter(d => d.y < 1);
+  g.fillStyle = col(L, lq); g.beginPath(); g.moveTo(bx - fw * .45, fy); g.lineTo(bx + fw * .45, fy); g.lineTo(bx + fw * .2, fy - fh * .45); g.lineTo(bx - fw * .2, fy - fh * .45); g.closePath(); g.fill();
+  g.strokeStyle = '#555'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(bx - 14, fy - fh); g.lineTo(bx - 14, fy - fh * .62); g.lineTo(bx - fw * .5, fy); g.lineTo(bx + fw * .5, fy); g.lineTo(bx + 14, fy - fh * .62); g.lineTo(bx + 14, fy - fh); g.stroke();
+  D.text(g, `${L.acid.split(' ')[0]} ${L.va} mL`, bx, fy + 14, {size: 11, color: '#55606e'});
+  const A = k.axes(g, {x: W * .45, y: 24, w: W * .5, h: H - 70}, [0, Math.ceil(veq(L) * 2 / 5) * 5, 5], [0, 14, 2], 'NaOH 부피 (mL)', 'pH');
+  g.fillStyle = 'rgba(91,191,106,.12)'; g.fillRect(A.X(0), A.Y(8.2), A.X(veq(L) * 2) - A.X(0) > 0 ? A.X(Math.ceil(veq(L) * 2 / 5) * 5) - A.X(0) : 0, A.Y(6) - A.Y(8.2));
+  k.line(g, pts.map(([v, p]) => [A.X(v), A.Y(p)]), '#2f6fd0', 2.5); pts.forEach(([v, p]) => { g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(A.X(v), A.Y(p), 3, 0, 7); g.fill(); });
+});
+</script>
+</body>
+</html>
