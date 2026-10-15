@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>디지털 변환기 설계소 · 고1 과학의 기초</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'h1adc', title: '디지털 변환기 설계소', unit: '고1 · 통합과학1 · 24 과학의 기초', back: '../../index.html#hi1', sim: 'sim.html#digital',
+  lead: '아날로그 소리 신호를 디지털로 바꾸는 <b>변환기</b>를 설계하세요. 표본화 빈도와 양자화 비트 수를 정해 <b>오차는 작게, 데이터는 적게</b> 만드는 것이 목표예요.',
+  howto: ['<b>표본화 빈도</b>(1초에 몇 번 값을 읽을지)와 <b>비트 수</b>(값을 몇 단계로 나눌지)를 슬라이더로 정하세요.', '복원된 신호(노란 선)와 원래 신호(파란 선)의 차이가 <b>오차(%)</b>예요.', '<b>[변환 확인]</b>을 눌러 오차 기준과 데이터 예산을 모두 만족하면 통과!'],
+  recap: '<b>표본화</b>: 연속 신호를 일정한 시간 간격으로 읽는 과정 — 빈도가 높을수록 원래 모양에 가깝다. 신호 속 가장 빠른 진동수의 <b>2배 이상</b>으로 표본화해야 모양을 잃지 않는다. <b>양자화</b>: 읽은 값을 정해진 단계 중 가장 가까운 값으로 바꾸는 과정 — n비트면 2ⁿ단계. 데이터 양 = 표본화 빈도 × 비트 수. 정밀도와 저장 공간 사이에서 알맞은 조건을 찾는 것이 디지털 변환 설계의 핵심이다.',
+  startLabel: '설계 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const SIG = [
+  {f: t => Math.sin(2 * Math.PI * 2 * t), name: '2 Hz 사인파', top: 2},
+  {f: t => .8 * Math.sin(2 * Math.PI * 3 * t) + .2 * Math.sin(2 * Math.PI * 7 * t), name: '3 Hz + 7 Hz 합성음', top: 7},
+  {f: t => .6 * Math.sin(2 * Math.PI * 5 * t) + .4 * Math.sin(2 * Math.PI * 1 * t), name: '1 Hz + 5 Hz 합성음', top: 5}];
+const LV = [
+  {s: 0, err: 10, bud: 40, why: '9 Hz × 3비트 = 27 bit/s 정도로도 오차 10 % 이하가 가능해요. 2 Hz 신호를 4 Hz보다 촘촘히 읽어야 모양이 살아나요.'},
+  {s: 0, err: 5, bud: 70, why: '오차를 줄이려면 비트 수(단계)와 표본화 빈도를 함께 올려야 해요. 15 Hz × 4비트 = 60 bit/s가 한 예.'},
+  {s: 1, err: 8, bud: 90, why: '7 Hz 성분이 섞여 있어 14 Hz보다 훨씬 자주 읽어야 해요. 빈도를 높이는 대신 비트를 3으로 아꼈어요.'},
+  {s: 2, err: 5, bud: 140, why: '빠른 5 Hz 성분 때문에 표본화 빈도는 30 Hz 안팎이 필요해요. 4비트(16단계)면 충분해요.'},
+  {s: 1, err: 3, bud: 170, why: '오차 3 %는 매우 엄격한 기준! 30 Hz × 5비트(32단계)처럼 둘 다 넉넉해야 해요.'}];
+let ui = {}, fs, bits, cur = null;
+const k = HS(app, {levels: LV, load(L){
+  k.mission(ui.g, `<b>${SIG[L.s].name}</b>을 변환하세요.<br>오차 <b>${L.err} % 이하</b>, 데이터 <b>${L.bud} bit/s 이하</b>`); calc(); }});
+function quant(v, b){ const N = 2 ** b, s = 2 / (N - 1); return Math.round((v + 1) / s) * s - 1; }
+function calc(){ const L = k.L(), f = SIG[L.s].f, n = fs.v, b = bits.v, P = [];
+  for (let i = 0; i <= n; i++) P.push(quant(f(i / n), b));
+  let e = 0; const M = 2000; for (let j = 0; j < M; j++) { const t = j / M, x = t * n, i = Math.floor(x), u = x - i, r = P[i] + (P[Math.min(n, i + 1)] - P[i]) * u; e += (r - f(t)) ** 2; }
+  cur = {P, err: Math.sqrt(e / M) * 100, data: n * b};
+  ui.r.innerHTML = `<p>오차 <b style="color:${cur.err <= L.err ? 'var(--mint)' : 'var(--coral)'}">${cur.err.toFixed(2)} %</b> / 기준 ${L.err} %</p><p>데이터 <b style="color:${cur.data <= L.bud ? 'var(--mint)' : 'var(--coral)'}">${cur.data} bit/s</b> / 예산 ${L.bud} bit/s</p><p class="note-c">${2 ** b}단계 양자화 · 1초에 ${n}번 표본화</p>`; }
+app.onStart = () => { ui.g = app.panel('미션'); ui.c = app.panel('변환기 조건');
+  fs = k.slider(ui.c, {label: '표본화 빈도', min: 4, max: 60, step: 1, val: 8, fmt: v => v + ' Hz', on: () => calc()});
+  bits = k.slider(ui.c, {label: '비트 수', min: 1, max: 8, step: 1, val: 2, fmt: v => v + ' 비트', on: () => calc()});
+  ui.r = app.panel('결과'); ui.b = app.panel('');
+  k.btn(ui.b, '📟 변환 확인', () => { const L = k.L(); calc();
+    if (cur.err > L.err) return k.fail(`오차 ${cur.err.toFixed(1)} % — 기준보다 커요`);
+    if (cur.data > L.bud) return k.fail(`데이터 ${cur.data} bit/s — 예산 초과!`);
+    k.win(ui.g, LV[k.lv].why, `${cur.err.toFixed(1)} %, ${cur.data} bit/s`); });
+  k.begin(); };
+k.draw((g, W, H) => { if (!cur) return; const L = k.L(), f = SIG[L.s].f, n = fs.v, b = bits.v;
+  g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, W, H);
+  const A = k.axes(g, {x: 56, y: 26, w: W - 80, h: H - 74}, [0, 1, .1], [-1, 1, .5], '시간 (s)', '신호 세기');
+  const N = 2 ** b; if (N <= 64) for (let i = 0; i < N; i++) { const v = -1 + i * 2 / (N - 1); g.strokeStyle = 'rgba(208,83,63,.18)'; g.beginPath(); g.moveTo(A.X(0), A.Y(v)); g.lineTo(A.X(1), A.Y(v)); g.stroke(); }
+  const O = []; for (let j = 0; j <= 400; j++) O.push([A.X(j / 400), A.Y(f(j / 400))]); k.line(g, O, '#2f6fd0', 3);
+  k.line(g, cur.P.map((v, i) => [A.X(i / n), A.Y(v)]), '#e0a400', 2.5);
+  cur.P.forEach((v, i) => { g.strokeStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.moveTo(A.X(i / n), A.Y(f(i / n))); g.lineTo(A.X(i / n), A.Y(v)); g.stroke(); g.fillStyle = '#d0533f'; g.beginPath(); g.arc(A.X(i / n), A.Y(v), 3.5, 0, 7); g.fill(); });
+  D.text(g, '— 원래 신호', A.X(.02), 14, {size: 12, color: '#2f6fd0', align: 'left', weight: 700}); D.text(g, '— 복원 신호', A.X(.2), 14, {size: 12, color: '#b98800', align: 'left', weight: 700}); D.text(g, `● 표본 (${N}단계)`, A.X(.38), 14, {size: 12, color: '#d0533f', align: 'left', weight: 700});
+});
+</script>
+</body>
+</html>
