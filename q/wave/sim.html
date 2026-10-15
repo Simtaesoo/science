@@ -77,6 +77,7 @@ const airy = th => { const x = Math.PI * st.D * 1e-3 * th / (st.wl * 1e-9); retu
 const thR = () => 1.22 * st.wl * 1e-9 / (st.D * 1e-3) * 1e6; // μrad
 const I2 = (tx, ty) => { const h = st.sep / 2; return airy(Math.hypot(tx - h, ty) * 1e-6) + airy(Math.hypot(tx + h, ty) * 1e-6); };
 function drawResol(){ const g = S.g, W = S.w, H = S.h, span = 800, pxs = 3, cw = Math.ceil(W / pxs), chh = Math.ceil(H * .78 / pxs), key = [st.wl, st.D, st.sep, W, H].join(), [r, gg, b] = wlRGB(st.wl);
+  if (!(cw >= 1 && chh >= 1)) return;
   if (key !== st.key) { const off = document.createElement('canvas'); off.width = cw; off.height = chh; const og = off.getContext('2d'), im = og.createImageData(cw, chh); for (let j = 0; j < chh; j++) for (let i = 0; i < cw; i++) { const tx = (i - cw / 2) / cw * span, ty = (j - chh / 2) / cw * span, I = Math.min(1, Math.sqrt(I2(tx, ty) / 1.2)), o = (j * cw + i) * 4; im.data[o] = r * I; im.data[o + 1] = gg * I; im.data[o + 2] = b * I; im.data[o + 3] = 255; } og.putImageData(im, 0, 0); st.img = off; st.key = key; }
   g.imageSmoothingEnabled = true; g.drawImage(st.img, 0, 0, W, H * .78); label(g, `망원경 상 (가로 ${span} μrad)`, 10, 14, {size: 11, color: '#cfd8e3', align: 'left', weight: 700});
   const ok = st.sep >= thR() * .999, verdict = st.quiz ? '' : ok ? '두 광원을 구별할 수 있다 (레일리 기준 이상)' : '두 광원이 하나로 보인다 (레일리 기준 미만)';
