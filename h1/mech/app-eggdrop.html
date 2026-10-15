@@ -46,7 +46,7 @@ app.step = dt => { const L = k.L(); if (!ball || ball.done) return; const v0 = L
     if (!onC) { sfx.bad(); k.fail(`쿠션을 벗어났어요! (${ball.x.toFixed(2)} m 지점에 떨어짐)`); }
     else if (F > LIM) { sfx.bad(); k.fail(`퍽! 평균 힘 ${F.toFixed(0)} N — 충돌 시간을 더 늘려야 해요`); }
     else k.win(ui.g, L.why, `평균 힘 ${F.toFixed(1)} N`); } };
-k.draw((g, W, H) => { const L = k.L(), wx = 7, wy = 5.6, sc = Math.min((W - 80) / wx, (H - 50) / wy), ox = 70, gy = H - 30, X = x => ox + x * sc, Y = y => gy - y * sc;
+k.draw((g, W, H) => { const L = k.L(), wx = 7.4, wy = 5.6, sc = Math.min((W - 80) / wx, (H - 50) / wy), ox = 70, gy = H - 30, X = x => ox + (x + .4) * sc, Y = y => gy - y * sc;
   const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#bfe3f7'); sky.addColorStop(1, '#eef8ff'); g.fillStyle = sky; g.fillRect(0, 0, W, H);
   g.fillStyle = '#8fbf7a'; g.fillRect(0, gy, W, H - gy);
   g.fillStyle = '#b8a48a'; g.fillRect(ox - 50, Y(L.h), 50, gy - Y(L.h)); g.fillStyle = '#9b876c'; for (let y = 0; y < L.h; y += .5) g.fillRect(ox - 44, Y(y + .4), 14, 10);
