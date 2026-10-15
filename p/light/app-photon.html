@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>레이저와 광전관 · 고2 물리학 빛과 물질</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'pphoton', title: '레이저와 광전관', unit: '고2 · 물리학 · 40 빛과 물질', back: '../../index.html#phys', sim: 'sim.html#photo', dark: true,
+  lead: '빛의 <b>파동성</b>(굴절·전반사)과 <b>입자성</b>(광전 효과)을 모두 다뤄야 하는 실험실이에요. 레이저의 각도를 맞춰 과녁을 맞히고, 빛의 파장을 골라 금속에서 원하는 에너지의 광전자를 튀어나오게 하세요!',
+  howto: ['레이저 단계: 물속 레이저의 <b>입사각</b>을 정해 과녁을 맞히세요. 임계각보다 크면 수면에서 <b>전반사</b>돼요.', '광전관 단계: 빛의 <b>파장</b>을 정해 광전자의 최대 운동 에너지(정지 전압)를 목표에 맞추세요. hc ≈ 1240 eV·nm.', '빛의 <b>세기</b>를 바꾸면 무엇이 달라지는지도 관찰해 보세요.'],
+  recap: '<b>스넬 법칙</b> n₁sinθ₁ = n₂sinθ₂. 굴절률이 큰 매질에서 작은 매질로 갈 때 입사각이 임계각(sinθc = n₂/n₁, 물→공기 약 48.8°)보다 크면 빛이 모두 반사되는 <b>전반사</b>가 일어난다. <b>광전 효과</b>: 금속에 문턱 진동수 이상의 빛을 비추면 광전자가 즉시 튀어나온다. 광전자의 최대 운동 에너지 Ek = hf − W (W: 일함수) — 빛의 세기가 아니라 <b>진동수(파장)</b>로 정해지며, 세기를 키우면 튀어나오는 광전자의 <b>수</b>만 늘어난다 → 빛은 hf의 에너지를 가진 광자(입자)의 흐름이다.',
+  startLabel: '실험 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const LV = [
+  {t: 'tank', n: 1.33, x: 2.4, mode: 'tir', why: '수면까지 1 m, 다시 바닥까지 1 m: tanθ = 2.4 ÷ 2 → θ ≈ 50.2°. 임계각 48.8°보다 커서 수면에서 전반사!'},
+  {t: 'tank', n: 1.33, x: .9, air: .8, mode: 'out', why: '물에서 공기로 나가며 법선에서 멀어지게 굴절해요(sinθ공기 = 1.33 sinθ물). θ ≈ 22.8°이면 수면까지 약 0.42 m, 굴절 후 공기 중에서 약 0.48 m를 더 나아가 과녁에 닿아요.'},
+  {t: 'tank', n: 1.6, x: 1.7, mode: 'tir', why: '굴절률 1.6인 액체의 임계각은 약 38.7°. tanθ = 1.7 ÷ 2 → θ ≈ 40.4°로 전반사! 굴절률이 클수록 전반사가 잘 일어나요.'},
+  {t: 'pe', metal: '나트륨', W: 2.28, Vs: .8, why: '광자 에너지 = 2.28 + 0.80 = 3.08 eV → λ = 1240 ÷ 3.08 ≈ 403 nm (보라색). 빛의 세기를 바꿔도 정지 전압은 그대로였죠?'},
+  {t: 'pe', metal: '아연', W: 4.3, thr: true, why: '문턱 파장 = 1240 ÷ 4.3 ≈ 288 nm. 이보다 긴 파장은 아무리 밝게 비춰도 광전자가 나오지 않아요 — 빛이 파동이라면 설명할 수 없는 결과!'},
+  {t: 'pe', metal: '세슘', W: 2.14, Vs: 1, why: '1240 ÷ (2.14 + 1.00) ≈ 395 nm. 일함수가 작은 세슘은 가시광선으로도 광전자가 잘 나와 광전관에 쓰여요.'}];
+let ui = {}, A, Lm, In, shot = null, el = [];
+const deg = Math.PI / 180;
+const k = HS(app, {levels: LV, load(L){ shot = null; el = []; const pe = L.t === 'pe'; ui.a.parentElement.style.display = pe ? 'none' : ''; ui.p.parentElement.style.display = pe ? '' : 'none';
+  if (pe) k.mission(ui.g, `금속: <b>${L.metal}</b> (일함수 ${L.W} eV)<br>${L.thr ? '광전자가 나오는 <b>가장 긴 파장</b>을 찾으세요. (문턱 파장과 5 nm 이내)' : `정지 전압이 <b>${L.Vs.toFixed(2)} V</b>가 되게 하세요. (±0.05 V)`}`);
+  else k.mission(ui.g, `굴절률 <b>${L.n}</b>인 액체 속 레이저로 ${L.mode === 'tir' ? `<b>바닥의 과녁</b>(${L.x} m 앞)을 맞히세요. 수면에서 반사되어야 해요.` : `<b>공기 중 과녁</b>을 맞히세요.`}`);
+  A.set(30); Lm.set(500); }});
+// 수조: 레이저 깊이 1 m, 수면 위 과녁 높이 air (m)
+function tank(L, th){ const t = th * deg, sc = Math.sin(t) * L.n, crit = Math.asin(1 / L.n) / deg, xs = Math.tan(t) * 1;
+  if (th >= crit) return {tir: true, crit, xs, xe: xs + Math.tan(t) * 1}; const ta = Math.asin(sc); return {tir: false, crit, xs, ta, xa: xs + Math.tan(ta) * (L.air || 1)}; }
+app.onStart = () => { ui.g = app.panel('실험 과제'); ui.a = app.panel('레이저');
+  A = k.slider(ui.a, {label: '입사각', min: 0, max: 80, step: .1, val: 30, fmt: v => v.toFixed(1) + '°', on: () => { shot = null; }});
+  k.btn(ui.a, '🔦 레이저 발사', () => { const L = k.L(), r = tank(L, A.v); shot = r; sfx.zap();
+    if (L.mode === 'tir') { if (!r.tir) return k.fail(`빛이 수면 밖으로 빠져나갔어요 — 임계각 ${r.crit.toFixed(1)}°보다 작아요`); if (Math.abs(r.xe - L.x) > .08) return k.fail(`${r.xe.toFixed(2)} m 지점에 맞았어요 — 과녁은 ${L.x} m`); return k.win(ui.g, L.why, `${A.v.toFixed(1)}°`); }
+    if (r.tir) return k.fail('전반사되어 공기 중으로 나가지 못했어요'); if (Math.abs(r.xa - L.x) > .06) return k.fail(`${r.xa.toFixed(2)} m 위치를 지났어요 — 과녁은 ${L.x} m`); k.win(ui.g, L.why, `${A.v.toFixed(1)}°`); }, 'big alt');
+  ui.p = app.panel('광원');
+  Lm = k.slider(ui.p, {label: '파장', min: 200, max: 700, step: 1, val: 500, fmt: v => v + ' nm', on: () => { shot = null; }});
+  In = k.slider(ui.p, {label: '빛의 세기', min: 1, max: 5, step: 1, val: 3, fmt: v => '★'.repeat(v)});
+  k.btn(ui.p, '💡 빛 비추기', () => { const L = k.L(), E = 1240 / Lm.v, K = E - L.W; shot = {E, K}; sfx.zap();
+    if (K <= 0) { if (L.thr) return k.fail('광전자가 나오지 않아요 — 더 짧은 파장(큰 에너지)이 필요해요'); return k.fail(`광자 에너지 ${E.toFixed(2)} eV < 일함수 ${L.W} eV → 광전자 없음`); }
+    if (L.thr) { const th = 1240 / L.W; if (th - Lm.v > 5) return k.fail(`나오긴 하지만 더 긴 파장에서도 나와요 (지금 ${Lm.v} nm)`); return k.win(ui.g, L.why, `${Lm.v} nm`); }
+    if (Math.abs(K - L.Vs) > .05) return k.fail(`정지 전압 ${K.toFixed(2)} V — 목표 ${L.Vs} V`); k.win(ui.g, L.why, `${K.toFixed(2)} V`); }, 'big alt');
+  k.begin(); };
+function wl2rgb(l){ if (l < 380) return '#b48cff'; let r = 0, g = 0, b = 0; if (l < 440) { r = (440 - l) / 60; b = 1; } else if (l < 490) { g = (l - 440) / 50; b = 1; } else if (l < 510) { g = 1; b = (510 - l) / 20; } else if (l < 580) { r = (l - 510) / 70; g = 1; } else if (l < 645) { r = 1; g = (645 - l) / 65; } else r = 1; return `rgb(${r * 255 | 0},${g * 255 | 0},${b * 255 | 0})`; }
+app.step = dt => { const L = k.L(); if (!L || L.t !== 'pe' || !shot || shot.K <= 0) return; if (Math.random() < In.v * dt * 6) el.push({x: 0, y: Math.random(), v: Math.sqrt(shot.K) }); el.forEach(e => e.x += e.v * dt * .5); el = el.filter(e => e.x < 1); };
+k.draw((g, W, H) => { const L = k.L(), t = performance.now() / 1000; g.fillStyle = '#121a26'; g.fillRect(0, 0, W, H);
+  if (L.t === 'tank') { const sc = Math.min((W - 80) / 4, (H - 40) / 2.8), ox = 50, sy = H * .42, X = x => ox + x * sc, Y = d => sy + d * sc;
+    g.fillStyle = L.n > 1.5 ? 'rgba(200,160,90,.35)' : 'rgba(80,150,230,.3)'; g.fillRect(0, sy, W, Y(1) - sy); g.strokeStyle = '#8ecdf2'; g.lineWidth = 2; g.beginPath(); g.moveTo(0, sy); g.lineTo(W, sy); g.stroke(); g.fillStyle = '#5a5248'; g.fillRect(0, Y(1), W, 8);
+    D.text(g, `굴절률 ${L.n}`, W - 12, Y(.9), {size: 12, color: '#e8eef6', align: 'right', weight: 700}); D.text(g, '공기 1.00', W - 12, sy - 14, {size: 12, color: '#e8eef6', align: 'right'});
+    const lx = X(0), ly = Y(1); g.fillStyle = '#d0533f'; g.fillRect(lx - 10, ly - 8, 20, 10);
+    if (L.mode === 'tir') { D.text(g, '🎯', X(L.x), Y(1) - 8, {size: 22}); } else { D.text(g, '🎯', X(L.x), sy - (L.air || 1) * sc, {size: 22}); }
+    const r = tank(L, A.v), t0 = A.v * deg, sx = X(r.xs);
+    g.strokeStyle = 'rgba(255,255,255,.35)'; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(sx, sy - 40); g.lineTo(sx, sy + 60); g.stroke(); g.setLineDash([]);
+    const beam = shot ? '#ff3b3b' : 'rgba(255,80,80,.4)'; g.strokeStyle = beam; g.lineWidth = shot ? 3 : 2; g.beginPath(); g.moveTo(lx, ly); g.lineTo(sx, sy);
+    if (r.tir) g.lineTo(X(r.xe), Y(1)); else { g.lineTo(X(r.xa), sy - (L.air || 1) * sc); } g.stroke();
+    if (!r.tir) { g.strokeStyle = 'rgba(255,80,80,.25)'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(sx, sy); g.lineTo(X(r.xs * 2), Y(1)); g.stroke(); }
+    D.text(g, `θ = ${A.v.toFixed(1)}° (임계각 ${r.crit.toFixed(1)}°)`, W / 2, 20, {size: 14, weight: 700, color: r.tir ? '#9be3b5' : '#f6d365'}); return; }
+  // 광전관
+  const c = wl2rgb(Lm.v), cx = W * .25, cy = H * .5; g.fillStyle = 'rgba(255,255,255,.05)'; D.rr(g, W * .15, H * .2, W * .7, H * .6, 30); g.fill(); g.strokeStyle = '#8ea3bd'; g.lineWidth = 2; g.stroke();
+  g.fillStyle = '#b0b8c4'; g.fillRect(cx - 10, H * .28, 18, H * .44); D.text(g, L.metal, cx, H * .76 + 8, {size: 12, color: '#e8eef6', weight: 700}); g.fillStyle = '#6a7380'; g.fillRect(W * .74, H * .28, 10, H * .44); D.text(g, '집전극', W * .745, H * .76 + 8, {size: 12, color: '#e8eef6'});
+  for (let i = 0; i < In.v * 3; i++) { const p = (t * .8 + i / (In.v * 3)) % 1; g.strokeStyle = c; g.globalAlpha = .7; g.lineWidth = 2; g.beginPath(); for (let s = 0; s < 30; s += 2) g.lineTo(W * .02 + (cx - W * .02) * p - s, H * (.3 + .4 * ((i * .37) % 1)) - s * .6 + 3 * Math.sin(s / 2)); g.stroke(); g.globalAlpha = 1; }
+  el.forEach(e => { g.fillStyle = '#8ecdf2'; g.beginPath(); g.arc(cx + 12 + e.x * (W * .74 - cx - 14), H * (.3 + .4 * e.y), 3.5, 0, 7); g.fill(); });
+  const E = 1240 / Lm.v; D.text(g, `광자 1개 에너지 ${E.toFixed(2)} eV`, W / 2, H * .1, {size: 15, weight: 700, color: c}); if (shot) D.text(g, shot.K > 0 ? `광전자 최대 운동 에너지 ${shot.K.toFixed(2)} eV → 정지 전압 ${shot.K.toFixed(2)} V` : '광전자가 나오지 않아요', W / 2, H * .9, {size: 14, weight: 700, color: shot.K > 0 ? '#9be3b5' : '#f28c7a'});
+});
+</script>
+</body>
+</html>
