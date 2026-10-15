@@ -47,10 +47,10 @@ k.draw((g, W, H) => { const L = k.L(), ty = H * .48, sc = (W - 60) / 14, X0 = 30
   if (L.t === 'push') { const a = run ? run.x / L.m : 0, t = Math.min(tt, L.T), x = 1 + .5 * a * t * t + (tt > L.T ? a * L.T * (tt - L.T) : 0), v = a * Math.min(tt, L.T); cart(Math.min(13.5, x), L.m, 'A', '#2f6fd0');
     if (run && tt < L.T) D.arrow(g, PX(x) - 70, ty - 26, PX(x) - 36, ty - 26, '#d0533f', 4);
     D.text(g, `t = ${Math.min(tt, L.T).toFixed(2)} s   v = ${v.toFixed(2)} m/s`, W / 2, H * .2, {size: 18, weight: 700, color: '#1d3a58'}); return; }
-  const tc = 1.2; let xa, xb; const v0 = L.t === 'recoil' ? 0 : run ? run.x : 0, mB = L.t === 'recoil' ? (run ? run.x : X.v) : L.mB;
-  if (L.t === 'recoil') { xa = 7.2 + (r ? r.vA * tt * .6 : 0); xb = 6 + (r ? r.vB * tt * .6 : 0); }
-  else { const xc = 6.2; if (!run || tt < tc) { xa = xc - v0 * (tc - tt) * .6 * (run ? 1 : 0) - (run ? 0 : 3); xb = xc + 1.1; if (!run) xa = 2.5; else xa = Math.max(.5, xc - v0 * .6 * (tc - tt)); }
-    else { xa = xc + r.vA * (tt - tc) * .6; xb = xc + 1.1 + r.vB * (tt - tc) * .6; } if (L.t === 'stick' && run && tt >= tc) xb = xa + 1.1; }
+  const tc = 1.2; let xa, xb; const v0 = L.t === 'recoil' ? 0 : run ? run.x : 0, mB = L.t === 'recoil' ? (run ? run.x : X.v) : L.mB, gm = ((26 + L.mA * 10) + (26 + mB * 10)) / 2 / sc;
+  if (L.t === 'recoil') { xa = 6.6 + gm / 2 + (r ? r.vA * tt * .6 : 0); xb = 6.6 - gm / 2 + (r ? r.vB * tt * .6 : 0); }
+  else { const xc = 6.2; if (!run || tt < tc) { xa = xc - v0 * (tc - tt) * .6 * (run ? 1 : 0) - (run ? 0 : 3); xb = xc + gm; if (!run) xa = 2.5; else xa = Math.max(.5, xc - v0 * .6 * (tc - tt)); }
+    else { xa = xc + r.vA * (tt - tc) * .6; xb = xc + gm + r.vB * (tt - tc) * .6; } if (L.t === 'stick' && run && tt >= tc) xb = xa + gm; }
   if (L.t === 'recoil' && !run) { g.strokeStyle = '#555'; g.lineWidth = 2; g.beginPath(); for (let i = 0; i <= 8; i++) g.lineTo(PX(6.3 + i * .07), ty - 22 + (i % 2 ? 6 : -6)); g.stroke(); }
   cart(Math.min(13.6, Math.max(.4, xa)), L.mA, 'A', '#2f6fd0'); cart(Math.min(13.6, Math.max(.4, xb)), mB, 'B', '#d0533f');
   // 운동량 막대
