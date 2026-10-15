@@ -2,7 +2,7 @@
 
 2022 개정 교육과정 중학교 과학과 고등학교 통합과학·물리 단원별 시뮬레이션, 실험·게임, 학습지, 퀴즈, 수업 도구 모음입니다. 빌드 과정 없이 HTML 파일만으로 작동하는 정적 사이트입니다.
 
-주소: https://simtaesoo.github.io/science/
+주소: https://science.sts0614.workers.dev/
 
 ## 담긴 자료
 
@@ -28,14 +28,14 @@
 
 ## 교사 잠금
 
-Cloudflare Pages에서만 작동합니다(`functions/_middleware.js`). 로그인하지 않은 학생에게는 서버가 아래 내용을 지운 뒤 페이지를 보내므로, 페이지 소스를 열어도 보이지 않습니다.
+Cloudflare Workers에서 작동합니다(`worker.js`, 설정은 `wrangler.jsonc`). GitHub에 올리면 Cloudflare가 자동으로 다시 배포합니다. 로그인하지 않은 학생에게는 서버가 아래 내용을 지운 뒤 페이지를 보내므로, 페이지 소스를 열어도 보이지 않습니다.
 
 - 학습지 빈칸 정답, 정답 문장·그래프, '정답 보기' 버튼
 - 수업 슬라이드의 교사용 메모(`%`로 시작하는 줄)와 메모(N) 버튼
 - 퀴즈의 '골든벨(교사 진행)' 모드 (학생은 개인 풀이만)
 - 수업 진행 도구(`tools/class.html`) 전체
 
-**비밀번호 설정**: Cloudflare 대시보드 → 이 Pages 프로젝트 → Settings → Variables and Secrets → `TEACHER_PASSWORD` 추가(Secret 권장) → 다시 배포. 비밀번호는 저장소에 적지 않습니다. 바꾸면 기존 교사 로그인이 모두 풀립니다.
+**비밀번호 설정**: Cloudflare 대시보드 → Workers & Pages → science → Settings → Variables and Secrets → `TEACHER_PASSWORD`를 Secret으로 추가. 비밀번호는 저장소에 적지 않습니다. 바꾸면 기존 교사 로그인이 모두 풀립니다.
 
 **로그인**: 메인 화면 오른쪽 위 '교사 로그인' 또는 `/teacher`. 한 번 로그인하면 그 기기에서 30일 동안 유지되고, 페이지 아래 '교사 모드 끝내기'로 나갈 수 있습니다.
 

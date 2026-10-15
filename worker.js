@@ -1,5 +1,6 @@
-/* 교사 잠금 (Cloudflare Pages Functions)
-   비밀번호는 코드에 적지 않습니다. Cloudflare 대시보드 → 이 Pages 프로젝트 → Settings → Variables and Secrets 에
+/* 교사 잠금 (Cloudflare Workers, 설정은 wrangler.jsonc)
+   모든 요청이 이 코드를 먼저 거친 뒤 사이트 파일(env.ASSETS)을 받아 옵니다.
+   비밀번호는 코드에 적지 않습니다. Cloudflare 대시보드 → Workers & Pages → science → Settings → Variables and Secrets 에
    TEACHER_PASSWORD 라는 이름으로 넣어 두세요. 비밀번호를 바꾸면 기존 교사 로그인은 모두 풀립니다.
 
    학생(로그인 안 한 사람)에게는 서버에서 아래를 지운 뒤 페이지를 보냅니다. 페이지 소스를 열어도 보이지 않습니다.
@@ -12,13 +13,15 @@ const COOKIE = 'sci_teacher';
 const MAX_AGE = 60 * 60 * 24 * 30;          // 30일
 const TEACHER_ONLY = [/^\/tools\/class(\.html)?$/];
 
-export async function onRequest(ctx) {
-  const {request, env} = ctx;
+export default {
+  fetch(request, env) { return handle(request, env); }
+};
+
+async function handle(request, env) {
   const url = new URL(request.url);
   const path = url.pathname;
 
-  if (path.startsWith('/functions/')) return new Response('Not found', {status: 404});
-  if (path === '/teacher' || path === '/teacher/') return loginRoute(request, env, url);
+    if (path === '/teacher' || path === '/teacher/') return loginRoute(request, env, url);
   if (path === '/teacher/logout') return new Response(null, {status: 302, headers: {Location: '/', 'Set-Cookie': `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`, 'Cache-Control': 'no-store'}});
 
   const isTeacher = await checkCookie(request, env);
@@ -26,7 +29,7 @@ export async function onRequest(ctx) {
     return new Response(null, {status: 302, headers: {Location: '/teacher?next=' + encodeURIComponent(path + url.search), 'Cache-Control': 'no-store'}});
   }
 
-  const res = await ctx.next();
+  const res = await env.ASSETS.fetch(request);
   const type = res.headers.get('content-type') || '';
   if (!type.includes('text/html')) return res;
 
