@@ -17,67 +17,96 @@
 <link rel="stylesheet" href="assets/site.css">
 <script src="assets/catalog.js"></script>
 <style>
-.hero{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;padding-block:12px 4px}
-.hero h1{font-size:clamp(26px,4vw,40px)}
-.hero p{margin:6px 0 0;color:var(--muted);max-width:56ch}
-.progress{font-family:var(--f-mono);font-size:13px;color:var(--muted);text-align:right}
-.progress b{font-size:22px;color:var(--ink)}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
-@media (max-width:400px){.units{grid-template-columns:1fr}}
-.unit{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
-.unit-head{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:baseline}
-.unit-no{font-family:var(--f-mono);font-size:22px;font-weight:600;color:var(--area);grid-row:span 2;line-height:1}
-.unit-title{font-weight:700;font-size:16px}
-.unit-meta{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}
-.items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-.items li{display:flex;align-items:center;gap:8px;font-size:14px;min-width:0}
-.items .tag{font-size:11px;border-radius:4px;padding:1px 6px;flex:none;border:1px solid var(--line);color:var(--muted)}
-.items a{flex:1;min-width:0;text-decoration:none;font-weight:500}
-.items a:hover{text-decoration:underline}
-.items .ready .tag{background:var(--area);border-color:var(--area);color:var(--surface)}
-.items .ready .tag.k-app{background:#f6d365;border-color:#d9b23f;color:#2a2a1a;font-weight:700}
-.items .ready .tag.k-deck{background:#ffe08a;border-color:#e6c157;color:#3a2c00;font-weight:700}
-.items .ready .tag.k-quiz{background:#c7b3f2;border-color:#a68fd8;color:#24183f;font-weight:700}
-.items .plan span.t{color:var(--muted);flex:1;min-width:0}
-.items .soon{font-size:11px;color:var(--muted);flex:none}
-.seg .lvl{font-size:11px;color:var(--muted);padding:0 4px 0 10px;align-self:center;font-weight:700}
-.seg .lvl:first-child{padding-left:4px}
-#grades{flex-wrap:wrap}
-.filter{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.filter label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
-.toolstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.toolstrip a{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-decoration:none;min-width:0}
+/* 메인 화면: 앱 막대 → 검색 → 학년 → 단원 카드 */
+.appbar .spacer{flex:1}
+.intro{display:flex;flex-direction:column;gap:12px;padding-top:6px}
+.intro h1{font-size:clamp(26px,4.4vw,40px);letter-spacing:-.02em;line-height:1.15}
+.intro p{margin:0;color:var(--muted);max-width:52ch}
+.search{position:relative;max-width:560px}
+.search input{width:100%;font:inherit;font-size:16px;padding:12px 14px 12px 42px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);box-shadow:0 1px 0 var(--line)}
+.search input::placeholder{color:var(--muted)}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted);pointer-events:none}
+.search input:focus-visible{outline:2px solid var(--phy);outline-offset:1px}
+.bar{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap}
+.seg .lvl{font-size:11px;color:var(--muted);padding:0 4px 0 10px;align-self:center;font-weight:700;flex:none}
+.seg .lvl:first-child{padding-left:6px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.toolstrip{display:flex;gap:10px;flex-wrap:wrap}
+.toolstrip a{display:inline-flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 14px 8px 10px;text-decoration:none;min-width:0}
 .toolstrip a:hover{border-color:var(--muted)}
-.toolstrip .ic{font-size:22px;flex:none}
+.toolstrip .ic{font-size:20px;flex:none}
 .toolstrip b{display:block;font-size:14px}
 .toolstrip span.d{display:block;font-size:12px;color:var(--muted)}
+.toolstrip .lock{font-size:11px;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-left:4px}
+.status{font-size:13px;color:var(--muted);margin:0}
+
+.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;align-items:start}
+@media (max-width:420px){.units{grid-template-columns:1fr}}
+.unit{container-type:inline-size;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0;box-shadow:0 1px 0 var(--line)}
+.unit-head{display:flex;gap:14px;align-items:center}
+/* 단원 번호는 주기율표 칸처럼 */
+.tile{flex:none;width:58px;height:62px;border:1.5px solid var(--area);border-radius:8px;display:flex;flex-direction:column;justify-content:space-between;padding:4px 6px 5px;background:color-mix(in srgb,var(--area) 8%,var(--surface));position:relative}
+.tile .no{font-family:var(--f-mono);font-weight:600;font-size:24px;line-height:1;color:var(--area);margin-top:6px}
+.tile .cd{font-family:var(--f-mono);font-size:9.5px;color:var(--muted);letter-spacing:-.02em;white-space:nowrap}
+.tile::before{content:attr(data-g);position:absolute;top:3px;right:5px;font-size:9px;font-weight:700;color:var(--area)}
+.unit h3{margin:0;font-size:17px;line-height:1.35;text-wrap:balance}
+.unit .cnt{margin:2px 0 0;font-size:12px;color:var(--muted)}
+
+.lessons{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.lessons li{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:2px 8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.lessons .ln{font-family:var(--f-mono);font-size:13px;font-weight:600;color:var(--area);text-align:center;white-space:nowrap}
+.lessons .ln.wide{font-size:11px}
+.lessons .lt{min-width:0;font-weight:500;text-decoration:none;color:var(--ink)}
+a.lt:hover{color:var(--area);text-decoration:underline;text-underline-offset:3px}
+.acts{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+@container (max-width:480px){.lessons li{grid-template-columns:26px minmax(0,1fr);align-items:start;padding:9px 0}.lessons .ln{grid-row:span 2;line-height:1.5}.acts{justify-content:flex-start;margin-top:4px}}
+.act{font-size:12px;font-weight:500;text-decoration:none;border-radius:999px;padding:3px 10px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;min-height:26px;display:inline-flex;align-items:center}
+.act:hover{border-color:var(--area);color:var(--area)}
+.act.sim{background:var(--area);border-color:var(--area);color:var(--surface)}
+.act.sim:hover{color:var(--surface);filter:brightness(1.08)}
+
+.extras{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.extra{display:flex;flex-direction:column;gap:2px;text-decoration:none;border-radius:10px;padding:8px 10px;background:var(--soft);border:1px solid transparent;min-width:0}
+.extra:hover{border-color:var(--line)}
+.extra .xk{font-size:11px;font-weight:700}
+.extra .xt{font-size:13px;line-height:1.4;color:var(--ink)}
+.extra.k-app .xk{color:#9a6b00}.extra.k-quiz .xk{color:#6b4fc0}.extra.k-ws .xk{color:var(--area)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .extra.k-app .xk{color:#f0c35a}:root:not([data-theme="light"]) .extra.k-quiz .xk{color:#bfa8f5}}
+:root[data-theme="dark"] .extra.k-app .xk{color:#f0c35a}:root[data-theme="dark"] .extra.k-quiz .xk{color:#bfa8f5}
+.soon{font-size:11px;color:var(--muted)}
+mark{background:color-mix(in srgb,var(--warn) 35%,transparent);color:inherit;border-radius:3px;padding:0 1px}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:24px;text-align:center;color:var(--muted)}
+.empty button{margin-top:10px}
 </style>
 </head>
 <body data-root="./">
 <div class="wrap">
-  <section class="hero">
-    <div>
-      <div class="eyebrow" id="curr"></div>
-      <h1 id="siteName">중·고 과학 실험실</h1>
-      <p>단원마다 직접 조작해 보는 시뮬레이션, 흥미를 끄는 실험·게임, 수업에 바로 쓰는 학습지를 모았습니다. 학년·과목을 고르고 단원을 찾아 들어가세요.</p>
-    </div>
-    <div class="progress" id="progress"></div>
-  </section>
-
-  <nav class="toolstrip" aria-label="수업 도구">
-    <a href="tools/class.html"><span class="ic">⏱</span><span><b>수업 진행 도구</b><span class="d">타이머 · 발표자 뽑기 · 모둠 편성</span></span></a>
+  <nav class="topbar appbar" aria-label="상단">
+    <a class="brand" href="index.html"><img src="icons/icon-192.png" alt=""><span id="siteName">중·고 과학 실험실</span></a>
+    <span class="spacer"></span>
+    <span id="who"></span>
   </nav>
 
-  <div class="filter">
-    <div class="seg" role="group" aria-label="학년" id="grades"></div>
-    <label for="onlyReady"><input type="checkbox" id="onlyReady"> 완성된 자료만 보기</label>
+  <section class="intro">
+    <h1 id="title">오늘 수업, 어디부터 열까요?</h1>
+    <p id="curr"></p>
+    <label class="search" for="q">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="단원·개념 검색 (예: 열평형, 전류)" autocomplete="off" aria-label="자료 검색">
+    </label>
+  </section>
+
+  <nav class="toolstrip" aria-label="수업 도구" id="tools"></nav>
+
+  <div class="bar">
+    <div class="seg" role="group" aria-label="학년·과목" id="grades"></div>
+    <div class="legend" aria-label="영역 색">
+      <span><i class="area-dot area-phy"></i>물리</span><span><i class="area-dot area-chem"></i>화학</span>
+      <span><i class="area-dot area-bio"></i>생명과학</span><span><i class="area-dot area-earth"></i>지구과학</span><span><i class="area-dot area-gen"></i>통합</span>
+    </div>
   </div>
-  <div class="legend">
-    <span><i class="area-dot area-phy"></i>물리</span><span><i class="area-dot area-chem"></i>화학</span>
-    <span><i class="area-dot area-bio"></i>생명과학</span><span><i class="area-dot area-earth"></i>지구과학</span><span><i class="area-dot area-gen"></i>통합</span>
-  </div>
+  <p class="status" id="status" aria-live="polite"></p>
 
   <div class="units" id="units"></div>
   <footer class="site" data-footer></footer>
@@ -85,40 +114,90 @@
 <script>
 (() => {
   const $ = id => document.getElementById(id);
-  $('siteName').textContent = SITE.name; document.title = SITE.name;
-  $('curr').textContent = SITE.curriculum + ' · 중학교 과학 · 고등학교 통합과학·물리';
+  const T = window.IS_TEACHER;   // true: 교사, false: 학생, undefined: 잠금 서버 없음
+  document.title = SITE.name; $('siteName').textContent = SITE.name;
+  $('curr').textContent = `${SITE.curriculum} 중학교 과학, 고등학교 통합과학·물리. 단원마다 시뮬레이션, 수업 슬라이드, 게임, 퀴즈, 학습지가 있어요.`;
+  $('who').innerHTML = T === true ? '<a class="who" href="/teacher">교사 모드</a>' : T === false ? '<a class="btn" href="/teacher?next=/">교사 로그인</a>' : '';
+  $('tools').innerHTML = `<a href="tools/class.html"><span class="ic">⏱</span><span><b>수업 진행 도구${T === false ? '<span class="lock">교사</span>' : ''}</b><span class="d">타이머, 발표자 뽑기, 모둠 편성</span></span></a>`;
+
+  const KIND = {sim: '시뮬레이션', deck: '슬라이드', app: '게임', quiz: '퀴즈', ws: '학습지'};
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+  const short = g => (g.level || '중') === '중' ? '중' + parseInt(g.grade) : g.book.replace('통합과학', '통과').replace('역학과 에너지', '역학').replace('전자기와 양자', '전자기');
+
+  // 시뮬레이션·슬라이드를 차시별로 묶는다
+  const range = t => { const m = t.match(/(\d+)(?:\s*~\s*(\d+))?\s*차시/); return m ? [+m[1], +(m[2] || m[1])] : null; };
+  const clean = t => t.replace(/^수업 슬라이드\s*·\s*/, '').replace(/^\d+(?:\s*~\s*\d+)?\s*차시\s*/, '').replace(/\s*\(\d+쪽\)\s*$/, '');
+  function group(items) {
+    const lessons = [], extras = [];
+    for (const it of items) {
+      const r = range(it.title);
+      if ((it.kind === 'sim' || it.kind === 'deck') && r) {
+        let L = lessons.find(l => r[0] >= l.r[0] && r[0] <= l.r[1]);
+        if (!L) { L = {r, title: null, sim: [], deck: []}; lessons.push(L); }
+        if (it.kind === 'sim' && !L.title) { L.title = clean(it.title); L.r = [Math.min(L.r[0], r[0]), Math.max(L.r[1], r[1])]; }
+        if (!L.title && !L.dt) L.dt = clean(it.title);
+        L[it.kind].push(it);
+      } else extras.push(it);
+    }
+    return {lessons, extras};
+  }
+
+  const units = CATALOG.flatMap(g => g.units.map(u => ({...u, g})));
   let grade = (location.hash || '#g1').slice(1);
   if (!CATALOG.some(g => g.id === grade)) grade = 'g1';
-  let onlyReady = false;
-
-  const all = CATALOG.flatMap(g => g.units.flatMap(u => u.items));
-  const done = all.filter(i => i.href).length;
-  $('progress').innerHTML = `<b>${done}</b> / ${all.length}<br>완성된 자료`;
+  let q = '';
 
   const lv = g => g.level || '중';
-  $('grades').innerHTML = ['중', '고'].map(L => `<span class="lvl">${L === '중' ? '중학교' : '고등학교'}</span>` + CATALOG.filter(g => lv(g) === L).map(g => `<button type="button" data-g="${g.id}">${L === '중' ? g.grade + ' · ' + g.book : g.book}</button>`).join('')).join('');
-  $('grades').querySelectorAll('button').forEach(b => b.onclick = () => { grade = b.dataset.g; history.replaceState(null, '', '#' + grade); render(); });
-  $('onlyReady').onchange = e => { onlyReady = e.target.checked; render(); };
+  $('grades').innerHTML = ['중', '고'].map(L => `<span class="lvl">${L === '중' ? '중학교' : '고등학교'}</span>` + CATALOG.filter(g => lv(g) === L).map(g => `<button type="button" data-g="${g.id}">${L === '중' ? g.grade : g.book}</button>`).join('')).join('');
+  $('grades').querySelectorAll('button').forEach(b => b.onclick = () => { grade = b.dataset.g; q = ''; $('q').value = ''; history.replaceState(null, '', '#' + grade); render(); });
+  $('q').addEventListener('input', e => { q = e.target.value.trim(); render(); });
+
+  const hi = t => { if (!q) return esc(t); const i = t.toLowerCase().indexOf(q.toLowerCase()); return i < 0 ? esc(t) : esc(t.slice(0, i)) + '<mark>' + esc(t.slice(i, i + q.length)) + '</mark>' + esc(t.slice(i + q.length)); };
+  const link = (it, cls, label) => it.href ? `<a class="${cls}" href="${it.href}">${label}</a>` : `<span class="${cls}" aria-disabled="true">${label} <span class="soon">준비 중</span></span>`;
+
+  function card(u, showGrade) {
+    const {lessons, extras} = group(u.items);
+    const nSim = u.items.filter(i => i.kind === 'sim').length, nDeck = u.items.filter(i => i.kind === 'deck').length;
+    const rows = lessons.map(L => {
+      const n = L.r[0] === L.r[1] ? L.r[0] : L.r[0] + '~' + L.r[1];
+      const title = L.title || L.dt;
+      const main = L.sim[0] && L.sim[0].href ? `<a class="lt" href="${L.sim[0].href}">${hi(title)}</a>` : `<span class="lt">${hi(title)}</span>`;
+      const acts = [
+        ...L.sim.map((s, k) => link(s, 'act sim', k ? '시뮬레이션 ' + (k + 1) : '시뮬레이션')),
+        ...L.deck.map(d => { const p = d.title.match(/\((\d+)쪽\)/); return link(d, 'act', '슬라이드' + (L.deck.length > 1 ? ' ' + (range(d.title) || [''])[0] + '차시' : '') + (p ? ' ' + p[1] + '쪽' : '')); })
+      ].join('');
+      return `<li><span class="ln${String(n).length > 2 ? ' wide' : ''}">${n}</span>${main}<span class="acts">${acts}</span></li>`;
+    }).join('');
+    const ex = extras.map(it => {
+      const t = it.title.replace(/^(게임|실험):\s*/, '').replace(/^퀴즈 배틀\s*·\s*/, '').replace(/^\(덤\)\s*/, '');
+      const k = it.kind === 'sim' ? '시뮬레이션' : it.kind === 'app' && /^실험/.test(it.title) ? '실험' : KIND[it.kind] || '자료';
+      return it.href ? `<a class="extra k-${it.kind}" href="${it.href}"><span class="xk">${k}</span><span class="xt">${hi(t)}</span></a>` : `<span class="extra k-${it.kind}"><span class="xk">${k}</span><span class="xt">${hi(t)} <span class="soon">준비 중</span></span></span>`;
+    }).join('');
+    const no = String(u.disp || u.no).padStart(2, '0');
+    return `<article class="unit area-${u.area}">
+      <header class="unit-head"><div class="tile" data-g="${showGrade ? short(u.g) : ''}"><span class="no">${no}</span><span class="cd">${esc(u.code)}</span></div>
+        <div><h3>${hi(u.title)}</h3><p class="cnt">${lessons.length}차시 · 시뮬레이션 ${nSim} · 슬라이드 ${nDeck}</p></div></header>
+      ${rows ? `<ol class="lessons">${rows}</ol>` : ''}
+      ${ex ? `<div class="extras">${ex}</div>` : ''}</article>`;
+  }
 
   function render() {
-    $('grades').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.g === grade));
-    const g = CATALOG.find(x => x.id === grade);
-    const units = g.units.filter(u => !onlyReady || u.items.some(i => i.href));
-    $('units').innerHTML = units.map(u => {
-      const items = u.items.filter(i => !onlyReady || i.href).map(i => {
-        const tag = `<span class="tag k-${i.kind}">${{ws: '학습지', app: '실험·게임', sim: '시뮬레이션', quiz: '퀴즈', deck: '수업 슬라이드'}[i.kind] || '자료'}</span>`;
-        return i.href
-          ? `<li class="ready">${tag}<a href="${i.href}">${i.title}</a></li>`
-          : `<li class="plan">${tag}<span class="t">${i.title}</span><span class="soon">준비 중</span></li>`;
-      }).join('');
-      return `<article class="unit area-${u.area}">
-        <div class="unit-head"><span class="unit-no">${String(u.disp || u.no).padStart(2, '0')}</span>
-          <span class="unit-title">${u.title}</span>
-          <span class="unit-meta"><span class="code">${u.code}</span>${u.items.filter(i => i.href).length}/${u.items.length} 완성</span></div>
-        <ul class="items">${items}</ul></article>`;
-    }).join('') || '<p class="note">이 학년에는 아직 완성된 자료가 없습니다.</p>';
+    $('grades').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(!q && b.dataset.g === grade)));
+    let list;
+    if (q) {
+      const k = q.toLowerCase();
+      list = units.filter(u => (u.title + ' ' + u.code + ' ' + u.items.map(i => i.title).join(' ')).toLowerCase().includes(k));
+      $('status').textContent = list.length ? `'${q}' 검색 결과: 단원 ${list.length}개` : '';
+    } else {
+      list = units.filter(u => u.g.id === grade);
+      $('status').textContent = '';
+    }
+    $('units').innerHTML = list.map(u => card(u, !!q)).join('') ||
+      `<div class="empty">'${esc(q)}'에 맞는 단원이 없어요. 다른 낱말로 찾아보세요.<br><button class="btn" type="button" id="clr">검색 지우기</button></div>`;
+    const c = $('clr'); if (c) c.onclick = () => { q = ''; $('q').value = ''; render(); $('q').focus(); };
   }
   render();
+  const seg = $('grades'), sel = seg.querySelector('[aria-pressed="true"]'); if (sel && seg.scrollWidth > seg.clientWidth) seg.scrollLeft = sel.offsetLeft - seg.clientWidth / 2 + sel.offsetWidth / 2;
 })();
 </script>
 </body>

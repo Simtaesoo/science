@@ -2,7 +2,7 @@
    - 우리 사이트 파일: 인터넷이 되면 항상 최신 파일을 받고(받은 것은 저장), 끊겼을 때만 저장본을 씁니다.
      그래서 GitHub에 자료를 올리면 앱에도 바로 반영됩니다. 이 파일을 고칠 필요가 없습니다.
    - 글꼴·QR 라이브러리 같은 외부 파일: 저장본을 먼저 쓰고 뒤에서 새로 받아 둡니다. */
-const CACHE = 'science-v1';
+const CACHE = 'science-v2';
 const CORE = [
   './', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png',
   'assets/site.css', 'assets/catalog.js', 'assets/simkit.js', 'assets/app.css', 'assets/app.js',
@@ -25,6 +25,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (!url.protocol.startsWith('http')) return;
+  if (url.pathname.startsWith('/teacher')) return;   // 교사 로그인 화면은 저장하지 않음
 
   if (url.origin === location.origin) {
     // 최신 우선, 끊기면 저장본

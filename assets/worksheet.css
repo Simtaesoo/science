@@ -113,3 +113,5 @@ table.ws{border-collapse:collapse;width:100%;font-size:9.5pt}
 }
 .memo{display:flex;flex-direction:column;gap:1mm}
 .memo-t{font-size:8.5pt;color:var(--muted);font-weight:700;letter-spacing:.04em}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}

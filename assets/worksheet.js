@@ -6,6 +6,9 @@ window.addEventListener('DOMContentLoaded', () => {
     ansBtn.classList.toggle('on', on);
     ansBtn.textContent = on ? '정답 숨기기' : '정답 보기';
   };
+  // 학생 화면(교사 로그인 전)에는 정답 보기 대신 교사 로그인 링크
+  const tb = document.querySelector('.toolbar');
+  if (tb && window.IS_TEACHER === false) { const a = document.createElement('a'); a.href = '/teacher?next=' + encodeURIComponent(location.pathname + location.search); a.textContent = '교사 로그인'; tb.insertBefore(a, tb.querySelector('[data-print]')); }
   const pr = document.querySelector('[data-print]');
   if (pr) pr.onclick = () => window.print();
 

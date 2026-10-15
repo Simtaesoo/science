@@ -15,11 +15,13 @@
 <script>
 const U = (new URLSearchParams(location.search).get('u') || '1').split(',').map(Number).filter(n => QB[n]);
 const units = CATALOG.flatMap(g => g.units.map(u => ({...u, grade: g.grade, gid: g.id, book: g.book, level: g.level}))), info = units.filter(u => U.includes(u.no));
+const TEACHER = window.IS_TEACHER !== false;   // 교사 로그인 안 한 학생에게는 '골든벨(교사 진행)' 모드를 숨긴다
+if (!TEACHER) { try { localStorage.setItem('sciapp:bell' + U.join('_') + ':mode', '"solo"'); } catch (e) {} }
 const app = AppKit({
   id: 'bell' + U.join('_'), title: '퀴즈 배틀 · 골든벨', unit: info.map(u => `${u.level === '고' ? u.book : u.grade} ${String(u.disp || u.no).padStart(2, '0')} ${u.title}`).join(' / '), back: '../index.html' + (info[0] ? '#' + info[0].gid : ''), dark: true,
-  lead: '<b>골든벨 모드</b>: 선생님이 화면을 띄우고 진행해요. 학생들은 보드판에 답을 쓰고, 정답을 공개한 뒤 맞힌 모둠을 눌러 점수를 줘요.<br><b>개인 모드</b>: 혼자 보기를 눌러 풀어요.',
-  howto: ['문제마다 제한 시간이 있어요. 시간이 끝나면 정답이 자동 공개돼요.', '골든벨 모드에서는 오른쪽 모둠 버튼으로 점수를 줘요. 마지막 문제는 <b>점수 2배</b>!', '해설까지 읽고 다음 문제로 넘어가세요.'],
-  options: [{key: 'mode', label: '모드', choices: [['bell', '골든벨(교사 진행)'], ['solo', '개인 풀이']], def: 'bell'}, {key: 'sec', label: '제한 시간', choices: [[10, '10초'], [20, '20초'], [30, '30초']], def: 20}, {key: 'players', label: '모둠', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠'], [5, '5모둠'], [6, '6모둠']], def: 4}],
+  lead: !TEACHER ? '보기를 눌러 혼자 풀어요. 모둠이 번갈아 풀 수도 있어요. 선생님이 진행하는 <b>골든벨 모드</b>는 교사 로그인 후 열려요.' : '<b>골든벨 모드</b>: 선생님이 화면을 띄우고 진행해요. 학생들은 보드판에 답을 쓰고, 정답을 공개한 뒤 맞힌 모둠을 눌러 점수를 줘요.<br><b>개인 모드</b>: 혼자 보기를 눌러 풀어요.',
+  howto: ['문제마다 제한 시간이 있어요. 시간이 끝나면 정답이 자동 공개돼요.', TEACHER ? '골든벨 모드에서는 오른쪽 모둠 버튼으로 점수를 줘요. 마지막 문제는 <b>점수 2배</b>!' : '모둠을 고르면 모둠이 한 문제씩 번갈아 풀어요. 맞히면 그 모둠 점수가 올라가요.', '해설까지 읽고 다음 문제로 넘어가세요.'],
+  options: [{key: 'mode', label: '모드', choices: TEACHER ? [['bell', '골든벨(교사 진행)'], ['solo', '개인 풀이']] : [['solo', '개인 풀이']], def: TEACHER ? 'bell' : 'solo'}, {key: 'sec', label: '제한 시간', choices: [[10, '10초'], [20, '20초'], [30, '30초']], def: 20}, {key: 'players', label: '모둠', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠'], [5, '5모둠'], [6, '6모둠']], def: 4}],
   recap: '틀린 문제의 해설을 다시 읽고, 시뮬레이션과 학습지로 개념을 복습해 보세요.', startLabel: '퀴즈 시작'
 });
 const {S, sfx, toast} = app, D = Draw;

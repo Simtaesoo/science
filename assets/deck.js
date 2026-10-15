@@ -86,7 +86,7 @@
   const notes = document.createElement('div'); notes.className = 'notes'; body.appendChild(notes);
   const ov = document.createElement('div'); ov.className = 'grid-ov'; body.appendChild(ov);
   const bar = document.createElement('div'); bar.className = 'bar';
-  bar.innerHTML = `<a href="${esc(back)}">← 목록</a><span class="ttl">${esc(document.title)}</span><button type="button" data-a="prev" aria-label="이전">◀</button><span class="pg"></span><button type="button" data-a="next" aria-label="다음">▶</button><button type="button" data-a="ov">전체 보기 (O)</button><button type="button" data-a="notes">메모 (N)</button><button type="button" data-a="fs">전체 화면 (F)</button><button type="button" data-a="print">인쇄</button>`;
+  bar.innerHTML = `<a href="${esc(back)}">← 목록</a><span class="ttl">${esc(document.title)}</span><button type="button" data-a="prev" aria-label="이전">◀</button><span class="pg"></span><button type="button" data-a="next" aria-label="다음">▶</button><button type="button" data-a="ov">전체 보기 (O)</button>${window.IS_TEACHER === false ? '' : '<button type="button" data-a="notes">메모 (N)</button>'}<button type="button" data-a="fs">전체 화면 (F)</button><button type="button" data-a="print">인쇄</button>${window.IS_TEACHER === false ? `<a href="/teacher?next=${encodeURIComponent(location.pathname)}">교사 로그인</a>` : ''}`;
   body.appendChild(bar);
   const els = [...stage.querySelectorAll('.slide')];
   const frags = els.map(el => [...el.querySelectorAll('.frag, .blank')]);
@@ -102,7 +102,7 @@
   bar.querySelectorAll('[data-a]').forEach(b => b.onclick = () => act[b.dataset.a]());
   addEventListener('keydown', e => { if (e.target.closest && e.target.closest('input,textarea')) return; const k = e.key;
     if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(k)) { e.preventDefault(); next(); } else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(k)) { e.preventDefault(); prev(); }
-    else if (k === 'Home') go(0); else if (k === 'End') go(els.length - 1); else if (k === 'o' || k === 'O') act.ov(); else if (k === 'n' || k === 'N') act.notes(); else if (k === 'f' || k === 'F') act.fs(); else if (k === 'Escape') ov.classList.remove('on'); });
+    else if (k === 'Home') go(0); else if (k === 'End') go(els.length - 1); else if (k === 'o' || k === 'O') act.ov(); else if ((k === 'n' || k === 'N') && window.IS_TEACHER !== false) act.notes(); else if (k === 'f' || k === 'F') act.fs(); else if (k === 'Escape') ov.classList.remove('on'); });
   stage.addEventListener('click', e => { const o = e.target.closest('.opt'); if (o) { const q = o.closest('.quiz'), ok = o.dataset.ok === '1'; o.classList.add(ok ? 'right' : 'wrong'); if (ok) { const ex = q.querySelector('.expl'), k = frags[i].indexOf(ex); if (k >= 0 && k >= f) { for (let j = f; j <= k; j++) showFrag(frags[i][j], true); f = k + 1; } } return; } if (e.target.closest('a,button,iframe,.frame')) return; next(); });
   let tx = null; stage.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive: true}); stage.addEventListener('touchend', e => { if (tx === null) return; const d = e.changedTouches[0].clientX - tx; if (Math.abs(d) > 50) { d < 0 ? next() : prev(); } tx = null; });
   addEventListener('resize', fit); fit();
