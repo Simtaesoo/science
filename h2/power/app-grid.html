@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>전력망 운영 센터 · 고1 에너지와 발전</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'h2grid', title: '전력망 운영 센터', unit: '고1 · 통합과학2 · 35 에너지와 발전', back: '../../index.html#hi2', sim: 'sim.html#grid',
+  lead: '발전소에서 만든 전기를 손실 없이 도시까지 보내고, 하루 동안 쉬지 않고 바뀌는 <b>전력 수요</b>를 맞추면서 <b>이산화 탄소 배출</b>을 줄이는 전력망 운영자가 되어 보세요!',
+  howto: ['송전 단계: <b>송전 전압</b>을 골라 손실 기준과 예산을 동시에 만족하세요. 손실 전력 = I²R, I = P ÷ V.', '발전 계획 단계: 발전원별 <b>설비 용량</b>을 정하세요. 24시간 동안 한 시간도 정전이 없어야 해요.', '<b>에너지 저장 장치(ESS)</b>는 낮에 남는 태양광 전기를 저장했다가 저녁에 내보내요.'],
+  recap: '<b>송전</b>: 같은 전력을 보낼 때 전압을 높이면 전류 I = P/V가 작아져 송전선의 손실 전력 P손실 = I²R이 전압의 제곱에 반비례해 줄어든다 → 변압기로 전압을 높여 송전하고 도시 가까이에서 낮춘다. <b>발전원</b>: 원자력은 출력이 일정해 기저 부하를, LNG는 출력 조절이 쉬워 수요 변화를 맡는다. 화석 연료 발전은 이산화 탄소를 배출하고, 태양광은 낮에만 발전하므로 저녁 수요를 맞추려면 <b>에너지 저장</b>이 필요하다. 에너지 효율과 탄소 배출, 안정적인 공급을 함께 고려해야 한다. (배출 계수: 석탄 0.82, LNG 0.37 kt/GWh — 게임용 단순화 값)',
+  startLabel: '운영 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const KV = [[22, 1], [66, 2], [154, 4], [345, 8], [765, 16]];
+const Dm = h => 55 + 15 * Math.exp(-(((h - 15) / 4) ** 2)) + 10 * Math.exp(-(((h - 20) / 2) ** 2)), So = h => h > 6 && h < 18 ? Math.sin(Math.PI * (h - 6) / 12) : 0;
+const LV = [
+  {t: 'line', P: 100, R: 10, lim: 5, bud: 5, why: '154 kV: I = 100 MW ÷ 154 kV ≈ 649 A → 손실 = 649² × 10 Ω ≈ 4.2 MW (4.2 %). 66 kV면 전류가 2.3배라 손실은 약 5.4배!'},
+  {t: 'line', P: 500, R: 5, lim: 1, bud: 16, why: '765 kV: I ≈ 654 A → 손실 ≈ 2.1 MW (0.43 %). 큰 전력을 멀리 보낼수록 초고압 송전이 필요해요.'},
+  {t: 'mix', max: {N: 30, C: 40, L: 40, S: 60, B: 0}, co2: 300, why: '원자력이 밤낮 일정한 기저 부하를, LNG가 오르내리는 수요를 맡았어요. 저녁 8시 무렵 최대 수요를 꼭 확인하세요!'},
+  {t: 'mix', max: {N: 30, C: 40, L: 40, S: 60, B: 0}, co2: 180, why: '석탄을 끄고 태양광을 늘리면 낮 동안 LNG 사용이 줄어 배출이 크게 줄어요. 하지만 해가 진 뒤의 수요는 다른 발전원이 맡아야 해요.'},
+  {t: 'mix', max: {N: 20, C: 40, L: 45, S: 80, B: 100}, co2: 220, why: '원자력이 줄면 태양광만으로는 저녁 수요를 감당할 수 없어요. 낮의 남는 전기를 ESS에 저장했다가 저녁에 쓰는 것이 핵심!'}];
+let ui = {}, kv = 154, sl = {}, res = null;
+function line(L){ const I = L.P * 1e6 / (kv * 1e3), loss = I * I * L.R / 1e6; return {I, loss, pct: loss / L.P * 100}; }
+function mix(){ const v = {}; for (const k2 in sl) v[k2] = sl[k2].v; let co2 = 0, short = 0, st = 0; const hr = [];
+  for (let h = 0; h < 24; h++) { const d = Dm(h); let r = Math.max(0, d - v.N); const nuc = Math.min(d, v.N), sp = v.S * So(h), s = Math.min(r, sp); st = Math.min(v.B, st + (sp - s) * .9); r -= s; const b = Math.min(r, st); st -= b; r -= b;
+    const c = Math.min(r, v.C); r -= c; const l = Math.min(r, v.L); r -= l; if (r > 1e-9) short++; co2 += c * .82 + l * .37; hr.push({d, nuc, s, b, c, l, gap: r}); }
+  return {co2, short, hr}; }
+const k = HS(app, {levels: LV, load(L){ res = null; ui.v.parentElement.style.display = L.t === 'line' ? '' : 'none'; ui.m.parentElement.style.display = L.t === 'mix' ? '' : 'none';
+  if (L.t === 'line') { k.mission(ui.g, `<b>${L.P} MW</b>를 저항 <b>${L.R} Ω</b>인 송전선으로 보내요.<br>손실 <b>${L.lim} % 이하</b>, 예산 <b>${L.bud}</b> 이하`); kv = 22; tools(); }
+  else { k.mission(ui.g, `24시간 동안 <b>정전 0시간</b>, 하루 CO₂ <b>${L.co2} kt 이하</b>${L.max.N < 30 ? '<br>⚠ 노후 원전 폐쇄로 원자력 최대 20 GW' : ''}`);
+    [['N', 0], ['C', 0], ['L', 0], ['S', 0], ['B', 0]].forEach(([n]) => { sl[n].el.max = L.max[n]; sl[n].set(0); const off = !L.max[n]; sl[n].el.disabled = off; sl[n].wrap.style.opacity = off ? .35 : 1; }); stat(); } }});
+function tools(){ const L = k.L(), r = line(L); ui.v.innerHTML = '<div class="tools">' + KV.map(([v, c]) => `<button class="tool" type="button" aria-pressed="${v === kv}" data-v="${v}">${v} kV<small style="opacity:.7">비용 ${c}</small></button>`).join('') + '</div>' +
+  `<p class="note-c" style="margin-top:8px">전류 <b>${r.I.toFixed(0)} A</b> · 손실 <b style="color:${r.pct <= L.lim ? 'var(--mint)' : 'var(--coral)'}">${r.loss.toFixed(2)} MW (${r.pct.toFixed(2)} %)</b></p>`;
+  ui.v.querySelectorAll('button').forEach(b => b.onclick = () => { kv = +b.dataset.v; sfx.click(); tools(); }); }
+function stat(){ const L = k.L(), m = mix(); ui.r.innerHTML = `<p>정전 시간 <b style="color:${m.short ? 'var(--coral)' : 'var(--mint)'}">${m.short}시간</b></p><p>하루 CO₂ <b style="color:${m.co2 <= L.co2 ? 'var(--mint)' : 'var(--coral)'}">${m.co2.toFixed(0)} kt</b> / ${L.co2} kt</p>`; }
+app.onStart = () => { ui.g = app.panel('운영 과제'); ui.v = app.panel('송전 전압'); ui.m = app.panel('발전 설비 용량');
+  [['N', '원자력', 'GW'], ['C', '석탄', 'GW'], ['L', 'LNG', 'GW'], ['S', '태양광', 'GW'], ['B', 'ESS', 'GWh']].forEach(([n, lb, u]) => sl[n] = k.slider(ui.m, {label: lb, min: 0, max: 60, step: 5, val: 0, fmt: v => v + ' ' + u, on: stat}));
+  ui.r = document.createElement('div'); ui.m.appendChild(ui.r);
+  ui.b = app.panel(''); k.btn(ui.b, '⚡ 운영 개시', () => { const L = k.L();
+    if (L.t === 'line') { const r = line(L), c = KV.find(x => x[0] === kv)[1]; if (r.pct > L.lim) return k.fail(`손실 ${r.pct.toFixed(1)} % — 기준 초과`); if (c > L.bud) return k.fail(`비용 ${c} — 예산 초과! 더 낮은 전압으로도 될까요?`); return k.win(ui.g, L.why, `${kv} kV`); }
+    const m = mix(); if (m.short) return k.fail(`${m.short}시간 동안 정전! 수요(검은 선)를 확인하세요`); if (m.co2 > L.co2) return k.fail(`CO₂ ${m.co2.toFixed(0)} kt — 목표 초과`); k.win(ui.g, L.why, `CO₂ ${m.co2.toFixed(0)} kt`); });
+  k.begin(); };
+k.draw((g, W, H) => { const L = k.L(), t = performance.now() / 1000; g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, W, H);
+  if (L.t === 'line') { const r = line(L), y = H * .45; D.text(g, '🏭', W * .1, y, {size: 44}); D.text(g, '🏙️', W * .9, y, {size: 44}); D.text(g, '발전소', W * .1, y + 40, {size: 12, weight: 700}); D.text(g, '도시', W * .9, y + 40, {size: 12, weight: 700});
+    D.text(g, '⚡ 승압', W * .21, y - 40, {size: 12, weight: 700, color: '#2f6fd0'}); D.text(g, `${kv} kV`, W * .21, y - 22, {size: 14, weight: 700, color: '#2f6fd0'});
+    for (let i = 0; i < 5; i++) { const x = W * (.28 + i * .12); g.strokeStyle = '#666'; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y + 50); g.lineTo(x, y - 20); g.moveTo(x - 14, y - 10); g.lineTo(x + 14, y - 10); g.stroke(); }
+    const heat = Math.min(1, r.pct / 25); g.strokeStyle = `rgb(${Math.round(80 + 175 * heat)},${Math.round(80 - 40 * heat)},60)`; g.lineWidth = 3 + 5 * heat; g.beginPath(); g.moveTo(W * .16, y - 10); for (let x = W * .16; x <= W * .84; x += 6) g.lineTo(x, y - 10 + 10 * Math.sin((x - W * .16) / (W * .12) * Math.PI) ** 2); g.stroke();
+    if (heat > .1) for (let i = 0; i < 6; i++) D.text(g, '♨', W * (.3 + i * .1), y - 30 - ((t * 20 + i * 13) % 30), {size: 14, color: '#d0533f'});
+    const n = Math.max(2, Math.round(r.I / 120)); for (let i = 0; i < Math.min(18, n); i++) { const x = W * .16 + ((t * 80 + i * W * .68 / Math.min(18, n)) % (W * .68)); g.fillStyle = '#f6b400'; g.beginPath(); g.arc(x, y - 10 + 10 * Math.sin((x - W * .16) / (W * .12) * Math.PI) ** 2, 4, 0, 7); g.fill(); }
+    D.text(g, `전류 ${r.I.toFixed(0)} A → 손실 ${r.loss.toFixed(1)} MW`, W / 2, H * .8, {size: 17, weight: 700, color: r.pct <= L.lim ? '#2f8a55' : '#d0533f'}); D.text(g, '노란 점이 많을수록 전류가 커요', W / 2, H * .88, {size: 12, color: '#55606e'}); return; }
+  const m = mix(), A = k.axes(g, {x: 52, y: 22, w: W - 76, h: H - 66}, [0, 24, 3], [0, 80, 10], '시각 (시)', '전력 (GW)'), bw = (A.X(1) - A.X(0));
+  const cols = [['nuc', '#8a5ac4', '원자력'], ['s', '#f6b400', '태양광'], ['b', '#2fb5a8', 'ESS'], ['c', '#55606e', '석탄'], ['l', '#2f6fd0', 'LNG']];
+  m.hr.forEach((h, i) => { let base = 0; cols.forEach(([k2, col]) => { const v = h[k2]; if (v > 0) { g.fillStyle = col; g.fillRect(A.X(i) + 1, A.Y(base + v), bw - 2, A.Y(base) - A.Y(base + v)); base += v; } }); if (h.gap > 1e-9) { g.fillStyle = 'rgba(208,83,63,.35)'; g.fillRect(A.X(i) + 1, A.Y(base + h.gap), bw - 2, A.Y(base) - A.Y(base + h.gap)); } });
+  const P = []; for (let h = 0; h <= 24; h += .25) P.push([A.X(h), A.Y(Dm(Math.min(23.99, h)))]); k.line(g, P, '#1d1d1d', 2.5);
+  cols.forEach(([, col, n], i) => { g.fillStyle = col; g.fillRect(64 + i * 72, 30, 12, 12); D.text(g, n, 80 + i * 72, 36, {size: 11.5, align: 'left', weight: 700}); }); D.text(g, '— 수요', 64 + 5 * 72, 36, {size: 11.5, align: 'left', weight: 700}); D.text(g, '■ 정전', 64 + 5 * 72 + 52, 36, {size: 11.5, align: 'left', weight: 700, color: '#d0533f'});
+});
+</script>
+</body>
+</html>
