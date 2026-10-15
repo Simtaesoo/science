@@ -86,7 +86,7 @@ window.AppKit = (cfg) => {
 
   /* 시작·종료 */
   function start(){ side.innerHTML = ''; playersBox = null; const n = +(opts.players || 1);
-    state.players = Array.from({length: n}, (_, i) => ({name: n > 1 ? ['🟡 1모둠', '🔴 2모둠', '🔵 3모둠', '🟢 4모둠'][i] : '나', score: 0})); state.turn = 0;
+    state.players = Array.from({length: n}, (_, i) => ({name: n > 1 ? ['🟡 1모둠', '🔴 2모둠', '🔵 3모둠', '🟢 4모둠', '🟣 5모둠', '🟠 6모둠'][i] : '나', score: 0})); state.turn = 0;
     cS.querySelector('b').textContent = 0; cL.hidden = cS.hidden = cT.hidden = true;
     sStart.hidden = true; sEnd.hidden = true; sPlay.hidden = false; window.scrollTo(0, 0);
     if (n > 1) { playersBox = panel('점수판'); playersBox.className = 'players'; renderPlayers(); }
