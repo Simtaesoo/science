@@ -22,7 +22,7 @@ window.HS = (app, o) => {
   k.mission = (box, html) => { box.innerHTML = `<p><b>${k.lv + 1}단계</b></p><p class="mission">${html}</p>`; };
   k.slider = (box, s) => {
     const w = document.createElement('label'); w.className = 'range'; w.style.margin = '8px 0';
-    w.innerHTML = `<span style="min-width:86px">${s.label}</span><input type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.val}"><output></output>`;
+    w.innerHTML = `<span style="min-width:74px;font-size:14px">${s.label}</span><input type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.val}" style="min-width:70px"><output style="white-space:nowrap;font-size:15.5px"></output>`;
     const inp = w.querySelector('input'), out = w.querySelector('output');
     const upd = quiet => { out.textContent = s.fmt ? s.fmt(+inp.value) : inp.value; if (!quiet && s.on) s.on(+inp.value); };
     inp.oninput = () => upd(); box.appendChild(w); upd(true);
