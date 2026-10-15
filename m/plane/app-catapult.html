@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>투석기 공성전 · 고3 역학과 에너지 평면 운동</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'mcatapult', title: '투석기 공성전', unit: '고3 · 역학과 에너지 · 41 평면 운동', back: '../../index.html#mech', sim: 'sim.html#proj',
+  lead: '투석기의 <b>발사 속력과 각도</b>를 계산해 성벽 너머의 깃발을 맞히세요! 단계마다 포탄은 <b>3발</b>. 공기 저항은 없고 g = 9.8 m/s²예요.',
+  howto: ['속력과 각도를 정하고 <b>[발사]</b>! 앞서 쏜 포탄의 궤적이 흐리게 남아요.', '깃발 주변 <b>±1 m</b>에 떨어지면 명중. 성벽에 맞으면 실패예요.', '계산으로 맞히면 점수가 높아요: 수평 거리 R = v₀²sin2θ / g (같은 높이일 때).'],
+  recap: '<b>포물선 운동</b>은 수평 방향의 <b>등속 운동</b>(x = v₀cosθ·t)과 연직 방향의 <b>등가속도 운동</b>(y = v₀sinθ·t − ½gt²)의 합성이다. 같은 높이로 떨어질 때 수평 도달 거리 R = v₀²sin2θ/g는 45°에서 최대이고, 서로 여각인 두 각도(예: 30°와 60°)의 도달 거리가 같다. 높은 장애물을 넘기려면 큰 각도가 유리하고, 수평으로 던지면 떨어지는 시간 t = √(2h/g)는 처음 속력과 관계없다.',
+  startLabel: '공성 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const G = 9.8;
+const LV = [
+  {h0: 0, tx: 30, wall: null, plat: null, fixV: null, why: 'R = v₀²sin2θ/g → 20 m/s, 24°(또는 66°)처럼 sin2θ = 0.735가 되는 조합이면 30 m! 45°라면 v₀ = √(30 × 9.8) ≈ 17.1 m/s.'},
+  {h0: 0, tx: 32, wall: [15, 8], plat: null, fixV: null, why: '성벽(8 m)을 넘으려면 15 m 지점에서 높이가 8 m보다 커야 해요. 각도를 키우고 속력을 조절했어요.'},
+  {h0: 0, tx: 25, wall: null, plat: [21, 5], fixV: null, why: '목표가 5 m 높이에 있어 같은 높이 공식은 못 써요. y = v₀sinθ·t − ½gt² = 5가 되는 순간의 x를 맞춰야 해요.'},
+  {h0: 0, tx: 26, wall: [19, 7], plat: null, fixV: 18, why: '속력이 18 m/s로 고정 → 26 m 거리에 맞는 각도는 약 26°와 64° 두 개! 높은 성벽 때문에 64°만 성공해요.'},
+  {h0: 20, tx: 20, wall: null, plat: null, fixV: null, flatOnly: true, why: '20 m 절벽에서 수평 발사: t = √(2 × 20 ÷ 9.8) ≈ 2.02 s → v₀ = 20 ÷ 2.02 ≈ 9.9 m/s. 각도는 0°!'}];
+let ui = {}, V, A, shots = [], fl = null, left = 3;
+const k = HS(app, {levels: LV, load(L){ shots = []; fl = null; left = 3;
+  k.mission(ui.g, `${L.h0 ? `높이 <b>${L.h0} m</b> 절벽에서` : ''} <b>${L.tx} m</b> 앞의 깃발을 맞히세요.${L.wall ? `<br>${L.wall[0]} m 지점에 높이 <b>${L.wall[1]} m</b> 성벽!` : ''}${L.plat ? `<br>깃발은 높이 <b>${L.plat[1]} m</b> 언덕 위에 있어요.` : ''}${L.fixV ? `<br>투석기 속력 <b>${L.fixV} m/s</b> 고정` : ''}${L.flatOnly ? '<br>대포는 <b>수평으로만</b> 쏠 수 있어요.' : ''}`);
+  V.el.disabled = !!L.fixV; V.wrap.style.opacity = L.fixV ? .4 : 1; V.set(L.fixV || 15); A.el.disabled = !!L.flatOnly; A.wrap.style.opacity = L.flatOnly ? .4 : 1; A.set(L.flatOnly ? 0 : 40); ammo(); }});
+function ground(L, x){ return L.plat && x >= L.plat[0] ? L.plat[1] : 0; }
+function path(L, v, a){ const t0 = a * Math.PI / 180, vx = v * Math.cos(t0), vy = v * Math.sin(t0), P = []; let hit = null;
+  for (let t = 0; t < 12; t += .01) { const x = vx * t, y = L.h0 + vy * t - .5 * G * t * t; P.push([x, y]);
+    if (L.wall && x >= L.wall[0] && x <= L.wall[0] + 1 && y <= L.wall[1]) { hit = {type: 'wall', x}; break; }
+    if (x > 0.5 && y <= ground(L, x)) { if (L.plat && x >= L.plat[0] && P.length > 1 && P[P.length - 2][0] < L.plat[0]) { hit = {type: 'cliff', x}; break; } hit = {type: 'ground', x}; break; } if (x > 60) break; }
+  return {P, hit}; }
+function ammo(){ ui.a.innerHTML = `남은 포탄 <b>${'🪨'.repeat(left)}${'·'.repeat(3 - left)}</b>`; }
+app.onStart = () => { ui.g = app.panel('작전'); ui.c = app.panel('투석기');
+  V = k.slider(ui.c, {label: '발사 속력', min: 5, max: 30, step: .1, val: 15, fmt: v => v.toFixed(1) + ' m/s'});
+  A = k.slider(ui.c, {label: '발사 각도', min: 0, max: 85, step: .5, val: 40, fmt: v => v.toFixed(1) + '°'});
+  ui.a = document.createElement('p'); ui.a.className = 'note-c'; ui.c.appendChild(ui.a);
+  ui.b = app.panel(''); k.btn(ui.b, '🪨 발사', () => { if (fl || k.done || left <= 0) return; const L = k.L(), p = path(L, V.v, A.v); fl = {p, i: 0}; left--; ammo(); sfx.whoosh(); });
+  k.begin(); };
+app.step = dt => { if (!fl) return; fl.i += dt * 100 * 1.3; if (fl.i >= fl.p.P.length - 1) { const L = k.L(), h = fl.p.hit; shots.push(fl.p.P); fl = null;
+    if (h && h.type !== 'wall' && h.type !== 'cliff' && Math.abs(h.x - L.tx) <= 1) return k.win(ui.g, L.why, `${h.x.toFixed(1)} m`);
+    k.fail(!h ? '너무 멀리 날아갔어요' : h.type === 'wall' ? '쿵! 성벽에 막혔어요' : h.type === 'cliff' ? '언덕 벽에 부딪혔어요' : `${h.x.toFixed(1)} m 지점에 떨어졌어요 (목표 ${L.tx} m)`);
+    if (left <= 0 && !k.done) setTimeout(() => { toast('포탄 보급! 다시 3발', 'good'); left = 3; ammo(); }, 900); } };
+k.draw((g, W, H) => { const L = k.L(), sc = Math.min((W - 60) / 42, (H - 50) / 26), ox = 30, gy = H - 24, X = x => ox + x * sc, Y = y => gy - y * sc;
+  const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#9fd3f5'); sky.addColorStop(1, '#eaf6ff'); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#7cbf6f'; g.fillRect(0, gy, W, H - gy); if (L.plat) { g.fillRect(X(L.plat[0]), Y(L.plat[1]), W, gy - Y(L.plat[1])); }
+  if (L.h0) { g.fillStyle = '#9b876c'; g.fillRect(0, Y(L.h0), X(0) + 4, gy - Y(L.h0)); g.fillStyle = '#5a8fd0'; g.fillRect(X(0) + 4, gy - 4, W, 8); }
+  for (let x = 0; x <= 40; x += 5) D.text(g, x + ' m', X(x), gy + 13, {size: 10, color: '#2b4a2b'});
+  if (L.wall) { g.fillStyle = '#8a8478'; g.fillRect(X(L.wall[0]), Y(L.wall[1]), sc, gy - Y(L.wall[1])); for (let y = 0; y < L.wall[1]; y += 1.5) { g.strokeStyle = 'rgba(0,0,0,.15)'; g.beginPath(); g.moveTo(X(L.wall[0]), Y(y)); g.lineTo(X(L.wall[0] + 1), Y(y)); g.stroke(); } D.text(g, `${L.wall[1]} m`, X(L.wall[0] + .5), Y(L.wall[1]) - 10, {size: 11, weight: 700}); }
+  const fy = Y(ground(L, L.tx)); g.strokeStyle = '#333'; g.lineWidth = 2; g.beginPath(); g.moveTo(X(L.tx), fy); g.lineTo(X(L.tx), fy - 30); g.stroke(); g.fillStyle = '#d0533f'; g.beginPath(); g.moveTo(X(L.tx), fy - 30); g.lineTo(X(L.tx) + 18, fy - 24); g.lineTo(X(L.tx), fy - 18); g.fill(); g.fillStyle = 'rgba(208,83,63,.25)'; g.fillRect(X(L.tx - 1), fy - 3, 2 * sc, 6);
+  g.fillStyle = '#6b4a2a'; g.fillRect(X(0) - 12, Y(L.h0) - 10, 24, 10); const a = A.v * Math.PI / 180; g.strokeStyle = '#6b4a2a'; g.lineWidth = 5; g.beginPath(); g.moveTo(X(0), Y(L.h0) - 8); g.lineTo(X(0) + 26 * Math.cos(a), Y(L.h0) - 8 - 26 * Math.sin(a)); g.stroke();
+  shots.forEach(P => k.line(g, P.map(([x, y]) => [X(x), Y(y)]), 'rgba(80,80,80,.35)', 1.5, [4, 4]));
+  if (fl) { const n = Math.floor(fl.i), P = fl.p.P.slice(0, n + 1); k.line(g, P.map(([x, y]) => [X(x), Y(y)]), '#555', 2); const [x, y] = P[P.length - 1]; g.fillStyle = '#444'; g.beginPath(); g.arc(X(x), Y(y), 6, 0, 7); g.fill(); D.text(g, `t = ${(n * .01).toFixed(2)} s`, W - 12, 18, {size: 13, weight: 700, align: 'right'}); }
+});
+</script>
+</body>
+</html>
