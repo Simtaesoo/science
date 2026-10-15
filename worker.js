@@ -296,7 +296,7 @@ function loginPage(msg, next, disabled, already) {
        <form method="post" action="/teacher"><input type="hidden" name="next" value="${esc(next)}">
        <label for="pw">교사 비밀번호</label><input id="pw" name="pw" type="password" autocomplete="current-password" required ${disabled ? 'disabled' : isPair ? 'autofocus' : ''}>
        <button type="submit" ${disabled ? 'disabled' : ''}>로그인</button></form>
-       ${isPair ? '' : `<div class="alt"><b>전자칠판이라면</b><span>칠판에는 비밀번호를 입력하지 마세요. 학생들이 볼 수 있어요. 폰으로 QR을 찍어 여세요.</span>
+       ${isPair ? '' : `<div class="alt"><b>전자칠판이라면</b><span>폰으로 QR을 찍어 여세요.</span>
        <a class="go ghost" href="/board?next=${encodeURIComponent(next)}">폰 QR로 칠판 열기</a></div>`}
        <a class="out" href="${esc(next)}">학생 화면으로 돌아가기</a>`;
   return shell('교사 로그인', body, msg && !disabled ? 401 : 200);
