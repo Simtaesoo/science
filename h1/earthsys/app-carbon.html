@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>탄소 순환 관제실 · 고1 지구시스템</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'h1carbon', title: '탄소 순환 관제실', unit: '고1 · 통합과학1 · 28 지구시스템', back: '../../index.html#hi1', sim: 'sim.html#cycle',
+  lead: '2025년 대기 중 이산화 탄소 농도는 약 420 ppm. 화석 연료가 기권으로 탄소를 보내고, <b>해양(수권)</b>과 <b>숲(생물권)</b>이 일부를 흡수해요. 정책을 정해 2100년까지의 탄소 순환을 관리하세요!',
+  howto: ['<b>화석 연료 감축률</b>(해마다 몇 %씩 줄일지), <b>숲 면적</b>, <b>탄소 포집</b>(2035년부터)을 정하세요.', '정책마다 <b>비용</b>이 들어요. 예산 안에서 목표를 달성해야 해요.', '<b>[2100년까지 실행]</b>을 누르면 해마다 탄소의 이동을 계산해 그래프로 보여 줘요.'],
+  recap: '탄소는 지권(화석 연료·석회암) → 기권(CO₂) → 수권(해수에 용해) → 생물권(광합성) 사이를 이동한다. 대기 CO₂ 1 ppm ≈ 탄소 2.12 GtC. 해마다 대기 탄소 변화 = 배출량 − 해양 흡수 − 육상 생물 흡수. 화석 연료를 태우면 오랫동안 지권에 저장되었던 탄소가 짧은 시간에 기권으로 이동해 농도가 높아진다. 해양과 숲의 흡수량은 대기 농도가 높을수록 커지지만, 배출량을 줄이지 않으면 증가를 막을 수 없다 — 지구시스템의 각 권은 서로 영향을 주고받는다. (게임 모형은 실제 값을 단순화한 것)',
+  startLabel: '관제 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const LV = [
+  {lock: ['f', 'c'], t2100: 460, why: '해마다 1.5 %만 줄여도 2100년 배출량은 약 1/3로 줄어 농도 증가가 크게 느려져요.'},
+  {lock: ['c'], peak: 450, cost: 80, why: '감축과 숲 가꾸기를 함께 하면 최고 농도를 낮출 수 있어요. 숲은 대기 탄소를 생물권으로 옮겨요.'},
+  {t2100: 380, cost: 120, why: '배출이 흡수보다 작아지는 순간부터 대기 농도가 줄어들기 시작해요.'},
+  {peak: 440, t2100: 350, cost: 110, why: '빠른 감축 + 탄소 포집으로 최고 농도와 2100년 농도를 모두 낮췄어요. 한 가지 수단만으로는 어려워요.'},
+  {t2100: 320, cost: 150, why: '산업화 이전(280 ppm)에 가까워지려면 배출을 거의 0으로 만들고 흡수원을 늘려야 해요. 매우 큰 노력이 필요하죠!'}];
+let ui = {}, R, F, Cc, run = null, prog = 0;
+const cost = () => R.v * 20 + Math.max(0, F.v - 100) * 2 + Cc.v * 15;
+function sim(r, f, c){ let C = 420, pk = 420; const P = [[2025, C]], fl = [];
+  for (let y = 2025; y < 2100; y++) { const E = 10 * Math.pow(1 - r / 100, y - 2025), cc = y >= 2035 ? c : 0, O = .006 * (C - 280) * 2.12, L = 2.5 * f / 100 * (C - 280) / 140;
+    if (y === 2025 || y === 2099) fl.push({y, E, cc, O, L}); C += (E - cc - L - O) / 2.12; pk = Math.max(pk, C); P.push([y + 1, C]); }
+  return {P, C, pk, fl}; }
+const k = HS(app, {levels: LV, load(L){ const goals = [L.t2100 ? `2100년 농도 <b>${L.t2100} ppm 이하</b>` : '', L.peak ? `최고 농도 <b>${L.peak} ppm 이하</b>` : '', L.cost ? `비용 <b>${L.cost} 이하</b>` : ''].filter(Boolean).join('<br>');
+  k.mission(ui.g, goals); [['r', R], ['f', F], ['c', Cc]].forEach(([n, s]) => { const lk = (L.lock || []).includes(n); s.el.disabled = lk; s.wrap.style.opacity = lk ? .4 : 1; });
+  R.set(0); F.set(100); Cc.set(0); run = null; info(); }});
+function info(){ const L = k.L(); ui.c.innerHTML = `비용 <b style="color:${L.cost && cost() > L.cost ? 'var(--coral)' : 'var(--yellow)'}">${cost().toFixed(0)}</b>${L.cost ? ` / ${L.cost}` : ''}`; run = null; }
+app.onStart = () => { ui.g = app.panel('목표'); ui.p = app.panel('정책');
+  R = k.slider(ui.p, {label: '화석 연료 감축', min: 0, max: 6, step: .5, val: 0, fmt: v => v.toFixed(1) + ' %/년', on: info});
+  F = k.slider(ui.p, {label: '숲 면적', min: 80, max: 140, step: 5, val: 100, fmt: v => v + ' %', on: info});
+  Cc = k.slider(ui.p, {label: '탄소 포집', min: 0, max: 3, step: .5, val: 0, fmt: v => v.toFixed(1) + ' GtC', on: info});
+  ui.c = document.createElement('p'); ui.c.className = 'note-c'; ui.p.appendChild(ui.c);
+  ui.b = app.panel(''); k.btn(ui.b, '▶ 2100년까지 실행', () => { run = sim(R.v, F.v, Cc.v); prog = 0; sfx.whoosh(); });
+  k.begin(); };
+function judge(){ const L = k.L(), s = run;
+  if (L.cost && cost() > L.cost) return k.fail(`예산 초과! 비용 ${cost().toFixed(0)} > ${L.cost}`);
+  if (L.peak && s.pk > L.peak + 1e-9) return k.fail(`최고 농도 ${s.pk.toFixed(1)} ppm — 목표보다 높아요`);
+  if (L.t2100 && s.C > L.t2100 + 1e-9) return k.fail(`2100년 농도 ${s.C.toFixed(1)} ppm — 목표보다 높아요`);
+  k.win(ui.g, L.why, `2100년 ${s.C.toFixed(0)} ppm`); }
+app.step = dt => { if (run && prog < 1) { prog = Math.min(1, prog + dt / 2); if (prog >= 1) judge(); } };
+k.draw((g, W, H) => { const L = k.L(); g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, W, H);
+  const gh = H * .62, A = k.axes(g, {x: 58, y: 24, w: W - 84, h: gh - 30}, [2025, 2100, 15], [280, 560, 40], '연도', 'CO₂ (ppm)');
+  if (L.t2100) { g.strokeStyle = '#2f8a55'; g.setLineDash([6, 4]); g.lineWidth = 2; g.beginPath(); g.moveTo(A.X(2090), A.Y(L.t2100)); g.lineTo(A.X(2100), A.Y(L.t2100)); g.stroke(); g.setLineDash([]); D.text(g, `목표 ${L.t2100}`, A.X(2088), A.Y(L.t2100), {size: 11, color: '#2f8a55', align: 'right', weight: 700}); }
+  if (L.peak) { g.strokeStyle = '#d0533f'; g.setLineDash([6, 4]); g.lineWidth = 1.5; g.beginPath(); g.moveTo(A.X(2025), A.Y(L.peak)); g.lineTo(A.X(2100), A.Y(L.peak)); g.stroke(); g.setLineDash([]); D.text(g, `최고 한도 ${L.peak}`, A.X(2026), A.Y(L.peak) - 9, {size: 11, color: '#d0533f', align: 'left', weight: 700}); }
+  const base = sim(0, 100, 0); k.line(g, base.P.map(([y, c]) => [A.X(y), A.Y(Math.min(560, c))]), 'rgba(0,0,0,.25)', 2, [4, 4]); D.text(g, '정책 없음', A.X(2098), A.Y(Math.min(555, base.C)) - 10, {size: 11, color: '#777', align: 'right'});
+  if (run) { const n = Math.max(1, Math.floor(run.P.length * prog)); k.line(g, run.P.slice(0, n).map(([y, c]) => [A.X(y), A.Y(c)]), '#2f6fd0', 3.5); const [y, c] = run.P[n - 1]; g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(A.X(y), A.Y(c), 5, 0, 7); g.fill(); D.text(g, `${y}년 ${c.toFixed(0)} ppm`, A.X(y), A.Y(c) - 16, {size: 12, weight: 700, color: '#1d3a58', stroke: '#fff'}); }
+  // 탄소 흐름 막대
+  const s = run || sim(R.v, F.v, Cc.v), by = gh + 22, bh = H - by - 10, items = [['배출', '#555b66'], ['해양 흡수', '#2f6fd0'], ['숲 흡수', '#2f8a55'], ['포집', '#8a5ac4']];
+  s.fl.forEach((f, j) => { const vals = [f.E, f.O, f.L, f.cc], cx = 70 + j * (W - 90) / 2, wcol = (W - 120) / 2; D.text(g, `${f.y}년 탄소 이동 (GtC/년)`, cx, by, {size: 12, weight: 700, align: 'left', color: '#34404e'});
+    vals.forEach((v, i) => { const yy = by + 16 + i * Math.min(20, (bh - 16) / 4); D.text(g, items[i][0], cx, yy, {size: 11, align: 'left', color: '#55606e'}); g.fillStyle = items[i][1]; g.fillRect(cx + 62, yy - 6, Math.max(1, v / 10 * (wcol - 110)), 12); D.text(g, v.toFixed(1), cx + 68 + v / 10 * (wcol - 110), yy, {size: 11, align: 'left', weight: 700}); }); });
+});
+</script>
+</body>
+</html>
