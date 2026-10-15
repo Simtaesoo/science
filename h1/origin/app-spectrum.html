@@ -57,8 +57,8 @@ k.draw((g, W, H) => { const L = k.L(), x0 = 40, x1 = W - 30, X = l => x0 + (l - 
   D.text(g, '파장 (nm)', (x0 + x1) / 2, y + bh + 32, {size: 11, color: '#b8c4d0'});
   // 기준선
   const ry = y + bh + 50, rh = Math.max(40, H - ry - 26);
-  g.fillStyle = 'rgba(255,255,255,.05)'; g.fillRect(x0, ry, x1 - x0, rh); D.text(g, '원소 기준 선 (실험실, 편이 보정 ' + zs.v.toFixed(3) + ')', x0, ry - 8, {size: 11, color: '#b8c4d0', align: 'left'});
-  const keys = [...on]; keys.forEach((e, j) => { const row = ry + rh * (j + .5) / Math.max(1, keys.length); EL[e].l.forEach(l => { const xx = X(l * (1 + zs.v)); g.strokeStyle = EL[e].c; g.lineWidth = 2; g.beginPath(); g.moveTo(xx, row - rh / Math.max(1, keys.length) / 2 + 3); g.lineTo(xx, row + rh / Math.max(1, keys.length) / 2 - 3); g.stroke(); g.globalAlpha = .35; g.beginPath(); g.moveTo(xx, y); g.lineTo(xx, y + bh); g.stroke(); g.globalAlpha = 1; }); D.text(g, EL[e].n, x1 - 4, row, {size: 11, color: EL[e].c, align: 'right', weight: 700}); });
+  g.fillStyle = 'rgba(255,255,255,.05)'; g.fillRect(x0, ry, x1 - x0, rh); D.text(g, '원소 기준 선 (실험실, 편이 보정 ' + (L.z ? zs.v : 0).toFixed(3) + ')', x0, ry - 8, {size: 11, color: '#b8c4d0', align: 'left'});
+  const keys = [...on]; keys.forEach((e, j) => { const row = ry + rh * (j + .5) / Math.max(1, keys.length); EL[e].l.forEach(l => { const xx = X(l * (1 + (L.z ? zs.v : 0))); g.strokeStyle = EL[e].c; g.lineWidth = 2; g.beginPath(); g.moveTo(xx, row - rh / Math.max(1, keys.length) / 2 + 3); g.lineTo(xx, row + rh / Math.max(1, keys.length) / 2 - 3); g.stroke(); g.globalAlpha = .35; g.beginPath(); g.moveTo(xx, y); g.lineTo(xx, y + bh); g.stroke(); g.globalAlpha = 1; }); D.text(g, EL[e].n, x1 - 4, row, {size: 11, color: EL[e].c, align: 'right', weight: 700}); });
   if (!keys.length) D.text(g, '원소 단추를 눌러 기준 선을 겹쳐 보세요', (x0 + x1) / 2, ry + rh / 2, {size: 13, color: '#8899aa'});
 });
 </script>
