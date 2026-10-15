@@ -5,7 +5,7 @@ window.HS = (app, o) => {
   const D = Draw;
   const k = {lv: 0, fails: 0, done: false};
   k.L = () => o.levels[k.lv];
-  k.begin = () => { k.lv = 0; k.fails = 0; app.startTimer(); k.load(); };
+  k.begin = () => { const q = +(new URLSearchParams(location.search).get('lv') || 1) - 1; k.lv = Math.max(0, Math.min(o.levels.length - 1, q || 0)); k.fails = 0; app.startTimer(); k.load(); }; // ?lv=3 → 3단계부터
   k.load = () => { k.done = false; app.setLevel(k.lv, o.levels.length); o.load(o.levels[k.lv], k.lv); };
   k.fail = msg => { if (k.done) return; k.fails++; app.sfx.bad(); app.addScore(-10); app.toast(msg, 'bad'); };
   k.win = (box, why, extra) => {
