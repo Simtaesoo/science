@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>나방 사냥과 자연선택 · 고1 지질 시대와 생물 다양성</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'h2moth', title: '나방 사냥과 자연선택', unit: '고1 · 통합과학2 · 31 지질 시대와 생물 다양성', back: '../../index.html#hi2', sim: 'sim.html#select',
+  lead: '여러분은 숲속의 <b>새</b>예요! 나무껍질에 앉은 회색가지나방을 찾아 잡아먹으세요. 눈에 잘 띄는 나방부터 잡히고, 살아남은 나방이 자손을 남겨요. 세대가 지나면 나방 무리는 어떻게 변할까요?',
+  howto: ['한 세대마다 나방 20마리 중 <b>10마리</b>를 눌러 잡으세요. 제한 시간 12초!', '살아남은 10마리가 2마리씩 자손을 남겨 다음 세대가 돼요. (가끔 돌연변이로 색이 바뀌어요)', '정해진 세대가 지난 뒤 <b>목표 비율</b>에 도달하면 성공!'],
+  recap: '<b>자연선택</b>: 같은 종이라도 개체마다 형질이 다르고(변이), 생존에 유리한 변이를 가진 개체가 더 많이 살아남아 자손에게 형질을 전달한다. 이 과정이 여러 세대 반복되면 집단의 형질 비율이 변한다. 영국의 회색가지나방은 산업 혁명으로 나무껍질이 그을음에 검게 변하자 검은색 나방의 비율이 늘었고, 대기 오염이 줄자 다시 밝은색 나방이 늘었다. 나방이 스스로 색을 바꾼 것이 아니라 <b>환경에 따라 선택된 것</b>이다. 변이가 다양할수록 환경 변화에도 살아남는 개체가 있을 가능성이 커진다 — 생물 다양성의 중요성.',
+  startLabel: '사냥 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const LV = [
+  {t: 'hunt', bark: 'light', start: .5, gens: 3, goal: ['light', .75], name: '산업 혁명 이전의 숲', why: '밝은 나무껍질에서는 검은 나방이 눈에 잘 띄어 먼저 잡혔어요 → 밝은색 나방의 비율 증가.'},
+  {t: 'hunt', bark: 'dark', start: .1, gens: 4, goal: ['dark', .5], name: '그을음 덮인 공업 지대', why: '나무가 검게 변하자 처음엔 드물던 검은 나방이 살아남아 늘었어요. 드문 변이가 새 환경에서 유리해졌어요!'},
+  {t: 'hunt', bark: 'light', start: .8, gens: 4, goal: ['light', .6], name: '대기 정화 이후의 숲', why: '환경이 다시 바뀌자 선택의 방향도 바뀌었어요. 자연선택은 “더 좋은 쪽”이 아니라 “그 환경에 맞는 쪽”을 남겨요.'},
+  {t: 'quiz', q: '나방 집단에서 검은색 나방의 비율이 늘어난 까닭으로 옳은 것은?', ch: ['나방이 그을음에 맞춰 스스로 몸 색을 바꾸었다', '검은색 변이를 가진 나방이 더 많이 살아남아 자손을 남겼다', '새가 검은색을 싫어하게 되었다', '그을음이 나방의 유전자를 검게 바꾸었다'], a: 1, why: '변이 → 생존 경쟁 → 적자생존 → 형질 전달의 반복이 자연선택이에요.'}];
+let ui = {}, moths = [], gen = 0, eaten = 0, tLeft = 0, hist = [], bark = [];
+function rnd(s){ return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+function makeBark(type){ const r = rnd(type === 'light' ? 7 : 11); bark = []; for (let i = 0; i < 180; i++) bark.push([r(), r(), r() * 30 + 8, r() * 3 + 1, r()]); }
+function spawn(darkFrac){ const r = Math.random; moths = []; for (let i = 0; i < 20; i++) moths.push({x: .06 + r() * .88, y: .08 + r() * .84, a: r() * .6 - .3, dark: i < Math.round(darkFrac * 20), alive: true, f: 0}); moths.sort(() => r() - .5); }
+const darkFrac = () => moths.filter(m => m.alive).length ? moths.filter(m => m.alive && m.dark).length / moths.filter(m => m.alive).length : 0;
+const k = HS(app, {levels: LV, load(L){ ui.h.parentElement.style.display = L.t === 'hunt' ? '' : 'none';
+  if (L.t === 'quiz') { k.mission(ui.g, '정리 문제'); app.quiz(ui.t, L.q, L.ch, L.a, {explain: L.why, onWrong: () => { k.fails++; app.addScore(-10); }, onRight: () => k.win(ui.g, '')}); moths = []; return; }
+  k.mission(ui.g, `<b>${L.name}</b><br>${L.gens}세대 뒤 ${L.goal[0] === 'light' ? '밝은색' : '검은색'} 나방 비율 <b>${L.goal[1] * 100} % 이상</b>`);
+  makeBark(L.bark); gen = 1; hist = [L.start]; spawn(L.start); eaten = 0; tLeft = 12; status(); }});
+function status(){ const L = k.L(); ui.t.innerHTML = `<p><b>${gen}세대</b> / ${L.gens}세대</p><p>잡은 나방 <b>${eaten}</b> / 10 · 남은 시간 <b>${Math.ceil(tLeft)}</b>초</p>`; hgraph(); }
+function hgraph(){ const L = k.L(); ui.h.innerHTML = hist.map((d, i) => `<div style="display:grid;grid-template-columns:52px 1fr 44px;gap:6px;align-items:center;font-size:13px;margin:3px 0"><span>${i + 1}세대</span><i style="display:flex;height:12px;border-radius:6px;overflow:hidden;background:#ece6d4"><u style="width:${d * 100}%;background:#3a3530"></u></i><b>${Math.round(d * 100)}%</b></div>`).join('') + '<p class="note-c">검은색 나방 비율 (나머지는 밝은색)</p>'; }
+function nextGen(){ if (k.L().t !== "hunt" || k.done || eaten < 10) return; const L = k.L(), surv = moths.filter(m => m.alive); let d = 0; surv.forEach(m => { for (let j = 0; j < 2; j++) d += (Math.random() < .05 ? !m.dark : m.dark) ? 1 : 0; }); const df = d / 20;
+  if (gen >= L.gens) { const v = L.goal[0] === 'dark' ? df : 1 - df; hist.push(df); hgraph();
+    if (v >= L.goal[1]) k.win(ui.g, L.why, `${L.goal[0] === 'dark' ? '검은색' : '밝은색'} ${Math.round(v * 100)} %`);
+    else { k.fail(`${Math.round(v * 100)} % — 목표에 못 미쳤어요. 눈에 잘 띄는 나방은 새에게 먼저 잡혀요!`); k.load(); } return; }
+  gen++; hist.push(df); spawn(df); eaten = 0; tLeft = 12; sfx.drip(); toast(`${gen}세대 탄생!`, 'good'); status(); }
+app.onStart = () => { ui.g = app.panel('숲 조사'); ui.t = app.panel('사냥 현황'); ui.h = app.panel('세대별 변화'); k.begin(); };
+app.pointer({tap(x, y){ const L = k.L(); if (!L || L.t !== 'hunt' || k.done) return; const W = S.w, H = S.h;
+  for (const m of moths) if (m.alive && Math.hypot(x - m.x * W, y - m.y * H) < 20) { m.alive = false; m.f = 1; eaten++; sfx.pop(); status(); if (eaten >= 10) setTimeout(nextGen, 350); return; } }});
+app.step = dt => { const L = k.L(); if (!L || L.t !== 'hunt' || k.done || eaten >= 10) return; tLeft -= dt; if (tLeft <= 0) { const live = moths.filter(m => m.alive).sort(() => Math.random() - .5); while (eaten < 10) { live.pop().alive = false; eaten++; } toast('시간 끝! 나머지는 다른 새가 잡았어요', 'bad'); status(); setTimeout(nextGen, 500); } else if (Math.ceil(tLeft) !== Math.ceil(tLeft + dt)) status(); };
+k.draw((g, W, H) => { const L = k.L(), t = performance.now() / 1000;
+  if (L.t === 'quiz') { g.fillStyle = '#e9e2cc'; g.fillRect(0, 0, W, H); D.text(g, '🦋 🐦 🌳', W / 2, H / 2, {size: Math.min(W, H) * .16}); return; }
+  const lite = L.bark === 'light'; g.fillStyle = lite ? '#d6cfba' : '#4b4541'; g.fillRect(0, 0, W, H);
+  bark.forEach(([x, y, l, w, c]) => { g.fillStyle = lite ? (c > .5 ? 'rgba(160,150,125,.55)' : 'rgba(235,230,215,.7)') : (c > .5 ? 'rgba(30,27,25,.6)' : 'rgba(95,88,82,.6)'); g.fillRect(x * W, y * H, w, l); if (lite && c > .8) { g.fillStyle = 'rgba(170,190,150,.5)'; g.beginPath(); g.arc(x * W + 10, y * H, 7, 0, 7); g.fill(); } });
+  moths.forEach(m => { const x = m.x * W, y = m.y * H; if (!m.alive) { if (m.f > 0) { D.text(g, '✨', x, y - m.f * 10, {size: 16}); m.f -= .02; } return; }
+    g.save(); g.translate(x, y); g.rotate(m.a); g.fillStyle = m.dark ? '#36312d' : '#e2dcc8'; g.strokeStyle = m.dark ? 'rgba(0,0,0,.4)' : 'rgba(120,110,90,.35)'; g.lineWidth = 1;
+    g.beginPath(); g.ellipse(-7, 0, 9, 6, -.4, 0, 7); g.fill(); g.stroke(); g.beginPath(); g.ellipse(7, 0, 9, 6, .4, 0, 7); g.fill(); g.stroke(); g.fillStyle = m.dark ? '#221e1b' : '#b8b09a'; g.fillRect(-1.5, -6, 3, 12);
+    if (!m.dark) { g.fillStyle = 'rgba(90,80,60,.35)'; g.beginPath(); g.arc(-7, -1, 1.5, 0, 7); g.arc(7, -1, 1.5, 0, 7); g.fill(); } g.restore(); });
+  D.text(g, `🐦 ${gen}세대 · ${Math.ceil(Math.max(0, tLeft))}초`, W - 14, 20, {size: 14, weight: 700, align: 'right', color: lite ? '#2b2a26' : '#f2efe4'});
+});
+</script>
+</body>
+</html>
