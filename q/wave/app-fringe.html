@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>무늬 복원 연구소 · 고3 전자기와 양자 빛의 파동성</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'qfringe', title: '무늬 복원 연구소', unit: '고3 · 전자기와 양자 · 49 빛의 파동성', back: '../../index.html#eq', sim: 'sim.html#double', dark: true,
+  lead: '실험 노트에 사진만 남고 조건이 지워졌어요! 간섭·회절 무늬를 보고 <b>파장, 슬릿 간격</b>을 거꾸로 알아내 똑같은 무늬를 재현하세요. 마지막엔 망원경으로 <b>두 별을 구별</b>하는 임무도 있어요.',
+  howto: ['위쪽이 기록된 무늬, 아래쪽이 지금 내 장치의 무늬예요. 슬라이더를 조절해 두 무늬를 겹치세요.', '눈금으로 <b>밝은 무늬 간격 Δx</b>와 <b>회절 무늬의 첫 어두운 곳</b>을 읽으면 계산으로 바로 맞힐 수 있어요.', '망원경 단계: 두 별이 <b>레일리 기준</b>으로 구별되게 하세요.'],
+  recap: '이중 슬릿의 밝은 무늬 간격 Δx = Lλ/d — 파장이 길수록, 스크린이 멀수록, 슬릿 간격이 좁을수록 넓다. 각 슬릿의 폭 a 때문에 생기는 회절 무늬의 첫 어두운 곳은 y = Lλ/a이며, 실제 무늬는 촘촘한 간섭무늬의 밝기가 넓은 회절 무늬를 따라 변하는 모양이다. 원형 구경 D를 지난 빛은 회절해 퍼지므로 두 점을 구별할 수 있는 최소 분해각은 θ = 1.22λ/D — 구경이 클수록, 파장이 짧을수록 분해능이 좋다.',
+  startLabel: '복원 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const LV = [
+  {t: 'fr', ans: {lam: 600, d: .25}, fix: {d: .25, a: .05}, vary: ['lam'], why: 'Δx = 2.4 mm = 1 m × λ ÷ 0.25 mm → λ = 600 nm. 무늬 간격으로 파장을 측정했어요 (영의 실험).'},
+  {t: 'fr', ans: {lam: 450, d: .3}, fix: {lam: 450, a: .05}, vary: ['d'], why: 'Δx = 1.5 mm → d = Lλ/Δx = 1 × 450 nm ÷ 1.5 mm = 0.30 mm.'},
+  {t: 'fr', ans: {lam: 650, d: .2}, fix: {a: .05}, vary: ['lam', 'd'], why: '회절의 첫 어두운 곳 13 mm = Lλ/a → λ = 650 nm, 그다음 Δx = 3.25 mm → d = 0.20 mm. 두 단서를 차례로 썼어요!'},
+  {t: 'tel', lam: 550, sep: 2e-6, maxD: .4, why: 'θ = 1.22 × 550 nm ÷ D ≤ 2 × 10⁻⁶ rad → D ≥ 0.34 m. 큰 구경일수록 회절 원반이 작아져요.'},
+  {t: 'filt', D: .2, sep: 3e-6, why: 'D = 0.2 m에서 θ = 1.22λ/D ≤ 3 × 10⁻⁶ → λ ≤ 492 nm. 파장이 짧은 파란빛 필터만 두 별을 구별해요.'}];
+let ui = {}, Lm, Dd, Ap, filt = 1;
+const CACHE = {key: '', img: null};
+const FIL = [['빨강', 650, '#ff6b6b'], ['초록', 550, '#5bd17a'], ['파랑', 450, '#5b8cff']];
+function I(x, lam, d, a){ const u = Math.PI * d * 1e-3 * x * 1e-3 / (lam * 1e-9), v = Math.PI * a * 1e-3 * x * 1e-3 / (lam * 1e-9), s = Math.abs(v) < 1e-6 ? 1 : Math.sin(v) / v; return Math.cos(u) ** 2 * s * s; }
+const cur = () => { const L = k.L(); return {lam: L.vary.includes('lam') ? Lm.v : L.fix.lam, d: L.vary.includes('d') ? Dd.v : L.fix.d, a: L.fix.a}; };
+const k = HS(app, {levels: LV, load(L){ Lm.wrap.style.display = Dd.wrap.style.display = Ap.wrap.style.display = 'none'; ui.f.style.display = 'none';
+  if (L.t === 'fr') { if (L.vary.includes('lam')) { Lm.wrap.style.display = ''; Lm.set(500); } if (L.vary.includes('d')) { Dd.wrap.style.display = ''; Dd.set(.4); }
+    k.mission(ui.g, `기록된 무늬를 재현하세요. 스크린 거리 <b>1 m</b>, 슬릿 폭 <b>0.05 mm</b>${L.fix.d ? `, 슬릿 간격 <b>${L.fix.d} mm</b>` : ''}${L.fix.lam ? `, 파장 <b>${L.fix.lam} nm</b>` : ''}`); }
+  else if (L.t === 'tel') { Ap.wrap.style.display = ''; Ap.set(.1); k.mission(ui.g, `각거리 <b>2 × 10⁻⁶ rad</b>인 쌍성을 550 nm 빛으로 구별하세요. 예산상 구경은 <b>${L.maxD} m</b>까지.`); }
+  else { ui.f.style.display = ''; filt = 0; ftools(); k.mission(ui.g, `구경 <b>0.2 m</b> 망원경으로 각거리 <b>3 × 10⁻⁶ rad</b>인 쌍성을 구별할 수 있는 필터를 고르세요.`); } }});
+function ftools(){ ui.f.innerHTML = '<div class="tools">' + FIL.map(([n, l, c], i) => `<button class="tool" type="button" aria-pressed="${i === filt}" data-i="${i}"><span style="color:${c}">●</span>${n} ${l} nm</button>`).join('') + '</div>'; ui.f.querySelectorAll('button').forEach(b => b.onclick = () => { filt = +b.dataset.i; sfx.click(); ftools(); }); }
+app.onStart = () => { ui.g = app.panel('복원 과제'); ui.c = app.panel('장치');
+  Lm = k.slider(ui.c, {label: '파장', min: 400, max: 700, step: 10, val: 500, fmt: v => v + ' nm'}); Dd = k.slider(ui.c, {label: '슬릿 간격', min: .1, max: .5, step: .05, val: .4, fmt: v => v.toFixed(2) + ' mm'});
+  Ap = k.slider(ui.c, {label: '구경 D', min: .05, max: .5, step: .01, val: .1, fmt: v => v.toFixed(2) + ' m'}); ui.f = document.createElement('div'); ui.c.appendChild(ui.f);
+  ui.b = app.panel(''); k.btn(ui.b, '🔬 비교 확인', () => { const L = k.L();
+    if (L.t === 'fr') { const c = cur(); if (Math.abs(c.lam - L.ans.lam) > 1 || Math.abs(c.d - L.ans.d) > .001) { const dx = 1 * c.lam * 1e-6 / c.d, tx = L.ans.lam * 1e-6 / L.ans.d; return k.fail(`아직 달라요 — 지금 Δx = ${dx.toFixed(2)} mm, 기록은 ${tx.toFixed(2)} mm`); } return k.win(ui.g, L.why); }
+    if (L.t === 'tel') { const th = 1.22 * L.lam * 1e-9 / Ap.v; if (Ap.v > L.maxD + 1e-9) return k.fail('예산 초과!'); if (th > L.sep) return k.fail(`최소 분해각 ${(th * 1e6).toFixed(2)} × 10⁻⁶ rad — 두 별이 겹쳐 보여요`); return k.win(ui.g, L.why, `D = ${Ap.v.toFixed(2)} m`); }
+    const th = 1.22 * FIL[filt][1] * 1e-9 / L.D; if (th > L.sep) return k.fail(`${FIL[filt][0]} 필터: 최소 분해각 ${(th * 1e6).toFixed(2)} × 10⁻⁶ rad — 구별 불가`); k.win(ui.g, L.why, FIL[filt][0]); });
+  k.begin(); };
+function color(l){ return l < 440 ? [130, 80, 255] : l < 490 ? [60, 120, 255] : l < 530 ? [60, 220, 120] : l < 580 ? [170, 230, 60] : l < 620 ? [255, 170, 40] : [255, 70, 50]; }
+k.draw((g, W, H) => { const L = k.L(); g.fillStyle = '#0b1018'; g.fillRect(0, 0, W, H);
+  if (L.t === 'fr') { const xr = 20, X = x => 30 + (x + xr) / (2 * xr) * (W - 60), c = cur(), rows = [['기록된 무늬', L.ans.lam, L.ans.d, H * .1], ['내 장치의 무늬', c.lam, c.d, H * .5]];
+    rows.forEach(([n, lam, d, y]) => { const col = color(lam), hh = H * .2; for (let px = 30; px < W - 30; px += 2) { const x = (px - 30) / (W - 60) * 2 * xr - xr, v = I(x, lam, d, L.fix.a); g.fillStyle = `rgb(${col[0] * v | 0},${col[1] * v | 0},${col[2] * v | 0})`; g.fillRect(px, y + 18, 2, hh); } D.text(g, n, 30, y + 8, {size: 12, color: '#e8eef6', weight: 700, align: 'left'}); });
+    for (let x = -20; x <= 20; x += 5) { g.strokeStyle = '#8899aa'; g.beginPath(); g.moveTo(X(x), H * .9); g.lineTo(X(x), H * .9 + 6); g.stroke(); D.text(g, x + '', X(x), H * .9 + 16, {size: 10.5, color: '#b8c4d0'}); }
+    D.text(g, '스크린 위치 (mm)', W / 2, H * .9 - 8, {size: 11, color: '#b8c4d0'}); return; }
+  const lam = L.t === 'tel' ? L.lam : FIL[filt][1], Dm = L.t === 'tel' ? Ap.v : L.D, th = 1.22 * lam * 1e-9 / Dm, cx = W / 2, cy = H * .48, pxPerRad = Math.min(W, H) * .18 / (L.sep), col = color(lam);
+  const key = [lam, Dm, W, H, k.lv].join(); if (CACHE.key !== key) { const img = g.createImageData(Math.floor(W * .6), Math.floor(H * .6)), w = img.width, h = img.height;
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) { let v = 0; for (const s of [-.5, .5]) { const dx = (i - w / 2) / pxPerRad - s * L.sep, dy = (j - h / 2) / pxPerRad, r = Math.hypot(dx, dy); v += Math.exp(-((r / th) ** 2) * 2.2); } v = Math.min(1, v); const o = (j * w + i) * 4; img.data[o] = col[0] * v; img.data[o + 1] = col[1] * v; img.data[o + 2] = col[2] * v; img.data[o + 3] = 255; }
+    CACHE.key = key; CACHE.img = img; }
+  const img = CACHE.img, w = img.width, h = img.height; g.putImageData(img, cx - w / 2, cy - h / 2); g.strokeStyle = '#334'; g.strokeRect(cx - w / 2, cy - h / 2, w, h);
+  D.text(g, `최소 분해각 ${(th * 1e6).toFixed(2)} × 10⁻⁶ rad · 두 별 각거리 ${(L.sep * 1e6).toFixed(1)} × 10⁻⁶ rad`, cx, H * .88, {size: 13, color: th <= L.sep ? '#9be3b5' : '#f28c7a', weight: 700});
+});
+</script>
+</body>
+</html>
