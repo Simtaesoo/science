@@ -37,14 +37,14 @@ const k = HS(app, {levels: LV, load(L){ res = null; ui.v.parentElement.style.dis
   else { k.mission(ui.g, `24시간 동안 <b>정전 0시간</b>, 하루 CO₂ <b>${L.co2} kt 이하</b>${L.max.N < 30 ? '<br>⚠ 노후 원전 폐쇄로 원자력 최대 20 GW' : ''}`);
     [['N', 0], ['C', 0], ['L', 0], ['S', 0], ['B', 0]].forEach(([n]) => { sl[n].el.max = L.max[n]; sl[n].set(0); const off = !L.max[n]; sl[n].el.disabled = off; sl[n].wrap.style.opacity = off ? .35 : 1; }); stat(); } }});
 function tools(){ const L = k.L(), r = line(L); ui.v.innerHTML = '<div class="tools">' + KV.map(([v, c]) => `<button class="tool" type="button" aria-pressed="${v === kv}" data-v="${v}">${v} kV<small style="opacity:.7">비용 ${c}</small></button>`).join('') + '</div>' +
-  `<p class="note-c" style="margin-top:8px">전류 <b>${r.I.toFixed(0)} A</b> · 손실 <b style="color:${r.pct <= L.lim ? 'var(--mint)' : 'var(--coral)'}">${r.loss.toFixed(2)} MW (${r.pct.toFixed(2)} %)</b></p>`;
+  `<p class="note-c" style="margin-top:8px">전류 <b>${r.I.toFixed(0)} A</b> · 손실 <b style="color:${r.pct <= L.lim ? 'var(--mint)' : 'var(--coral)'}">${r.pct >= 100 ? '보낼 전력보다 큼 → 송전 불가' : r.loss.toFixed(2) + ' MW (' + r.pct.toFixed(2) + ' %)'}</b></p>`;
   ui.v.querySelectorAll('button').forEach(b => b.onclick = () => { kv = +b.dataset.v; sfx.click(); tools(); }); }
 function stat(){ const L = k.L(), m = mix(); ui.r.innerHTML = `<p>정전 시간 <b style="color:${m.short ? 'var(--coral)' : 'var(--mint)'}">${m.short}시간</b></p><p>하루 CO₂ <b style="color:${m.co2 <= L.co2 ? 'var(--mint)' : 'var(--coral)'}">${m.co2.toFixed(0)} kt</b> / ${L.co2} kt</p>`; }
 app.onStart = () => { ui.g = app.panel('운영 과제'); ui.v = app.panel('송전 전압'); ui.m = app.panel('발전 설비 용량');
   [['N', '원자력', 'GW'], ['C', '석탄', 'GW'], ['L', 'LNG', 'GW'], ['S', '태양광', 'GW'], ['B', 'ESS', 'GWh']].forEach(([n, lb, u]) => sl[n] = k.slider(ui.m, {label: lb, min: 0, max: 60, step: 5, val: 0, fmt: v => v + ' ' + u, on: stat}));
   ui.r = document.createElement('div'); ui.m.appendChild(ui.r);
   ui.b = app.panel(''); k.btn(ui.b, '⚡ 운영 개시', () => { const L = k.L();
-    if (L.t === 'line') { const r = line(L), c = KV.find(x => x[0] === kv)[1]; if (r.pct > L.lim) return k.fail(`손실 ${r.pct.toFixed(1)} % — 기준 초과`); if (c > L.bud) return k.fail(`비용 ${c} — 예산 초과! 더 낮은 전압으로도 될까요?`); return k.win(ui.g, L.why, `${kv} kV`); }
+    if (L.t === 'line') { const r = line(L), c = KV.find(x => x[0] === kv)[1]; if (r.pct > L.lim) return k.fail(r.pct >= 100 ? '전압이 너무 낮아 전력을 보낼 수 없어요' : `손실 ${r.pct.toFixed(1)} % — 기준 초과`); if (c > L.bud) return k.fail(`비용 ${c} — 예산 초과! 더 낮은 전압으로도 될까요?`); return k.win(ui.g, L.why, `${kv} kV`); }
     const m = mix(); if (m.short) return k.fail(`${m.short}시간 동안 정전! 수요(검은 선)를 확인하세요`); if (m.co2 > L.co2) return k.fail(`CO₂ ${m.co2.toFixed(0)} kt — 목표 초과`); k.win(ui.g, L.why, `CO₂ ${m.co2.toFixed(0)} kt`); });
   k.begin(); };
 k.draw((g, W, H) => { const L = k.L(), t = performance.now() / 1000; g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, W, H);
@@ -54,7 +54,7 @@ k.draw((g, W, H) => { const L = k.L(), t = performance.now() / 1000; g.fillStyle
     const heat = Math.min(1, r.pct / 25); g.strokeStyle = `rgb(${Math.round(80 + 175 * heat)},${Math.round(80 - 40 * heat)},60)`; g.lineWidth = 3 + 5 * heat; g.beginPath(); g.moveTo(W * .16, y - 10); for (let x = W * .16; x <= W * .84; x += 6) g.lineTo(x, y - 10 + 10 * Math.sin((x - W * .16) / (W * .12) * Math.PI) ** 2); g.stroke();
     if (heat > .1) for (let i = 0; i < 6; i++) D.text(g, '♨', W * (.3 + i * .1), y - 30 - ((t * 20 + i * 13) % 30), {size: 14, color: '#d0533f'});
     const n = Math.max(2, Math.round(r.I / 120)); for (let i = 0; i < Math.min(18, n); i++) { const x = W * .16 + ((t * 80 + i * W * .68 / Math.min(18, n)) % (W * .68)); g.fillStyle = '#f6b400'; g.beginPath(); g.arc(x, y - 10 + 10 * Math.sin((x - W * .16) / (W * .12) * Math.PI) ** 2, 4, 0, 7); g.fill(); }
-    D.text(g, `전류 ${r.I.toFixed(0)} A → 손실 ${r.loss.toFixed(1)} MW`, W / 2, H * .8, {size: 17, weight: 700, color: r.pct <= L.lim ? '#2f8a55' : '#d0533f'}); D.text(g, '노란 점이 많을수록 전류가 커요', W / 2, H * .88, {size: 12, color: '#55606e'}); return; }
+    D.text(g, `전류 ${r.I.toFixed(0)} A → ${r.pct >= 100 ? '손실이 너무 커서 송전 불가!' : '손실 ' + r.loss.toFixed(1) + ' MW'}`, W / 2, H * .8, {size: 17, weight: 700, color: r.pct <= L.lim ? '#2f8a55' : '#d0533f'}); D.text(g, '노란 점이 많을수록 전류가 커요', W / 2, H * .88, {size: 12, color: '#55606e'}); return; }
   const m = mix(), A = k.axes(g, {x: 52, y: 22, w: W - 76, h: H - 66}, [0, 24, 3], [0, 80, 10], '시각 (시)', '전력 (GW)'), bw = (A.X(1) - A.X(0));
   const cols = [['nuc', '#8a5ac4', '원자력'], ['s', '#f6b400', '태양광'], ['b', '#2fb5a8', 'ESS'], ['c', '#55606e', '석탄'], ['l', '#2f6fd0', 'LNG']];
   m.hr.forEach((h, i) => { let base = 0; cols.forEach(([k2, col]) => { const v = h[k2]; if (v > 0) { g.fillStyle = col; g.fillRect(A.X(i) + 1, A.Y(base + v), bw - 2, A.Y(base) - A.Y(base + v)); base += v; } }); if (h.gap > 1e-9) { g.fillStyle = 'rgba(208,83,63,.35)'; g.fillRect(A.X(i) + 1, A.Y(base + h.gap), bw - 2, A.Y(base) - A.Y(base + h.gap)); } });
