@@ -92,7 +92,7 @@ function bodyOutline(g, cx, top, h){
   g.beginPath(); g.arc(cx, top + h * .08, h * .07, 0, TAU); g.fill(); g.stroke();
   g.beginPath(); g.moveTo(cx - w * .32, top + h * .17); g.quadraticCurveTo(cx - w * .5, top + h * .5, cx - w * .3, top + h * .95); g.lineTo(cx + w * .3, top + h * .95); g.quadraticCurveTo(cx + w * .5, top + h * .5, cx + w * .32, top + h * .17); g.closePath(); g.fill(); g.stroke();
 }
-function drawDig(){
+function drawDig(){ if (S.w < 80 || S.h < 80) return;
   const g = S.g, h = S.h - 20, top = 10, cx = S.w * .35, P = ([n, u, v]) => [cx + (u - .5) * h * .6, top + v * h];
   bodyOutline(g, cx, top, h);
   // 소화관
@@ -121,7 +121,7 @@ function stepDig(dt){ if (!st.bolus) return; const b = st.bolus, here = PATH[Mat
   const slow = DIG[st.food].steps[here] ? .25 : .7; b.k += dt * slow; if (DIG[st.food].steps[here]) b.broken = Math.min(1, b.broken + dt * .25); if (b.k >= PATH.length - 1) st.bolus = null; }
 
 /* ===== 2. 순환 ===== */
-function drawCirc(){
+function drawCirc(){ if (S.w < 80 || S.h < 80) return;
   const g = S.g, cx = S.w * .42, cy = S.h * .5, rate = 70 + st.ex * .9, beat = (Math.sin(st.t * rate / 60 * TAU) + 1) / 2;
   // 폐 (위), 온몸 (아래)
   const lung = [cx, cy - S.h * .33], body = [cx, cy + S.h * .33];
@@ -150,7 +150,7 @@ function drawCirc(){
 }
 
 /* ===== 3. 호흡 ===== */
-function drawBreath(){
+function drawBreath(){ if (S.w < 80 || S.h < 80) return;
   const g = S.g;
   if (st.br === 'alv') {
     const cx = S.w * .4, cy = S.h * .5, R = Math.min(S.w, S.h) * .25;
@@ -176,7 +176,7 @@ function drawBreath(){
 }
 
 /* ===== 4. 배설 ===== */
-function drawExcr(){
+function drawExcr(){ if (S.w < 80 || S.h < 80) return;
   const g = S.g, x0 = 40, y0 = 50, w = S.w - 80, h = S.h - 110;
   // 네프론 단순도: 사구체(왼쪽 위) → 세뇨관(가운데) → 집합관(오른쪽)
   const glo = [x0 + 60, y0 + 50];
@@ -199,7 +199,7 @@ function drawExcr(){
 }
 
 /* ===== 5. 통합 ===== */
-function drawAll(){
+function drawAll(){ if (S.w < 80 || S.h < 80) return;
   const g = S.g, cx = S.w / 2, cy = S.h / 2, R = Math.min(S.w, S.h) * .34, k = 1 + st.ex / 50;
   const nodes = {dig: [cx - R * 1.1, cy - R * .6, '소화계', '영양소 흡수'], resp: [cx + R * 1.1, cy - R * .6, '호흡계', 'O₂ 흡수 · CO₂ 배출'], circ: [cx, cy - R * .1, '순환계', '물질 운반'], cell: [cx, cy + R * .75, '조직 세포', '세포 호흡'], exc: [cx + R * 1.1, cy + R * .55, '배설계', '요소 배출']};
   const links = [['dig', 'circ', C.warn, '영양소'], ['resp', 'circ', C.phy, '산소'], ['circ', 'cell', C.hot, '영양소 + 산소'], ['cell', 'circ', C.muted, 'CO₂ · 노폐물'], ['circ', 'resp', C.muted, 'CO₂'], ['circ', 'exc', C.chem, '요소']];
