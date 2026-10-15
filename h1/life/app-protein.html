@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>단백질 공장 · 고1 생명 시스템</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'h1protein', title: '단백질 공장', unit: '고1 · 통합과학1 · 30 생명 시스템', back: '../../index.html#hi1', sim: 'sim.html#gene',
+  lead: '세포는 DNA의 유전 정보로 단백질을 만드는 공장이에요. 핵 속에서 <b>전사</b>로 mRNA를 만들고, 리보솜에서 <b>번역</b>으로 아미노산을 이어 단백질 주문을 완성하세요!',
+  howto: ['<b>전사</b>: DNA 주형 가닥의 염기에 상보적인 RNA 염기를 차례로 누르세요. (A→U, T→A, G→C, C→G)', '<b>번역</b>: mRNA의 코돈(염기 3개)을 보고 코돈표에서 알맞은 아미노산을 고르세요.', '종결 코돈이 나오면 번역이 끝나요.'],
+  recap: '<b>유전자 발현</b>: DNA → (전사) → mRNA → (번역) → 단백질. 전사는 핵 속에서 DNA 주형 가닥에 상보적인 RNA가 만들어지는 과정으로, RNA에는 T 대신 <b>U</b>가 쓰인다. 번역은 세포질의 리보솜에서 mRNA의 염기 3개(<b>코돈</b>)가 아미노산 1개를 지정하는 과정이다. AUG는 메싸이오닌을 지정하는 개시 코돈, UAA·UAG·UGA는 종결 코돈이다. DNA 염기 하나가 바뀌면 코돈이 바뀌어 다른 아미노산이 들어가거나 번역이 일찍 끝날 수 있다.',
+  startLabel: '공장 가동'
+});
+const {S, sfx, toast} = app, D = Draw;
+const TX = {A: 'U', T: 'A', G: 'C', C: 'G'};
+const COD = {AUG: '메싸이오닌', UUU: '페닐알라닌', GGC: '글리신', GCU: '알라닌', UGG: '트립토판', AAA: '라이신', GAA: '글루탐산', CCA: '프롤린', UAA: '종결', UAG: '종결', UGA: '종결'};
+const AA = ['메싸이오닌', '페닐알라닌', '글리신', '알라닌', '트립토판', '라이신', '글루탐산', '프롤린', '종결'];
+const LV = [
+  {tpl: 'TACAAACCG', tx: 1, tl: 0, why: 'TAC AAA CCG → AUG UUU GGC. RNA에는 T가 없고 A의 짝으로 U가 들어가요.'},
+  {tpl: 'TACAAACCGATT', tx: 0, tl: 1, why: 'AUG(메싸이오닌) → UUU(페닐알라닌) → GGC(글리신) → UAA(종결). 아미노산 3개짜리 펩타이드 완성!'},
+  {tpl: 'TACCGAACCATT', tx: 1, tl: 1, why: 'mRNA AUG GCU UGG UAA → 메싸이오닌–알라닌–트립토판. 전사와 번역을 모두 해냈어요.'},
+  {tpl: 'TACTTTCTTGGTATC', tx: 1, tl: 1, why: 'AUG AAA GAA CCA UAG → 메싸이오닌–라이신–글루탐산–프롤린.'},
+  {tpl: 'TACATTCTTGGTATC', tx: 1, tl: 1, mut: true, why: '4단계와 염기 하나(T→A)만 달라요. AAA가 종결 코돈 UAA로 바뀌어 번역이 일찍 끝났어요 — 돌연변이의 효과!'}];
+let ui = {}, ph, mr = '', ci = 0, chain = [];
+const full = L => L.tpl.split('').map(b => TX[b]).join('');
+const k = HS(app, {levels: LV, load(L){ ci = 0; chain = []; mr = L.tx ? '' : full(L); ph = L.tx ? 'tx' : 'tl';
+  k.mission(ui.g, (L.tx && L.tl ? '<b>전사 → 번역</b>을 모두 하세요.' : L.tx ? '<b>전사</b>: DNA 주형 가닥으로 mRNA를 만드세요.' : '<b>번역</b>: mRNA의 코돈을 아미노산으로 바꾸세요.') + (L.mut ? '<br>⚠ 돌연변이가 생긴 유전자예요!' : '')); pad(); }});
+function pad(){ const L = k.L();
+  if (ph === 'tx') { ui.t.innerHTML = '<p style="margin-bottom:6px">RNA 염기 고르기</p><div class="tools" style="justify-content:center">' + 'AUGC'.split('').map(b => `<button class="tool" type="button" data-b="${b}" style="font-size:22px;min-width:60px;justify-content:center">${b}</button>`).join('') + '</div>';
+    ui.t.querySelectorAll('button').forEach(b => b.onclick = () => txIn(b.dataset.b)); }
+  else if (ph === 'tl') { ui.t.innerHTML = `<p style="margin-bottom:6px">코돈 <b>${mr.substr(ci * 3, 3)}</b> → 아미노산은?</p><div class="tools">` + AA.map(a => `<button class="tool" type="button" data-a="${a}">${a}</button>`).join('') + '</div>';
+    ui.t.querySelectorAll('button').forEach(b => b.onclick = () => tlIn(b.dataset.a)); }
+  else ui.t.innerHTML = '<p>✔ 완료!</p>'; }
+function txIn(b){ const L = k.L(); if (ph !== 'tx' || k.done) return; const want = TX[L.tpl[mr.length]];
+  if (b !== want) return k.fail(`${L.tpl[mr.length]}의 짝은 ${want}예요`);
+  mr += b; sfx.pop(); if (mr.length === L.tpl.length) { if (L.tl) { ph = 'tl'; toast('전사 완료! 이제 리보솜으로', 'good'); pad(); } else { ph = 'end'; pad(); k.win(ui.g, L.why); } } }
+function tlIn(a){ const L = k.L(); if (ph !== 'tl' || k.done) return; const c = mr.substr(ci * 3, 3), want = COD[c];
+  if (a !== want) return k.fail(`${c}는 ${a}가 아니에요 — 코돈표를 확인하세요`);
+  sfx.ok(); chain.push(a); ci++; if (a === '종결' || ci * 3 >= mr.length) { ph = 'end'; pad(); k.win(ui.g, L.why, `아미노산 ${chain.filter(x => x !== '종결').length}개`); } else pad(); }
+app.onStart = () => { ui.g = app.panel('주문'); ui.t = app.panel('작업'); ui.c = app.panel('코돈표 (일부)');
+  ui.c.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;font-size:13.5px">' + Object.keys(COD).map(c => `<span><b style="font-family:monospace">${c}</b> ${COD[c]}</span>`).join('') + '</div>';
+  k.begin(); };
+const COL = {A: '#f28c7a', T: '#f6d365', U: '#c7b3f2', G: '#9be3b5', C: '#8ecdf2'};
+k.draw((g, W, H) => { const L = k.L(), n = L.tpl.length, w = Math.min(46, (W - 50) / n), x0 = W / 2 - w * n / 2 + w / 2, t = performance.now() / 1000;
+  g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, W, H);
+  g.fillStyle = 'rgba(199,179,242,.18)'; D.rr(g, 14, 14, W - 28, H * .48, 18); g.fill(); D.text(g, '핵', 34, 32, {size: 13, weight: 700, color: '#7a5ab0'});
+  const y1 = H * .17, y2 = H * .34;
+  D.text(g, 'DNA 주형 가닥', x0 - w / 2, y1 - w * .7, {size: 11.5, color: '#55606e', align: 'left'});
+  for (let i = 0; i < n; i++) { const x = x0 + i * w, b = L.tpl[i], mutHere = L.mut && i === 3; g.fillStyle = COL[b]; D.rr(g, x - w * .42, y1 - w * .42, w * .84, w * .84, 6); g.fill(); if (mutHere) { g.strokeStyle = '#d0533f'; g.lineWidth = 3; g.stroke(); } D.text(g, b, x, y1, {size: w * .42, weight: 700});
+    if (i < mr.length) { g.fillStyle = COL[mr[i]]; D.rr(g, x - w * .42, y2 - w * .42, w * .84, w * .84, 6); g.fill(); D.text(g, mr[i], x, y2, {size: w * .42, weight: 700}); }
+    else if (i === mr.length && ph === 'tx') { g.strokeStyle = '#2f6fd0'; g.setLineDash([4, 3]); g.lineWidth = 2; D.rr(g, x - w * .42, y2 - w * .42, w * .84, w * .84, 6); g.stroke(); g.setLineDash([]); } }
+  D.text(g, 'mRNA', x0 - w / 2, y2 + w * .75, {size: 11.5, color: '#55606e', align: 'left'});
+  // 리보솜과 번역
+  const y3 = H * .66, y4 = H * .86; D.text(g, '세포질 · 리보솜', 30, H * .54, {size: 13, weight: 700, color: '#55606e', align: 'left'});
+  if (mr.length === n) { for (let i = 0; i < n; i++) { const x = x0 + i * w; g.fillStyle = COL[mr[i]]; D.rr(g, x - w * .42, y3 - w * .42, w * .84, w * .84, 6); g.fill(); D.text(g, mr[i], x, y3, {size: w * .4, weight: 700}); }
+    for (let c = 0; c < n / 3; c++) { g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 1.5; g.strokeRect(x0 + c * 3 * w - w / 2 + 1, y3 - w / 2, 3 * w - 2, w); }
+    if (ph === 'tl') { const rx = x0 + ci * 3 * w + w; g.fillStyle = 'rgba(47,111,208,.22)'; g.beginPath(); g.ellipse(rx, y3 + 4, w * 1.9, w * 1.05, 0, 0, 7); g.fill(); g.strokeStyle = '#2f6fd0'; g.lineWidth = 2; g.stroke(); }
+    chain.forEach((a, i) => { const x = x0 + i * 3 * w + w, stop = a === '종결'; if (i) { g.strokeStyle = '#8a7a5a'; g.lineWidth = 3; g.beginPath(); g.moveTo(x - 3 * w + 22, y4); g.lineTo(x - 22, y4); g.stroke(); }
+      g.fillStyle = stop ? '#ddd' : ['#f28c7a', '#f6d365', '#9be3b5', '#8ecdf2', '#c7b3f2'][i % 5]; g.beginPath(); g.arc(x, y4 + Math.sin(t * 2 + i) * 2, 22, 0, 7); g.fill(); D.text(g, stop ? '끝' : a.slice(0, 3), x, y4, {size: 11.5, weight: 700}); }); }
+  else D.text(g, '전사가 끝나면 mRNA가 리보솜으로 이동해요', W / 2, (y3 + y4) / 2, {size: 14, color: '#8a8478'});
+});
+</script>
+</body>
+</html>
