@@ -31,7 +31,7 @@ function pH(L, v){ const nh = L.nH * L.ca * L.va, nb = L.cb * v, vt = (L.va + v)
   if (Math.abs(d) < 1e-12) return 7; if (d > 0) return -Math.log10(d / vt); return 14 + Math.log10(-d / vt); }
 function col(L, p){ if (L.ind === 'BTB') return p < 6 ? '#f2d14a' : p < 7.6 ? '#5bbf6a' : '#3f6fd8'; return p < 8.2 ? 'rgba(235,240,250,.85)' : p < 10 ? '#f08cc4' : '#d6439a'; }
 const k = HS(app, {levels: LV, load(L){ vb = 0; pts = [[0, L.t ? 1 : pH(L, 0)]]; drops = [];
-  ui.t.parentElement.style.display = L.t ? 'none' : ''; ui.b.parentElement.style.display = L.t ? 'none' : '';
+  ui.q.parentElement.style.display = L.t ? '' : 'none'; ui.t.parentElement.style.display = L.t ? 'none' : ''; ui.b.parentElement.style.display = L.t ? 'none' : '';
   if (L.t) { k.mission(ui.g, '산화·환원 판정'); app.quiz(ui.q, L.q, L.ch, L.a, {explain: L.why, onWrong: () => { k.fails++; app.addScore(-10); }, onRight: () => k.win(ui.g, '')}); return; }
   ui.q.innerHTML = '';
   k.mission(ui.g, `${L.acid} ${L.unk ? '' : L.ca + ' M '}<b>${L.va} mL</b>를 ${L.cb} M NaOH로 중화하세요.<br>지시약: <b>${L.ind === 'BTB' ? 'BTB' : '페놀프탈레인'}</b>`); info(); }});
