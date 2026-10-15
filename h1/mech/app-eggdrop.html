@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>에그 드롭 안전 연구소 · 고1 역학 시스템</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'h1egg', title: '에그 드롭 안전 연구소', unit: '고1 · 통합과학1 · 29 역학 시스템', back: '../../index.html#hi1', sim: 'sim.html#safety',
+  lead: '높은 곳에서 떨어지는 달걀(60 g)을 깨뜨리지 않고 받아 내세요! 달걀은 <b>평균 25 N</b>보다 큰 힘을 받으면 깨져요. 쿠션을 쌓아 <b>충돌 시간</b>을 늘리는 것이 핵심이에요.',
+  howto: ['재료(신문지·에어캡·스펀지)의 <b>층 수</b>를 정해 쿠션을 쌓으세요. 두꺼울수록 달걀이 천천히 멈춰요.', '수평으로 던지는 단계에서는 <b>던지는 속력</b>을 정해 쿠션 위에 떨어지게 하세요.', '<b>[떨어뜨리기]</b>를 누르면 충돌 속력, 충격량, 충돌 시간, 평균 힘을 계산해요. 예산을 넘지 마세요!'],
+  recap: '자유 낙하: v = √(2gh) — 2 m에서 떨어지면 약 6.3 m/s. 수평으로 던진 물체는 수평 방향으로 <b>등속</b>, 연직 방향으로 <b>자유 낙하</b> → 떨어지는 시간 t = √(2h/g), 수평 거리 x = v₀t. <b>충격량</b> = 운동량의 변화량 = 평균 힘 × 충돌 시간. 같은 높이에서 떨어지면 달걀이 받는 충격량은 같지만, 쿠션이 두꺼워 <b>충돌 시간이 길어지면 평균 힘이 작아진다</b>. 에어백, 헬멧, 운동장 매트가 같은 원리이다. (게임에서는 쿠션이 일정한 힘으로 눌린다고 보고 충돌 시간 = 2 × 눌린 깊이 ÷ 충돌 속력으로 계산)',
+  startLabel: '실험 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const G = 9.8, M = .06, LIM = 25;
+const MAT = [{n: '신문지', d: .01, c: 1, col: '#d9d4c5'}, {n: '에어캡', d: .02, c: 3, col: '#bfe6ff'}, {n: '스펀지', d: .04, c: 5, col: '#f6d365'}];
+const LV = [
+  {h: 1, x: 0, bud: 6, why: '1 m에서 떨어진 달걀의 충돌 속력은 약 4.4 m/s. 쿠션을 2.4 cm 이상 쌓으면 평균 힘이 25 N 아래로 내려가요.'},
+  {h: 3, x: 0, bud: 15, why: '높이가 3배면 충돌 직전 운동 에너지도 3배 → 쿠션도 약 3배 두꺼워야 해요.'},
+  {h: 5, x: 0, bud: 16, why: '5 m에서는 약 9.9 m/s! 스펀지를 섞어 12 cm보다 두껍게(약 13 cm) 쌓아야 충돌 시간이 충분히 길어져요.'},
+  {h: 2, x: 3, bud: 15, why: '떨어지는 시간 √(2×2/9.8) ≈ 0.64 s 동안 3 m를 가야 하므로 v₀ ≈ 4.7 m/s. 수평 속도도 있어 충돌 속력은 더 커져요.'},
+  {h: 4, x: 5, bud: 20, why: 't = √(2×4/9.8) ≈ 0.90 s → v₀ ≈ 5.5 m/s. 충돌 속력은 √(v₀² + 2gh) ≈ 10.4 m/s.'}];
+let ui = {}, cnt = [0, 0, 0], V0, ball = null, res = null;
+const thick = () => cnt.reduce((s, n, i) => s + n * MAT[i].d, 0), price = () => cnt.reduce((s, n, i) => s + n * MAT[i].c, 0);
+const k = HS(app, {levels: LV, load(L){ cnt = [0, 0, 0]; ball = null; res = null;
+  k.mission(ui.g, `높이 <b>${L.h} m</b>에서 ${L.x ? `수평으로 던져 <b>${L.x} m</b> 앞의 쿠션에` : '떨어뜨려 바로 아래 쿠션에'} 받아 내세요.<br>예산 <b>${L.bud}</b>`);
+  ui.vw.style.display = L.x ? '' : 'none'; V0.set(L.x ? 3 : 0); tools(); }});
+function tools(){ const L = k.L(); ui.t.innerHTML = MAT.map((m, i) => `<div style="display:flex;align-items:center;gap:8px;margin:5px 0"><span style="min-width:96px"><span style="color:${m.col}">■</span> ${m.n}<br><small style="opacity:.7">${m.d * 100} cm · 비용 ${m.c}</small></span><button class="tool" type="button" data-i="${i}" data-d="-1">－</button><b style="min-width:18px;text-align:center">${cnt[i]}</b><button class="tool" type="button" data-i="${i}" data-d="1">＋</button></div>`).join('') + `<p class="note-c">쿠션 두께 <b>${(thick() * 100).toFixed(0)} cm</b> · 비용 <b style="color:${price() > L.bud ? 'var(--coral)' : 'var(--yellow)'}">${price()}</b> / ${L.bud}</p>`;
+  ui.t.querySelectorAll('button').forEach(b => b.onclick = () => { const i = +b.dataset.i; cnt[i] = D.clamp(cnt[i] + +b.dataset.d, 0, 6); ball = null; res = null; sfx.pop(); tools(); }); }
+app.onStart = () => { ui.g = app.panel('실험 조건'); ui.t = app.panel('쿠션 쌓기'); ui.v = app.panel('던지는 속력'); ui.vw = ui.v.parentElement;
+  V0 = k.slider(ui.v, {label: '수평 속력 v₀', min: 0, max: 8, step: .1, val: 0, fmt: v => v.toFixed(1) + ' m/s', on: () => { ball = null; res = null; }});
+  ui.r = app.panel('측정 결과'); ui.r.innerHTML = '<p class="note-c">떨어뜨리면 결과가 나와요.</p>';
+  ui.b = app.panel(''); k.btn(ui.b, '🥚 떨어뜨리기', () => { const L = k.L(); if (price() > L.bud) return k.fail(`예산 초과! ${price()} > ${L.bud}`); ball = {t: 0, x: 0, y: L.h, done: false}; res = null; sfx.whoosh(); });
+  k.begin(); };
+app.step = dt => { const L = k.L(); if (!ball || ball.done) return; const v0 = L.x ? V0.v : 0, T = Math.sqrt(2 * L.h / G);
+  ball.t = Math.min(T, ball.t + dt * .8); ball.x = v0 * ball.t; ball.y = L.h - .5 * G * ball.t * ball.t;
+  if (ball.t >= T) { ball.done = true; const vy = G * T, v = Math.hypot(v0, vy), onC = Math.abs(ball.x - L.x) <= .3, d = onC ? Math.max(.002, thick()) : .002, dt2 = 2 * d / v, F = M * v / dt2 + M * G;
+    res = {v, J: M * v, dt: dt2, F, onC, ok: onC && F <= LIM};
+    ui.r.innerHTML = `<p>충돌 속력 <b>${v.toFixed(2)} m/s</b></p><p>충격량 <b>${(M * v).toFixed(3)} N·s</b></p><p>충돌 시간 <b>${(dt2 * 1000).toFixed(1)} ms</b></p><p>평균 힘 <b style="color:${F <= LIM ? 'var(--mint)' : 'var(--coral)'}">${F.toFixed(1)} N</b> (한계 ${LIM} N)</p>`;
+    if (!onC) { sfx.bad(); k.fail(`쿠션을 벗어났어요! (${ball.x.toFixed(2)} m 지점에 떨어짐)`); }
+    else if (F > LIM) { sfx.bad(); k.fail(`퍽! 평균 힘 ${F.toFixed(0)} N — 충돌 시간을 더 늘려야 해요`); }
+    else k.win(ui.g, L.why, `평균 힘 ${F.toFixed(1)} N`); } };
+k.draw((g, W, H) => { const L = k.L(), wx = 7, wy = 5.6, sc = Math.min((W - 80) / wx, (H - 50) / wy), ox = 70, gy = H - 30, X = x => ox + x * sc, Y = y => gy - y * sc;
+  const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#bfe3f7'); sky.addColorStop(1, '#eef8ff'); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#8fbf7a'; g.fillRect(0, gy, W, H - gy);
+  g.fillStyle = '#b8a48a'; g.fillRect(ox - 50, Y(L.h), 50, gy - Y(L.h)); g.fillStyle = '#9b876c'; for (let y = 0; y < L.h; y += .5) g.fillRect(ox - 44, Y(y + .4), 14, 10);
+  D.text(g, `${L.h} m`, ox - 25, Y(L.h) - 12, {size: 13, weight: 700, color: '#34404e'});
+  for (let y = 0; y <= 5; y++) { g.strokeStyle = 'rgba(0,0,0,.08)'; g.beginPath(); g.moveTo(ox, Y(y)); g.lineTo(W, Y(y)); g.stroke(); }
+  for (let x = 0; x <= 6; x++) D.text(g, x + ' m', X(x), gy + 14, {size: 10.5, color: '#34404e'});
+  // 쿠션
+  let yy = 0; const cw = .6 * sc; cnt.forEach((n, i) => { for (let j = 0; j < n; j++) { const hpx = Math.max(4, MAT[i].d * sc * 2.5); g.fillStyle = MAT[i].col; g.strokeStyle = 'rgba(0,0,0,.3)'; g.fillRect(X(L.x) - cw / 2, gy - yy - hpx, cw, hpx); g.strokeRect(X(L.x) - cw / 2, gy - yy - hpx, cw, hpx); yy += hpx; } });
+  g.strokeStyle = '#d0533f'; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(X(L.x) - cw / 2, gy + 2); g.lineTo(X(L.x) + cw / 2, gy + 2); g.stroke(); g.setLineDash([]);
+  // 예상 경로
+  if (L.x) { const T = Math.sqrt(2 * L.h / G), P = []; for (let i = 0; i <= 30; i++) { const t = T * i / 30; P.push([X(V0.v * t), Y(L.h - .5 * G * t * t)]); } k.line(g, P, 'rgba(47,111,208,.35)', 2, [5, 5]); }
+  // 달걀
+  const bx = ball ? ball.x : 0, by = ball ? Math.max(0, ball.y) : L.h, ex = X(bx), ey = Y(by) - (ball && ball.done ? 0 : 0) - 9 - (by <= 0 ? yy * 0 : 0);
+  if (res && !res.ok) { g.fillStyle = '#fff'; g.beginPath(); g.ellipse(ex, gy - 4 - (res.onC ? yy : 0), 20, 5, 0, 0, 7); g.fill(); g.fillStyle = '#f6c343'; g.beginPath(); g.arc(ex, gy - 6 - (res.onC ? yy : 0), 6, 0, 7); g.fill(); D.text(g, '💥', ex, gy - 30 - (res.onC ? yy : 0), {size: 22}); }
+  else { const y2 = res ? gy - yy - 9 : ey; g.fillStyle = '#fffaf0'; g.strokeStyle = '#8a7a5a'; g.lineWidth = 2; g.beginPath(); g.ellipse(ex, y2, 7, 9.5, 0, 0, 7); g.fill(); g.stroke(); if (res) D.text(g, '😊', ex, y2 - 24, {size: 18}); }
+});
+</script>
+</body>
+</html>

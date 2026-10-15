@@ -13,7 +13,7 @@
 const app = AppKit({
   id: 'h1carbon', title: '탄소 순환 관제실', unit: '고1 · 통합과학1 · 28 지구시스템', back: '../../index.html#hi1', sim: 'sim.html#cycle',
   lead: '2025년 대기 중 이산화 탄소 농도는 약 420 ppm. 화석 연료가 기권으로 탄소를 보내고, <b>해양(수권)</b>과 <b>숲(생물권)</b>이 일부를 흡수해요. 정책을 정해 2100년까지의 탄소 순환을 관리하세요!',
-  howto: ['<b>화석 연료 감축률</b>(해마다 몇 %씩 줄일지), <b>숲 면적</b>, <b>탄소 포집</b>(2035년부터)을 정하세요.', '정책마다 <b>비용</b>이 들어요. 예산 안에서 목표를 달성해야 해요.', '<b>[2100년까지 실행]</b>을 누르면 해마다 탄소의 이동을 계산해 그래프로 보여 줘요.'],
+  howto: ['<b>연료 감축률</b>(화석 연료 사용을 해마다 몇 %씩 줄일지), <b>숲 면적</b>, <b>탄소 포집</b>(2035년부터, 해마다 GtC)을 정하세요.', '정책마다 <b>비용</b>이 들어요. 예산 안에서 목표를 달성해야 해요.', '<b>[2100년까지 실행]</b>을 누르면 해마다 탄소의 이동을 계산해 그래프로 보여 줘요.'],
   recap: '탄소는 지권(화석 연료·석회암) → 기권(CO₂) → 수권(해수에 용해) → 생물권(광합성) 사이를 이동한다. 대기 CO₂ 1 ppm ≈ 탄소 2.12 GtC. 해마다 대기 탄소 변화 = 배출량 − 해양 흡수 − 육상 생물 흡수. 화석 연료를 태우면 오랫동안 지권에 저장되었던 탄소가 짧은 시간에 기권으로 이동해 농도가 높아진다. 해양과 숲의 흡수량은 대기 농도가 높을수록 커지지만, 배출량을 줄이지 않으면 증가를 막을 수 없다 — 지구시스템의 각 권은 서로 영향을 주고받는다. (게임 모형은 실제 값을 단순화한 것)',
   startLabel: '관제 시작'
 });
@@ -35,9 +35,9 @@ const k = HS(app, {levels: LV, load(L){ const goals = [L.t2100 ? `2100년 농도
   R.set(0); F.set(100); Cc.set(0); run = null; info(); }});
 function info(){ const L = k.L(); ui.c.innerHTML = `비용 <b style="color:${L.cost && cost() > L.cost ? 'var(--coral)' : 'var(--yellow)'}">${cost().toFixed(0)}</b>${L.cost ? ` / ${L.cost}` : ''}`; run = null; }
 app.onStart = () => { ui.g = app.panel('목표'); ui.p = app.panel('정책');
-  R = k.slider(ui.p, {label: '화석 연료 감축', min: 0, max: 6, step: .5, val: 0, fmt: v => v.toFixed(1) + ' %/년', on: info});
+  R = k.slider(ui.p, {label: '연료 감축률', min: 0, max: 6, step: .5, val: 0, fmt: v => v.toFixed(1) + '%', on: info});
   F = k.slider(ui.p, {label: '숲 면적', min: 80, max: 140, step: 5, val: 100, fmt: v => v + ' %', on: info});
-  Cc = k.slider(ui.p, {label: '탄소 포집', min: 0, max: 3, step: .5, val: 0, fmt: v => v.toFixed(1) + ' GtC', on: info});
+  Cc = k.slider(ui.p, {label: '탄소 포집', min: 0, max: 3, step: .5, val: 0, fmt: v => v.toFixed(1) + 'Gt', on: info});
   ui.c = document.createElement('p'); ui.c.className = 'note-c'; ui.p.appendChild(ui.c);
   ui.b = app.panel(''); k.btn(ui.b, '▶ 2100년까지 실행', () => { run = sim(R.v, F.v, Cc.v); prog = 0; sfx.whoosh(); });
   k.begin(); };
@@ -52,9 +52,9 @@ k.draw((g, W, H) => { const L = k.L(); g.fillStyle = '#f7f3ea'; g.fillRect(0, 0,
   if (L.t2100) { g.strokeStyle = '#2f8a55'; g.setLineDash([6, 4]); g.lineWidth = 2; g.beginPath(); g.moveTo(A.X(2090), A.Y(L.t2100)); g.lineTo(A.X(2100), A.Y(L.t2100)); g.stroke(); g.setLineDash([]); D.text(g, `목표 ${L.t2100}`, A.X(2088), A.Y(L.t2100), {size: 11, color: '#2f8a55', align: 'right', weight: 700}); }
   if (L.peak) { g.strokeStyle = '#d0533f'; g.setLineDash([6, 4]); g.lineWidth = 1.5; g.beginPath(); g.moveTo(A.X(2025), A.Y(L.peak)); g.lineTo(A.X(2100), A.Y(L.peak)); g.stroke(); g.setLineDash([]); D.text(g, `최고 한도 ${L.peak}`, A.X(2026), A.Y(L.peak) - 9, {size: 11, color: '#d0533f', align: 'left', weight: 700}); }
   const base = sim(0, 100, 0); k.line(g, base.P.map(([y, c]) => [A.X(y), A.Y(Math.min(560, c))]), 'rgba(0,0,0,.25)', 2, [4, 4]); D.text(g, '정책 없음', A.X(2098), A.Y(Math.min(555, base.C)) - 10, {size: 11, color: '#777', align: 'right'});
-  if (run) { const n = Math.max(1, Math.floor(run.P.length * prog)); k.line(g, run.P.slice(0, n).map(([y, c]) => [A.X(y), A.Y(c)]), '#2f6fd0', 3.5); const [y, c] = run.P[n - 1]; g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(A.X(y), A.Y(c), 5, 0, 7); g.fill(); D.text(g, `${y}년 ${c.toFixed(0)} ppm`, A.X(y), A.Y(c) - 16, {size: 12, weight: 700, color: '#1d3a58', stroke: '#fff'}); }
+  if (run) { const n = Math.max(1, Math.floor(run.P.length * prog)); k.line(g, run.P.slice(0, n).map(([y, c]) => [A.X(y), A.Y(c)]), '#2f6fd0', 3.5); const [y, c] = run.P[n - 1]; g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(A.X(y), A.Y(c), 5, 0, 7); g.fill(); D.text(g, `${y}년 ${c.toFixed(0)} ppm`, A.X(y) - (y > 2085 ? 6 : 0), A.Y(c) - 16, {size: 12, weight: 700, color: '#1d3a58', stroke: '#fff', align: y > 2085 ? 'right' : 'center'}); }
   // 탄소 흐름 막대
-  const s = run || sim(R.v, F.v, Cc.v), by = gh + 22, bh = H - by - 10, items = [['배출', '#555b66'], ['해양 흡수', '#2f6fd0'], ['숲 흡수', '#2f8a55'], ['포집', '#8a5ac4']];
+  const s = run || sim(R.v, F.v, Cc.v), by = gh + 42, bh = H - by - 8, items = [['배출', '#555b66'], ['해양 흡수', '#2f6fd0'], ['숲 흡수', '#2f8a55'], ['포집', '#8a5ac4']];
   s.fl.forEach((f, j) => { const vals = [f.E, f.O, f.L, f.cc], cx = 70 + j * (W - 90) / 2, wcol = (W - 120) / 2; D.text(g, `${f.y}년 탄소 이동 (GtC/년)`, cx, by, {size: 12, weight: 700, align: 'left', color: '#34404e'});
     vals.forEach((v, i) => { const yy = by + 16 + i * Math.min(20, (bh - 16) / 4); D.text(g, items[i][0], cx, yy, {size: 11, align: 'left', color: '#55606e'}); g.fillStyle = items[i][1]; g.fillRect(cx + 62, yy - 6, Math.max(1, v / 10 * (wcol - 110)), 12); D.text(g, v.toFixed(1), cx + 68 + v / 10 * (wcol - 110), yy, {size: 11, align: 'left', weight: 700}); }); });
 });
