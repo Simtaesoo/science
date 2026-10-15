@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>조율사의 공방 · 고3 역학과 에너지 탄성파와 소리</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'mtuner', title: '조율사의 공방', unit: '고3 · 역학과 에너지 · 45 탄성파와 소리', back: '../../index.html#mech', sim: 'sim.html#stand',
+  lead: '공연 직전! 악기들의 음이 모두 틀어져 있어요. 줄의 <b>파동 속력</b>, 줄과 관의 <b>길이</b>를 계산해 목표 음에 정확히 맞추세요. 소리를 직접 들으며 조율할 수 있어요 🎵',
+  howto: ['슬라이더로 조절하고 <b>[소리 듣기]</b>로 목표 음과 비교하세요.', '조율기 바늘이 가운데(±8센트 이내)에 오면 <b>[조율 완료]</b>!', '음속 340 m/s. 줄·열린 관 f₁ = v/2L, 닫힌 관 f₁ = v/4L.'],
+  recap: '줄과 관에서는 양 끝 조건을 만족하는 <b>정상파</b>만 생긴다. 양끝이 고정된 줄과 열린 관: λ₁ = 2L → f₁ = v/2L, 한쪽이 닫힌 관: λ₁ = 4L → f₁ = v/4L(홀수배 진동만). 줄을 팽팽하게 하면 파동 속력이 커져 음이 높아지고, 줄이나 관을 짧게 하면 파장이 짧아져 음이 높아진다. 진동수가 2배면 한 옥타브 위. <b>도플러 효과</b>: 음원이 다가오면 f′ = f·v/(v − vₛ)로 높게 들린다.',
+  startLabel: '공방 열기'
+});
+const {S, sfx, toast} = app, D = Draw;
+const LV = [
+  {t: 'string', L: .65, note: 'A4 (라)', f: 440, var: 'v', why: 'f₁ = v/2L → v = 2 × 0.65 × 440 = 572 m/s. 줄을 조여 파동 속력을 높였어요.'},
+  {t: 'string', v: 286, note: 'E4 (미)', f: 329.6, var: 'L', why: 'L = v / 2f = 286 ÷ (2 × 329.6) ≈ 0.434 m. 기타의 프렛을 누르는 것은 줄의 길이를 바꾸는 것이에요.'},
+  {t: 'open', note: 'C5 (높은 도)', f: 523.3, var: 'L', why: '열린 관: L = 340 ÷ (2 × 523.3) ≈ 0.325 m. 플루트처럼 양쪽이 열린 관이에요.'},
+  {t: 'closed', note: 'G3 (낮은 솔)', f: 196, var: 'L', why: '닫힌 관: L = 340 ÷ (4 × 196) ≈ 0.434 m. 같은 음을 내는 열린 관보다 길이가 절반이에요.'},
+  {t: 'doppler', f0: 680, note: '다가오는 구급차', f: 720, var: 'vs', why: '720 = 680 × 340 ÷ (340 − vₛ) → vₛ ≈ 18.9 m/s(약 68 km/h). 들리는 음높이로 속력을 알 수 있어요.'}];
+let ui = {}, X, ac = null, osc = null;
+function cur(){ const L = k.L(), x = X.v; if (L.t === 'string') return L.var === 'v' ? x / (2 * L.L) : L.v / (2 * x); if (L.t === 'open') return 340 / (2 * x); if (L.t === 'closed') return 340 / (4 * x); return L.f0 * 340 / (340 - x); }
+const cents = () => 1200 * Math.log2(cur() / k.L().f);
+function play(f, d){ if (app.store.get('muted', false)) return; try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime; o.type = 'triangle'; o.frequency.value = f; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.15, t + .03); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g).connect(ac.destination); o.start(t); o.stop(t + d + .05); } catch (e) {} }
+const k = HS(app, {levels: LV, load(L){ const lab = {v: '파동 속력', L: L.t === 'string' ? '줄 길이' : '관 길이', vs: '음원 속력'}[L.var];
+  X.wrap.querySelector('span').textContent = lab; const r = {v: [300, 800, 1, 450], L: [.2, 1, .001, .6], vs: [0, 60, .1, 5]}[L.var]; X.el.min = r[0]; X.el.max = r[1]; X.el.step = r[2]; X.set(r[3]);
+  X.wrap.querySelector('output').textContent = fmt(X.v);
+  k.mission(ui.g, L.t === 'doppler' ? `정지한 사람에게 사이렌(원래 <b>${L.f0} Hz</b>)이 <b>${L.f} Hz</b>로 들려요. 구급차의 속력을 맞혀 같은 소리를 재현하세요.` : `<b>${{string: '현악기 줄', open: '열린 관(플루트)', closed: '닫힌 관(팬파이프)'}[L.t]}</b>을 <b>${L.note} ${L.f} Hz</b>에 맞추세요.${L.t === 'string' ? (L.var === 'v' ? ` (줄 길이 ${L.L} m)` : ` (파동 속력 ${L.v} m/s)`) : ''}`); info(); }});
+const fmt = v => { const L = k.L(); return L.var === 'v' ? v.toFixed(0) + ' m/s' : L.var === 'L' ? (v * 100).toFixed(1) + ' cm' : v.toFixed(1) + ' m/s'; };
+function info(){ ui.r.innerHTML = `<p>지금 나는 소리 <b>${cur().toFixed(1)} Hz</b></p><p>목표 <b>${k.L().f} Hz</b> · 차이 <b>${cents() > 0 ? '+' : ''}${cents().toFixed(0)}센트</b></p>`; }
+app.onStart = () => { ui.g = app.panel('조율 의뢰'); ui.c = app.panel('조절');
+  X = k.slider(ui.c, {label: '값', min: 0, max: 1, step: .01, val: .5, fmt: v => k.L() ? fmt(v) : v, on: info}); ui.r = document.createElement('div'); ui.c.appendChild(ui.r);
+  const tl = document.createElement('div'); tl.className = 'tools'; tl.style.marginTop = '8px'; ui.c.appendChild(tl);
+  [['🎯 목표 음', () => play(k.L().f, .8)], ['🔊 지금 소리', () => play(cur(), .8)], ['🎼 번갈아', () => { play(k.L().f, .5); setTimeout(() => play(cur(), .5), 600); }]].forEach(([n, f]) => { const b = document.createElement('button'); b.className = 'tool'; b.type = 'button'; b.textContent = n; b.onclick = f; tl.appendChild(b); });
+  ui.b = app.panel(''); k.btn(ui.b, '✔ 조율 완료', () => { const c = cents(); if (Math.abs(c) <= 8) { play(cur(), .6); k.win(ui.g, k.L().why, `${cur().toFixed(1)} Hz`); } else k.fail(`${c > 0 ? '높아요' : '낮아요'} — ${Math.abs(c).toFixed(0)}센트 차이`); });
+  k.begin(); };
+k.draw((g, W, H) => { const L = k.L(), t = performance.now() / 1000, f = cur(); g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, W, H);
+  // 악기
+  const y = H * .3, x0 = W * .12, maxw = W * .76;
+  if (L.t === 'string') { const len = L.var === 'L' ? X.v : L.L, w = maxw * len / 1, amp = 14; g.fillStyle = '#c0762b'; g.fillRect(x0 - 10, y - 26, 10, 52); g.fillRect(x0 + w, y - 26, 10, 52); g.strokeStyle = '#555'; g.lineWidth = 2;
+    g.beginPath(); for (let i = 0; i <= 60; i++) { const u = i / 60; g.lineTo(x0 + u * w, y + amp * Math.sin(Math.PI * u) * Math.sin(t * 20)); } g.stroke(); g.globalAlpha = .3; g.beginPath(); for (let i = 0; i <= 60; i++) { const u = i / 60; g.lineTo(x0 + u * w, y - amp * Math.sin(Math.PI * u)); } g.stroke(); g.globalAlpha = 1;
+    D.text(g, `L = ${(len * 100).toFixed(1)} cm`, x0 + w / 2, y + 40, {size: 13, weight: 700}); }
+  else if (L.t !== 'doppler') { const len = X.v, w = maxw * len, open = L.t === 'open'; g.fillStyle = 'rgba(192,118,43,.25)'; g.fillRect(x0, y - 22, w, 44); g.strokeStyle = '#8a5a2a'; g.lineWidth = 3; g.beginPath(); g.moveTo(x0, y - 22); g.lineTo(x0 + w, y - 22); g.moveTo(x0, y + 22); g.lineTo(x0 + w, y + 22); g.stroke(); if (!open) { g.lineWidth = 6; g.beginPath(); g.moveTo(x0 + w, y - 22); g.lineTo(x0 + w, y + 22); g.stroke(); }
+    g.strokeStyle = '#2f6fd0'; g.lineWidth = 2; for (const s of [1, -1]) { g.beginPath(); for (let i = 0; i <= 60; i++) { const u = i / 60, a = open ? Math.cos(Math.PI * u) : Math.cos(Math.PI / 2 * u); g.lineTo(x0 + u * w, y + s * 16 * a * Math.cos(t * 6)); } g.stroke(); }
+    D.text(g, `L = ${(len * 100).toFixed(1)} cm (${open ? '양쪽 열림' : '한쪽 닫힘'})`, x0 + w / 2, y + 40, {size: 13, weight: 700}); }
+  else { const vx = ((t * 40) % (W + 100)) - 50; D.text(g, '🚑', W - vx, y, {size: 40}); D.text(g, '🧍', W * .2, y + 10, {size: 34}); for (let i = 1; i <= 4; i++) { g.strokeStyle = `rgba(208,83,63,${.5 - i * .1})`; g.beginPath(); g.arc(W - vx - i * 14 * (1 - X.v / 340 * 3), y, i * 14, Math.PI * .6, Math.PI * 1.4); g.stroke(); } D.text(g, `음원 속력 ${X.v.toFixed(1)} m/s`, W / 2, y + 40, {size: 13, weight: 700}); }
+  // 조율기
+  const cx = W / 2, cy = H * .9, R = Math.min(W * .3, H * .38), c = Math.max(-50, Math.min(50, cents())), a = -Math.PI / 2 + c / 50 * Math.PI / 3;
+  g.strokeStyle = '#cfc8b6'; g.lineWidth = 12; g.beginPath(); g.arc(cx, cy, R, -Math.PI / 2 - Math.PI / 3, -Math.PI / 2 + Math.PI / 3); g.stroke(); g.strokeStyle = '#9be3b5'; g.beginPath(); g.arc(cx, cy, R, -Math.PI / 2 - Math.PI / 3 * 8 / 50, -Math.PI / 2 + Math.PI / 3 * 8 / 50); g.stroke();
+  D.arrow(g, cx, cy, cx + (R - 6) * Math.cos(a), cy + (R - 6) * Math.sin(a), Math.abs(c) <= 8 ? '#2f8a55' : '#d0533f', 3); D.text(g, '♭ 낮음', cx - R * .9, cy - R * .55, {size: 12, color: '#55606e'}); D.text(g, '높음 ♯', cx + R * .9, cy - R * .55, {size: 12, color: '#55606e'});
+  D.text(g, `${f.toFixed(1)} Hz`, cx, cy - R - 16, {size: 18, weight: 700, color: Math.abs(c) <= 8 ? '#2f8a55' : '#1d3a58'});
+});
+</script>
+</body>
+</html>
