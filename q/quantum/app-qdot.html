@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>양자 기술 공방 · 고3 전자기와 양자 양자 현상</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'qdot', title: '양자 기술 공방', unit: '고3 · 전자기와 양자 · 50 양자 현상', back: '../../index.html#eq', sim: 'sim.html#box', dark: true,
+  lead: '양자 현상을 이용한 첨단 기술을 직접 설계해 보세요! 상자 크기로 색을 정하는 <b>양자점 디스플레이</b>, 장벽 두께로 전류를 조절하는 <b>터널링 소자</b>, 그리고 <b>불확정성 원리</b>의 한계까지.',
+  howto: ['양자점 단계: 전자가 갇힌 상자의 <b>크기 L</b>을 조절해 n = 2 → 1 전이로 나오는 빛을 목표 색에 맞추세요. (±5 nm)', '터널링 단계: 장벽 <b>두께</b>를 조절해 투과 확률을 목표에 맞추세요.', '불확정성 단계: 조건을 만족하는 가장 좁은 슬릿을 찾으세요.'],
+  recap: '길이 L인 상자에 갇힌 전자의 에너지는 Eₙ = n²h²/8mL²로 <b>양자화</b>되며(L = 0.5 nm일 때 E₁ ≈ 1.50 eV), 상자가 작을수록 에너지 간격이 커진다 → 작은 양자점은 파란빛, 큰 양자점은 빨간빛(λ = 1240/ΔE). <b>양자 터널링</b>: 입자는 자신보다 높은 에너지 장벽을 일정한 확률로 통과하며, 투과 확률은 장벽 두께에 따라 지수적으로 줄어든다 → 주사 터널링 현미경, 플래시 메모리. <b>불확정성 원리</b> Δx·Δp ≥ ħ/2: 위치를 좁게 제한할수록 운동량(속도)의 불확정성이 커진다. (양자점 단계는 진공 속 전자 모형으로 단순화)',
+  startLabel: '공방 열기'
+});
+const {S, sfx, toast} = app, D = Draw;
+const HB = 1.0546e-34, ME = 9.109e-31;
+const LV = [
+  {t: 'qd', lam: 620, name: '빨간 화소', why: 'λ = 1240 ÷ (3 × 0.376 / L²) ≈ 1099 L² → L ≈ 0.75 nm. 상자가 클수록 에너지 간격이 작아 파장이 긴 빛!'},
+  {t: 'qd', lam: 530, name: '초록 화소', why: 'L ≈ 0.69 nm. 빨간 화소보다 조금 작은 상자가 필요해요.'},
+  {t: 'qd', lam: 460, name: '파란 화소', why: 'L ≈ 0.65 nm. 가장 작은 상자 → 가장 큰 에너지 간격 → 가장 짧은 파장. 크기만 바꿔 세 가지 색을 모두 만들었어요!'},
+  {t: 'tn', goal: 2, tol: .3, why: '두께 약 0.29~0.30 nm에서 투과 확률 2 %. 두께가 0.1 nm만 변해도 확률이 몇 배씩 변해 — 그래서 STM은 원자 하나의 높이 차이도 감지해요.'},
+  {t: 'un', vmax: 100, why: 'Δx ≥ ħ/(2mΔv) = 1.055 × 10⁻³⁴ ÷ (2 × 9.11 × 10⁻³¹ × 10⁵) ≈ 0.58 nm. 이보다 좁히면 속도가 더 불확실해져요.'}];
+let ui = {}, X, ph = 0, el = [];
+const lamQD = L => 1240 / (3 * .376 / (L * L));
+function Ttn(a){ const ka = Math.sqrt(2 * ME * 3 * 1.602e-19) / HB * a * 1e-9, s = Math.sinh(ka); return 1 / (1 + 64 * s * s / 60) * 100; }
+const dv = a => HB / (2 * ME * a * 1e-9) / 1000;
+function wl2rgb(l){ if (l < 380) return 'rgb(180,140,255)'; if (l > 750) return 'rgb(136,34,34)'; let r = 0, g = 0, b = 0; if (l < 440) { r = (440 - l) / 60; b = 1; } else if (l < 490) { g = (l - 440) / 50; b = 1; } else if (l < 510) { g = 1; b = (510 - l) / 20; } else if (l < 580) { r = (l - 510) / 70; g = 1; } else if (l < 645) { r = 1; g = (645 - l) / 65; } else r = 1; return `rgb(${r * 255 | 0},${g * 255 | 0},${b * 255 | 0})`; }
+const k = HS(app, {levels: LV, load(L){ el = [];
+  const cfg = {qd: ['상자 크기 L', .4, 1.2, .001, .9, v => v.toFixed(3) + ' nm'], tn: ['장벽 두께', .05, .6, .005, .1, v => v.toFixed(3) + ' nm'], un: ['슬릿 폭 Δx', .1, 2, .01, .2, v => v.toFixed(2) + ' nm']}[L.t];
+  X.wrap.querySelector('span').textContent = cfg[0]; X.el.min = cfg[1]; X.el.max = cfg[2]; X.el.step = cfg[3]; fmt = cfg[5]; X.set(cfg[4]);
+  k.mission(ui.g, L.t === 'qd' ? `양자점 디스플레이의 <b>${L.name}</b>: n = 2 → 1 전이로 <b>${L.lam} nm</b> 빛을 내는 상자를 만드세요.` : L.t === 'tn' ? `5 eV 전자가 8 eV 장벽을 지나요. 투과 확률을 <b>${L.goal} %</b>(±${L.tol})로 맞추세요.` : `전자를 슬릿에 통과시킬 때 옆 방향 속도 불확정성이 <b>${L.vmax} km/s 이하</b>가 되는 <b>가장 좁은</b> 슬릿을 고르세요. (5 % 이내)`); info(); }});
+let fmt = v => v;
+function info(){ const L = k.L(), x = X.v; ui.r.innerHTML = L.t === 'qd' ? `<p>E₁ = <b>${(.376 / x / x).toFixed(2)} eV</b>, E₂ = <b>${(4 * .376 / x / x).toFixed(2)} eV</b></p><p>방출 빛 <b>${lamQD(x).toFixed(0)} nm</b></p>` : L.t === 'tn' ? `<p>투과 확률 <b>${Ttn(x).toFixed(2)} %</b></p>` : `<p>최소 속도 불확정성 <b>${dv(x).toFixed(1)} km/s</b></p>`; }
+app.onStart = () => { ui.g = app.panel('설계 의뢰'); ui.c = app.panel('조절');
+  X = k.slider(ui.c, {label: '값', min: .4, max: 1.2, step: .001, val: .9, fmt: v => fmt(v), on: info}); ui.r = document.createElement('div'); ui.c.appendChild(ui.r);
+  ui.b = app.panel(''); k.btn(ui.b, '⚛️ 시제품 시험', () => { const L = k.L(), x = X.v; sfx.zap();
+    if (L.t === 'qd') { const l = lamQD(x); if (Math.abs(l - L.lam) > 5) return k.fail(`${l.toFixed(0)} nm 빛 — ${l > L.lam ? '상자를 줄이세요' : '상자를 키우세요'}`); return k.win(ui.g, L.why, `L = ${x.toFixed(3)} nm`); }
+    if (L.t === 'tn') { const T = Ttn(x); if (Math.abs(T - L.goal) > L.tol) return k.fail(`투과 확률 ${T.toFixed(2)} % — ${T > L.goal ? '장벽을 두껍게' : '장벽을 얇게'}`); return k.win(ui.g, L.why, `${T.toFixed(2)} %`); }
+    const v = dv(x); if (v > L.vmax + 1e-9) return k.fail(`Δv = ${v.toFixed(0)} km/s — 기준 초과! 슬릿을 넓히세요`); if (v < L.vmax * .95) return k.fail(`Δv = ${v.toFixed(0)} km/s — 조건은 맞지만 더 좁힐 수 있어요`); k.win(ui.g, L.why, `Δx = ${x.toFixed(2)} nm`); });
+  k.begin(); };
+app.step = dt => { ph += dt; const L = k.L(); if (L && L.t === 'tn' && Math.random() < dt * 8) el.push({x: 0, pass: Math.random() * 100 < Ttn(X.v)}); el.forEach(e => e.x += dt * .45); el = el.filter(e => e.x < 1.05); };
+k.draw((g, W, H) => { const L = k.L(), x = X.v; g.fillStyle = '#0b1018'; g.fillRect(0, 0, W, H);
+  if (L.t === 'qd') { const l = lamQD(x), c = wl2rgb(l), bw = Math.min(W * .5, x / 1.2 * W * .6), cx = W * .38, cy = H * .5, bh = H * .62;
+    g.strokeStyle = '#8ea3bd'; g.lineWidth = 3; g.beginPath(); g.moveTo(cx - bw / 2, cy - bh / 2); g.lineTo(cx - bw / 2, cy + bh / 2); g.lineTo(cx + bw / 2, cy + bh / 2); g.lineTo(cx + bw / 2, cy - bh / 2); g.stroke();
+    const E1 = .376 / x / x, Emax = 4 * .376 / (.4 * .4), Y = e => cy + bh / 2 - e / Emax * bh * 1.6;
+    [1, 2].forEach(n => { const yy = Y(n * n * E1); g.strokeStyle = n === 2 ? '#f6d365' : '#9be3b5'; g.lineWidth = 2; g.beginPath(); g.moveTo(cx - bw / 2, yy); g.lineTo(cx + bw / 2, yy); g.stroke(); D.text(g, `n=${n}  ${(n * n * E1).toFixed(2)} eV`, cx + bw / 2 + 8, yy, {size: 12, color: '#e8eef6', align: 'left'});
+      g.strokeStyle = n === 2 ? 'rgba(246,211,101,.6)' : 'rgba(155,227,181,.6)'; g.beginPath(); for (let i = 0; i <= 50; i++) { const u = i / 50; g.lineTo(cx - bw / 2 + u * bw, yy - 18 * Math.sin(n * Math.PI * u) * Math.cos(ph * 3)); } g.stroke(); });
+    D.arrow(g, cx, Y(4 * E1) + 4, cx, Y(E1) - 4, '#fff', 2.5); g.strokeStyle = c; g.lineWidth = 3; g.beginPath(); for (let i = 0; i < 70; i++) g.lineTo(cx + 12 + i * 2.2, (Y(4 * E1) + Y(E1)) / 2 + 7 * Math.sin(i / 2.5 - ph * 10)); g.stroke();
+    D.glow(g, W * .85, H * .5, 70, c.replace(/rgb\(|\)/g, ''), .8); D.text(g, `${l.toFixed(0)} nm`, W * .85, H * .5, {size: 16, weight: 700, color: '#fff'}); D.text(g, `목표 ${L.lam} nm`, W * .85, H * .5 + 90, {size: 13, color: wl2rgb(L.lam), weight: 700});
+    D.text(g, `L = ${x.toFixed(3)} nm`, cx, cy + bh / 2 + 18, {size: 13, color: '#e8eef6', weight: 700}); return; }
+  if (L.t === 'tn') { const bx = W * .45, bw = x / .6 * W * .25 + 4, cy = H * .5; g.fillStyle = 'rgba(208,83,63,.35)'; g.fillRect(bx, H * .2, bw, H * .6); D.text(g, `장벽 8 eV · ${x.toFixed(3)} nm`, bx + bw / 2, H * .16, {size: 12, color: '#f28c7a', weight: 700});
+    g.strokeStyle = '#8ecdf2'; g.lineWidth = 2; g.beginPath(); for (let px = 20; px < W - 20; px += 2) { let a; if (px < bx) a = 1; else if (px < bx + bw) a = Math.exp(-(px - bx) / bw * Math.log(1 / Math.max(1e-4, Math.sqrt(Ttn(x) / 100)))); else a = Math.sqrt(Ttn(x) / 100); g.lineTo(px, cy + 50 * a * Math.sin(px / 12 - ph * 8)); } g.stroke();
+    el.forEach(e => { const px = 20 + e.x * (W - 40); if (!e.pass && px > bx) return; g.fillStyle = e.pass ? '#9be3b5' : '#8ecdf2'; g.beginPath(); g.arc(px, cy + 90, 4, 0, 7); g.fill(); });
+    D.text(g, `투과 확률 ${Ttn(x).toFixed(2)} %`, W / 2, H - 22, {size: 16, weight: 700, color: '#f6d365'}); return; }
+  const cx = W * .3, sw = x / 2 * H * .5 + 4, spread = Math.min(H * .45, dv(x) / 600 * H * .45 + 6);
+  g.fillStyle = '#556'; g.fillRect(cx - 4, 20, 8, H / 2 - sw / 2 - 20); g.fillRect(cx - 4, H / 2 + sw / 2, 8, H / 2 - sw / 2 - 20);
+  for (let i = 0; i < 160; i++) { const r = Math.sin(i * 12.9898) * 43758.5453 % 1, y = H / 2 + spread * (Math.abs(r) * 2 - 1) * .9 * Math.sin(i * 1.7); g.fillStyle = 'rgba(142,205,242,.6)'; g.fillRect(W * .82, y, 10, 2); }
+  g.strokeStyle = 'rgba(142,205,242,.4)'; g.beginPath(); g.moveTo(cx, H / 2); g.lineTo(W * .82, H / 2 - spread); g.moveTo(cx, H / 2); g.lineTo(W * .82, H / 2 + spread); g.stroke();
+  D.text(g, `슬릿 폭 ${x.toFixed(2)} nm`, cx, H - 14, {size: 13, color: '#e8eef6', weight: 700}); D.text(g, `Δv ≥ ${dv(x).toFixed(0)} km/s`, W * .82, H - 14, {size: 13, color: dv(x) <= L.vmax ? '#9be3b5' : '#f28c7a', weight: 700});
+});
+</script>
+</body>
+</html>
