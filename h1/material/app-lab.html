@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>구조 연구소 · 고1 지각·생명체 구성 물질과 신소재</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'h1mat', title: '구조 연구소', unit: '고1 · 통합과학1 · 27 지각·생명체 구성 물질과 신소재', back: '../../index.html#hi1', sim: 'sim.html#silicate',
+  lead: '지각의 광물, 생명체의 DNA, 첨단 신소재는 모두 <b>기본 단위가 규칙적으로 결합</b>한 구조예요. 연구소의 의뢰를 해결하며 구조와 성질의 관계를 밝혀내세요!',
+  howto: ['<b>DNA 의뢰</b>: 주형 가닥의 염기와 <b>상보적인 염기</b>를 빠르게 눌러 새 가닥을 완성하세요. (A–T, G–C)', '<b>광물 의뢰</b>: 규산염 사면체가 연결된 모습을 보고 Si : O 비를 고르세요.', '<b>신소재 의뢰</b>: 용도에 맞는 신소재를 고르세요.'],
+  recap: '<b>규산염 광물</b>: 규소 1개와 산소 4개가 결합한 Si–O 사면체가 기본 단위 — 산소를 공유할수록 Si : O 비가 1 : 4(독립형, 감람석) → 1 : 3(단사슬, 휘석) → 4 : 11(복사슬, 각섬석) → 2 : 5(판상, 흑운모) → 1 : 2(망상, 석영)로 변한다. <b>핵산</b>: 뉴클레오타이드가 결합한 구조로, DNA의 두 가닥은 A–T, G–C가 상보적으로 결합한다. <b>단백질</b>: 아미노산이 펩타이드 결합으로 연결된다. <b>신소재</b>: 반도체(LED·태양 전지), 초전도체(전기 저항 0 → MRI·자기 부상 열차), 그래핀(얇고 강하며 전기가 잘 통함 → 휘는 디스플레이) 등은 원소의 배열과 결합을 조절해 만든다.',
+  startLabel: '연구 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const PAIR = {A: 'T', T: 'A', G: 'C', C: 'G'};
+const LV = [
+  {t: 'dna', seq: 'ATGCGT', why: '수소 결합으로 A는 T와, G는 C와만 짝을 지어요. 그래서 한 가닥만 알면 다른 가닥을 알 수 있어요.'},
+  {t: 'sil', kind: 0, q: '사면체가 서로 떨어져 있는 <b>독립형 구조</b>(감람석)의 Si : O 비는?', ans: '1 : 4', why: '산소를 공유하지 않으므로 SiO₄ 그대로 → 1 : 4'},
+  {t: 'sil', kind: 1, q: '사면체가 산소 2개씩 공유하며 한 줄로 이어진 <b>단사슬 구조</b>(휘석)의 Si : O 비는?', ans: '1 : 3', why: '사면체마다 산소 2개를 이웃과 반씩 나눠 가져요 → 2 + 2 × ½ = 3 → 1 : 3'},
+  {t: 'dna', seq: 'GGATCCTAGC', why: '염기 10개! G–C 쌍은 수소 결합이 3개, A–T 쌍은 2개라 G–C가 많을수록 DNA가 더 안정해요.'},
+  {t: 'sil', kind: 2, q: '사면체가 산소 3개씩 공유하며 평면으로 이어진 <b>판상 구조</b>(흑운모)의 Si : O 비는?', ans: '2 : 5', why: '1 + 3 × ½ = 2.5 → Si : O = 1 : 2.5 = 2 : 5. 판 사이 결합이 약해 얇게 쪼개져요.'},
+  {t: 'mat', q: '병원의 <b>MRI</b>에서 강한 자기장을 만드는 전자석의 코일에 쓰이는 신소재는?', ans: '초전도체', why: '임계 온도 이하에서 전기 저항이 0이 되어 큰 전류를 흘려도 열이 나지 않아 강한 자기장을 만들 수 있어요.'},
+  {t: 'mat', q: '종이처럼 <b>휘어지는 투명한 디스플레이 전극</b>에 알맞은 신소재는?', ans: '그래핀', why: '탄소 원자가 육각형 벌집 모양으로 배열된 한 층 — 얇고 투명하며 강하고 전기가 잘 통해요.'},
+  {t: 'dna', seq: 'TACGGATCCATG', why: '12염기 완성! DNA의 염기 서열은 단백질을 이루는 아미노산의 순서 정보를 담고 있어요.'}];
+const SIL = ['1 : 4', '1 : 3', '4 : 11', '2 : 5', '1 : 2'], MAT = ['반도체', '초전도체', '그래핀', '규산염 유리', '탄소 나노튜브'];
+let ui = {}, pos = 0, flash = 0, wrong = -1;
+const k = HS(app, {levels: LV, load(L){ pos = 0; wrong = -1;
+  if (L.t === 'dna') { k.mission(ui.g, `주형 가닥 <b>${L.seq.length}염기</b>에 상보적인 새 가닥을 만드세요.`); pad(); }
+  else { k.mission(ui.g, L.t === 'sil' ? '광물 의뢰: 구조를 보고 비를 구하세요.' : '신소재 의뢰'); const ch = L.t === 'sil' ? SIL : MAT;
+    app.quiz(ui.t, L.q, ch, ch.indexOf(L.ans), {explain: L.why, onWrong: () => { k.fails++; app.addScore(-10); }, onRight: () => k.win(ui.g, '')}); } }});
+function pad(){ ui.t.innerHTML = '<div class="tools" style="justify-content:center">' + 'ATGC'.split('').map(b => `<button class="tool" type="button" data-b="${b}" style="font-size:22px;min-width:64px;justify-content:center">${b}</button>`).join('') + '</div><p class="note-c" style="margin-top:8px">왼쪽부터 차례로 짝이 되는 염기를 누르세요.</p>';
+  ui.t.querySelectorAll('button').forEach(btn => btn.onclick = () => press(btn.dataset.b)); }
+function press(b){ const L = k.L(); if (k.done || L.t !== 'dna') return;
+  if (PAIR[L.seq[pos]] === b) { pos++; sfx.pop(); wrong = -1; if (pos >= L.seq.length) { ui.t.innerHTML = '<p>✔ 새 가닥 완성!</p>'; k.win(ui.g, L.why); } }
+  else { wrong = pos; flash = 1; k.fail(`${L.seq[pos]}의 짝은 ${b}가 아니에요`); } }
+addEventListener('keydown', e => { const b = e.key.toUpperCase(); if ('ATGC'.includes(b) && b.length === 1) press(b); });
+app.onStart = () => { ui.g = app.panel('의뢰'); ui.t = app.panel('작업대'); k.begin(); };
+const COL = {A: '#f28c7a', T: '#f6d365', G: '#9be3b5', C: '#8ecdf2'};
+function tet(g, x, y, s, c){ g.fillStyle = c || 'rgba(47,111,208,.18)'; g.strokeStyle = '#2f6fd0'; g.lineWidth = 2; g.beginPath(); for (let i = 0; i < 3; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / 3; g.lineTo(x + s * Math.cos(a), y + s * Math.sin(a)); } g.closePath(); g.fill(); g.stroke();
+  for (let i = 0; i < 3; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / 3; g.fillStyle = '#e66a5a'; g.beginPath(); g.arc(x + s * Math.cos(a), y + s * Math.sin(a), s * .22, 0, 7); g.fill(); }
+  g.fillStyle = '#e66a5a'; g.beginPath(); g.arc(x, y, s * .2, 0, 7); g.fill(); g.fillStyle = '#555b66'; g.beginPath(); g.arc(x, y, s * .13, 0, 7); g.fill(); }
+k.draw((g, W, H) => { const L = k.L(), t = performance.now() / 1000; g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, W, H);
+  if (L.t === 'dna') { const n = L.seq.length, w = Math.min(64, (W - 60) / n), x0 = W / 2 - w * n / 2 + w / 2, y1 = H * .36, y2 = H * .64;
+    D.text(g, '주형 가닥 3′', x0 - w / 2, y1 - w * .9, {size: 12, color: '#55606e', align: 'left'}); D.text(g, '새 가닥 5′', x0 - w / 2, y2 + w * .9, {size: 12, color: '#55606e', align: 'left'});
+    g.strokeStyle = '#8a7a5a'; g.lineWidth = 5; g.beginPath(); g.moveTo(x0 - w / 2, y1 - w * .45); g.lineTo(x0 + w * (n - .5), y1 - w * .45); g.stroke(); g.beginPath(); g.moveTo(x0 - w / 2, y2 + w * .45); g.lineTo(x0 - w / 2 + w * pos, y2 + w * .45); g.stroke();
+    for (let i = 0; i < n; i++) { const x = x0 + i * w, b = L.seq[i]; g.fillStyle = COL[b]; D.rr(g, x - w * .4, y1 - w * .4, w * .8, w * .8, 8); g.fill(); D.text(g, b, x, y1, {size: w * .42, weight: 700});
+      if (i < pos) { const p = PAIR[b]; g.strokeStyle = '#9aa'; g.setLineDash([3, 3]); g.lineWidth = 2; g.beginPath(); g.moveTo(x, y1 + w * .42); g.lineTo(x, y2 - w * .42); g.stroke(); g.setLineDash([]); g.fillStyle = COL[p]; D.rr(g, x - w * .4, y2 - w * .4, w * .8, w * .8, 8); g.fill(); D.text(g, p, x, y2, {size: w * .42, weight: 700}); D.text(g, b === 'G' || b === 'C' ? '≡' : '=', x + w * .32, (y1 + y2) / 2, {size: 12, color: '#55606e'}); }
+      else if (i === pos) { g.strokeStyle = wrong === i && flash > 0 ? '#d0533f' : '#2f6fd0'; g.lineWidth = 3; g.setLineDash([5, 4]); D.rr(g, x - w * .4, y2 - w * .4, w * .8, w * .8, 8); g.stroke(); g.setLineDash([]); D.text(g, '?', x, y2, {size: w * .4, color: '#2f6fd0', weight: 700}); } }
+    flash = Math.max(0, flash - .03); D.text(g, `${pos} / ${n}`, W / 2, H - 22, {size: 15, weight: 700, color: '#55606e'}); return; }
+  if (L.t === 'sil') { const s = Math.min(W, H) * .07;
+    if (L.kind === 0) [[.3, .45], [.55, .35], [.72, .6], [.4, .7]].forEach(([a, b], i) => tet(g, W * a, H * b + Math.sin(t + i) * 3, s));
+    else if (L.kind === 1) for (let i = 0; i < 7; i++) tet(g, W * .14 + i * s * 1.73, H * .5 + (i % 2 ? s * .5 : 0), s, i % 2 ? 'rgba(47,111,208,.3)' : null);
+    else for (let r = 0; r < 3; r++) for (let i = 0; i < 6; i++) tet(g, W * .18 + i * s * 1.73 + (r % 2) * s * .87, H * .3 + r * s * 1.5, s, (i + r) % 2 ? 'rgba(47,111,208,.3)' : null);
+    D.text(g, ['독립형 (감람석)', '단사슬 (휘석)', '판상 (흑운모)'][L.kind], W / 2, 30, {size: 18, weight: 700, display: true});
+    D.text(g, '● 산소  ● 규소 — 위에서 본 사면체', W / 2, H - 20, {size: 12, color: '#55606e'}); return; }
+  const icons = L.ans === '초전도체' ? ['🧲', '🏥', '❄️'] : ['📱', '🔬', '⬡'];
+  icons.forEach((c, i) => D.text(g, c, W * (.3 + i * .2), H * .45 + Math.sin(t * 2 + i) * 6, {size: Math.min(W, H) * .14}));
+  D.text(g, '신소재 의뢰', W / 2, 30, {size: 18, weight: 700, display: true});
+});
+</script>
+</body>
+</html>
