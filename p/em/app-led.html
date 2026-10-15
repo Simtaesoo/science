@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>빛 공방: 원자와 LED · 고2 물리학 전기와 자기</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'pled', title: '빛 공방: 원자와 LED', unit: '고2 · 물리학 · 39 전기와 자기', back: '../../index.html#phys', sim: 'sim.html#diode', dark: true,
+  lead: '주문받은 색의 빛을 만들어 보세요! 수소 원자에서는 <b>전자의 전이</b>로, LED에서는 반도체의 <b>띠 간격</b>으로 빛의 색(파장)이 정해져요. 광자 에너지 E = hc/λ, hc ≈ 1240 eV·nm.',
+  howto: ['원자 단계: 에너지 준위 그림에서 <b>처음 준위 → 나중 준위</b> 순서로 눌러 전이를 만드세요.', 'LED 단계: 반도체 재료를 고르고 다이오드 방향을 정한 뒤 <b>[전원 켜기]</b>.', 'LED는 <b>순방향 전압</b>일 때만 전류가 흘러 빛이 나요.'],
+  recap: '<b>수소 원자의 에너지 준위</b>: Eₙ = −13.6/n² eV로 불연속적이다. 전자가 높은 준위에서 낮은 준위로 전이할 때 에너지 차이만큼의 광자를 방출한다: λ = 1240 / ΔE (nm). n = 3 → 2는 656 nm(빨강), 4 → 2는 486 nm(청록) — 가시광선 영역의 <b>발머 계열</b>. n → 1은 자외선(라이먼 계열). <b>LED</b>: p–n 접합에 순방향 전압을 걸면 전도띠의 전자가 원자가 띠의 양공과 결합하며 <b>띠 간격</b>만큼의 에너지를 빛으로 낸다 → 띠 간격이 클수록 파장이 짧다(파랑). 역방향이면 전류가 거의 흐르지 않는다(정류 작용).',
+  startLabel: '공방 열기'
+});
+const {S, sfx, toast} = app, D = Draw;
+const MAT = [['GaAs', 1.42], ['AlGaAs', 1.91], ['GaAsP', 2.0], ['GaP', 2.26], ['InGaN', 2.7], ['GaN', 3.4]];
+const LV = [
+  {t: 'atom', want: 656, from: 3, to: 2, why: 'E₃ − E₂ = −1.51 − (−3.40) = 1.89 eV → λ = 1240 ÷ 1.89 ≈ 656 nm. 수소 스펙트럼의 빨간 선!'},
+  {t: 'atom', want: 486, from: 4, to: 2, why: 'E₄ − E₂ = −0.85 − (−3.40) = 2.55 eV → 486 nm (청록). 2번 준위로 떨어지는 전이가 가시광선(발머 계열)이에요.'},
+  {t: 'atom', want: 122, from: 2, to: 1, why: 'E₂ − E₁ = 10.2 eV → 122 nm 자외선. 1번 준위로 떨어지는 전이는 에너지가 커서 자외선(라이먼 계열)이에요.'},
+  {t: 'led', want: 650, mat: 'AlGaAs', rev: false, why: '띠 간격 1.91 eV → 1240 ÷ 1.91 ≈ 649 nm 빨간빛. 순방향 전압에서만 전자와 양공이 만나 빛을 내요.'},
+  {t: 'led', want: 550, mat: 'GaP', rev: true, why: '1240 ÷ 2.26 ≈ 549 nm 초록빛. 처음엔 다이오드가 역방향이라 불이 켜지지 않았어요 — 정류 작용!'},
+  {t: 'led', want: 460, mat: 'InGaN', rev: true, why: '1240 ÷ 2.7 ≈ 459 nm 파란빛. 띠 간격이 큰 질화 갈륨 계열로 파란 LED를 만든 공로로 2014년 노벨 물리학상이 수여되었어요.'}];
+const En = n => -13.6 / (n * n);
+let ui = {}, sel = [], mat = null, fwd = true, on = false, ph = null;
+function wl2rgb(l){ if (l < 380) return '#b48cff'; if (l > 750) return '#aa3333'; let r = 0, g = 0, b = 0; if (l < 440) { r = (440 - l) / 60; b = 1; } else if (l < 490) { g = (l - 440) / 50; b = 1; } else if (l < 510) { g = 1; b = (510 - l) / 20; } else if (l < 580) { r = (l - 510) / 70; g = 1; } else if (l < 645) { r = 1; g = (645 - l) / 65; } else r = 1; return `rgb(${r * 255 | 0},${g * 255 | 0},${b * 255 | 0})`; }
+const k = HS(app, {levels: LV, load(L){ sel = []; mat = null; on = false; ph = null; fwd = !L.rev;
+  k.mission(ui.g, L.t === 'atom' ? `수소 원자로 파장 <b>${L.want} nm</b>의 빛을 내세요.` : `<b>${L.want} nm</b> 빛을 내는 LED를 만들어 켜세요.`); tools(); }});
+function tools(){ const L = k.L();
+  if (L.t === 'atom') { ui.t.innerHTML = `<p class="note-c">무대의 준위를 눌러 고르세요.</p><p>선택: <b>${sel.length ? 'n = ' + sel.join(' → ') : '—'}</b></p>${sel.length === 2 ? `<p>ΔE = <b>${Math.abs(En(sel[0]) - En(sel[1])).toFixed(2)} eV</b>${sel[0] > sel[1] ? ` → λ ≈ <b>${(1240 / (En(sel[0]) - En(sel[1]))).toFixed(0)} nm</b>` : ' (흡수 — 빛을 내려면 높은 준위에서 낮은 준위로)'}</p>` : ''}`; return; }
+  ui.t.innerHTML = '<div class="tools">' + MAT.map(([n, e]) => `<button class="tool" type="button" aria-pressed="${mat === n}" data-m="${n}">${n}<small style="opacity:.7">${e} eV</small></button>`).join('') + `</div><button class="tool" type="button" id="flip" style="margin-top:10px;width:100%;justify-content:center">🔄 다이오드 방향 바꾸기 (지금: ${fwd ? '순방향' : '역방향'})</button>`;
+  ui.t.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { mat = b.dataset.m; on = false; sfx.click(); tools(); }); ui.t.querySelector('#flip').onclick = () => { fwd = !fwd; on = false; sfx.click(); tools(); }; }
+app.onStart = () => { ui.g = app.panel('주문'); ui.t = app.panel('작업대'); ui.b = app.panel('');
+  k.btn(ui.b, '💡 빛 내기 / 전원 켜기', () => { const L = k.L();
+    if (L.t === 'atom') { if (sel.length < 2) return k.fail('준위 두 개를 차례로 고르세요'); if (sel[0] < sel[1]) return k.fail('낮은 준위 → 높은 준위는 빛을 흡수하는 전이예요'); const lam = 1240 / (En(sel[0]) - En(sel[1])); ph = {lam, t: 0};
+      if (Math.abs(lam - L.want) <= 3) return k.win(ui.g, L.why, `${lam.toFixed(0)} nm`); return k.fail(`${lam.toFixed(0)} nm 빛이 나왔어요 — 주문은 ${L.want} nm`); }
+    if (!mat) return k.fail('반도체 재료를 고르세요'); on = true; if (!fwd) return k.fail('불이 켜지지 않아요! 역방향 전압에서는 전류가 거의 흐르지 않아요');
+    const lam = 1240 / MAT.find(m => m[0] === mat)[1]; if (Math.abs(lam - L.want) > 12) return k.fail(`${lam.toFixed(0)} nm 빛 — 주문한 색이 아니에요`); k.win(ui.g, L.why, `${lam.toFixed(0)} nm`); });
+  k.begin(); };
+function lvY(n, H){ const top = 34, bot = H - 30; return top + (En(n) - En(6)) / (En(1) - En(6)) * (bot - top); }
+app.pointer({tap(x, y){ const L = k.L(); if (!L || L.t !== 'atom' || k.done) return; for (let n = 1; n <= 5; n++) if (Math.abs(y - lvY(n, S.h)) < 14 && x > S.w * .15 && x < S.w * .7) { if (sel.length >= 2) sel = []; if (sel[0] !== n) sel.push(n); ph = null; sfx.click(); tools(); return; } }});
+k.draw((g, W, H) => { const L = k.L(), t = performance.now() / 1000; g.fillStyle = '#121a26'; g.fillRect(0, 0, W, H);
+  if (L.t === 'atom') { for (let n = 1; n <= 5; n++) { const y = lvY(n, H), s = sel.includes(n); g.strokeStyle = s ? '#f6d365' : '#8ea3bd'; g.lineWidth = s ? 4 : 2.5; g.beginPath(); g.moveTo(W * .15, y); g.lineTo(W * .7, y); g.stroke(); D.text(g, `n = ${n}`, W * .12, y, {size: 13, color: '#e8eef6', align: 'right', weight: 700}); D.text(g, `${En(n).toFixed(2)} eV`, W * .72, y, {size: 12, color: '#b8c4d0', align: 'left'}); }
+    D.text(g, '수소 원자의 에너지 준위', W / 2, 16, {size: 13, color: '#e8eef6', weight: 700});
+    if (sel.length === 2) { const y0 = lvY(sel[0], H), y1 = lvY(sel[1], H); D.arrow(g, W * .42, y0, W * .42, y1, sel[0] > sel[1] ? '#f6d365' : '#8ecdf2', 4); }
+    if (ph) { const c = wl2rgb(ph.lam); g.strokeStyle = c; g.lineWidth = 3; g.beginPath(); for (let x = 0; x < W * .25; x += 2) g.lineTo(W * .45 + x + ((t * 120) % 40), lvY(sel[1], H) - 20 + 8 * Math.sin(x / 6 - t * 10)); g.stroke(); D.text(g, `${ph.lam.toFixed(0)} nm`, W * .85, lvY(sel[1], H) - 20, {size: 16, weight: 700, color: c}); }
+    return; }
+  // 회로
+  const cx = W / 2, cy = H * .5, w = W * .5, h = H * .44; g.strokeStyle = '#b8c4d0'; g.lineWidth = 3; g.strokeRect(cx - w / 2, cy - h / 2, w, h);
+  g.fillStyle = '#121a26'; g.fillRect(cx - 20, cy + h / 2 - 16, 40, 32); g.strokeStyle = '#e8eef6'; g.beginPath(); g.moveTo(cx - 8, cy + h / 2 - 14); g.lineTo(cx - 8, cy + h / 2 + 14); g.stroke(); g.lineWidth = 6; g.beginPath(); g.moveTo(cx + 8, cy + h / 2 - 8); g.lineTo(cx + 8, cy + h / 2 + 8); g.stroke(); D.text(g, '＋', cx - 20, cy + h / 2 + 26, {size: 12, color: '#f28c7a'}); D.text(g, '전지', cx + 26, cy + h / 2 + 26, {size: 12, color: '#b8c4d0'});
+  const dx = cx, dy = cy - h / 2; g.fillStyle = '#121a26'; g.fillRect(dx - 30, dy - 22, 60, 44); g.save(); g.translate(dx, dy); if (!fwd) g.scale(-1, 1);
+  g.fillStyle = '#e8eef6'; g.beginPath(); g.moveTo(-14, -14); g.lineTo(-14, 14); g.lineTo(12, 0); g.closePath(); g.fill(); g.fillRect(12, -14, 4, 28); g.restore();
+  D.text(g, fwd ? 'p → n (순방향)' : 'n ← p (역방향)', dx, dy - 34, {size: 12, color: fwd ? '#9be3b5' : '#f28c7a', weight: 700}); D.text(g, mat ? `LED 재료: ${mat}` : '재료를 고르세요', dx, dy + 36, {size: 12, color: '#e8eef6'});
+  if (on && fwd && mat) { const lam = 1240 / MAT.find(m => m[0] === mat)[1], c = wl2rgb(lam); D.glow(g, dx, dy, 90 + 6 * Math.sin(t * 5), lam > 750 || lam < 380 ? '120,80,160' : c.replace(/rgb\(|\)/g, ''), .55); D.text(g, `${lam.toFixed(0)} nm${lam > 750 ? ' (적외선 — 눈에 안 보임)' : lam < 400 ? ' (자외선)' : ''}`, dx, dy - 60, {size: 15, weight: 700, color: c});
+    for (let i = 0; i < 8; i++) { const p = (t * .3 + i / 8) % 1, per = 2 * (w + h), d = p * per; let x, y; if (d < w) { x = cx - w / 2 + d; y = cy - h / 2; } else if (d < w + h) { x = cx + w / 2; y = cy - h / 2 + d - w; } else if (d < 2 * w + h) { x = cx + w / 2 - (d - w - h); y = cy + h / 2; } else { x = cx - w / 2; y = cy + h / 2 - (d - 2 * w - h); } g.fillStyle = '#8ecdf2'; g.beginPath(); g.arc(x, y, 3.5, 0, 7); g.fill(); } }
+});
+</script>
+</body>
+</html>
