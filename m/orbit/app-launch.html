@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>위성 궤도 관제실 · 고3 역학과 에너지 천체의 운동</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'morbit', title: '위성 궤도 관제실', unit: '고3 · 역학과 에너지 · 42 천체의 운동', back: '../../index.html#mech', sim: 'sim.html#sat', dark: true,
+  lead: '발사체가 위성을 목표 고도까지 올려 놓았어요. 이제 지표와 나란한 방향으로 정확한 <b>속력</b>을 주어 원하는 궤도에 진입시키세요! 너무 느리면 추락, 너무 빠르면 타원 궤도나 탈출…',
+  howto: ['<b>진입 속력</b>(km/s)을 정하고 <b>[궤도 진입]</b>을 누르세요.', '지구 GM = 3.986 × 10⁵ km³/s², 지구 반지름 6371 km. 원 궤도 속력 v = √(GM/r).', '타원 궤도의 가장 먼 점(원지점) 고도나 탈출 여부도 미션이 될 수 있어요.'],
+  recap: '인공위성은 <b>만유인력이 구심력</b> 역할을 하여 원운동한다: GMm/r² = mv²/r → v = √(GM/r). 궤도가 높을수록 속력은 느리고 주기 T = 2π√(r³/GM)는 길다. 같은 위치에서 원 궤도 속력보다 빠르면 그 점을 근지점으로 하는 <b>타원 궤도</b>, 느리면 원지점으로 하는 타원(낮으면 추락)이 된다. 속력이 <b>탈출 속력</b> √(2GM/r) = 원 궤도 속력 × √2 이상이면 지구 중력을 벗어난다. 정지 궤도(고도 약 35 800 km)는 주기가 지구 자전 주기와 같다.',
+  startLabel: '관제 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const MU = 398600, RE = 6371;
+const LV = [
+  {alt: 300, goal: 'circ', view: 9000, why: 'v = √(398600 ÷ 6671) ≈ 7.73 km/s. 약 90분에 지구를 한 바퀴 돌아요.'},
+  {alt: 1000, goal: 'circ', view: 9500, why: 'r = 7371 km → v ≈ 7.35 km/s. 더 높은 궤도는 더 느리게 돌아요.'},
+  {alt: 300, goal: 'apo', apo: 5000, view: 13000, why: '근지점 6671 km, 원지점 11371 km인 타원 → 활력 방정식으로 v ≈ 8.68 km/s. 원 궤도보다 약 0.95 km/s 빠르면 돼요.'},
+  {alt: 300, goal: 'esc', vmax: 11.2, view: 30000, why: '탈출 속력 = 7.73 × √2 ≈ 10.93 km/s. 이보다 빠르면 다시 돌아오지 않아요(에너지 ≥ 0).'},
+  {alt: 35786, goal: 'circ', view: 46000, why: 'r = 42157 km → v ≈ 3.07 km/s, 주기 약 24시간 → 정지 궤도! 지상에서는 멈춰 있는 것처럼 보여요.'}];
+let ui = {}, V, sat = null, trail = [];
+function elems(L, v){ const r = RE + L.alt, eps = v * v / 2 - MU / r, h = r * v, e = Math.sqrt(Math.max(0, 1 + 2 * eps * h * h / MU / MU)); if (eps >= 0) return {esc: true, e};
+  const a = -MU / (2 * eps), rp = a * (1 - e), ra = a * (1 + e), T = 2 * Math.PI * Math.sqrt(a ** 3 / MU); return {a, e, rp, ra, T, crash: Math.min(rp, ra) < RE + 80}; }
+const k = HS(app, {levels: LV, load(L){ sat = null; trail = []; const vc = Math.sqrt(MU / (RE + L.alt));
+  k.mission(ui.g, `현재 고도 <b>${L.alt.toLocaleString()} km</b>. ` + (L.goal === 'circ' ? `<b>원 궤도</b>에 진입시키세요. (이심률 0.01 이하)` : L.goal === 'apo' ? `원지점 고도가 <b>${L.apo.toLocaleString()} km</b>(±200 km)인 <b>타원 궤도</b>를 만드세요.` : `지구 중력을 <b>탈출</b>하세요. 단, 연료가 부족해 <b>${L.vmax} km/s</b>까지만 낼 수 있어요.`));
+  V.set(L.alt > 30000 ? 2.5 : 7); info(); }});
+function info(){ const L = k.L(), E = elems(L, V.v); sat = null; trail = [];
+  ui.i.innerHTML = E.esc ? '<p>예상 궤도: <b>탈출</b></p>' : E.crash ? '<p>예상 궤도: <b style="color:var(--coral)">대기권 재진입(추락)</b></p>' : '<p class="note-c">진입해 보면 궤도 정보를 알 수 있어요.</p>'; if (!E.esc && !E.crash) ui.i.innerHTML = ''; }
+app.onStart = () => { ui.g = app.panel('관제 미션'); ui.c = app.panel('추진기');
+  V = k.slider(ui.c, {label: '진입 속력', min: 1, max: 12, step: .01, val: 7, fmt: v => v.toFixed(2) + ' km/s', on: info}); ui.i = document.createElement('div'); ui.c.appendChild(ui.i);
+  ui.r = app.panel('궤도 정보'); ui.r.innerHTML = '<p class="note-c">—</p>';
+  ui.b = app.panel(''); k.btn(ui.b, '🛰️ 궤도 진입', () => { const L = k.L(), r = RE + L.alt; sat = {x: r, y: 0, vx: 0, vy: V.v, t: 0, minr: r, maxr: r}; trail = []; sfx.whoosh(); judge(); });
+  k.begin(); };
+function judge(){ const L = k.L(), E = elems(L, V.v);
+  ui.r.innerHTML = E.esc ? `<p>궤도: <b>탈출 궤도</b> (이심률 ≥ 1)</p>` : `<p>근지점 고도 <b>${(E.rp - RE).toFixed(0)} km</b></p><p>원지점 고도 <b>${(E.ra - RE).toFixed(0)} km</b></p><p>이심률 <b>${E.e.toFixed(3)}</b> · 주기 <b>${(E.T / 60).toFixed(0)}분</b></p>`;
+  if (L.goal === 'esc') { if (V.v > L.vmax + 1e-9) return k.fail(`연료 부족! ${L.vmax} km/s까지만 가능해요`); if (!E.esc) return k.fail('지구로 돌아오는 타원 궤도예요 — 탈출하지 못했어요'); return k.win(ui.g, L.why, `${V.v.toFixed(2)} km/s`); }
+  if (E.esc) return k.fail('너무 빨라 지구를 탈출해 버렸어요!'); if (E.crash) return k.fail('속력이 모자라 대기권으로 떨어지는 궤도예요');
+  if (L.goal === 'circ') { if (E.e > .01) return k.fail(`이심률 ${E.e.toFixed(3)} — 원이 아니라 타원 궤도예요`); return k.win(ui.g, L.why, `${V.v.toFixed(2)} km/s`); }
+  if (Math.abs(E.ra - RE - L.apo) > 200) return k.fail(`원지점 고도 ${(E.ra - RE).toFixed(0)} km — 목표 ${L.apo} km`); k.win(ui.g, L.why, `${V.v.toFixed(2)} km/s`); }
+app.step = dt => { if (!sat) return; const L = k.L(), E = elems(L, V.v), warp = (E.T || 6000) / 6; let n = 400; const h = dt * warp / n;
+  for (let i = 0; i < n; i++) { const r = Math.hypot(sat.x, sat.y); if (r < RE) { sat.crash = true; break; } const a = -MU / (r * r * r); sat.vx += a * sat.x * h; sat.vy += a * sat.y * h; sat.x += sat.vx * h; sat.y += sat.vy * h; }
+  trail.push([sat.x, sat.y]); if (trail.length > 900) trail.shift(); };
+k.draw((g, W, H) => { const L = k.L(), cx = W / 2, cy = H / 2, sc = Math.min(W, H) / 2 / (L.view * 1.05), t = performance.now() / 1000;
+  g.fillStyle = '#070b14'; g.fillRect(0, 0, W, H); for (let i = 0; i < 120; i++) { g.fillStyle = `rgba(255,255,255,${.2 + (i % 5) * .1})`; g.fillRect((i * 97) % W, (i * 53) % H, 1.4, 1.4); }
+  const gr = g.createRadialGradient(cx - RE * sc * .3, cy - RE * sc * .3, 2, cx, cy, RE * sc); gr.addColorStop(0, '#6fb2ff'); gr.addColorStop(1, '#1d4f9a'); g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, RE * sc, 0, 7); g.fill();
+  g.strokeStyle = 'rgba(142,205,242,.35)'; g.setLineDash([4, 5]); g.beginPath(); g.arc(cx, cy, (RE + L.alt) * sc, 0, 7); g.stroke(); g.setLineDash([]);
+  if (L.goal === 'apo') { g.strokeStyle = 'rgba(246,211,101,.5)'; g.setLineDash([3, 6]); g.beginPath(); g.arc(cx, cy, (RE + L.apo) * sc, 0, 7); g.stroke(); g.setLineDash([]); D.text(g, `목표 원지점 고도 ${L.apo} km`, cx, cy - (RE + L.apo) * sc - 10, {size: 12, color: '#f6d365'}); }
+  if (trail.length > 1) k.line(g, trail.map(([x, y]) => [cx + x * sc, cy - y * sc]), '#f6d365', 2);
+  const p = sat ? [sat.x, sat.y] : [RE + L.alt, 0]; D.text(g, '🛰️', cx + p[0] * sc, cy - p[1] * sc, {size: 20});
+  if (!sat) D.arrow(g, cx + p[0] * sc, cy - p[1] * sc - 14, cx + p[0] * sc, cy - p[1] * sc - 14 - V.v * 8, '#9be3b5', 3);
+  if (sat && sat.crash) D.text(g, '💥 추락!', cx + p[0] * sc, cy - p[1] * sc - 24, {size: 16, color: '#f28c7a', weight: 700});
+  D.text(g, `지구 (반지름 ${RE} km)`, cx, cy, {size: 12, color: '#e8eef6', weight: 700});
+});
+</script>
+</body>
+</html>
