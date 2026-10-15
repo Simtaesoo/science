@@ -90,7 +90,7 @@ function drawRefract(){ const g = S.g, W = S.w, H = S.h, cx = W * .45, cy = H * 
 
 /* ===== 2. 이중 슬릿 간섭 ===== */
 let off = null; const fringe = () => st.L * st.wl * 1e-9 / (st.d * 1e-3) * 1000; // mm
-function drawInterf(){ const g = S.g, W = S.w, H = S.h, sx = W * .12, scrX = W * .78, cy = H * .5, rgbA = wlColor(st.wl), lamPx = 10 + (st.wl - 400) / 300 * 10, dPx = 20 + st.d / .5 * 100;
+function drawInterf(){ if (S.w < 80 || S.h < 80) return; const g = S.g, W = S.w, H = S.h, sx = W * .12, scrX = W * .78, cy = H * .5, rgbA = wlColor(st.wl), lamPx = 10 + (st.wl - 400) / 300 * 10, dPx = 20 + st.d / .5 * 100;
   // 물결 그림 (저해상도 픽셀)
   const cw = Math.round((scrX - sx) / 3), ch = Math.round(H / 3); if (!off || off.width !== cw || off.height !== ch) { off = document.createElement('canvas'); off.width = cw; off.height = ch; }
   const og = off.getContext('2d'), img = og.createImageData(cw, ch), k = TAU / lamPx, ph = st.t * 6;
