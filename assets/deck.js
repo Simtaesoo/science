@@ -100,6 +100,20 @@
   ov.querySelectorAll('button').forEach((b, k) => b.onclick = () => { go(k); ov.classList.remove('on'); });
   const act = {prev, next, ov: () => ov.classList.toggle('on'), notes: () => notes.classList.toggle('on'), fs: () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(), print: () => window.print()};
   bar.querySelectorAll('[data-a]').forEach(b => b.onclick = () => act[b.dataset.a]());
+  // 교사: 이 슬라이드를 학생에게 공개/비공개
+  if (window.IS_TEACHER === true) {
+    const key = location.pathname.replace(/\.html$/, '');
+    const pub = document.createElement('button'); pub.type = 'button';
+    const show = on => { pub.setAttribute('aria-pressed', String(on)); pub.textContent = on ? '학생 공개 중' : '학생 비공개'; pub.style.borderColor = on ? '#6cc48a' : ''; pub.style.color = on ? '#6cc48a' : ''; };
+    show((window.OPEN_SLIDES || []).includes(key));
+    pub.onclick = async () => {
+      const on = pub.getAttribute('aria-pressed') !== 'true'; pub.disabled = true;
+      try { const r = await fetch('/teacher/slides', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({slide: key, open: on})}); if (!r.ok) throw new Error((await r.json()).error || r.status); show(on); }
+      catch (e) { alert('공개 설정을 바꾸지 못했어요: ' + e.message); }
+      pub.disabled = false;
+    };
+    bar.insertBefore(pub, bar.querySelector('[data-a="print"]'));
+  }
   addEventListener('keydown', e => { if (e.target.closest && e.target.closest('input,textarea')) return; const k = e.key;
     if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(k)) { e.preventDefault(); next(); } else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(k)) { e.preventDefault(); prev(); }
     else if (k === 'Home') go(0); else if (k === 'End') go(els.length - 1); else if (k === 'o' || k === 'O') act.ov(); else if ((k === 'n' || k === 'N') && window.IS_TEACHER !== false) act.notes(); else if (k === 'f' || k === 'F') act.fs(); else if (k === 'Escape') ov.classList.remove('on'); });

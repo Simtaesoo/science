@@ -102,3 +102,6 @@ table.tb{border-collapse:collapse;width:100%;font-size:30px;text-align:center}
 /* 키보드 이동 표시, 움직임 줄이기 */
 .bar button:focus-visible,.bar a:focus-visible,.ov button:focus-visible{outline:2px solid #79a2ff;outline-offset:2px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+/* 좁은 화면: 아래 막대 버튼은 한 줄로, 넘치면 옆으로 밀어서 보기 */
+.bar button,.bar a{white-space:nowrap;flex:none}
+@media (max-width:700px){.bar{overflow-x:auto;scrollbar-width:none}.bar::-webkit-scrollbar{display:none}.bar button,.bar a{padding:6px 10px;font-size:13px}}

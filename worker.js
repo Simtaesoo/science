@@ -9,11 +9,24 @@
    - 수업 슬라이드(slides*.html), 수업 진행 도구(tools/class.html): 교사 로그인 화면으로 보냄
    골든벨 '교사 진행' 모드는 화면에서 숨깁니다(window.IS_TEACHER). */
 
+import {DurableObject} from 'cloudflare:workers';
 import {TEACHER_TOKEN} from './.teacher.js';   // 배포 때 build-teacher.mjs가 만듦
 
 const COOKIE = 'sci_teacher';
 const MAX_AGE = 60 * 60 * 24 * 30;          // 30일
-const TEACHER_ONLY = [/^\/tools\/class(\.html)?$/, /\/slides\d*(\.html)?$/];   // 수업 진행 도구, 수업 슬라이드 전체
+const TEACHER_ONLY = [/^\/tools\/class(\.html)?$/];   // 수업 진행 도구
+const SLIDE = /^(\/[a-z0-9\/_-]+\/slides\d*)(?:\.html)?$/;     // 수업 슬라이드: 교사 전용, 단 선생님이 '학생 공개'로 연 것은 학생도 볼 수 있음
+
+/* 학생에게 공개한 슬라이드 목록을 저장하는 곳 (Cloudflare Durable Object, 설정은 wrangler.jsonc) */
+export class Settings extends DurableObject {
+  async getOpen() { return (await this.ctx.storage.get('openSlides')) || []; }
+  async setOpen(key, open) {
+    const s = new Set(await this.getOpen()); open ? s.add(key) : s.delete(key);
+    const a = [...s].sort(); await this.ctx.storage.put('openSlides', a); return a;
+  }
+}
+const store = env => env.SETTINGS ? env.SETTINGS.get(env.SETTINGS.idFromName('main')) : null;
+async function openSlides(env) { try { const s = store(env); return s ? await s.getOpen() : []; } catch (e) { return []; } }
 
 export default {
   fetch(request, env) { return handle(request, env); }
@@ -23,11 +36,13 @@ async function handle(request, env) {
   const url = new URL(request.url);
   const path = url.pathname;
 
-    if (path === '/teacher' || path === '/teacher/') return loginRoute(request, env, url);
+  if (path === '/teacher' || path === '/teacher/') return loginRoute(request, env, url);
   if (path === '/teacher/logout') return new Response(null, {status: 302, headers: {Location: '/', 'Set-Cookie': `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`, 'Cache-Control': 'no-store'}});
 
   const isTeacher = await checkCookie(request, env);
-  if (!isTeacher && TEACHER_ONLY.some(r => r.test(path))) {
+  if (path === '/teacher/slides') return slidesApi(request, env, url, isTeacher);
+  const slide = path.match(SLIDE);
+  if (!isTeacher && (TEACHER_ONLY.some(r => r.test(path)) || (slide && !(await openSlides(env)).includes(slide[1])))) {
     return new Response(null, {status: 302, headers: {Location: '/teacher?next=' + encodeURIComponent(path + url.search), 'Cache-Control': 'no-store'}});
   }
 
@@ -47,7 +62,9 @@ async function handle(request, env) {
     out = new Response(cleaned, {status: res.status, statusText: res.statusText, headers});
   }
 
-  let rw = new HTMLRewriter().on('head', {element(e) { e.prepend(`<script>window.IS_TEACHER=${isTeacher};</script>`, {html: true}); }});
+  const isHome = path === '/' || path === '/index' || path === '/index.html';
+  const extra = isHome || slide ? `window.OPEN_SLIDES=${JSON.stringify(await openSlides(env))};` : '';
+  let rw = new HTMLRewriter().on('head', {element(e) { e.prepend(`<script>window.IS_TEACHER=${isTeacher};${extra}</script>`, {html: true}); }});
   if (!isTeacher) {
     rw = rw
       .on('.ans-only', {element(e) { e.remove(); }})
@@ -57,6 +74,21 @@ async function handle(request, env) {
       .on('.blank', {text(t) { if (t.text) t.replace([...t.text].map(() => '　').join('')); }});
   }
   return rw.transform(out);
+}
+
+// 슬라이드 학생 공개 켜기/끄기 (교사만). POST {slide: '/g1/force/slides1', open: true}
+async function slidesApi(request, env, url, isTeacher) {
+  const json = (o, status = 200) => new Response(JSON.stringify(o), {status, headers: {'content-type': 'application/json', 'Cache-Control': 'no-store'}});
+  if (!isTeacher) return json({error: '교사 로그인이 필요해요.'}, 401);
+  if (request.method === 'GET') return json({open: await openSlides(env)});
+  if (request.method !== 'POST') return json({error: 'method'}, 405);
+  const origin = request.headers.get('origin');
+  if (origin && origin !== url.origin) return json({error: 'origin'}, 403);
+  const s = store(env); if (!s) return json({error: '저장소가 아직 준비되지 않았어요.'}, 503);
+  let body; try { body = await request.json(); } catch (e) { return json({error: 'body'}, 400); }
+  const m = String(body.slide || '').match(SLIDE);
+  if (!m) return json({error: '슬라이드 주소가 아니에요.'}, 400);
+  return json({open: await s.setOpen(m[1], !!body.open)});
 }
 
 async function hash(s) {

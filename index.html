@@ -63,7 +63,9 @@ a.lt:hover{color:var(--area);text-decoration:underline;text-underline-offset:3px
 @container (max-width:480px){.lessons li{grid-template-columns:26px minmax(0,1fr);align-items:start;padding:9px 0}.lessons .ln{grid-row:span 2;line-height:1.5}.acts{justify-content:flex-start;margin-top:4px}}
 .act{font-size:12px;font-weight:500;text-decoration:none;border-radius:999px;padding:3px 10px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;min-height:26px;display:inline-flex;align-items:center}
 .act:hover{border-color:var(--area);color:var(--area)}
-.act.locked::after{content:'교사';font-size:10px;font-weight:700;margin-left:5px;padding:0 5px;border-radius:999px;background:var(--soft);color:var(--muted)}
+.pub{font:500 11px var(--f-body);border:1px dashed var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:2px 9px;min-height:26px;cursor:pointer;white-space:nowrap}
+.pub[aria-pressed="true"]{border-style:solid;border-color:var(--bio);color:var(--bio);font-weight:700}
+.pub:disabled{opacity:.5}
 .act.sim{background:var(--area);border-color:var(--area);color:var(--surface)}
 .act.sim:hover{color:var(--surface);filter:brightness(1.08)}
 
@@ -121,6 +123,10 @@ mark{background:color-mix(in srgb,var(--warn) 35%,transparent);color:inherit;bor
   $('who').innerHTML = T === true ? '<a class="who" href="/teacher">교사 모드</a>' : T === false ? '<a class="btn" href="/teacher?next=/">교사 로그인</a>' : '';
   $('tools').innerHTML = `<a href="tools/class.html"><span class="ic">⏱</span><span><b>수업 진행 도구${T === false ? '<span class="lock">교사</span>' : ''}</b><span class="d">타이머, 발표자 뽑기, 모둠 편성</span></span></a>`;
 
+  // 슬라이드: 교사에게는 전부 + '학생 공개' 스위치, 학생에게는 선생님이 공개한 것만
+  let OPEN = new Set(window.OPEN_SLIDES || []);
+  const skey = href => '/' + href.replace(/^\.?\//, '').replace(/\.html$/, '');
+  const canSee = d => T !== false || OPEN.has(skey(d.href || ''));
   const KIND = {sim: '시뮬레이션', deck: '슬라이드', app: '게임', quiz: '퀴즈', ws: '학습지'};
   const esc = t => String(t).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
   const short = g => (g.level || '중') === '중' ? '중' + parseInt(g.grade) : g.book.replace('통합과학', '통과').replace('역학과 에너지', '역학').replace('전자기와 양자', '전자기');
@@ -158,14 +164,17 @@ mark{background:color-mix(in srgb,var(--warn) 35%,transparent);color:inherit;bor
 
   function card(u, showGrade) {
     const {lessons, extras} = group(u.items);
-    const nSim = u.items.filter(i => i.kind === 'sim').length, nDeck = u.items.filter(i => i.kind === 'deck').length;
+    const nSim = u.items.filter(i => i.kind === 'sim').length, nDeck = u.items.filter(i => i.kind === 'deck' && canSee(i)).length;
     const rows = lessons.map(L => {
       const n = L.r[0] === L.r[1] ? L.r[0] : L.r[0] + '~' + L.r[1];
       const title = L.title || L.dt;
       const main = L.sim[0] && L.sim[0].href ? `<a class="lt" href="${L.sim[0].href}">${hi(title)}</a>` : `<span class="lt">${hi(title)}</span>`;
       const acts = [
         ...L.sim.map((s, k) => link(s, 'act sim', k ? '시뮬레이션 ' + (k + 1) : '시뮬레이션')),
-        ...L.deck.map(d => { const p = d.title.match(/\((\d+)쪽\)/); return link(d, T === false ? 'act locked' : 'act', '슬라이드' + (L.deck.length > 1 ? ' ' + (range(d.title) || [''])[0] + '차시' : '') + (p ? ' ' + p[1] + '쪽' : '')); })
+        ...L.deck.filter(canSee).map(d => { const p = d.title.match(/\((\d+)쪽\)/); const a = link(d, 'act', '슬라이드' + (L.deck.length > 1 ? ' ' + (range(d.title) || [''])[0] + '차시' : '') + (p ? ' ' + p[1] + '쪽' : ''));
+          if (T !== true || !d.href) return a;
+          const on = OPEN.has(skey(d.href));
+          return a + `<button type="button" class="pub" data-slide="${skey(d.href)}" aria-pressed="${on}" title="학생에게 이 슬라이드 ${on ? '숨기기' : '보여 주기'}">${on ? '학생 공개 중' : '비공개'}</button>`; })
       ].join('');
       return `<li><span class="ln${String(n).length > 2 ? ' wide' : ''}">${n}</span>${main}<span class="acts">${acts}</span></li>`;
     }).join('');
@@ -177,7 +186,7 @@ mark{background:color-mix(in srgb,var(--warn) 35%,transparent);color:inherit;bor
     const no = String(u.disp || u.no).padStart(2, '0');
     return `<article class="unit area-${u.area}">
       <header class="unit-head"><div class="tile" data-g="${showGrade ? short(u.g) : ''}"><span class="no">${no}</span><span class="cd">${esc(u.code)}</span></div>
-        <div><h3>${hi(u.title)}</h3><p class="cnt">${lessons.length}차시 · 시뮬레이션 ${nSim} · 슬라이드 ${nDeck}</p></div></header>
+        <div><h3>${hi(u.title)}</h3><p class="cnt">${lessons.length}차시 · 시뮬레이션 ${nSim}${nDeck ? ' · 슬라이드 ' + nDeck : ''}</p></div></header>
       ${rows ? `<ol class="lessons">${rows}</ol>` : ''}
       ${ex ? `<div class="extras">${ex}</div>` : ''}</article>`;
   }
@@ -195,6 +204,15 @@ mark{background:color-mix(in srgb,var(--warn) 35%,transparent);color:inherit;bor
     }
     $('units').innerHTML = list.map(u => card(u, !!q)).join('') ||
       `<div class="empty">'${esc(q)}'에 맞는 단원이 없어요. 다른 낱말로 찾아보세요.<br><button class="btn" type="button" id="clr">검색 지우기</button></div>`;
+    $('units').querySelectorAll('.pub').forEach(b => b.onclick = async () => {
+      const on = b.getAttribute('aria-pressed') !== 'true'; b.disabled = true;
+      try {
+        const r = await fetch('/teacher/slides', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({slide: b.dataset.slide, open: on})});
+        const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status);
+        OPEN = new Set(j.open); b.setAttribute('aria-pressed', String(on)); b.textContent = on ? '학생 공개 중' : '비공개'; b.title = '학생에게 이 슬라이드 ' + (on ? '숨기기' : '보여 주기');
+      } catch (e) { alert('공개 설정을 바꾸지 못했어요: ' + e.message); }
+      b.disabled = false;
+    });
     const c = $('clr'); if (c) c.onclick = () => { q = ''; $('q').value = ''; render(); $('q').focus(); };
   }
   render();
