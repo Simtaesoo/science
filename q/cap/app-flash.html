@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>축전기 설계실 · 고3 전자기와 양자 축전기와 회로</title>
+<link rel="stylesheet" href="../../assets/app.css">
+<script src="../../assets/app.js"></script>
+<script src="../../assets/hskit.js"></script>
+</head>
+<body>
+<script>
+const app = AppKit({
+  id: 'qflash', title: '축전기 설계실', unit: '고3 · 전자기와 양자 · 47 축전기와 회로', back: '../../index.html#eq', sim: 'sim.html#rc',
+  lead: '카메라 플래시, 자동 심장 충격기, 와이퍼 타이머… 모두 <b>축전기</b>가 핵심 부품이에요. 의뢰서의 조건에 맞게 축전기와 저항을 설계하세요!',
+  howto: ['슬라이더로 극판·전기 용량·저항을 정하면 오른쪽에 계산값이 나와요.', '충전 그래프의 점선은 목표 시간과 전압이에요.', '조건을 모두 만족하면 <b>[납품]</b>!'],
+  recap: '평행판 축전기의 전기 용량 C = κε₀A/d (ε₀ = 8.85 × 10⁻¹² F/m) — 넓이에 비례, 간격에 반비례, 유전체를 넣으면 κ배. 저장 전하 Q = CV, 저장 에너지 U = ½CV². RC 회로의 충전: V(t) = ε(1 − e^(−t/RC)), 시간 상수 τ = RC 뒤 약 63 %, 3τ 뒤 약 95 %. 충전 시작 순간 전류는 ε/R로 가장 크다. R이나 C를 키우면 충전이 느려진다.',
+  startLabel: '설계 시작'
+});
+const {S, sfx, toast} = app, D = Draw;
+const E0 = 8.85e-12, DIE = [['공기', 1], ['종이', 3.7], ['유리', 5]];
+const LV = [
+  {t: 'plate', C: 354, tol: .03, why: 'C = ε₀A/d = 8.85 × 10⁻¹² × 0.04 ÷ 0.001 = 354 pF. 넓이를 2배로 하거나 간격을 절반으로 하면 같은 효과예요. 종이(κ = 3.7)를 쓰면 더 작은 극판으로도 가능!'},
+  {t: 'energy', V: 300, U: 2, why: 'U = ½CV² → C = 2U/V² = 2 × 2 ÷ 300² ≈ 44 μF. 플래시는 이 에너지를 1/1000초 안에 쏟아내요.'},
+  {t: 'charge', V: 300, C: 44, Imax: .02, T: 2.5, why: '충전 시작 전류 300/R ≤ 0.02 A → R ≥ 15 kΩ, 95 %까지 3RC ≤ 2.5 s → R ≤ 18.9 kΩ. 두 조건 사이에서 골랐어요.'},
+  {t: 'wiper', V: 12, C: 200, T: 4, why: '전압이 63 %에 이를 때마다 와이퍼가 한 번 움직이므로 간격 = τ = RC → R = 4 ÷ (200 × 10⁻⁶) = 20 kΩ.'},
+  {t: 'energy', V: 5000, U: 200, why: '자동 심장 충격기: C = 2 × 200 ÷ 5000² = 16 μF. 높은 전압으로 큰 에너지를 저장해요.'}];
+let ui = {}, s = {}, dsel = 0;
+function vals(){ const L = k.L(); if (L.t === 'plate') return {C: DIE[dsel][1] * E0 * s.A.v / (s.d.v / 1000) * 1e12};
+  if (L.t === 'energy') return {U: .5 * s.C.v * 1e-6 * L.V * L.V};
+  const R = s.R.v * 1e3, C = L.C * 1e-6; return {R, tau: R * C, I0: L.V / R}; }
+const k = HS(app, {levels: LV, load(L){ ['A', 'd', 'C', 'R'].forEach(n => s[n].wrap.style.display = 'none'); ui.d.style.display = L.t === 'plate' ? '' : 'none';
+  if (L.t === 'plate') { s.A.wrap.style.display = s.d.wrap.style.display = ''; s.A.set(.02); s.d.set(2); dsel = 0; dtools(); k.mission(ui.g, `전기 용량 <b>${L.C} pF</b>(±3 %)인 평행판 축전기를 만드세요.`); }
+  else if (L.t === 'energy') { s.C.wrap.style.display = ''; s.C.el.max = 200; s.C.set(10); k.mission(ui.g, `<b>${L.V} V</b>로 충전해 <b>${L.U} J</b>(±3 %)을 저장할 축전기를 고르세요.${L.V > 1000 ? '<br>(자동 심장 충격기)' : '<br>(카메라 플래시)'}`); }
+  else { s.R.wrap.style.display = ''; s.R.set(5); k.mission(ui.g, L.t === 'charge' ? `${L.C} μF 축전기를 ${L.V} V로 충전할 저항을 고르세요.<br>충전 시작 전류 <b>${L.Imax * 1000} mA 이하</b>, 95 %까지 <b>${L.T} s 이내</b>` : `와이퍼 타이머: ${L.C} μF 축전기가 63 %까지 충전될 때마다 한 번 작동해요. 간격을 <b>${L.T} s</b>(±5 %)로 맞추세요.`); }
+  info(); }});
+function dtools(){ ui.d.innerHTML = '<p style="margin:6px 0 4px">극판 사이 물질</p><div class="tools">' + DIE.map(([n, kk], i) => `<button class="tool" type="button" aria-pressed="${i === dsel}" data-i="${i}">${n} κ=${kk}</button>`).join('') + '</div>'; ui.d.querySelectorAll('button').forEach(b => b.onclick = () => { dsel = +b.dataset.i; sfx.click(); dtools(); info(); }); }
+function info(){ const L = k.L(), v = vals();
+  ui.r.innerHTML = L.t === 'plate' ? `<p>C = <b>${v.C.toFixed(0)} pF</b> / 목표 ${L.C} pF</p>` : L.t === 'energy' ? `<p>저장 에너지 <b>${v.U.toFixed(2)} J</b> / 목표 ${L.U} J</p><p class="note-c">Q = CV = ${(s.C.v * 1e-6 * L.V * 1000).toFixed(1)} mC</p>` : `<p>시간 상수 τ = <b>${v.tau.toFixed(2)} s</b></p>${L.t === 'charge' ? `<p>시작 전류 <b>${(v.I0 * 1000).toFixed(1)} mA</b> · 95 %까지 <b>${(3 * v.tau).toFixed(2)} s</b></p>` : ''}`; }
+app.onStart = () => { ui.g = app.panel('의뢰서'); ui.c = app.panel('설계');
+  s.A = k.slider(ui.c, {label: '극판 넓이', min: .005, max: .05, step: .005, val: .02, fmt: v => (v * 1e4).toFixed(0) + ' cm²', on: info});
+  s.d = k.slider(ui.c, {label: '극판 간격', min: .5, max: 5, step: .5, val: 2, fmt: v => v.toFixed(1) + ' mm', on: info});
+  s.C = k.slider(ui.c, {label: '전기 용량', min: 1, max: 200, step: 1, val: 10, fmt: v => v + ' μF', on: info});
+  s.R = k.slider(ui.c, {label: '저항', min: 1, max: 50, step: .5, val: 5, fmt: v => v.toFixed(1) + ' kΩ', on: info});
+  ui.d = document.createElement('div'); ui.c.appendChild(ui.d); ui.r = document.createElement('div'); ui.r.style.marginTop = '8px'; ui.c.appendChild(ui.r);
+  ui.b = app.panel(''); k.btn(ui.b, '📦 납품', () => { const L = k.L(), v = vals();
+    if (L.t === 'plate') { if (Math.abs(v.C - L.C) / L.C > L.tol) return k.fail(`C = ${v.C.toFixed(0)} pF — 목표와 달라요`); return k.win(ui.g, L.why, `${v.C.toFixed(0)} pF`); }
+    if (L.t === 'energy') { if (Math.abs(v.U - L.U) / L.U > .03) return k.fail(`저장 에너지 ${v.U.toFixed(2)} J — 목표 ${L.U} J`); return k.win(ui.g, L.why, `${s.C.v} μF`); }
+    if (L.t === 'charge') { if (v.I0 > L.Imax + 1e-9) return k.fail(`시작 전류 ${(v.I0 * 1000).toFixed(1)} mA — 전지가 견디지 못해요`); if (3 * v.tau > L.T) return k.fail(`95 % 충전에 ${(3 * v.tau).toFixed(2)} s — 너무 느려요`); return k.win(ui.g, L.why, `${s.R.v} kΩ`); }
+    if (Math.abs(v.tau - L.T) / L.T > .05) return k.fail(`간격 ${v.tau.toFixed(2)} s — 목표 ${L.T} s`); k.win(ui.g, L.why, `${s.R.v} kΩ`); });
+  k.begin(); };
+k.draw((g, W, H) => { const L = k.L(), t = performance.now() / 1000; g.fillStyle = '#f7f3ea'; g.fillRect(0, 0, W, H);
+  if (L.t === 'plate') { const a = Math.sqrt(s.A.v) / Math.sqrt(.05) * Math.min(W, H) * .5, gap = s.d.v / 5 * H * .3 + 8, cx = W / 2, cy = H / 2;
+    g.fillStyle = ['rgba(220,235,255,.0)', 'rgba(240,225,190,.8)', 'rgba(170,220,230,.6)'][dsel]; g.fillRect(cx - a / 2, cy - gap / 2, a, gap);
+    g.fillStyle = '#d0533f'; g.fillRect(cx - a / 2, cy - gap / 2 - 8, a, 8); g.fillStyle = '#2f6fd0'; g.fillRect(cx - a / 2, cy + gap / 2, a, 8);
+    for (let i = 0; i < 7; i++) { const x = cx - a / 2 + a * (i + .5) / 7; D.arrow(g, x, cy - gap / 2 + 2, x, cy + gap / 2 - 2, 'rgba(0,0,0,.35)', 1.5); }
+    D.text(g, `넓이 ${(s.A.v * 1e4).toFixed(0)} cm² · 간격 ${s.d.v} mm · ${DIE[dsel][0]}`, cx, H - 24, {size: 13, weight: 700}); D.text(g, `C = ${vals().C.toFixed(0)} pF`, cx, 30, {size: 20, weight: 700, color: '#1d3a58'}); return; }
+  if (L.t === 'energy') { const v = vals(), f = Math.min(1, v.U / L.U); const cx = W / 2, cy = H / 2; g.fillStyle = '#555b66'; D.rr(g, cx - 60, cy - 90, 120, 180, 14); g.fill(); g.fillStyle = '#f6d365'; D.rr(g, cx - 50, cy + 80 - 160 * Math.min(1.2, v.U / L.U) / 1.2, 100, 160 * Math.min(1.2, v.U / L.U) / 1.2, 10); g.fill();
+    g.strokeStyle = '#d0533f'; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(cx - 70, cy + 80 - 160 / 1.2); g.lineTo(cx + 70, cy + 80 - 160 / 1.2); g.stroke(); g.setLineDash([]); D.text(g, `목표 ${L.U} J`, cx + 76, cy + 80 - 160 / 1.2, {size: 12, color: '#d0533f', align: 'left', weight: 700});
+    D.text(g, `${v.U.toFixed(2)} J`, cx, cy - 106, {size: 18, weight: 700}); D.text(g, L.V > 1000 ? '❤️‍🩹' : '📸', cx - 140, cy, {size: 50}); if (Math.abs(f - 1) < .03) D.glow(g, cx, cy, 120 + 10 * Math.sin(t * 6), '246,211,101', .4); return; }
+  const v = vals(), A = k.axes(g, {x: 56, y: 24, w: W - 80, h: H - 70}, [0, 10, 1], [0, L.V, L.V / 4], '시간 (s)', '축전기 전압 (V)'), P = [];
+  for (let x = 0; x <= 10; x += .05) P.push([A.X(x), A.Y(L.V * (1 - Math.exp(-x / v.tau)))]); k.line(g, P, '#2f6fd0', 3);
+  const lvl = L.t === 'charge' ? .95 : .632; g.strokeStyle = '#d0533f'; g.setLineDash([5, 4]); g.lineWidth = 1.5; g.beginPath(); g.moveTo(A.X(0), A.Y(L.V * lvl)); g.lineTo(A.X(10), A.Y(L.V * lvl)); g.moveTo(A.X(L.T), A.Y(0)); g.lineTo(A.X(L.T), A.Y(L.V)); g.stroke(); g.setLineDash([]);
+  D.text(g, `${Math.round(lvl * 100)} %`, A.X(10) - 4, A.Y(L.V * lvl) - 9, {size: 11.5, color: '#d0533f', align: 'right', weight: 700}); D.text(g, `목표 ${L.T} s`, A.X(L.T) + 4, A.Y(L.V) + 12, {size: 11.5, color: '#d0533f', align: 'left', weight: 700});
+  const tm = (t % 10); g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(A.X(tm), A.Y(L.V * (1 - Math.exp(-tm / v.tau))), 5, 0, 7); g.fill();
+});
+</script>
+</body>
+</html>
