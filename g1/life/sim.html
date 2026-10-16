@@ -131,7 +131,6 @@ function drawCell(){
     g.strokeStyle = hl('wall') ? C.hot : '#4b7a2c'; g.lineWidth = hl('wall') ? 10 : 8; g.strokeRect(x0, y0, w, h);
     g.strokeStyle = hl('membrane') ? C.hot : C.ink; g.lineWidth = hl('membrane') ? 3 : 1.5; g.strokeRect(x0 + 8, y0 + 8, w - 16, h - 16);
     g.fillStyle = 'rgba(190,220,250,.6)'; g.fillRect(x0 + w * .35, y0 + h * .2, w * .5, h * .6);
-    label(g, '액포', x0 + w * .6, y0 + h * .5, {size: 12, color: C.muted});
     hits.push(['wall', (x, y) => (x > x0 - 6 && x < x0 + w + 6 && y > y0 - 6 && y < y0 + h + 6) && !(x > x0 + 5 && x < x0 + w - 5 && y > y0 + 5 && y < y0 + h - 5)]);
     hits.push(['membrane', (x, y) => (x > x0 + 4 && x < x0 + w - 4 && y > y0 + 4 && y < y0 + h - 4) && !(x > x0 + 12 && x < x0 + w - 12 && y > y0 + 12 && y < y0 + h - 12)]);
     // 엽록체

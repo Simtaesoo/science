@@ -50,7 +50,7 @@
         <div class="field" data-only="mix"><div class="seg" id="mixSeg"><button type="button" data-mx="boil">가열 (끓을 때)</button><button type="button" data-mx="freeze">냉각 (얼 때)</button></div></div>
         <button class="btn" type="button" id="mixRun" data-only="mix">실험 시작</button>
         <!-- 5 -->
-        <div class="field" data-only="sep"><div class="seg" id="sepSeg"><button type="button" data-sp="dist">끓는점 차 (증류)</button><button type="button" data-sp="dens">밀도 차</button><button type="button" data-sp="recr">용해도 차 (재결정)</button><button type="button" data-sp="chrom">크로마토그래피</button></div></div>
+        <div class="field" data-only="sep"><div class="seg" id="sepSeg"><button type="button" data-sp="dist">끓는점 차 (증류)</button><button type="button" data-sp="dens">밀도 차</button><button type="button" data-sp="recr">용해도 차 (재결정)</button></div></div>
         <button class="btn" type="button" id="sepRun" data-only="sep">분리 시작</button>
       </div>
     </section>
@@ -286,7 +286,7 @@ function table(){
   const k = st.mode; $('tTitle').textContent = TITLE[k]; $('thead').innerHTML = '<tr>' + HEAD[k].map(h => `<th>${h}</th>`).join('') + '</tr>';
   let rows = st.rows[k];
   if (k === 'mix') rows = [['순물질', '끓는 동안(어는 동안) 온도 일정'], ['혼합물', '끓는 동안 온도가 계속 조금씩 오름, 순물질보다 높은 온도에서 끓고 낮은 온도에서 얾']];
-  if (k === 'sep') rows = [['증류', '끓는점 차', '바닷물 → 식수, 원유 분리'], ['분별 깔때기', '밀도 차', '물과 식용유'], ['재결정', '용해도 차', '천일염 정제, 질산 칼륨 정제'], ['크로마토그래피', '이동 속도 차', '잉크 색소, 도핑 검사']];
+  if (k === 'sep') rows = [['증류', '끓는점 차', '바닷물 → 식수, 원유 분리'], ['분별 깔때기', '밀도 차', '물과 식용유'], ['재결정', '용해도 차', '천일염 정제, 질산 칼륨 정제']];
   $('clear').hidden = k === 'mix' || k === 'sep';
   $('tbody').innerHTML = rows.length ? rows.map(r => '<tr>' + r.map(x => `<td>${x}</td>`).join('') + '</tr>').join('') : `<tr class="empty"><td colspan="${HEAD[k].length}">실험을 하면 여기에 기록됩니다.</td></tr>`;
 }

@@ -52,7 +52,7 @@ app.draw = (g, W, H) => { if (!seq) return; const now = performance.now(), k = s
     g.fillStyle = '#f2d36b'; g.fillRect(x, bot - 30 * pxcm, 50, 30 * pxcm); g.strokeStyle = '#a0822a'; g.strokeRect(x, bot - 30 * pxcm, 50, 30 * pxcm);
     for (let c = 0; c <= 30; c++) { const y = bot - c * pxcm; g.strokeStyle = '#333'; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (c % 5 ? 10 : 20), y); g.stroke(); if (c % 5 === 0) D.text(g, c, x + 34, y, {size: 11, color: '#333'}); }
     D.text(g, '🤏', W / 2 + 56, hy, {size: 34}); D.text(g, '잡는 손', W / 2 + 100, hy, {size: 12, color: '#9fb0d0', align: 'left'}); g.strokeStyle = '#f28c7a'; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(W / 2 - 90, hy); g.lineTo(W / 2 + 40, hy); g.stroke(); g.setLineDash([]);
-    if (st === 'show' && ruler) D.text(g, `${ruler.toFixed(1)} cm → t = √(2d ÷ g) = ${Math.round(Math.sqrt(2 * ruler / 100 / 9.8) * 1000)} ms`, W / 2, H * .14, {size: 16, color: '#f6d365', weight: 700}); }
+    if (st === 'show' && ruler) D.text(g, `${ruler.toFixed(1)} cm 떨어진 뒤 잡음 → 반응 시간 약 ${Math.round(Math.sqrt(2 * ruler / 100 / 9.8) * 1000)} ms`, W / 2, H * .14, {size: 16, color: '#f6d365', weight: 700}); }
   if (st === 'show' && results.length && k !== 'rul') { const r = results[results.length - 1]; if (r.ms) D.text(g, r.ms + ' ms', W / 2, H * .72, {size: 40, display: true, color: '#f6d365'}); }
   // 신경 경로 애니메이션
   if (st === 'show' && now - flash < 900) { const p = (now - flash) / 900, P = [[.1, .9, '감각기'], [.24, .9, '감각 신경'], [.38, .9, '대뇌'], [.62, .9, '운동 신경'], [.88, .9, '근육']]; P.forEach(([x, y, n], i) => { D.text(g, n, x * W, y * H + 18, {size: 11, color: '#9fb0d0'}); g.fillStyle = p * 4 >= i ? '#f6d365' : '#334'; g.beginPath(); g.arc(x * W, y * H, 7, 0, 7); g.fill(); }); }

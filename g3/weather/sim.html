@@ -42,7 +42,7 @@
         <label class="field" data-only="cloud" for="t0">지표 기온 <input type="range" id="t0" min="15" max="35" step="1" value="27"><output id="t0Out">27 ℃</output></label>
         <label class="field" data-only="cloud" for="d0">지표 이슬점 <input type="range" id="d0" min="5" max="25" step="1" value="19"><output id="d0Out">19 ℃</output></label>
         <button class="btn" type="button" id="rise" data-only="cloud">공기 상승시키기</button>
-        <div class="field" data-only="wind"><div class="seg" id="wSeg"><button type="button" data-w="map">고기압과 저기압</button><button type="button" data-w="sea">해륙풍</button></div></div>
+        <div class="field" data-only="wind"><div class="seg" id="wSeg"><button type="button" data-w="map">고기압과 저기압</button><button type="button" data-w="sea">해륙풍</button><button type="button" data-w="global">대기 대순환</button></div></div>
         <label class="field" data-only="wind" id="dpF" for="dp">기압 차 <input type="range" id="dp" min="4" max="40" step="4" value="16"><output id="dpOut">16 hPa</output></label>
         <label class="field" data-only="wind" id="hourF" for="hour">시각 <input type="range" id="hour" min="0" max="23" step="1" value="14"><output id="hourOut">14시</output></label>
         <div class="field" data-only="front"><div class="seg" id="fSeg"><button type="button" data-f="cold">한랭 전선</button><button type="button" data-f="warm">온난 전선</button><button type="button" data-f="mass">우리나라 주변 기단</button></div></div>
@@ -187,8 +187,20 @@ function drawCloud(){
 }
 
 /* ===== 5. 기압과 바람 ===== */
+function drawGlobal(){
+  const g = S.g, cx = S.w * .4, cy = S.h * .92, R = Math.min(S.w * .34, S.h * .84), ly = la => cy - R * Math.sin(la * Math.PI / 180), hw = la => R * Math.cos(la * Math.PI / 180);
+  const sea = g.createRadialGradient(cx - R * .3, cy - R * .3, R * .1, cx, cy, R); sea.addColorStop(0, '#9cc8ee'); sea.addColorStop(1, '#3f7fc0'); g.fillStyle = sea; g.beginPath(); g.arc(cx, cy, R, Math.PI, TAU); g.closePath(); g.fill(); // 북반구만
+  [0, 30, 60].forEach(la => { const y = ly(la), w = hw(la); g.strokeStyle = la ? 'rgba(255,255,255,.7)' : '#ffe08a'; g.lineWidth = la ? 1.2 : 2; g.setLineDash(la ? [5, 4] : []); g.beginPath(); g.moveTo(cx - w, y); g.lineTo(cx + w, y); g.stroke(); g.setLineDash([]); label(g, la ? `북위 ${la}°` : '적도', cx - w - 8, y, {size: 11, align: 'right', color: C.ink}); });
+  const belts = [[15, -1, '무역풍', '#ffd36a'], [45, 1, '편서풍', '#ffffff'], [75, -1, '극동풍', '#cfe6ff']];
+  belts.forEach(([la, dir, nm, col]) => { const y = ly(la), w = hw(la); for (let k = -2; k <= 2; k++) { const ph = ((st.t * .25 * dir) % .4 + .4) % .4, x = cx + (k * .36 + ph - .2) * w * .9; if (Math.abs(x - cx) > w * .85) continue; const dx = dir * w * .16, dy = -dir * 8; arrow(g, x - dx / 2, y - dy / 2, x + dx / 2, y + dy / 2, col, 2.6); }
+    label(g, `${nm} (${dir < 0 ? '동 → 서' : '서 → 동'})`, cx + R + 16, y, {size: 13, weight: 700, align: 'left', color: dir > 0 ? C.hot : C.cold}); });
+  [[2, '적도: 많이 가열 → 공기 상승'], [30, '30° 부근: 공기 하강'], [60, '60° 부근: 공기 상승'], [75, '극: 냉각 → 공기 하강']].forEach(([la, t]) => label(g, t, cx + R + 16, ly(la) + (la === 2 ? -4 : la === 75 ? -18 : 18), {size: 11, align: 'left', color: C.muted}));
+  const ky = ly(37), kx = cx - hw(37) * .25; g.fillStyle = C.hot; g.beginPath(); g.arc(kx, ky, 5, 0, TAU); g.fill(); label(g, '우리나라 (편서풍대)', kx - 8, ky + 16, {size: 12, weight: 700, color: '#fff', align: 'right'});
+  label(g, '북반구 대기 대순환 (모식도)', S.w - 12, 14, {size: 11, color: C.muted, align: 'right'});
+}
 function drawWind(){
   const g = S.g;
+  if (st.w === 'global') return drawGlobal();
   if (st.w === 'map') {
     const Lc = [S.w * .26, S.h * .5], Hc = [S.w * .7, S.h * .5];
     g.fillStyle = '#eef3ea'; g.fillRect(0, 0, S.w, S.h);
@@ -272,6 +284,7 @@ function drawGraph(){
   else if (st.mode === 'green') { const m = axes(G, {x: [0, 100, 25, '온실 기체 양 (상대값)'], y: [-20, 30, 10, '평균 기온 (℃)']}); const p = []; for (let x = 0; x <= 100; x += 2) p.push([x, 255 * Math.pow(1 / (1 - (.6 + .3 * x / 100) / 2), .25) - 273]); line(G, p, m, C.hot, 2.5); line(G, [[0, -18], [100, -18]], m, C.cold, 1.2, [4, 4]); label(g, '대기가 없을 때 약 −18 ℃', m.X(70), m.Y(-18) - 10, {size: 11, color: C.cold}); g.fillStyle = C.ink; if (!st.noAir) { g.beginPath(); g.arc(m.X(st.gh), m.Y(TsEq()), 5, 0, TAU); g.fill(); } }
   else if (st.mode === 'humid') { const m = axes(G, {x: [0, 24, 6, '시각 (시)'], y: [0, 100, 20, '기온 (℃) · 상대 습도 (%)']}); const Tp = [], Rp = []; for (let h = 0; h <= 24; h += .5) { const T = 18 + 8 * Math.cos((h - 14) / 24 * TAU); Tp.push([h, T]); Rp.push([h, Math.min(100, 12 / sat(T) * 100)]); } line(G, Tp, m, C.hot, 2.5); line(G, Rp, m, C.phy, 2.5); label(g, '기온', m.X(14), m.Y(26) - 10, {size: 11, color: C.hot}); label(g, '상대 습도', m.X(5), m.Y(Math.min(100, 12 / sat(10.5) * 100)) - 10, {size: 11, color: C.phy}); }
   else if (st.mode === 'cloud') { const m = axes(G, {x: [-10, 35, 5, '온도 (℃)'], y: [0, 4, 1, '높이 (km)']}); const a = [], b = []; for (let z = 0; z <= 4; z += .05) { a.push([parcelT(z), z]); b.push([parcelD(z), z]); } line(G, a, m, C.hot, 2.5); line(G, b, m, C.cold, 2.5, [5, 3]); label(g, '공기 덩어리 기온', m.X(parcelT(.5)) + 6, m.Y(.5), {size: 11, color: C.hot, align: 'left'}); label(g, '이슬점', m.X(parcelD(.3)) - 6, m.Y(.3), {size: 11, color: C.cold, align: 'right'}); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(parcelT(st.h)), m.Y(st.h), 5, 0, TAU); g.fill(); }
+  else if (st.mode === 'wind' && st.w === 'global') { const m = axes(G, {x: [0, 90, 30, '위도 (°N)'], y: [0, 100, 25, '에너지 (상대값)']}); const A = [[0, 100], [15, 96], [30, 85], [45, 66], [60, 45], [75, 28], [90, 20]], E = [[0, 70], [15, 70], [30, 68], [45, 62], [60, 55], [75, 48], [90, 45]]; line(G, A, m, C.hot, 2.5); line(G, E, m, C.cold, 2.5); label(g, '흡수하는 태양 에너지', m.X(20), m.Y(100) + 2, {size: 11, color: C.hot, align: 'left'}); label(g, '방출하는 에너지', m.X(55), m.Y(60) - 14, {size: 11, color: C.cold, align: 'left'}); label(g, '남는 에너지 → 대기와 해수가 고위도로 운반', m.X(45), m.T + m.h - 14, {size: 11, weight: 700}); }
   else if (st.mode === 'wind') { if (st.w === 'map') { const m = axes(G, {x: [0, 40, 10, '기압 차 (hPa)'], y: [0, 20, 5, '바람의 세기 (상대값)']}); line(G, [[0, 0], [40, 20]], m, C.phy, 2.5); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.dp), m.Y(st.dp / 2), 5, 0, TAU); g.fill(); }
     else { const m = axes(G, {x: [0, 24, 6, '시각 (시)'], y: [10, 35, 5, '기온 (℃)']}); const Lp = [], Sp = []; for (let h = 0; h <= 24; h += .5) { Lp.push([h, 22 + 8 * Math.cos((h - 14) / 24 * TAU)]); Sp.push([h, 22 + 1.5 * Math.cos((h - 16) / 24 * TAU)]); } line(G, Lp, m, '#c9a66b', 2.5); line(G, Sp, m, '#3f7fc0', 2.5); label(g, '육지', m.X(14), m.Y(30) - 10, {size: 11}); label(g, '바다', m.X(3), m.Y(22.5) - 10, {size: 11}); g.strokeStyle = C.ink; g.beginPath(); g.moveTo(m.X(st.hour), m.T); g.lineTo(m.X(st.hour), m.T + m.h); g.stroke(); } }
   else { if (st.f === 'mass') { const m = axes(G, {x: [0, 4, 1, ''], y: [0, 30, 10, '기단의 성질 (기온 ℃, 대략)']}); MASS.forEach(([n, p, s, uv, col], i) => { const v = [-15, 10, 28, 15][i] + 15; g.fillStyle = col; g.fillRect(m.X(i + .2), m.Y(v - 15 < 0 ? 0 : v - 15), m.X(.6) - m.X(0), m.Y(0) - m.Y(Math.max(0, v - 15))); label(g, n.replace(' 기단', ''), m.X(i + .5), m.T + m.h + 12, {size: 10}); }); }
@@ -283,6 +296,7 @@ function table(){
   else if (st.mode === 'green') setTable('대기 중 이산화 탄소 농도 (하와이 마우나로아)', ['연도', '1960', '1980', '2000', '2020'], [['농도 (ppm)', '약 317', '약 339', '약 370', '약 414']]);
   else if (st.mode === 'humid') setTable('포화 수증기량 (g/kg)', ['기온 (℃)', '0', '10', '15', '20', '25', '30'], [['포화 수증기량', '3.8', '7.6', '10.6', '14.7', '20.0', '27.2']]);
   else if (st.mode === 'cloud') setTable('구름이 생기는 경우', ['경우', '예'], [['지표면이 부분적으로 가열될 때', '여름철 소나기구름'], ['공기가 산을 타고 오를 때', '산 중턱의 구름'], ['찬 공기와 따뜻한 공기가 만날 때', '전선 주변의 구름'], ['저기압 중심으로 공기가 모여들 때', '저기압의 흐린 날씨']]);
+  else if (st.mode === 'wind' && st.w === 'global') setTable('북반구의 대기 대순환', ['위도', '지표 부근의 바람', '부는 방향'], [['0° ~ 30°', '무역풍', '동쪽 → 서쪽'], ['30° ~ 60°', '편서풍', '서쪽 → 동쪽'], ['60° ~ 90°', '극동풍', '동쪽 → 서쪽']]);
   else if (st.mode === 'wind') setTable('고기압과 저기압', ['구분', '고기압', '저기압'], [['중심 기압', '주위보다 높음', '주위보다 낮음'], ['바람 (북반구)', '시계 방향으로 불어 나감', '시계 반대 방향으로 불어 들어옴'], ['기류', '하강 기류', '상승 기류'], ['날씨', '맑음', '흐리거나 비']]);
   else if (st.f === 'mass') setTable('우리나라 주변 기단', ['기단', '성질', '영향 계절', '날씨'], [['시베리아', '한랭 건조', '겨울', '춥고 건조, 한파'], ['오호츠크해', '한랭 다습', '초여름', '높새바람, 장마 전선'], ['북태평양', '고온 다습', '여름', '무더위, 열대야'], ['양쯔강', '온난 건조', '봄·가을', '건조, 황사(봄)']]);
   else setTable('한랭 전선과 온난 전선', ['구분', '한랭 전선', '온난 전선'], [['전선면 기울기', '급함', '완만함'], ['구름', '적운형 (적란운)', '층운형'], ['강수', '좁은 지역, 소나기', '넓은 지역, 지속적인 비'], ['이동 속도', '빠름', '느림'], ['통과 후 기온', '낮아짐', '높아짐']]);
@@ -301,7 +315,10 @@ function ledger(){
     t = '[공기 냉각하기]로 기온을 내리면 이슬점에서 응결이 시작됩니다.'; }
   else if (st.mode === 'cloud') { s = stat('응결 고도', Math.round(cloudBase() * 1000), ' m') + stat('공기 덩어리', st.h >= cloudBase() ? '포화 (구름)' : '불포화');
     e = '공기가 상승하면 주위 기압이 낮아져 <b>단열 팽창</b>하고 기온이 낮아집니다. 기온이 <b>이슬점</b>에 도달하면 수증기가 응결하여 <b>구름</b>이 생깁니다. 지표의 기온과 이슬점 차이가 클수록 구름 밑면이 높습니다.';
-    t = '지표 기온과 이슬점을 바꾸어 구름 밑면의 높이 변화를 비교하세요. (모형: 불포화 공기 10 ℃/km, 이슬점 2 ℃/km 하강)'; }
+    t = '지표 기온과 이슬점을 바꾸어 구름 밑면의 높이 변화를 비교하세요. (기온은 빠르게, 이슬점은 천천히 낮아지는 모형)'; }
+  else if (st.mode === 'wind' && st.w === 'global') { s = stat('우리나라', '편서풍대') + stat('바람의 원인', '위도별 가열 차');
+    e = '적도 지방은 태양 에너지를 많이 받아 남고, 극지방은 모자랍니다. 이 에너지 차이 때문에 지구 전체 규모로 공기가 순환하는 것을 <b>대기 대순환</b>이라고 합니다. 북반구의 지표 부근에서는 위도 0°~30°에 <b>무역풍</b>, 30°~60°에 <b>편서풍</b>, 60°~90°에 <b>극동풍</b>이 붑니다. 우리나라는 편서풍대에 있어 날씨가 대체로 서쪽에서 동쪽으로 변합니다.';
+    t = '각 위도대의 바람 방향을 확인하고, 우리나라의 날씨가 서쪽에서 동쪽으로 변하는 까닭을 말해 보세요. (바람이 휘는 까닭은 다루지 않아요.)'; }
   else if (st.mode === 'wind') { if (st.w === 'map') { s = stat('기압 차', st.dp, ' hPa') + stat('바람', st.dp > 28 ? '강함' : st.dp > 12 ? '보통' : '약함');
       e = '<b>기압</b>은 공기가 누르는 힘으로, 1기압은 약 1013 hPa입니다. 두 지점의 기압 차가 생기면 공기는 기압이 높은 곳에서 낮은 곳으로 이동하는데, 이것이 <b>바람</b>입니다. 기압 차가 클수록 바람이 강합니다.';
       t = '기압 차를 바꾸며 바람의 세기를 비교하세요.'; }
@@ -327,7 +344,7 @@ $('cool').onclick = () => { st.cooling = !st.cooling; };
 $('t0').oninput = e => { st.t0 = +e.target.value; if (st.d0 > st.t0) { st.d0 = st.t0; $('d0').value = st.d0; $('d0Out').textContent = st.d0 + ' ℃'; } $('t0Out').textContent = st.t0 + ' ℃'; st.h = 0; };
 $('d0').oninput = e => { st.d0 = Math.min(+e.target.value, st.t0); e.target.value = st.d0; $('d0Out').textContent = st.d0 + ' ℃'; st.h = 0; };
 $('rise').onclick = () => { if (st.h >= 3.9) st.h = 0; st.rising = true; };
-function syncW(){ const m = st.w === 'map', on = st.mode === 'wind'; $('dpF').hidden = !m || !on; $('hourF').hidden = m || !on; if (on) $('gTitle').textContent = m ? '기압 차와 바람의 세기' : '육지와 바다의 하루 기온'; table(); }
+function syncW(){ const m = st.w === 'map', gl = st.w === 'global', on = st.mode === 'wind'; $('dpF').hidden = !m || !on; $('hourF').hidden = m || gl || !on; if (on) $('gTitle').textContent = m ? '기압 차와 바람의 세기' : gl ? '위도별 에너지 흡수와 방출' : '육지와 바다의 하루 기온'; table(); }
 Kit.seg($('wSeg'), 'w', v => { st.w = v; syncW(); })('map');
 $('dp').oninput = e => { st.dp = +e.target.value; $('dpOut').textContent = st.dp + ' hPa'; };
 $('hour').oninput = e => { st.hour = +e.target.value; $('hourOut').textContent = st.hour + '시'; };

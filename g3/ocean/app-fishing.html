@@ -3,29 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>조경 수역 어부 · 중3 해수의 성질과 순환</title>
+<title>수온 지도 어부 · 중3 수권과 해수의 순환</title>
 <link rel="stylesheet" href="../../assets/app.css">
 <script src="../../assets/app.js"></script>
 </head>
 <body>
 <script>
 const app = AppKit({
-  id: 'fishing', title: '조경 수역 어부', unit: '중3 · 18 수권과 해수의 순환', back: '../../index.html#g3', sim: 'sim.html#current', dark: true,
-  lead: '우리나라 주변 바다는 <b>난류와 한류</b>가 만나는 황금 어장! 계절에 따라 달라지는 <b>수온</b>과 <b>조경 수역</b>의 위치를 읽고 그물을 던져 물고기를 잡으세요.',
-  howto: ['바다 위에 손가락(마우스)을 올리면 <b>표층 수온</b>이 보여요.', '그물을 던질 곳을 <b>누르세요</b>. 의뢰마다 3번 던질 수 있어요.', '물고기마다 좋아하는 수온이 달라요. 한류와 난류가 만나는 <b>조경 수역</b>은 영양염과 플랑크톤이 많아 보너스!'],
+  id: 'fishing', title: '수온 지도 어부', unit: '중3 · 18 수권과 해수의 순환', back: '../../index.html#g3', sim: 'sim.html#current', dark: true,
+  lead: '우리나라 주변 바다는 <b>난류와 한류</b>가 만나는 황금 어장! 계절에 따라 달라지는 <b>수온</b>과 난류·한류가 만나는 곳을 읽고 그물을 던져 물고기를 잡으세요.',
+  howto: ['바다 위에 손가락(마우스)을 올리면 <b>표층 수온</b>이 보여요.', '그물을 던질 곳을 <b>누르세요</b>. 의뢰마다 3번 던질 수 있어요.', '물고기마다 좋아하는 수온이 달라요. 한류와 난류가 만나는 곳은 영양 염류와 플랑크톤이 많아 보너스!'],
   options: [{key: 'players', label: '인원', choices: [[1, '1명'], [2, '2모둠'], [3, '3모둠'], [4, '4모둠']], def: 1}],
-  recap: '우리나라 주변에는 <b>쿠로시오 해류</b>에서 갈라진 <b>동한 난류·황해 난류</b>와, 북쪽에서 내려오는 <b>북한 한류</b>가 흐릅니다. 동해에서 난류와 한류가 만나는 <b>조경 수역</b>은 영양염과 플랑크톤이 풍부해 좋은 어장이 되며, 난류가 강한 <b>여름에는 북쪽</b>으로, 한류가 강한 <b>겨울에는 남쪽</b>으로 이동해요. 해수는 깊이에 따라 <b>혼합층 · 수온 약층 · 심해층</b>으로 나뉘고, 해수 1 kg에 녹아 있는 염류의 양(g)을 <b>염분</b>(psu)이라고 해요.',
+  recap: '북태평양을 시계 방향으로 도는 해류 가운데 아시아 쪽으로 올라오는 난류 <b>쿠로시오 해류</b>에서 갈라진 따뜻한 물이 우리 바다로 들어오고, 북쪽에서는 차가운 물(한류)이 내려옵니다. 동해에서 난류와 한류가 만나는 곳(조경 수역)은 영양염과 플랑크톤이 풍부해 좋은 어장이 되며, 난류가 강한 <b>여름에는 북쪽</b>으로, 한류가 강한 <b>겨울에는 남쪽</b>으로 이동해요. 해수는 깊이에 따라 <b>혼합층 · 수온 약층 · 심해층</b>으로 나뉘고, 해수 1 kg에 녹아 있는 염류의 양(g)을 <b>염분</b>(psu)이라고 해요.',
   startLabel: '출항!'
 });
 const {S, sfx, toast} = app, D = Draw;
 const KOR = [[.30, .02], [.52, .02], [.60, .10], [.58, .20], [.62, .32], [.64, .45], [.63, .58], [.60, .70], [.52, .76], [.44, .78], [.38, .74], [.40, .66], [.36, .58], [.40, .50], [.36, .42], [.30, .38], [.33, .30], [.28, .22], [.30, .12]];
 const JPN = [[.84, .64], [.92, .55], [1.02, .5], [1.02, 1.02], [.8, 1.02], [.74, .86], [.78, .74]];
 const FISH = {명태: ['🐟', 2, 8, '한류성'], 오징어: ['🦑', 12, 20, '난류성'], 고등어: ['🐠', 15, 22, '난류성'], 대구: ['🐡', 3, 10, '한류성']};
-const MIS = [['winter', '명태', '겨울 동해에서 <b>명태</b>(한류성)를 잡아라!'], ['summer', '오징어', '여름에 <b>오징어</b>(난류성)를 잡아라!'], ['summer', null, '여름의 <b>조경 수역</b>을 찾아 그물을 던져라!'], ['winter', null, '겨울의 <b>조경 수역</b>을 찾아라! (여름과 비교해 보세요)'], ['winter', '고등어', '겨울에 <b>고등어</b>(난류성)를 잡아라!']];
+const MIS = [['winter', '명태', '겨울 동해에서 <b>명태</b>(한류성)를 잡아라!'], ['summer', '오징어', '여름에 <b>오징어</b>(난류성)를 잡아라!'], ['summer', null, '여름에 <b>난류와 한류가 만나는 곳</b>을 찾아 그물을 던져라!'], ['winter', null, '겨울에 <b>난류와 한류가 만나는 곳</b>을 찾아라! (여름과 비교해 보세요)'], ['winter', '고등어', '겨울에 <b>고등어</b>(난류성)를 잡아라!']];
 const QZ = [['깊이에 따라 수온이 급격히 낮아지며 매우 안정해 위아래로 잘 섞이지 않는 층은?', ['수온 약층', '혼합층', '심해층'], 0, '수온 약층은 위가 따뜻하고 아래가 차가워 대류가 일어나지 않는 안정한 층이에요.'],
   ['혼합층이 가장 두껍게 발달하는 조건은?', ['바람이 강하게 부는 곳', '바람이 거의 없는 곳', '수심이 얕은 곳'], 0, '바람이 해수를 섞어 수온이 일정한 혼합층이 두꺼워져요.'],
   ['해수 2 kg에 염류 70 g이 녹아 있다면 염분은?', ['35 psu', '70 psu', '140 psu', '3.5 psu'], 0, '염분 = 해수 1 kg 속 염류(g) → 70 ÷ 2 = 35 psu'],
-  ['염분이 다른 두 바다에서 같은 것은?', ['염류 사이의 비율 (염분비)', '염류의 총량', '수온'], 0, '염분비 일정 법칙: 염분은 달라도 염류 사이의 비율은 일정해요.'],
+  ['북태평양에서 북적도 해류를 서쪽으로 흐르게 하는 바람은?', ['무역풍', '편서풍', '극동풍'], 0, '저위도의 무역풍이 바닷물을 동쪽에서 서쪽으로 밀어요. 중위도의 편서풍은 북태평양 해류를 동쪽으로 흐르게 해요.'],
   ['강물이 흘러드는 연안이나 비가 많이 오는 지역의 염분은?', ['낮다', '높다', '변화 없다'], 0, '담수가 섞이면 염분이 낮아지고, 증발이 많으면 높아져요.']];
 let mis, mi, R, ui = {}, hover = null, boat = {x: .8, y: .95, tx: .8, ty: .95}, nets = [], catchFx = [], locked;
 const yf = s => s === 'summer' ? .3 : .5;
@@ -35,7 +35,7 @@ const inLand = (x, y) => { const P = [KOR, JPN]; return P.some(poly => { let c =
 app.onStart = () => { mis = MIS.slice(); mi = -1; ui.q = app.panel('의뢰'); ui.c = app.panel('어획 기록'); app.startTimer(); next(); };
 function next(){ mi++; locked = false; nets = []; if (mi >= mis.length + 3) return end(); app.setLevel(mi, mis.length + 3);
   if (mi >= mis.length) { const q = QZ.sort(() => Math.random() - .5)[0]; QZ.push(QZ.shift()); R = {quiz: true, s: 'summer'}; app.quiz(ui.q, '📘 해양 연구소 질문: ' + q[0], q[1], q[2], {explain: q[3], onRight: tr => { app.addScore(tr === 1 ? 60 : 20); locked = true; setTimeout(() => { app.nextTurn(); next(); }, 2200); }, onWrong: () => app.addScore(-10)}); return; }
-  const [s, f, txt] = mis[mi]; R = {s, f, casts: 0, total: 0}; ui.q.innerHTML = `<p class="mission">${txt}</p>${f ? `<p class="note-c">${FISH[f][0]} ${f}: ${FISH[f][3]}, 좋아하는 수온 ${FISH[f][1]}~${FISH[f][2]} ℃</p>` : '<p class="note-c">조경 수역: 난류와 한류가 만나 수온이 급하게 변하는 곳</p>'}<p>그물 남음: <b>3</b></p>`; ui.c.innerHTML = '<p class="note-c">아직 던지지 않았어요.</p>'; }
+  const [s, f, txt] = mis[mi]; R = {s, f, casts: 0, total: 0}; ui.q.innerHTML = `<p class="mission">${txt}</p>${f ? `<p class="note-c">${FISH[f][0]} ${f}: ${FISH[f][3]}, 좋아하는 수온 ${FISH[f][1]}~${FISH[f][2]} ℃</p>` : '<p class="note-c">난류와 한류가 만나는 곳(조경 수역): 수온이 급하게 변하는 곳</p>'}<p>그물 남음: <b>3</b></p>`; ui.c.innerHTML = '<p class="note-c">아직 던지지 않았어요.</p>'; }
 function geo(){ const W = S.w, H = S.h, s = Math.min(W * .62, H * .98); return {ox: (W - s) / 2 - W * .02, oy: (H - s) / 2, s}; }
 const toN = (x, y) => { const G = geo(); return [(x - G.ox) / G.s, (y - G.oy) / G.s]; };
 app.pointer({move(x, y){ hover = toN(x, y); }, tap(x, y){ if (!R || R.quiz || locked) return; const [nx, ny] = toN(x, y); if (nx < 0 || nx > 1 || ny < 0 || ny > 1) return; if (inLand(nx, ny)) { toast('육지에는 그물을 던질 수 없어요', 'bad'); return; } cast(nx, ny); }});

@@ -12,9 +12,9 @@
 <script>
 const app = AppKit({
   id: 'h1protein', title: '단백질 공장', unit: '고1 · 통합과학1 · 30 생명 시스템', back: '../../index.html#hi1', sim: 'sim.html#gene',
-  lead: '세포는 DNA의 유전 정보로 단백질을 만드는 공장이에요. 핵 속에서 <b>전사</b>로 mRNA를 만들고, 리보솜에서 <b>번역</b>으로 아미노산을 이어 단백질 주문을 완성하세요!',
+  lead: '세포는 DNA의 유전 정보로 단백질을 만드는 공장이에요. 핵 속에서 <b>전사</b>로 mRNA를 만들고, 라이보솜에서 <b>번역</b>으로 아미노산을 이어 단백질 주문을 완성하세요!',
   howto: ['<b>전사</b>: DNA 주형 가닥의 염기에 상보적인 RNA 염기를 차례로 누르세요. (A→U, T→A, G→C, C→G)', '<b>번역</b>: mRNA의 코돈(염기 3개)을 보고 코돈표에서 알맞은 아미노산을 고르세요.', '종결 코돈이 나오면 번역이 끝나요.'],
-  recap: '<b>유전자 발현</b>: DNA → (전사) → mRNA → (번역) → 단백질. 전사는 핵 속에서 DNA 주형 가닥에 상보적인 RNA가 만들어지는 과정으로, RNA에는 T 대신 <b>U</b>가 쓰인다. 번역은 세포질의 리보솜에서 mRNA의 염기 3개(<b>코돈</b>)가 아미노산 1개를 지정하는 과정이다. AUG는 메싸이오닌을 지정하는 개시 코돈, UAA·UAG·UGA는 종결 코돈이다. DNA 염기 하나가 바뀌면 코돈이 바뀌어 다른 아미노산이 들어가거나 번역이 일찍 끝날 수 있다.',
+  recap: '<b>유전자 발현</b>: DNA → (전사) → mRNA → (번역) → 단백질. 전사는 핵 속에서 DNA 주형 가닥에 상보적인 RNA가 만들어지는 과정으로, RNA에는 T 대신 <b>U</b>가 쓰인다. 번역은 세포질의 라이보솜에서 mRNA의 염기 3개(<b>코돈</b>)가 아미노산 1개를 지정하는 과정이다. AUG는 메싸이오닌을 지정하는 개시 코돈, UAA·UAG·UGA는 종결 코돈이다. DNA 염기 하나가 바뀌면 코돈이 바뀌어 다른 아미노산이 들어가거나 번역이 일찍 끝날 수 있다.',
   startLabel: '공장 가동'
 });
 const {S, sfx, toast} = app, D = Draw;
@@ -39,7 +39,7 @@ function pad(){ const L = k.L();
   else ui.t.innerHTML = '<p>✔ 완료!</p>'; }
 function txIn(b){ const L = k.L(); if (ph !== 'tx' || k.done) return; const want = TX[L.tpl[mr.length]];
   if (b !== want) return k.fail(`${L.tpl[mr.length]}의 짝은 ${want}예요`);
-  mr += b; sfx.pop(); if (mr.length === L.tpl.length) { if (L.tl) { ph = 'tl'; toast('전사 완료! 이제 리보솜으로', 'good'); pad(); } else { ph = 'end'; pad(); k.win(ui.g, L.why); } } }
+  mr += b; sfx.pop(); if (mr.length === L.tpl.length) { if (L.tl) { ph = 'tl'; toast('전사 완료! 이제 라이보솜으로', 'good'); pad(); } else { ph = 'end'; pad(); k.win(ui.g, L.why); } } }
 function tlIn(a){ const L = k.L(); if (ph !== 'tl' || k.done) return; const c = mr.substr(ci * 3, 3), want = COD[c];
   if (a !== want) return k.fail(`${c}는 ${a}가 아니에요 — 코돈표를 확인하세요`);
   sfx.ok(); chain.push(a); ci++; if (a === '종결' || ci * 3 >= mr.length) { ph = 'end'; pad(); k.win(ui.g, L.why, `아미노산 ${chain.filter(x => x !== '종결').length}개`); } else pad(); }
@@ -56,14 +56,14 @@ k.draw((g, W, H) => { const L = k.L(), n = L.tpl.length, w = Math.min(46, (W - 5
     if (i < mr.length) { g.fillStyle = COL[mr[i]]; D.rr(g, x - w * .42, y2 - w * .42, w * .84, w * .84, 6); g.fill(); D.text(g, mr[i], x, y2, {size: w * .42, weight: 700}); }
     else if (i === mr.length && ph === 'tx') { g.strokeStyle = '#2f6fd0'; g.setLineDash([4, 3]); g.lineWidth = 2; D.rr(g, x - w * .42, y2 - w * .42, w * .84, w * .84, 6); g.stroke(); g.setLineDash([]); } }
   D.text(g, 'mRNA', x0 - w / 2, y2 + w * .75, {size: 11.5, color: '#55606e', align: 'left'});
-  // 리보솜과 번역
-  const y3 = H * .66, y4 = H * .86; D.text(g, '세포질 · 리보솜', 30, H * .54, {size: 13, weight: 700, color: '#55606e', align: 'left'});
+  // 라이보솜과 번역
+  const y3 = H * .66, y4 = H * .86; D.text(g, '세포질 · 라이보솜', 30, H * .54, {size: 13, weight: 700, color: '#55606e', align: 'left'});
   if (mr.length === n) { for (let i = 0; i < n; i++) { const x = x0 + i * w; g.fillStyle = COL[mr[i]]; D.rr(g, x - w * .42, y3 - w * .42, w * .84, w * .84, 6); g.fill(); D.text(g, mr[i], x, y3, {size: w * .4, weight: 700}); }
     for (let c = 0; c < n / 3; c++) { g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 1.5; g.strokeRect(x0 + c * 3 * w - w / 2 + 1, y3 - w / 2, 3 * w - 2, w); }
     if (ph === 'tl') { const rx = x0 + ci * 3 * w + w; g.fillStyle = 'rgba(47,111,208,.22)'; g.beginPath(); g.ellipse(rx, y3 + 4, w * 1.9, w * 1.05, 0, 0, 7); g.fill(); g.strokeStyle = '#2f6fd0'; g.lineWidth = 2; g.stroke(); }
     chain.forEach((a, i) => { const x = x0 + i * 3 * w + w, stop = a === '종결'; if (i) { g.strokeStyle = '#8a7a5a'; g.lineWidth = 3; g.beginPath(); g.moveTo(x - 3 * w + 22, y4); g.lineTo(x - 22, y4); g.stroke(); }
       g.fillStyle = stop ? '#ddd' : ['#f28c7a', '#f6d365', '#9be3b5', '#8ecdf2', '#c7b3f2'][i % 5]; g.beginPath(); g.arc(x, y4 + Math.sin(t * 2 + i) * 2, 22, 0, 7); g.fill(); D.text(g, stop ? '끝' : a.slice(0, 3), x, y4, {size: 11.5, weight: 700}); }); }
-  else D.text(g, '전사가 끝나면 mRNA가 리보솜으로 이동해요', W / 2, (y3 + y4) / 2, {size: 14, color: '#8a8478'});
+  else D.text(g, '전사가 끝나면 mRNA가 라이보솜으로 이동해요', W / 2, (y3 + y4) / 2, {size: 14, color: '#8a8478'});
 });
 </script>
 </body>

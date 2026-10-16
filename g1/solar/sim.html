@@ -37,7 +37,7 @@
       <div class="controls">
         <button class="btn primary" id="play" type="button">일시정지</button>
         <!-- 1 -->
-        <div class="field" data-only="planets">그래프 <select id="axis"><option value="rd">반지름과 밀도</option><option value="md">질량과 밀도</option></select></div>
+        <div class="field" data-only="planets">그래프 <select id="axis"><option value="rd">반지름과 질량</option></select></div>
         <label class="field" data-only="planets" for="grp"><input type="checkbox" id="grp"> 두 무리로 나누어 보기</label>
         <!-- 2 -->
         <label class="field" data-only="sun" for="year">연도 <input type="range" id="year" min="2008" max="2030" step="0.5" value="2025"><output id="yearOut">2025년</output></label>
@@ -73,8 +73,8 @@
   <section aria-label="생각해 보기">
     <h2 style="margin-bottom:10px">생각해 보기</h2>
     <div class="think">
-      <details class="q"><summary><span class="qnum">Q1</span>목성형 행성은 크기가 큰데 왜 밀도는 작을까?</summary>
-        <p>목성형 행성은 주로 수소와 헬륨 같은 가벼운 기체로 이루어져 있습니다. 반면 지구형 행성은 암석과 금속으로 이루어져 크기는 작아도 밀도가 큽니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q1</span>목성형 행성에는 왜 탐사 로봇이 내려앉을 수 없을까?</summary>
+        <p>목성형 행성은 주로 수소와 헬륨 같은 가벼운 기체로 이루어져 단단한 표면이 없습니다. 반면 지구형 행성은 암석과 금속으로 이루어져 단단한 표면이 있습니다.</p></details>
       <details class="q"><summary><span class="qnum">Q2</span>계절에 따라 밤하늘에 보이는 별자리가 바뀌는 까닭은?</summary>
         <p>지구가 태양 둘레를 공전하면서 한밤중에 지구가 바라보는 방향이 달라지기 때문입니다. 태양 쪽에 있는 별자리는 낮에 떠 있어 보이지 않습니다.</p></details>
       <details class="q"><summary><span class="qnum">Q3</span>보름달은 매달 뜨는데 월식은 왜 가끔만 일어날까?</summary>
@@ -280,11 +280,10 @@ function drawMoon(){
 function drawGraph(){
   const g = G.g;
   if (st.mode === 'planets') {
-    const md = st.axis === 'md';
-    const m = axes(G, md ? {x: [-2, 3, 1, '질량 (지구=1, 로그 눈금 10ⁿ)'], y: [0, 6, 1, '평균 밀도 (g/cm³)']} : {x: [0, 12, 2, '반지름 (지구=1)'], y: [0, 6, 1, '평균 밀도 (g/cm³)']});
-    PL.forEach((p, i) => { const x = md ? Math.log10(p.m) : p.r; g.fillStyle = st.grp ? (p.type === 'T' ? C.earth : C.phy) : C.ink;
-      g.beginPath(); g.arc(m.X(x), m.Y(p.rho), i === st.sel ? 7 : 5, 0, TAU); g.fill(); label(g, p.n, m.X(x) + 8, m.Y(p.rho) - 8, {align: 'left', size: 11}); });
-    if (st.grp) { label(g, '지구형 행성', m.X(md ? -1 : 1.5), m.Y(5.9), {color: C.earth, weight: 700, size: 12}); label(g, '목성형 행성', m.X(md ? 2 : 8), m.Y(2.4), {color: C.phy, weight: 700, size: 12}); }
+    const m = axes(G, {x: [0, 12, 2, '반지름 (지구=1)'], y: [-2, 3, 1, '질량 (지구=1, 로그 눈금 10ⁿ)']});
+    PL.forEach((p, i) => { const x = p.r, y = Math.log10(p.m); g.fillStyle = st.grp ? (p.type === 'T' ? C.earth : C.phy) : C.ink;
+      g.beginPath(); g.arc(m.X(x), m.Y(y), i === st.sel ? 7 : 5, 0, TAU); g.fill(); label(g, p.n, m.X(x) + 8, m.Y(y) - 8, {align: 'left', size: 11}); });
+    if (st.grp) { label(g, '지구형 행성', m.X(2.2), m.Y(-1.6), {color: C.earth, weight: 700, size: 12}); label(g, '목성형 행성', m.X(7), m.Y(2.8), {color: C.phy, weight: 700, size: 12}); }
   } else if (st.mode === 'sun') {
     const m = axes(G, {x: [2008, 2030, 4, '연도'], y: [0, 160, 40, '흑점 수 (모형)']});
     const pts = []; for (let y = 2008; y <= 2030; y += 0.25) pts.push([y, sunspotN(y)]); line(G, pts, m, C.earth);
@@ -310,8 +309,8 @@ function ledger(){
   let s = '', e = '', t = '';
   if (st.mode === 'planets') {
     const p = PL[st.sel];
-    s = stat('반지름', p.r, '지구=1') + stat('질량', p.m, '지구=1') + stat('평균 밀도', p.rho, 'g/cm³') + stat('고리 · 위성', p.ring + ' · ' + p.moon);
-    e = `<b>${p.n}</b>은 ${p.type === 'T' ? '<b>지구형 행성</b>: 크기와 질량이 작고 밀도가 크며, 단단한 암석 표면이 있습니다. 위성이 없거나 적고 고리가 없습니다.' : '<b>목성형 행성</b>: 크기와 질량이 크고 밀도가 작으며, 주로 기체로 이루어져 단단한 표면이 없습니다. 위성이 많고 고리가 있습니다.'}`;
+    s = stat('반지름', p.r, '지구=1') + stat('질량', p.m, '지구=1') + stat('표면', p.sur) + stat('고리 · 위성', p.ring + ' · ' + p.moon);
+    e = `<b>${p.n}</b>은 ${p.type === 'T' ? '<b>지구형 행성</b>: 크기와 질량이 작고, 암석과 금속으로 이루어져 단단한 표면이 있습니다. 위성이 없거나 적고 고리가 없습니다.' : '<b>목성형 행성</b>: 크기와 질량이 크고, 주로 수소·헬륨 같은 기체로 이루어져 단단한 표면이 없습니다. 위성이 많고 고리가 있습니다.'}`;
     t = '태양계에는 태양과 8개의 행성, 왜소행성(명왕성 등), 소행성(주로 화성과 목성 사이), 위성, 혜성이 있습니다.';
   } else if (st.mode === 'sun') {
     const N = sunspotN(st.year), act = N > 110 ? '활발 (극대기 무렵)' : N < 40 ? '조용 (극소기 무렵)' : '보통';
@@ -338,7 +337,7 @@ function ledger(){
 function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>';
   $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
 function table(){
-  if (st.mode === 'planets') setTable('행성 자료 (지구 = 1)', ['행성', '반지름', '질량', '밀도', '고리', '위성'], PL.map(p => [p.n, p.r, p.m, p.rho, p.ring, p.moon]));
+  if (st.mode === 'planets') setTable('행성 자료 (지구 = 1)', ['행성', '반지름', '질량', '표면', '고리', '위성'], PL.map(p => [p.n, p.r, p.m, p.sur, p.ring, p.moon]));
   else if (st.mode === 'sun') setTable('태양의 표면과 대기', ['구분', '현상', '특징'], [['표면 (광구)', '흑점', '주변보다 온도가 낮아 어둡다'], ['', '쌀알 무늬', '광구 아래의 대류로 생긴다'], ['대기', '채층', '광구 위의 붉은 층 (개기 일식 때 보임)'], ['', '코로나', '채층 위의 진주색 대기층'], ['', '홍염', '채층에서 솟아오르는 불꽃 모양'], ['', '플레어', '흑점 부근의 폭발 현상']]);
   else if (st.mode === 'rot' && st.rot === 'daily') setTable('일주 운동 정리', ['하늘', '별의 움직임'], [['북쪽', '북극성 중심, 시계 반대 방향 회전'], ['동쪽', '오른쪽 위로 비스듬히 떠오름'], ['남쪽', '동→서, 왼쪽에서 오른쪽으로 이동'], ['서쪽', '오른쪽 아래로 비스듬히 짐']]);
   else if (st.mode === 'rot') setTable('월별 별자리 (모형)', ['월', '태양이 지나는 별자리', '한밤중 남쪽 하늘'], [1, 3, 5, 7, 9, 11].map(m => [m + '월', zodAt(sunLon(m)) + '자리', zodAt((sunLon(m) + 180) % 360) + '자리']));

@@ -24,7 +24,8 @@
       <button type="button" data-mode="eq">2. 화학 반응식</button>
       <button type="button" data-mode="mass">3. 질량 보존</button>
       <button type="button" data-mode="ratio">4. 일정 성분비</button>
-      <button type="button" data-mode="energy">5. 에너지 출입</button>
+      <button type="button" data-mode="gas">5. 기체 반응 법칙</button>
+      <button type="button" data-mode="energy">6. 에너지 출입</button>
     </div>
   </header>
 
@@ -43,6 +44,10 @@
         <label class="field" data-only="ratio" for="cu">구리 <input type="range" id="cu" min="1" max="8" step="1" value="4"><output id="cuOut">4 g</output></label>
         <label class="field" data-only="ratio" for="ox">산소 <input type="range" id="ox" min="0.5" max="2" step="0.5" value="1"><output id="oxOut">1 g</output></label>
         <button class="btn" type="button" id="heat" data-only="ratio">가열하기</button>
+        <div class="field" data-only="gas"><div class="seg" id="gasSeg"><button type="button" data-gs="water">수증기 생성</button><button type="button" data-gs="hcl">염화 수소 생성</button><button type="button" data-gs="nh3">암모니아 생성</button></div></div>
+        <label class="field" data-only="gas" for="va"><span id="vaN">수소</span> <input type="range" id="va" min="10" max="60" step="10" value="20"><output id="vaOut">20 mL</output></label>
+        <label class="field" data-only="gas" for="vb"><span id="vbN">산소</span> <input type="range" id="vb" min="10" max="60" step="10" value="10"><output id="vbOut">10 mL</output></label>
+        <button class="btn" type="button" id="gasGo" data-only="gas">반응시키기</button>
         <div class="field" data-only="energy"><div class="seg" id="enSeg"><button type="button" data-en="hand">손난로</button><button type="button" data-en="fuel">메테인 연소</button><button type="button" data-en="cold">수산화 바륨 + 염화 암모늄</button><button type="button" data-en="bake">탄산수소 나트륨 분해</button></div></div>
         <button class="btn" type="button" id="start" data-only="energy">반응 시작</button>
         <div class="field" data-only="energy" id="burnF"><label for="burner"><input type="checkbox" id="burner" checked> 계속 가열하기</label></div>
@@ -85,19 +90,19 @@
 const {C, $, canvas, axes, line, arrow, label, font} = Kit;
 const S = canvas($('scene')), G = canvas($('graph'));
 const TAU = Math.PI * 2;
-const st = {mode:'change', t:0, ch:'melt', p:0, going:false, eq:'water', co:{}, ms:'precip', closed:false, mp:0, mrun:false, mhist:[], cu:4, ox:1, rp:0, rrun:false, en:'hand', ep:0, erun:false, T:20, ehist:[], burner:true};
+const st = {mode:'change', t:0, ch:'melt', p:0, going:false, eq:'water', co:{}, ms:'precip', closed:false, mp:0, mrun:false, mhist:[], cu:4, ox:1, rp:0, rrun:false, en:'hand', ep:0, erun:false, T:20, ehist:[], burner:true, gs:'water', va:20, vb:10, gp:0, grun:false};
 let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 
 /* 원자 그리기 */
-const AT = {H:['#ffffff', 7, '#555'], O:['#e0503c', 11, '#fff'], C:['#3a3f48', 11, '#fff'], N:['#4a72d8', 11, '#fff'], Cu:['#c8793a', 12, '#fff']};
+const AT = {H:['#ffffff', 7, '#555'], O:['#e0503c', 11, '#fff'], C:['#3a3f48', 11, '#fff'], N:['#4a72d8', 11, '#fff'], Cu:['#c8793a', 12, '#fff'], Cl:['#4fae5a', 11, '#fff']};
 function atom(g, el, x, y, s){ const [col, r, tc] = AT[el], rr = r * (s || 1); g.fillStyle = col; g.strokeStyle = '#333'; g.lineWidth = 1; g.beginPath(); g.arc(x, y, rr, 0, TAU); g.fill(); g.stroke(); if (rr > 8) label(g, el, x, y + .5, {size: el.length > 1 ? 8 : 9, color: tc, weight: 700}); }
 const MOL = {
   H2: [['H', -7, 0], ['H', 7, 0]], O2: [['O', -10, 0], ['O', 10, 0]], H2O: [['O', 0, -2], ['H', -12, 8], ['H', 12, 8]],
   CH4: [['C', 0, 0], ['H', -13, -9], ['H', 13, -9], ['H', -13, 9], ['H', 13, 9]], CO2: [['O', -20, 0], ['C', 0, 0], ['O', 20, 0]],
   N2: [['N', -10, 0], ['N', 10, 0]], NH3: [['N', 0, 2], ['H', -13, 9], ['H', 13, 9], ['H', 0, -13]], Cu: [['Cu', 0, 0]], CuO: [['Cu', -10, 0], ['O', 11, 0]],
-  H2O2: [['O', -9, 0], ['O', 9, 0], ['H', -18, -9], ['H', 18, 9]]
+  H2O2: [['O', -9, 0], ['O', 9, 0], ['H', -18, -9], ['H', 18, 9]], Cl2: [['Cl', -10, 0], ['Cl', 10, 0]], HCl: [['Cl', -4, 0], ['H', 12, 0]]
 };
-const NAME = {H2: 'H₂', O2: 'O₂', H2O: 'H₂O', CH4: 'CH₄', CO2: 'CO₂', N2: 'N₂', NH3: 'NH₃', Cu: 'Cu', CuO: 'CuO', H2O2: 'H₂O₂'};
+const NAME = {H2: 'H₂', O2: 'O₂', H2O: 'H₂O', CH4: 'CH₄', CO2: 'CO₂', N2: 'N₂', NH3: 'NH₃', Cu: 'Cu', CuO: 'CuO', H2O2: 'H₂O₂', Cl2: 'Cl₂', HCl: 'HCl'};
 function mol(g, k, x, y, s){ MOL[k].forEach(([el, dx, dy]) => atom(g, el, x + dx * (s || 1), y + dy * (s || 1), s)); }
 function lerp(a, b, f){ return a + (b - a) * f; }
 const ease = f => f < .5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2;
@@ -221,7 +226,27 @@ function drawRatio(){
   label(g, '구리 원자 1개와 산소 원자 1개가 결합 → 질량비 구리 : 산소 = 4 : 1', S.w / 2, S.h - 14, {size: 12, color: C.muted});
 }
 
-/* ===== 5. 에너지 출입 ===== */
+/* ===== 5. 기체 반응 법칙 ===== */
+const GS = {water: {a: 'H2', b: 'O2', p: 'H2O', k: [2, 1, 2], na: '수소', nb: '산소', np: '수증기', T: '100 ℃ 이상에서'}, hcl: {a: 'H2', b: 'Cl2', p: 'HCl', k: [1, 1, 2], na: '수소', nb: '염소', np: '염화 수소', T: ''}, nh3: {a: 'N2', b: 'H2', p: 'NH3', k: [1, 3, 2], na: '질소', nb: '수소', np: '암모니아', T: ''}};
+function gasRes(){ const r = GS[st.gs], n = Math.min(st.va / 10 / r.k[0], st.vb / 10 / r.k[1]); return {n, usedA: n * r.k[0] * 10, usedB: n * r.k[1] * 10, prod: n * r.k[2] * 10, leftA: st.va - n * r.k[0] * 10, leftB: st.vb - n * r.k[1] * 10}; }
+function gasBox(g, x, w, vol, key, cnt, title, col, alpha){ const H = S.h, base = H * .78, h = Math.max(30, vol / 60 * H * .55); g.globalAlpha = alpha;
+  g.fillStyle = 'rgba(120,160,210,.12)'; g.strokeStyle = col; g.lineWidth = 2; g.fillRect(x, base - h, w, h); g.strokeRect(x, base - h, w, h);
+  const per = Math.max(1, Math.floor(w / 46)); for (let i = 0; i < cnt; i++) { const cx = x + 24 + (i % per) * 44, cy = base - 20 - Math.floor(i / per) * 34; if (cy > base - h + 6) mol(g, key, cx, cy, .8); }
+  label(g, title, x + w / 2, base + 18, {size: 12, weight: 700}); label(g, `${+vol.toFixed(1)} mL`, x + w / 2, base + 36, {size: 12, color: C.muted}); g.globalAlpha = 1; }
+function drawGas(){
+  const g = S.g, r = GS[st.gs], res = gasRes(), f = ease(st.gp), W = S.w, bw = Math.min(110, W * .16);
+  label(g, `${r.na} + ${r.nb} → ${r.np}`, W / 2, 20, {weight: 700, size: 15, color: C.chem}); label(g, `같은 온도와 압력에서 부피를 비교 ${r.T ? '(' + r.T + ')' : ''}`, W / 2, 42, {size: 11, color: C.muted});
+  label(g, '반응 전', W * .22, 66, {weight: 700}); label(g, '반응 후', W * .72, 66, {weight: 700});
+  gasBox(g, W * .06, bw, st.va, r.a, st.va / 10, r.na, C.cold, 1 - f * .6); gasBox(g, W * .06 + bw + 16, bw, st.vb, r.b, st.vb / 10, r.nb, C.hot, 1 - f * .6);
+  arrow(g, W * .44, S.h * .5, W * .52, S.h * .5, C.ink, 2.5);
+  if (st.gp > 0) { let x = W * .55; gasBox(g, x, bw, res.prod, r.p, Math.round(res.prod / 10), r.np, C.chem, f); x += bw + 16;
+    if (res.leftA > 0) gasBox(g, x, bw, res.leftA, r.a, Math.round(res.leftA / 10), '남은 ' + r.na, C.cold, f);
+    if (res.leftB > 0) gasBox(g, x, bw, res.leftB, r.b, Math.round(res.leftB / 10), '남은 ' + r.nb, C.hot, f); }
+  else label(g, '[반응시키기]를 누르세요', W * .72, S.h * .5, {color: C.muted});
+  label(g, '모형: 분자 1개 = 기체 10 mL (같은 온도·압력에서 같은 부피 속 분자 수는 같다)', W / 2, S.h - 14, {size: 11, color: C.muted});
+}
+
+/* ===== 6. 에너지 출입 ===== */
 const EN = {hand: {exo: true, n: '철 + 산소 → 산화 철 + 열', T1: 55, k: .5}, fuel: {exo: true, n: '메테인 + 산소 → 이산화 탄소 + 물 + 열', T1: 70, k: .35}, cold: {exo: false, n: '수산화 바륨 + 염화 암모늄 → (주위의 열을 흡수)', T1: 2, k: .5}, bake: {exo: false, n: '탄산수소 나트륨 → 탄산 나트륨 + 물 + 이산화 탄소 (열을 흡수)', T1: 20, k: .25}};
 function drawEnergy(){
   const g = S.g, e = EN[st.en], cx = S.w * .32, by = S.h * .72;
@@ -265,6 +290,8 @@ function drawGraph(){
   } else if (st.mode === 'mass') { const m0 = MS[st.ms].m0, m = axes(G, {x: [0, 1, .25, '반응 진행'], y: [m0 - 3, m0 + 3, 1, '질량 (g)']}); line(G, [[0, m0], [1, m0]], m, C.line, 1, [4, 4]); if (st.mhist.length > 1) line(G, st.mhist, m, C.chem, 2.5); }
   else if (st.mode === 'ratio') { const m = axes(G, {x: [0, 8, 1, '반응한 구리의 질량 (g)'], y: [0, 10, 2, '질량 (g)']}); line(G, [[0, 0], [8, 10]], m, C.chem, 2.5); line(G, [[0, 0], [8, 2]], m, C.hot, 2.5); label(g, '산화 구리(Ⅱ)', m.X(6.6), m.Y(8.3) - 10, {size: 11, color: C.chem}); label(g, '결합한 산소', m.X(6.6), m.Y(1.65) - 10, {size: 11, color: C.hot});
     if (st.rp > .99) { const r = ratioRes(); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(r.cuUsed), m.Y(r.cuO), 5, 0, TAU); g.fill(); g.beginPath(); g.arc(m.X(r.cuUsed), m.Y(r.oUsed), 5, 0, TAU); g.fill(); } }
+  else if (st.mode === 'gas') { const r = GS[st.gs], k = r.k[2] / r.k[0], m = axes(G, {x: [0, 60, 10, `반응한 ${r.na}의 부피 (mL)`], y: [0, 120, 20, '부피 (mL)']}); line(G, [[0, 0], [60, 60 * k]], m, C.chem, 2.5); line(G, [[0, 0], [60, 60 * r.k[1] / r.k[0]]], m, C.hot, 2, [5, 4]); label(g, `생성된 ${r.np}`, m.X(48), m.Y(48 * k) - 12, {size: 11, color: C.chem}); label(g, `반응한 ${r.nb}`, m.X(52), m.Y(52 * r.k[1] / r.k[0]) + 12, {size: 11, color: C.hot});
+    if (st.gp > .99) { const q = gasRes(); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(q.usedA), m.Y(q.prod), 5, 0, TAU); g.fill(); } }
   else { const m = axes(G, {x: [0, 60, 10, '시간 (초)'], y: [-10, 80, 10, '온도 (℃)']}); const p = st.ehist.map((T, i) => [i / 10, T]); if (p.length > 1) line(G, p, m, Kit.tempColor(st.T, 0, 70), 2.5); line(G, [[0, 20], [60, 20]], m, C.line, 1, [4, 4]); }
 }
 function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>'; $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
@@ -273,7 +300,8 @@ function table(){
   else if (st.mode === 'eq') { const sd = sides(); setTable('원자 수 비교', ['원자', '반응 전', '반응 후', '같은가?'], sd.els.map(el => [el, sd.L[el] || 0, sd.R[el] || 0, sd.L[el] === sd.R[el] ? '○' : '×'])); }
   else if (st.mode === 'mass') setTable('질량 보존 법칙', ['반응', '열린 용기', '닫힌 용기'], [['앙금 생성', '변화 없음', '변화 없음'], ['기체 발생', '감소 (기체가 빠져나감)', '변화 없음'], ['강철솜 연소', '증가 (산소가 결합)', '변화 없음']]);
   else if (st.mode === 'ratio') setTable('구리와 산소의 반응', ['구리 (g)', '산화 구리(Ⅱ) (g)', '결합한 산소 (g)', '구리 : 산소'], [[1, 1.25, .25, '4 : 1'], [2, 2.5, .5, '4 : 1'], [4, 5, 1, '4 : 1'], [8, 10, 2, '4 : 1']]);
-  else setTable('발열 반응과 흡열 반응의 이용', ['구분', '주위 온도', '이용 예'], [['발열 반응', '높아짐', '손난로, 발열 도시락, 연료의 연소'], ['흡열 반응', '낮아짐', '냉찜질 팩, 베이킹파우더로 빵 굽기, 광합성']]);
+  else if (st.mode === 'gas') setTable('기체 반응의 부피비 (같은 온도·압력)', ['반응', '부피비', '전체 부피'], [['수소 + 산소 → 수증기', '2 : 1 : 2', '3 → 2 (줄어듦)'], ['수소 + 염소 → 염화 수소', '1 : 1 : 2', '2 → 2 (같음)'], ['질소 + 수소 → 암모니아', '1 : 3 : 2', '4 → 2 (줄어듦)']]);
+  else setTable('발열 반응과 흡열 반응의 이용', ['구분', '주위 온도', '이용 예'], [['발열 반응', '높아짐', '손난로, 발열 도시락, 연료의 연소'], ['흡열 반응', '낮아짐', '베이킹파우더로 빵 굽기, 광합성 (냉찜질 팩은 용해로 열 흡수)']]);
 }
 function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
 function ledger(){
@@ -290,6 +318,9 @@ function ledger(){
   else if (st.mode === 'ratio') { const r = ratioRes(); s = stat('생성된 산화 구리(Ⅱ)', st.rp > .99 ? r.cuO.toFixed(2) : '–', ' g') + stat('남은 물질', st.rp > .99 ? (r.cuLeft > 0 ? '구리 ' + r.cuLeft + ' g' : r.oLeft > 0 ? '산소 ' + r.oLeft + ' g' : '없음') : '–');
     e = '<b>일정 성분비 법칙</b>: 화합물을 이루는 성분 원소 사이에는 일정한 질량비가 성립합니다. 구리와 산소가 반응하여 산화 구리(Ⅱ)가 될 때 질량비는 항상 구리 : 산소 = 4 : 1입니다. 한쪽이 많으면 남습니다.';
     t = '구리와 산소의 양을 바꾸며 무엇이 남는지 예상한 뒤 [가열하기]로 확인하세요.'; }
+  else if (st.mode === 'gas') { const r = GS[st.gs], q = gasRes(), done = st.gp > .99; s = stat('부피비', r.k.join(' : ')) + stat(`생성된 ${r.np}`, done ? +q.prod.toFixed(1) : '–', ' mL') + stat('남은 기체', done ? (q.leftA > 0 ? `${r.na} ${+q.leftA.toFixed(1)} mL` : q.leftB > 0 ? `${r.nb} ${+q.leftB.toFixed(1)} mL` : '없음') : '–');
+    e = '<b>기체 반응 법칙</b>: 기체끼리 반응하여 새로운 기체가 생성될 때, 같은 온도와 압력에서 반응하는 기체와 생성되는 기체의 부피 사이에는 간단한 정수비가 성립합니다. 같은 온도·압력에서 같은 부피 속 기체 분자 수가 같다고 보면, 부피비는 화학 반응식의 <b>계수비</b>(분자 수의 비)와 같습니다. 전체 부피는 줄어들 수 있지만 질량은 보존됩니다.';
+    t = '두 기체의 부피를 바꾸어 어느 쪽이 남는지 먼저 예상한 뒤 [반응시키기]로 확인하세요.'; }
   else { const ex = EN[st.en].exo; s = stat('온도', st.T.toFixed(1), ' ℃') + stat('반응', ex ? '발열 반응' : '흡열 반응');
     e = ex ? '<b>발열 반응</b>: 화학 반응이 일어날 때 에너지를 방출하는 반응. 주위의 온도가 높아집니다. 예: 연소, 금속이 녹스는 반응, 손난로.' : '<b>흡열 반응</b>: 화학 반응이 일어날 때 주위로부터 에너지를 흡수하는 반응. 주위의 온도가 낮아지거나, 계속 열을 가해야 반응이 일어납니다. 예: 탄산수소 나트륨의 분해, 광합성.';
     t = st.en === 'bake' ? '[계속 가열하기]를 끄면 반응이 멈추는지 관찰하세요.' : '반응 전후 온도 변화로 에너지 출입 방향을 판단하세요.'; }
@@ -306,19 +337,25 @@ $('react').onclick = () => { st.mp = 0; st.mhist = [[0, MS[st.ms].m0]]; st.mrun 
 $('cu').oninput = e => { st.cu = +e.target.value; $('cuOut').textContent = st.cu + ' g'; st.rp = 0; st.rrun = false; RP = null; };
 $('ox').oninput = e => { st.ox = +e.target.value; $('oxOut').textContent = st.ox + ' g'; st.rp = 0; st.rrun = false; RP = null; };
 $('heat').onclick = () => { if (st.rp >= 1) { st.rp = 0; st.rrun = false; } else st.rrun = true; };
+const gasReset = () => { st.gp = 0; st.grun = false; };
+Kit.seg($('gasSeg'), 'gs', v => { st.gs = v; $('vaN').textContent = GS[v].na; $('vbN').textContent = GS[v].nb; gasReset(); table(); })('water');
+$('va').oninput = e => { st.va = +e.target.value; $('vaOut').textContent = st.va + ' mL'; gasReset(); };
+$('vb').oninput = e => { st.vb = +e.target.value; $('vbOut').textContent = st.vb + ' mL'; gasReset(); };
+$('gasGo').onclick = () => { if (st.gp >= 1) gasReset(); else st.grun = true; };
 Kit.seg($('enSeg'), 'en', v => { st.en = v; st.ep = 0; st.erun = false; st.T = 20; st.ehist = []; $('burnF').hidden = v !== 'bake' || st.mode !== 'energy'; })('hand');
 $('start').onclick = () => { st.ep = 0; st.T = 20; st.ehist = []; st.erun = true; };
 $('burner').onchange = e => st.burner = e.target.checked;
 new ResizeObserver(() => { CH = null; RP = null; }).observe($('scene').parentElement);
 Kit.tabs(m => { st.mode = m; table(); $('burnF').hidden = !(m === 'energy' && st.en === 'bake');
-  $('gTitle').textContent = {change: '변화 전후 원자 수', eq: '반응 전후 원자 수', mass: '반응 중 질량 변화', ratio: '구리의 질량과 생성물의 질량', energy: '시간에 따른 온도 변화'}[m];
-  $('gSub').textContent = {change: '회색: 변화 전 · 색: 변화 후', eq: '회색: 반응 전 · 색: 반응 후', mass: '점선: 반응 전 질량', ratio: '구리 : 산소 : 산화 구리(Ⅱ) = 4 : 1 : 5', energy: '점선: 처음 온도 (20 ℃)'}[m]; }, ['change', 'eq', 'mass', 'ratio', 'energy']);
+  $('gTitle').textContent = {change: '변화 전후 원자 수', eq: '반응 전후 원자 수', mass: '반응 중 질량 변화', ratio: '구리의 질량과 생성물의 질량', gas: '반응한 기체의 부피와 생성된 기체의 부피', energy: '시간에 따른 온도 변화'}[m];
+  $('gSub').textContent = {change: '회색: 변화 전 · 색: 변화 후', eq: '회색: 반응 전 · 색: 반응 후', mass: '점선: 반응 전 질량', ratio: '구리 : 산소 : 산화 구리(Ⅱ) = 4 : 1 : 5', gas: '실선: 생성된 기체 · 점선: 함께 반응한 기체', energy: '점선: 처음 온도 (20 ℃)'}[m]; }, ['change', 'eq', 'mass', 'ratio', 'gas', 'energy']);
 Kit.loop(dt => { st.t += dt;
     if (st.going) { st.p = Math.min(1, st.p + dt * .4); if (st.p >= 1) st.going = false; }
     if (st.mrun) { st.mp = Math.min(1, st.mp + dt * .25); st.mhist.push([st.mp, massNow()]); if (st.mp >= 1) st.mrun = false; }
     if (st.rrun) { st.rp = Math.min(1, st.rp + dt * .4); if (st.rp >= 1) st.rrun = false; }
+    if (st.grun) { st.gp = Math.min(1, st.gp + dt * .5); if (st.gp >= 1) st.grun = false; }
     if (st.mode === 'energy') stepEnergy(dt); },
-  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({change: drawChange, eq: drawEq, mass: drawMass, ratio: drawRatio, energy: drawEnergy})[st.mode](); drawGraph(); ledger(); }, $('play'));
+  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({change: drawChange, eq: drawEq, mass: drawMass, ratio: drawRatio, gas: drawGas, energy: drawEnergy})[st.mode](); drawGraph(); ledger(); }, $('play'));
 })();
 </script>
 </body>

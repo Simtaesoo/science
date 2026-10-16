@@ -46,7 +46,7 @@
   <section aria-label="생각해 보기">
     <h2 style="margin-bottom:10px">생각해 보기</h2>
     <div class="think">
-      <details class="q"><summary><span class="qnum">Q1</span>용수철 진자를 달에 가져가면 주기가 바뀔까?</summary><p>바뀌지 않아요. 용수철 진자의 주기 T = 2π√(m/k)에는 중력 가속도가 없어요. 반면 단진자의 주기 T = 2π√(L/g)는 g가 작은 달에서 약 2.5배 길어져요.</p></details>
+      <details class="q"><summary><span class="qnum">Q1</span>용수철 진자를 달에 가져가면 주기가 바뀔까?</summary><p>바뀌지 않아요. 용수철 진자의 주기 T = 2π√(m/k)에는 중력 가속도가 없어요. 반면 단진자의 주기는 g가 작은 달에서 약 2.5배 길어져요.</p></details>
       <details class="q"><summary><span class="qnum">Q2</span>그네를 탈 때 진폭을 크게 해도 왕복 시간이 거의 같은 까닭은?</summary><p>진폭이 작을 때 단진자의 주기는 진폭과 무관해요(등시성). 시뮬레이션에서 진폭을 5°→20°로 바꾸면 주기가 거의 같다가, 40° 이상이 되면 공식보다 조금씩 길어지는 것도 확인해 보세요.</p></details>
       <details class="q"><summary><span class="qnum">Q3</span>단진동하는 물체의 속력이 가장 큰 곳과 가속도가 가장 큰 곳은?</summary><p>속력은 진동 중심(평형점)에서 가장 크고, 가속도는 양 끝(변위 최대)에서 가장 커요. 가속도 a = −ω²x로 변위에 비례하고 방향은 항상 중심을 향해요.</p></details>
     </div>
@@ -80,7 +80,7 @@ function drawPend(){ if (S.w < 80 || S.h < 120) return; const g = S.g, W = S.w, 
   g.fillStyle = '#9aa6b8'; g.fillRect(px - 60, py - 10, 120, 10); g.strokeStyle = C.muted; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(px, py); g.lineTo(px, py + len + 30); g.stroke(); g.beginPath(); g.arc(px, py, len, Math.PI / 2 - st.pA * D, Math.PI / 2 + st.pA * D); g.stroke(); g.setLineDash([]);
   g.strokeStyle = C.ink; g.lineWidth = 1.5; g.beginPath(); g.moveTo(px, py); g.lineTo(bx, by); g.stroke(); g.fillStyle = C.accent; g.beginPath(); g.arc(bx, by, 12, 0, TAU); g.fill();
   arrow(g, bx, by, bx, by + 40, C.muted, 2); const ft = -Math.sin(st.th) * 40; arrow(g, bx, by, bx + ft * Math.cos(st.th), by - ft * Math.sin(st.th), C.hot, 2.5); label(g, '복원력 mg sinθ', bx + 16, by + 30, {size: 10, color: C.hot, align: 'left'});
-  const mt = measT(); label(g, `측정 주기 ${mt ? mt.toFixed(3) + ' s' : '측정 중…'}`, W - 14, 20, {size: 13, weight: 700, align: 'right'}); label(g, `공식 2π√(L/g) = ${Tp().toFixed(3)} s`, W - 14, 40, {size: 12, align: 'right', color: C.muted}); label(g, `왕복 ${Math.max(0, st.cross.length - 1)}회`, W - 14, 58, {size: 11, align: 'right', color: C.muted});
+  const mt = measT(); label(g, `측정 주기 ${mt ? mt.toFixed(3) + ' s' : '측정 중…'}`, W - 14, 20, {size: 13, weight: 700, align: 'right'}); label(g, `작은 진폭 주기 ${Tp().toFixed(3)} s`, W - 14, 40, {size: 12, align: 'right', color: C.muted}); label(g, `왕복 ${Math.max(0, st.cross.length - 1)}회`, W - 14, 58, {size: 11, align: 'right', color: C.muted});
   if (st.target) { label(g, `🎯 목표 주기 ${st.target.toFixed(2)} s (±0.02 s)`, 14, 20, {size: 13, weight: 700, align: 'left', color: C.accent}); if (st.msg) label(g, st.msg, 14, 42, {size: 13, weight: 700, align: 'left', color: st.msg.startsWith('성공') ? C.bio : C.hot}); } }
 function checkTarget(){ if (!st.target) return; const T = Tp(); st.msg = Math.abs(T - st.target) <= .02 ? `성공! L = ${st.L.toFixed(2)} m` : `지금 ${T.toFixed(2)} s — ${T < st.target ? '줄을 늘려 보세요' : '줄을 줄여 보세요'}`; }
 /* ===== 그래프·표 ===== */
@@ -91,8 +91,8 @@ function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody'), set =
   if (st.mode === 'spring') { s.innerHTML = `<div><b>${Ts().toFixed(2)} s</b><span>주기 T = 2π√(m/k)</span></div><div><b>${(st.A * om()).toFixed(2)} m/s</b><span>최대 속력 Aω</span></div><div><b>${(st.A * om() * om()).toFixed(2)} m/s²</b><span>최대 가속도 Aω²</span></div><div><b>${(.5 * st.k * st.A * st.A).toFixed(3)} J</b><span>역학적 에너지 ½kA²</span></div>`;
     $('explain').innerHTML = '<b>단진동</b>: 변위에 비례하고 변위와 반대 방향인 복원력 F = −kx를 받는 물체의 운동. 변위 x = A cos ωt, 가속도 a = −ω²x. 용수철 진자의 주기 T = 2π√(m/k)는 <b>진폭과 무관</b>해요. 운동 에너지와 탄성 퍼텐셜 에너지의 합은 ½kA²로 일정해요.'; $('tip').textContent = '질량을 4배로 하면 주기는 2배, 용수철 상수를 4배로 하면 주기는 1/2배. 진폭을 바꿔도 주기는 그대로예요.';
     th.innerHTML = '<tr><th>질량 (kg)</th><th>주기 (s)</th></tr>'; tb.innerHTML = [.25, .5, 1, 2].map(m => `<tr><td>${m}</td><td>${(TAU * Math.sqrt(m / st.k)).toFixed(2)}</td></tr>`).join(''); set('시간에 따른 변위', `k = ${st.k} N/m, m = ${st.m} kg`, `질량과 주기 (k = ${st.k} N/m)`); }
-  else { const mt = measT(); s.innerHTML = `<div><b>${Tp().toFixed(3)} s</b><span>공식 주기 2π√(L/g)</span></div><div><b>${mt ? mt.toFixed(3) + ' s' : '측정 중'}</b><span>실제 측정 주기</span></div>`;
-    $('explain').innerHTML = '<b>단진자</b>: 진폭이 작을 때 복원력 mg sinθ ≈ mgθ가 변위에 비례해 단진동해요. 주기 T = 2π√(L/g)는 줄의 길이와 중력 가속도로만 정해지고, 추의 질량과 (작은) 진폭에는 무관해요(<b>진자의 등시성</b>). 진폭이 크면 sinθ ≈ θ가 맞지 않아 주기가 조금 길어져요.'; $('tip').textContent = '[목표 주기 도전]을 눌러 주어진 주기의 진자를 만들어 보세요. 공식을 거꾸로 풀면 L = g(T/2π)².';
+  else { const mt = measT(); s.innerHTML = `<div><b>${Tp().toFixed(3)} s</b><span>작은 진폭일 때 주기</span></div><div><b>${mt ? mt.toFixed(3) + ' s' : '측정 중'}</b><span>실제 측정 주기</span></div>`;
+    $('explain').innerHTML = '<b>단진자</b>: 진폭이 작을 때 복원력 mg sinθ ≈ mgθ가 변위에 비례해 단진동해요. 주기는 줄의 길이와 중력 가속도에 따라 달라지고, 추의 질량과 (작은) 진폭에는 무관해요(<b>진자의 등시성</b>). 진폭이 크면 sinθ ≈ θ가 맞지 않아 주기가 조금 길어져요.'; $('tip').textContent = '[목표 주기 도전]을 눌러 주어진 주기의 진자를 만들어 보세요. 줄 길이를 바꿔 가며 주기를 맞춰 보세요.';
     th.innerHTML = '<tr><th>줄 길이 (m)</th><th>지구 주기 (s)</th><th>달 주기 (s)</th></tr>'; tb.innerHTML = [.25, .5, 1, 2].map(L => `<tr><td>${L}</td><td>${(TAU * Math.sqrt(L / 9.8)).toFixed(2)}</td><td>${(TAU * Math.sqrt(L / 1.62)).toFixed(2)}</td></tr>`).join(''); set('시간에 따른 진자의 각도', `진폭 ${st.pA}°, g = ${st.g} m/s²`, '줄 길이와 주기'); } }
 const bind = (id, k, f, after) => { $(id).oninput = e => { st[k] = +e.target.value; $(id + 'Out').textContent = f(st[k]); if (after) after(); render(); }; };
 bind('sk', 'k', v => v + ' N/m'); bind('sm', 'm', v => v.toFixed(2) + ' kg'); bind('sA', 'A', v => v.toFixed(2) + ' m');

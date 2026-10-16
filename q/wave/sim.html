@@ -46,7 +46,7 @@
     <h2 style="margin-bottom:10px">생각해 보기</h2>
     <div class="think">
       <details class="q"><summary><span class="qnum">Q1</span>이중 슬릿 무늬에서 밝기가 점점 어두워지다가 사라지는 곳이 있는 까닭은?</summary><p>각 슬릿에도 폭이 있어 단일 슬릿 회절이 일어나요. 간섭무늬는 단일 슬릿 회절 무늬(포락선) 안에 갇혀 있어서, 회절의 어두운 곳에서는 간섭의 밝은 무늬도 사라져요(무늬 결손).</p></details>
-      <details class="q"><summary><span class="qnum">Q2</span>대형 망원경의 거울을 크게 만드는 까닭은 빛을 많이 모으기 위해서만일까?</summary><p>그것뿐 아니라 분해능 때문이에요. 회절로 생기는 퍼짐 각 θ ≈ 1.22λ/D는 구경 D가 클수록 작아져, 가까이 붙은 두 별을 구별할 수 있어요.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>대형 망원경의 거울을 크게 만드는 까닭은 빛을 많이 모으기 위해서만일까?</summary><p>그것뿐 아니라 분해능 때문이에요. 회절로 생기는 퍼짐 각은 구경 D가 클수록 작아져, 가까이 붙은 두 별을 구별할 수 있어요.</p></details>
       <details class="q"><summary><span class="qnum">Q3</span>블루레이 디스크가 DVD보다 더 많은 정보를 담을 수 있는 까닭은?</summary><p>블루레이는 파장이 짧은 파란 레이저(405 nm)를 써서 회절에 의한 빛점의 크기가 작아요. 그래서 더 작은 홈에 정보를 기록하고 읽을 수 있어요.</p></details>
     </div>
   </section>
@@ -82,7 +82,7 @@ function drawResol(){ const g = S.g, W = S.w, H = S.h, span = 800, pxs = 3, cw =
   g.imageSmoothingEnabled = true; g.drawImage(st.img, 0, 0, W, H * .78); label(g, `망원경 상 (가로 ${span} μrad)`, 10, 14, {size: 11, color: '#cfd8e3', align: 'left', weight: 700});
   const ok = st.sep >= thR() * .999, verdict = st.quiz ? '' : ok ? '두 광원을 구별할 수 있다 (레일리 기준 이상)' : '두 광원이 하나로 보인다 (레일리 기준 미만)';
   if (!st.quiz) label(g, verdict, W / 2, H * .85, {size: 14, weight: 700, color: ok ? C.bio : C.hot}); else label(g, st.ans || '이 상에서 두 광원을 구별할 수 있을까? 아래 버튼으로 답하세요', W / 2, H * .85, {size: 13, weight: 700, color: C.accent});
-  label(g, `θ_R = 1.22λ/D = ${thR().toFixed(0)} μrad`, W / 2, H * .93, {size: 12}); }
+  label(g, `최소 분해각 ${thR().toFixed(0)} μrad`, W / 2, H * .93, {size: 12}); }
 /* ===== 그래프·표 ===== */
 function drawGraph(){ const g = G.g;
   if (st.mode === 'double') { const m = axes(G, {x: [-30, 30, 5, '스크린 위치 (mm)'], y: [0, 1, .25, '밝기 (상대값)']}); const P = [], E = []; for (let y = -30; y <= 30; y += .02) { P.push([y, Iy(y)]); const b = Math.PI * st.a * 1e-3 * y / 1000 / (st.wl * 1e-9); E.push([y, sinc(b) ** 2]); } if (!st.single) line(G, E, m, C.muted, 1.5, [4, 3]); line(G, P, m, `rgb(${wlRGB(st.wl).map(Math.round).join(',')})`, 2.2); label(g, st.single ? '단일 슬릿 회절 무늬' : '점선: 단일 슬릿 회절 포락선', m.X(18), m.Y(.92), {size: 10, color: C.muted}); }
@@ -91,8 +91,8 @@ function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody'), set =
   if (st.mode === 'double') { s.innerHTML = `<div><b>${dx().toFixed(2)} mm</b><span>간섭무늬 간격 Δx = Lλ/d</span></div><div><b>${firstMin().toFixed(1)} mm</b><span>회절 첫 어두운 곳 y = Lλ/a</span></div><div><b>${Math.max(0, Math.round(2 * st.d / st.a - 1))}</b><span>가운데 회절 무늬 안 밝은 간섭무늬 수</span></div>`;
     $('explain').innerHTML = '<b>이중 슬릿 간섭</b>: 경로차 d sinθ = mλ이면 밝은 무늬, (m + ½)λ이면 어두운 무늬. 무늬 간격 Δx = Lλ/d. <b>단일 슬릿 회절</b>: 슬릿 폭 a에서 a sinθ = mλ (m ≠ 0)인 곳이 어두워요. 실제 이중 슬릿 무늬는 간섭무늬에 회절 무늬가 곱해진 모양이에요.'; $('tip').textContent = '슬릿 폭을 좁히면 회절 포락선이 넓어지고, 슬릿 간격을 넓히면 간섭무늬가 촘촘해져요. "슬릿 하나만 열기"로 회절 무늬만 확인해 보세요.';
     th.innerHTML = '<tr><th>파장 (nm)</th><th>Δx (mm)</th><th>회절 첫 어두운 곳 (mm)</th></tr>'; tb.innerHTML = [400, 500, 600, 700].map(w => `<tr><td>${w}</td><td>${(w * 1e-9 / (st.d * 1e-3) * 1000).toFixed(2)}</td><td>${(w * 1e-9 / (st.a * 1e-3) * 1000).toFixed(1)}</td></tr>`).join(''); set('스크린의 밝기 분포', `d = ${st.d.toFixed(2)} mm, a = ${st.a} mm, λ = ${st.wl} nm`, `파장에 따른 무늬 (d = ${st.d.toFixed(2)} mm, a = ${st.a} mm)`); }
-  else { s.innerHTML = `<div><b>${thR().toFixed(0)} μrad</b><span>최소 분해각 1.22λ/D</span></div><div><b>${st.sep} μrad</b><span>두 광원의 각 간격</span></div>`;
-    $('explain').innerHTML = '<b>회절과 분해능</b>: 빛이 둥근 구멍(렌즈·눈동자)을 지나면 회절해 점이 아니라 퍼진 무늬(에어리 원반)로 맺혀요. 두 점의 무늬가 많이 겹치면 구별할 수 없어요. <b>레일리 기준</b>: 한 무늬의 중심이 다른 무늬의 첫 어두운 고리에 올 때 겨우 구별 → 최소 분해각 θ = 1.22λ/D. 구경이 클수록, 파장이 짧을수록 분해능이 좋아요.'; $('tip').textContent = '[구별 퀴즈]: 무작위 조건의 상을 보고 두 광원이 구별되는지 맞혀 보세요.';
+  else { s.innerHTML = `<div><b>${thR().toFixed(0)} μrad</b><span>최소 분해각</span></div><div><b>${st.sep} μrad</b><span>두 광원의 각 간격</span></div>`;
+    $('explain').innerHTML = '<b>회절과 분해능</b>: 빛이 둥근 구멍(렌즈·눈동자)을 지나면 회절해 점이 아니라 퍼진 무늬(에어리 원반)로 맺혀요. 두 점의 무늬가 많이 겹치면 구별할 수 없어요. <b>레일리 기준</b>: 한 무늬의 중심이 다른 무늬의 첫 어두운 고리에 올 때 겨우 구별돼요. 구경이 클수록, 파장이 짧을수록 분해능이 좋아요.'; $('tip').textContent = '[구별 퀴즈]: 무작위 조건의 상을 보고 두 광원이 구별되는지 맞혀 보세요.';
     th.innerHTML = '<tr><th>광학 기기</th><th>구경 D</th><th>최소 분해각 (550 nm)</th></tr>'; tb.innerHTML = [['사람 눈동자', '3 mm', 3e-3], ['쌍안경', '50 mm', .05], ['학교 천체 망원경', '200 mm', .2], ['허블 우주 망원경', '2.4 m', 2.4]].map(([n, d, D]) => `<tr><td>${n}</td><td>${d}</td><td>${(1.22 * 550e-9 / D * 1e6).toFixed(D < .01 ? 0 : 1)} μrad</td></tr>`).join(''); set('두 광원을 지나는 선의 밝기', `λ = ${st.wl} nm, D = ${st.D.toFixed(1)} mm`, '광학 기기의 분해능'); } }
 const bind = (id, k, f) => { $(id).oninput = e => { st[k] = +e.target.value; $(id + 'Out').textContent = f(st[k]); st.quiz = null; st.ans = ''; quizBtns(false); render(); }; };
 bind('wl', 'wl', v => v + ' nm'); bind('dd', 'd', v => v.toFixed(2) + ' mm'); bind('aa', 'a', v => v.toFixed(2) + ' mm'); bind('ap', 'D', v => v.toFixed(1) + ' mm'); bind('sep', 'sep', v => v + ' μrad');

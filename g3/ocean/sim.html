@@ -22,8 +22,8 @@
       <button type="button" data-mode="water">1. 수권과 수자원</button>
       <button type="button" data-mode="layer">2. 수온의 층상 구조</button>
       <button type="button" data-mode="salt">3. 염분</button>
-      <button type="button" data-mode="current">4. 해류</button>
-      <button type="button" data-mode="tide">5. 조석</button>
+      <button type="button" data-mode="current">4. 대기 대순환과 해류</button>
+      <button type="button" data-mode="korea">5. 우리 바다와 해류</button>
     </div>
   </header>
 
@@ -33,13 +33,12 @@
       <div class="controls">
         <button class="btn primary" id="play" type="button">일시정지</button>
         <div class="field" data-only="water"><div class="seg" id="waSeg"><button type="button" data-wa="all">지구의 물 전체</button><button type="button" data-wa="fresh">담수만 확대</button></div></div>
-        <div class="field" data-only="layer"><div class="seg" id="latSeg"><button type="button" data-lat="low">저위도</button><button type="button" data-lat="mid">중위도</button><button type="button" data-lat="high">고위도</button></div></div>
+        <div class="field" data-only="layer"><div class="seg" id="latSeg"><button type="button" data-lat="low">저위도</button><button type="button" data-lat="mid">중위도</button><button type="button" data-lat="high">고위도</button><button type="button" data-lat="sum">우리 바다 여름</button><button type="button" data-lat="win">우리 바다 겨울</button></div></div>
         <label class="field" data-only="layer" for="wind">바람 세기 <input type="range" id="wind" min="0" max="100" step="5" value="40"><output id="windOut">보통</output></label>
         <div class="field" data-only="salt"><div class="seg" id="placeSeg"><button type="button" data-pl="avg">평균 해수</button><button type="button" data-pl="sub">중위도 (증발 많음)</button><button type="button" data-pl="eq">적도 (비 많음)</button><button type="button" data-pl="river">큰 강 하구</button><button type="button" data-pl="ice">빙하가 녹는 곳</button></div></div>
-        <label class="field" data-only="current" for="season">계절 <input type="range" id="season" min="0" max="1" step="1" value="0"><output id="seasonOut">여름</output></label>
-        <div class="field" data-only="current"><label for="showW"><input type="checkbox" id="showW" checked> 난류</label> <label for="showC"><input type="checkbox" id="showC" checked> 한류</label></div>
-        <div class="field" data-only="tide"><div class="seg" id="seaSeg"><button type="button" data-sea="west">서해안</button><button type="button" data-sea="east">동해안</button></div></div>
-        <label class="field" data-only="tide" for="hour">시각 <input type="range" id="hour" min="0" max="24" step="0.25" value="0"><output id="hourOut">0시</output></label>
+        <div class="field" data-only="current"><label for="showWind"><input type="checkbox" id="showWind" checked> 바람 보기</label> <label for="showGyre"><input type="checkbox" id="showGyre" checked> 해류 보기</label></div>
+        <label class="field" data-only="korea" for="season">계절 <input type="range" id="season" min="0" max="1" step="1" value="0"><output id="seasonOut">여름</output></label>
+        <div class="field" data-only="korea"><label for="showW"><input type="checkbox" id="showW" checked> 난류</label> <label for="showC"><input type="checkbox" id="showC" checked> 한류</label></div>
       </div>
     </section>
     <aside class="panel ledger" aria-label="설명">
@@ -65,13 +64,13 @@
     <div class="think">
       <details class="q"><summary><span class="qnum">Q1</span>지구 표면의 대부분이 물인데 왜 물이 부족하다고 할까?</summary>
         <p>지구의 물 대부분은 짠 해수이고, 담수는 약 2.5 %뿐입니다. 그 담수도 대부분 빙하와 지하수로 존재하여, 우리가 바로 쓸 수 있는 호수와 하천의 물은 아주 적습니다.</p></details>
-      <details class="q"><summary><span class="qnum">Q2</span>바닷물의 염분이 달라도 염류의 비율은 왜 같을까?</summary>
-        <p>해수는 오랜 세월 동안 해류와 섞이며 고르게 혼합되었기 때문입니다. 증발하거나 강물이 들어오면 물의 양만 달라지므로, 녹아 있는 염류 사이의 비율은 그대로입니다(염분비 일정 법칙).</p></details>
-      <details class="q"><summary><span class="qnum">Q3</span>서해안에 갯벌이 넓게 발달한 까닭은?</summary>
-        <p>서해안은 조차가 크고 해안의 경사가 완만해, 썰물 때 넓은 바닥이 드러나며 강이 실어 온 고운 퇴적물이 쌓이기 때문입니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q2</span>황해의 염분이 동해보다 낮은 까닭은?</summary>
+        <p>황해에는 큰 강물(담수)이 많이 흘러들기 때문입니다. 염류의 양은 그대로인데 물의 양이 늘어나 염분이 낮아집니다. 비가 많이 오는 여름에는 더 낮아집니다.</p></details>
+      <details class="q"><summary><span class="qnum">Q3</span>북태평양의 표층 해류는 왜 시계 방향으로 돌까?</summary>
+        <p>저위도에서는 무역풍이 바닷물을 서쪽으로, 중위도에서는 편서풍이 동쪽으로 밉니다. 서쪽은 아시아, 동쪽은 북아메리카 대륙에 막혀 각각 북쪽과 남쪽으로 꺾이므로, 네 해류가 이어져 시계 방향으로 순환합니다.</p></details>
     </div>
   </section>
-  <footer class="site" data-footer data-extra="해류 지도는 모식도이며, 물의 분포·염분·조차 값은 교과서에 실린 대표값입니다."></footer>
+  <footer class="site" data-footer data-extra="해류 지도는 모식도이며, 물의 분포·염분·수온 값은 경향을 보여 주는 대표값입니다."></footer>
 </div>
 
 <script>
@@ -79,7 +78,7 @@
 const {C, $, canvas, axes, line, arrow, label, font} = Kit;
 const S = canvas($('scene')), G = canvas($('graph'));
 const TAU = Math.PI * 2;
-const st = {mode:'water', t:0, wa:'all', lat:'mid', wind:40, pl:'avg', season:0, showW:true, showC:true, sea:'west', hour:0, auto:true};
+const st = {mode:'water', t:0, wa:'all', lat:'mid', wind:40, pl:'avg', season:0, showW:true, showC:true, showWind:true, showGyre:true};
 
 /* ===== 1. 수권 ===== */
 const WATER = [['해수', 97.47, '#3f7fc0'], ['빙하', 1.76, '#bfe3f2'], ['지하수', 0.76, '#7a9a5a'], ['호수와 하천', 0.01, '#5ab0d8']];
@@ -109,25 +108,28 @@ function drawWater(){
 }
 
 /* ===== 2. 수온의 층상 구조 ===== */
-const LAT = {low: 27, mid: 18, high: 3};
-function profile(z, lat, wind){ const Ts = LAT[lat], deep = 2, d = 20 + wind * 1.2, th = 600; if (lat === 'high') return Ts - (Ts - deep) * Math.min(1, z / 1500); if (z <= d) return Ts; if (z <= d + th) { const f = (z - d) / th; return Ts - (Ts - deep - 2) * Math.sqrt(f); } return Math.max(deep, 4 - (z - d - th) / 1500 * 2); }
+const LAT = {low: 27, mid: 18, high: 3, sum: 25, win: 10};
+function profile(z, lat, wind){ const Ts = LAT[lat], deep = 2, d = 20 + wind * 1.2, th = 600; if (lat === 'high') return Ts - (Ts - deep) * Math.min(1, z / 1500);
+  if (lat === 'sum' || lat === 'win') { const dd = lat === 'sum' ? 10 + wind * .2 : 60 + wind * 1.2, t2 = lat === 'sum' ? 150 : 140; if (z <= dd) return Ts; if (z <= dd + t2) { const f = (z - dd) / t2; return Ts - (Ts - 1.5) * Math.sqrt(f); } return Math.max(1, 1.5 - (z - dd - t2) / 3000); } if (z <= d) return Ts; if (z <= d + th) { const f = (z - d) / th; return Ts - (Ts - deep - 2) * Math.sqrt(f); } return Math.max(deep, 4 - (z - d - th) / 1500 * 2); }
 function drawLayerSea(){
-  const g = S.g, L = 20, R = S.w * .55, T = 60, B = S.h - 20, zmax = 2000, Y = z => T + (B - T) * z / zmax;
+  const g = S.g, L = 20, R = S.w * .55, T = 60, B = S.h - 20, kr = st.lat === 'sum' || st.lat === 'win', zmax = kr ? 400 : 2000, dz = kr ? 4 : 20, Y = z => T + (B - T) * z / zmax;
   g.fillStyle = '#cfe6f7'; g.fillRect(0, 0, S.w, T);
-  for (let z = 0; z < zmax; z += 20) { const tc = profile(z, st.lat, st.wind); g.fillStyle = Kit.tempColor(tc, 0, 30); g.fillRect(L, Y(z), R - L, Y(z + 20) - Y(z) + 1); }
+  for (let z = 0; z < zmax; z += dz) { const tc = profile(z, st.lat, st.wind); g.fillStyle = Kit.tempColor(tc, 0, 30); g.fillRect(L, Y(z), R - L, Y(z + dz) - Y(z) + 1); }
   const d = 20 + st.wind * 1.2;
-  if (st.lat !== 'high') { g.strokeStyle = 'rgba(255,255,255,.85)'; g.setLineDash([5, 4]); [d, d + 600].forEach(z => { g.beginPath(); g.moveTo(L, Y(z)); g.lineTo(R, Y(z)); g.stroke(); }); g.setLineDash([]);
+  if (st.lat === 'low' || st.lat === 'mid') { g.strokeStyle = 'rgba(255,255,255,.85)'; g.setLineDash([5, 4]); [d, d + 600].forEach(z => { g.beginPath(); g.moveTo(L, Y(z)); g.lineTo(R, Y(z)); g.stroke(); }); g.setLineDash([]);
     label(g, '혼합층', (L + R) / 2, Y(d / 2), {weight: 700, color: '#fff'}); label(g, '수온 약층', (L + R) / 2, Y(d + 300), {weight: 700, color: '#fff'}); label(g, '심해층', (L + R) / 2, Y(1400), {weight: 700, color: '#fff'}); }
+  else if (kr) { const dd = st.lat === 'sum' ? 10 + st.wind * .2 : 60 + st.wind * 1.2, t2 = st.lat === 'sum' ? 150 : 140; g.strokeStyle = 'rgba(255,255,255,.85)'; g.setLineDash([5, 4]); [dd, dd + t2].forEach(z => { g.beginPath(); g.moveTo(L, Y(z)); g.lineTo(R, Y(z)); g.stroke(); }); g.setLineDash([]);
+    label(g, '혼합층', (L + R) / 2, Y(dd / 2) + (dd < 30 ? 10 : 0), {weight: 700, color: '#fff'}); label(g, st.lat === 'sum' ? '수온 약층 (뚜렷)' : '수온 약층 (약함)', (L + R) / 2, Y(dd + t2 / 2), {weight: 700, color: '#fff'}); label(g, '심해층', (L + R) / 2, Y(330), {weight: 700, color: '#fff'}); label(g, st.lat === 'sum' ? '우리 바다(동해) 여름 — 모식' : '우리 바다(동해) 겨울 — 모식', (L + R) / 2, Y(395) - 4, {size: 11, color: '#fff'}); }
   else label(g, '층상 구조가 잘 나타나지 않음', (L + R) / 2, Y(700), {weight: 700, color: '#fff'});
   // 태양·바람
-  const sunR = {low: 26, mid: 20, high: 12}[st.lat]; g.fillStyle = '#ffcf40'; g.beginPath(); g.arc(40, 30, sunR, 0, TAU); g.fill();
+  const sunR = {low: 26, mid: 20, high: 12, sum: 24, win: 14}[st.lat]; g.fillStyle = '#ffcf40'; g.beginPath(); g.arc(40, 30, sunR, 0, TAU); g.fill();
   for (let i = 0; i < 6; i++) { const x = ((st.t * (20 + st.wind) + i * 90) % (R + 40)) - 20; if (st.wind > 0) arrow(g, x, 24, x + 14 + st.wind * .2, 24, '#5a7aa0', 1.5); }
   g.strokeStyle = '#3a6ea8'; g.lineWidth = 2; g.beginPath(); for (let x = L; x <= R; x += 4) g.lineTo(x, T - 2 + Math.sin(x / 14 + st.t * 3) * (1 + st.wind / 25)); g.stroke();
-  for (let z = 0; z <= zmax; z += 500) label(g, z + ' m', R + 6, Y(z), {size: 10, color: C.muted, align: 'left'});
+  for (let z = 0; z <= zmax; z += kr ? 100 : 500) label(g, z + ' m', R + 6, Y(z), {size: 10, color: C.muted, align: 'left'});
   // 수온 곡선
   const px0 = S.w * .66, pw = S.w * .3, PX = tc => px0 + pw * tc / 30; g.strokeStyle = C.line; g.lineWidth = 1; g.beginPath(); g.moveTo(px0, T); g.lineTo(px0, B); g.moveTo(px0, T); g.lineTo(px0 + pw, T); g.stroke();
   for (let tc = 0; tc <= 30; tc += 10) label(g, tc + ' ℃', PX(tc), T - 10, {size: 10, color: C.muted});
-  g.strokeStyle = C.hot; g.lineWidth = 2.5; g.beginPath(); for (let z = 0; z <= zmax; z += 10) { const p = [PX(profile(z, st.lat, st.wind)), Y(z)]; z ? g.lineTo(...p) : g.moveTo(...p); } g.stroke();
+  g.strokeStyle = C.hot; g.lineWidth = 2.5; g.beginPath(); for (let z = 0; z <= zmax; z += kr ? 2 : 10) { const p = [PX(profile(z, st.lat, st.wind)), Y(z)]; z ? g.lineTo(...p) : g.moveTo(...p); } g.stroke();
   label(g, '깊이에 따른 수온', px0 + pw / 2, B + 0 - 6, {size: 11, color: C.muted});
 }
 
@@ -144,10 +146,9 @@ function drawSalt(){
   label(g, `${nm}: 염분 ${sal} psu`, S.w / 2, 20, {weight: 700, size: 15, color: C.earth}); label(g, why, S.w / 2, 42, {size: 12, color: C.muted});
   // 염류 구성 막대
   const x0 = S.w * .52, w = S.w * .42, y0 = S.h * .3; let xx = x0;
-  label(g, '녹아 있는 염류의 구성비 (%)', x0 + w / 2, y0 - 20, {weight: 700, size: 12});
-  SALTS.forEach(([n, p, col], i) => { const ww = w * p / 100; g.fillStyle = col; g.fillRect(xx, y0, ww, 34); g.strokeStyle = '#fff'; g.strokeRect(xx, y0, ww, 34); xx += ww; });
-  SALTS.forEach(([n, p, col], i) => { const y = y0 + 56 + i * 22; g.fillStyle = col; g.fillRect(x0, y - 7, 14, 14); label(g, `${n} ${p}%  →  ${(sal * p / 100).toFixed(1)} g`, x0 + 22, y, {size: 12, align: 'left'}); });
-  label(g, '염분이 달라도 구성비(%)는 그대로! (염분비 일정 법칙)', x0 + w / 2, y0 + 56 + 6 * 22 + 10, {size: 12, weight: 700, color: C.hot});
+  label(g, '염분을 바꾸는 것은 물의 양', x0 + w / 2, y0 - 20, {weight: 700, size: 13});
+  [['⬆ 염분이 높아지는 경우', ['증발량 > 강수량 (물이 빠져나감)', '바닷물이 얼 때 (얼음은 거의 담수)'], C.hot], ['⬇ 염분이 낮아지는 경우', ['강수량 > 증발량', '강물(담수)이 흘러들 때', '빙하가 녹은 물이 섞일 때'], C.cold]].forEach(([h, rows, col], k) => { const y = y0 + 10 + k * 110; label(g, h, x0, y, {size: 13, weight: 700, align: 'left', color: col}); rows.forEach((r, i) => label(g, '· ' + r, x0 + 10, y + 24 + i * 22, {size: 12, align: 'left'})); });
+  label(g, '녹아 있는 염류의 양은 그대로, 물의 양이 변한다', x0 + w / 2, y0 + 250, {size: 12, weight: 700, color: C.earth});
 }
 
 /* ===== 4. 해류 ===== */
@@ -184,44 +185,47 @@ function drawCurrent(){
   label(g, '빨강: 난류 · 파랑: 한류 (모식도)', S.w - 16, S.h - 18, {size: 11, color: C.muted, align: 'right'});
 }
 
-/* ===== 5. 조석 ===== */
-const AMP = {west: 3.5, east: .15};
-const tideH = h => AMP[st.sea] * Math.cos((h - 3) / 12.42 * TAU);
-function drawTide(){
-  const g = S.g, gy = S.h * .55, h = tideH(st.hour), scale = st.sea === 'west' ? 22 : 22, wl = gy - h * scale;
-  const sky = g.createLinearGradient(0, 0, 0, gy); sky.addColorStop(0, '#bfdcf3'); sky.addColorStop(1, '#eef6fc'); g.fillStyle = sky; g.fillRect(0, 0, S.w, S.h);
-  // 해안 경사
-  const slope = st.sea === 'west' ? .3 : 1.0;
-  const ground = x => Math.min(S.h - 10, gy - 80 + (x - 40) * slope);
-  g.fillStyle = '#3f7fc0'; g.fillRect(0, wl, S.w, S.h - wl);
-  g.fillStyle = st.sea === 'west' ? '#8a7356' : '#b9a27a'; g.beginPath(); g.moveTo(0, S.h); for (let x = 0; x <= S.w; x += 6) g.lineTo(x, ground(x)); g.lineTo(S.w, S.h); g.fill();
-  // 만조선·간조선
-  [[AMP[st.sea], '만조 때 해수면'], [-AMP[st.sea], '간조 때 해수면']].forEach(([v, n]) => { const y = gy - v * scale; g.strokeStyle = 'rgba(0,0,0,.35)'; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(0, y); g.lineTo(S.w, y); g.stroke(); g.setLineDash([]); label(g, n, S.w - 10, y - 8, {size: 11, align: 'right', color: '#223'}); });
-  if (st.sea === 'west') { const tide = h < 0; if (tide) { label(g, '드러난 갯벌', S.w * .45, ground(S.w * .45) - 14, {size: 12, weight: 700, color: '#5a4020'}); } }
-  // 기준 막대
-  const px = S.w * .7; g.fillStyle = '#fff'; g.fillRect(px - 4, gy - 110, 8, 200); for (let k = -4; k <= 4; k++) { g.fillStyle = '#333'; g.fillRect(px - 8, gy - k * scale, 16, 1.5); if (k % 2 === 0) label(g, k + ' m', px + 12, gy - k * scale, {size: 10, align: 'left'}); }
-  const rising = tideH(st.hour + .05) > h;
-  label(g, `${Math.floor(st.hour)}시 ${String(Math.floor(st.hour % 1 * 60)).padStart(2, '0')}분 · 해수면 ${h >= 0 ? '+' : ''}${h.toFixed(2)} m · ${Math.abs(h) > AMP[st.sea] * .97 ? (h > 0 ? '만조' : '간조') : rising ? '밀물' : '썰물'}`, S.w / 2, 22, {weight: 700, size: 15});
-  label(g, `조차 약 ${(AMP[st.sea] * 2).toFixed(1)} m (모형)`, S.w / 2, 44, {size: 12, color: C.muted});
+/* ===== 4. 대기 대순환과 북태평양 표층 순환 ===== */
+const GY = {cx: .5, cy: .55, rx: .33, ry: .22};
+const GCUR = [['북적도 해류', .3, .8, '#e07a5a', .5, .82], ['쿠로시오 해류', .8, 1.3, '#d8483a', .28, .58], ['북태평양 해류', 1.3, 1.8, '#e0a030', .5, .385], ['캘리포니아 해류', 1.8, 2.3, '#2f64c8', .72, .58]];
+function drawGyre(){
+  const g = S.g, pad = 10, W = S.w - pad * 2, H = S.h - pad * 2, P = (x, y) => [pad + x * W, pad + y * H], latY = la => .95 - la / 60 * .88;
+  g.fillStyle = '#d6e9f7'; g.fillRect(pad, pad, W, H);
+  // 위도선
+  [0, 30, 60].forEach(la => { const [, y] = P(0, latY(la)); g.strokeStyle = 'rgba(0,0,0,.18)'; g.setLineDash([4, 5]); g.beginPath(); g.moveTo(pad, y); g.lineTo(pad + W, y); g.stroke(); g.setLineDash([]); label(g, la ? `북위 ${la}°` : '적도', pad + W * .62, y - 8, {size: 11, color: C.muted}); });
+  // 대륙
+  const land = (pts, nm, lx, ly) => { g.fillStyle = '#e8e1cf'; g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 1; g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(...P(x, y)) : g.moveTo(...P(x, y))); g.closePath(); g.fill(); g.stroke(); label(g, nm, ...P(lx, ly), {size: 13, weight: 700, color: '#7a6a48'}); };
+  land([[0, .02], [.14, .02], [.16, .2], [.12, .32], [.15, .42], [.1, .55], [.08, .7], [.04, .8], [0, .82]], '아시아', .06, .3);
+  land([[1, .02], [.84, .02], [.82, .15], [.86, .3], [.88, .45], [.92, .6], [.95, .72], [1, .78]], '북아메리카', .94, .3);
+  // 바람
+  if (st.showWind) { [[15, -1, '무역풍', '#5a7a9a'], [45, 1, '편서풍', '#5a7a9a'], [75, -1, '극동풍', '#8aa0b4']].forEach(([la, dir, nm, col]) => { const y = latY(la); if (y < .03) return; for (let k = 0; k < 5; k++) { const x0 = .22 + k * .13, a = [x0 - dir * .04, y], b = [x0 + dir * .04, y]; arrow(g, ...P(...a), ...P(...b), col, 2); } label(g, `${nm} (${dir < 0 ? '동 → 서' : '서 → 동'})`, ...P(.5, y - .045), {size: 12, weight: 700, color: col}); }); }
+  // 해류
+  if (st.showGyre) { const pt = th => P(GY.cx + GY.rx * Math.cos(th * Math.PI), GY.cy + GY.ry * Math.sin(th * Math.PI));
+    GCUR.forEach(([nm, a0, a1, col, lx, ly]) => { g.strokeStyle = col; g.lineWidth = 5; g.globalAlpha = .85; g.beginPath(); for (let th = a0; th <= a1 + 1e-6; th += .02) { const [x, y] = pt(th); th === a0 ? g.moveTo(x, y) : g.lineTo(x, y); } g.stroke(); g.globalAlpha = 1;
+      arrow(g, ...pt(a1 - .06), ...pt(a1 - .01), col, 4);
+      label(g, nm, ...P(lx, ly), {size: 13, weight: 700, color: col}); });
+    for (let j = 0; j < 14; j++) { const th = (st.t * .08 + j / 7) % 2, [x, y] = pt(th); g.fillStyle = 'rgba(255,255,255,.9)'; g.beginPath(); g.arc(x, y, 3, 0, TAU); g.fill(); }
+    label(g, '↻ 시계 방향 순환', ...P(GY.cx, GY.cy + .02), {size: 14, weight: 700, color: '#3a6ea8'}); }
+  label(g, '모식도 · 빨강 계열: 따뜻한 해류 · 파랑: 차가운 해류', S.w - 16, S.h - 18, {size: 11, color: C.muted, align: 'right'});
 }
 
 /* ===== 그래프 ===== */
 function drawGraph(){
   const g = G.g;
   if (st.mode === 'water') { const m = axes(G, {x: [0, 4, 1, ''], y: [0, 100, 25, '비율 (%)']}); WATER.forEach(([n, p, col], i) => { g.fillStyle = col; g.fillRect(m.X(i + .2), m.Y(p), m.X(.6) - m.X(0), Math.max(1, m.Y(0) - m.Y(p))); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 11}); label(g, p + '%', m.X(i + .5), m.Y(p) - 10, {size: 11, weight: 700}); }); }
+  else if (st.mode === 'layer' && (st.lat === 'sum' || st.lat === 'win')) { const m = axes(G, {x: [0, 30, 5, '수온 (℃)'], y: [-400, 0, 100, '깊이 (m, 위가 해수면)']}); [['sum', '#d8483a'], ['win', '#2f64c8']].forEach(([lat, col]) => { const p = []; for (let z = 0; z <= 400; z += 5) p.push([profile(z, lat, st.wind), -z]); line(G, p, m, col, lat === st.lat ? 3 : 1.4); }); label(g, '여름', m.X(23), m.Y(-40), {size: 11, color: '#d8483a'}); label(g, '겨울', m.X(12), m.Y(-40), {size: 11, color: '#2f64c8'}); }
   else if (st.mode === 'layer') { const m = axes(G, {x: [0, 30, 5, '수온 (℃)'], y: [-2000, 0, 500, '깊이 (m, 위가 해수면)']}); [['low', '#d8483a'], ['mid', '#e0a030'], ['high', '#2f64c8']].forEach(([lat, col]) => { const p = []; for (let z = 0; z <= 2000; z += 20) p.push([profile(z, lat, st.wind), -z]); line(G, p, m, col, lat === st.lat ? 3 : 1.4); }); label(g, '저위도', m.X(25), m.Y(-80), {size: 11, color: '#d8483a'}); label(g, '중위도', m.X(14), m.Y(-80), {size: 11, color: '#e0a030'}); label(g, '고위도', m.X(5), m.Y(-300), {size: 11, color: '#2f64c8'}); }
   else if (st.mode === 'salt') { const keys = Object.keys(PL), m = axes(G, {x: [0, keys.length, 1, ''], y: [25, 40, 5, '염분 (psu)']}); keys.forEach((k, i) => { const v = PL[k][1]; g.fillStyle = k === st.pl ? C.earth : C.line; g.fillRect(m.X(i + .2), m.Y(v), m.X(.6) - m.X(0), m.Y(25) - m.Y(v)); label(g, PL[k][0].replace(' 해역', '').replace('빙하가 녹는 ', ''), m.X(i + .5), m.T + m.h + 12, {size: 10}); }); }
-  else if (st.mode === 'current') { const m = axes(G, {x: [0, 3, 1, ''], y: [0, 30, 10, '표층 수온 (℃, 여름 대략)']}); [['난류 (동한 난류)', 24, '#d8483a'], ['조경 수역', 19, '#a060c8'], ['한류 (북한 한류)', 14, '#2f64c8']].forEach(([n, v, col], i) => { g.fillStyle = col; g.fillRect(m.X(i + .2), m.Y(v), m.X(.6) - m.X(0), m.Y(0) - m.Y(v)); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 10}); }); }
-  else { const m = axes(G, {x: [0, 24, 3, '시각 (시)'], y: [-4, 4, 2, '해수면 높이 (m)']}); const p = []; for (let h = 0; h <= 24; h += .1) p.push([h, tideH(h)]); line(G, p, m, C.phy, 2.5); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.hour), m.Y(tideH(st.hour)), 5, 0, TAU); g.fill();
-    for (let k = 0; k < 2; k++) { const hm = 3 + k * 12.42; label(g, '만조', m.X(hm), m.Y(AMP[st.sea]) - 10, {size: 10, color: C.muted}); label(g, '간조', m.X(hm + 6.21), m.Y(-AMP[st.sea]) + 12, {size: 10, color: C.muted}); } }
+  else if (st.mode === 'current') { const m = axes(G, {x: [0, 2, 1, ''], y: [0, 30, 10, '표층 수온 (℃)']}); [['일본 남쪽 (쿠로시오)', 27, '#d8483a'], ['캘리포니아 앞바다', 18, '#2f64c8']].forEach(([n, v, col], i) => { g.fillStyle = col; g.fillRect(m.X(i + .25), m.Y(v), m.X(.5) - m.X(0), m.Y(0) - m.Y(v)); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 11}); label(g, v + ' ℃', m.X(i + .5), m.Y(v) - 10, {size: 11, weight: 700}); }); }
+  else if (st.mode === 'korea') { const m = axes(G, {x: [0, 3, 1, ''], y: [0, 30, 10, '표층 수온 (℃, 여름 대략)']}); [['난류 (동한 난류)', 24, '#d8483a'], ['조경 수역', 19, '#a060c8'], ['한류 (북한 한류)', 14, '#2f64c8']].forEach(([n, v, col], i) => { g.fillStyle = col; g.fillRect(m.X(i + .2), m.Y(v), m.X(.6) - m.X(0), m.Y(0) - m.Y(v)); label(g, n, m.X(i + .5), m.T + m.h + 12, {size: 10}); }); }
 }
 function setTable(title, head, rows){ $('tTitle').textContent = title; $('thead').innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>'; $('tbody').innerHTML = rows.map(r => '<tr>' + r.map(x => `<td style="font-family:var(--f-body)">${x}</td>`).join('') + '</tr>').join(''); }
 function table(){
   if (st.mode === 'water') setTable('수자원의 이용', ['용도', '내용'], [['생활용수', '마시는 물, 씻기, 요리 등 일상생활'], ['농업용수', '농작물 재배, 가축 사육'], ['공업용수', '제품 생산, 기계 냉각'], ['유지용수', '하천의 정상적인 기능 유지']]);
   else if (st.mode === 'layer') setTable('해수의 층상 구조', ['층', '특징'], [['혼합층', '바람의 혼합 작용으로 수온이 일정, 바람이 강할수록 두꺼움'], ['수온 약층', '깊어질수록 수온이 급격히 낮아짐, 매우 안정하여 물질·에너지 교환을 막음'], ['심해층', '수온이 낮고 일정 (약 4 ℃ 이하), 계절 변화 거의 없음']]);
   else if (st.mode === 'salt') setTable('염분이 달라지는 까닭', ['높아지는 경우', '낮아지는 경우'], [['증발량이 강수량보다 많을 때', '강수량이 증발량보다 많을 때'], ['해수가 얼 때 (결빙)', '강물이 흘러들 때'], ['', '빙하가 녹을 때']]);
-  else if (st.mode === 'current') setTable('우리나라 주변 해류', ['해류', '종류', '흐르는 곳'], [['쿠로시오 해류', '난류', '우리나라 주변 난류의 근원'], ['쓰시마 난류', '난류', '대한 해협 → 동해'], ['동한 난류', '난류', '동해안을 따라 북쪽'], ['황해 난류', '난류', '황해로 북쪽'], ['북한 한류', '한류', '동해안을 따라 남쪽'], ['리만 한류', '한류', '연해주 연안을 따라 남쪽']]);
-  else setTable('조석 용어', ['용어', '뜻'], [['밀물 / 썰물', '해수면이 높아짐 / 낮아짐'], ['만조 / 간조', '해수면이 가장 높을 때 / 가장 낮을 때'], ['조차', '만조와 간조의 해수면 높이 차'], ['주기', '하루에 대략 두 번씩 만조와 간조 (약 12시간 25분 간격)']]);
+  else if (st.mode === 'current') setTable('북태평양의 표층 해류', ['해류', '방향', '만드는 까닭', '성질'], [['북적도 해류', '동 → 서', '무역풍', '따뜻함'], ['쿠로시오 해류', '남 → 북', '아시아 대륙에 막힘', '난류'], ['북태평양 해류', '서 → 동', '편서풍', '비교적 따뜻함'], ['캘리포니아 해류', '북 → 남', '북아메리카 대륙에 막힘', '한류']]);
+  else if (st.mode === 'korea') setTable('우리나라 주변 해류 (참고)', ['해류', '종류', '흐르는 곳'], [['쿠로시오 해류', '난류', '우리나라 주변 난류의 근원'], ['쓰시마 난류', '난류', '대한 해협 → 동해'], ['동한 난류', '난류', '동해안을 따라 북쪽'], ['황해 난류', '난류', '황해로 북쪽'], ['북한 한류', '한류', '동해안을 따라 남쪽'], ['리만 한류', '한류', '연해주 연안을 따라 남쪽']]);
 }
 function stat(k, v, u){ return `<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u || ''}</small></div></div>`; }
 function ledger(){
@@ -229,18 +233,18 @@ function ledger(){
   if (st.mode === 'water') { s = stat('해수', '97.47', ' %') + stat('담수', '2.53', ' %');
     e = '<b>수권</b>: 지구에 분포하는 물 전체. 대부분이 <b>해수</b>이고, 담수는 빙하 &gt; 지하수 &gt; 호수와 하천 순으로 많습니다. <b>지하수</b>는 빙하 다음으로 많은 담수로, 수자원으로서 가치가 큽니다.';
     t = '[담수만 확대]로 담수가 어떤 형태로 존재하는지 확인하세요.'; }
-  else if (st.mode === 'layer') { s = stat('표층 수온', LAT[st.lat], ' ℃') + stat('혼합층 두께', st.lat === 'high' ? '-' : Math.round(20 + st.wind * 1.2), ' m');
-    e = '해수는 깊이에 따른 수온 분포에 따라 <b>혼합층, 수온 약층, 심해층</b>으로 나뉩니다. 태양 에너지는 표층에서 흡수되고, 바람이 물을 섞어 혼합층이 생깁니다. 고위도는 표층 수온이 낮아 층상 구조가 잘 나타나지 않습니다.';
-    t = '바람을 세게 하면 혼합층이 두꺼워지는 것을 확인하세요.'; }
-  else if (st.mode === 'salt') { s = stat('염분', PL[st.pl][1], ' psu') + stat('염화 나트륨', (PL[st.pl][1] * .777).toFixed(1), ' g');
-    e = '<b>염류</b>: 해수에 녹아 있는 여러 가지 물질. <b>염분</b>: 해수 1 kg에 녹아 있는 염류의 총량을 g 수로 나타낸 것(단위 psu, 평균 약 35 psu). 염분은 장소에 따라 다르지만 염류의 구성비는 어디서나 일정합니다(<b>염분비 일정 법칙</b>).';
-    t = '장소를 바꾸며 염분과 염류의 구성비를 비교하세요.'; }
-  else if (st.mode === 'current') { s = stat('계절', st.season ? '겨울' : '여름') + stat('조경 수역', st.season ? '남쪽으로' : '북쪽으로');
+  else if (st.mode === 'layer') { s = stat('표층 수온', LAT[st.lat], ' ℃') + stat('혼합층 두께', st.lat === 'high' ? '-' : Math.round(st.lat === 'sum' ? 10 + st.wind * .2 : st.lat === 'win' ? 60 + st.wind * 1.2 : 20 + st.wind * 1.2), ' m');
+    e = '해수는 깊이에 따른 수온 분포에 따라 <b>혼합층, 수온 약층, 심해층</b>으로 나뉩니다. 태양 에너지는 표층에서 흡수되고, 바람이 물을 섞어 혼합층이 생깁니다. 고위도는 표층 수온이 낮아 층상 구조가 잘 나타나지 않습니다. 우리 바다는 <b>여름</b>에 표층이 따뜻하고 혼합층이 얇아 수온 약층이 뚜렷하고, <b>겨울</b>에는 강한 바람으로 혼합층이 두꺼워집니다.';
+    t = '바람을 세게 하면 혼합층이 두꺼워지는 것을 확인하세요. [우리 바다 여름]과 [우리 바다 겨울]을 비교해 보세요.'; }
+  else if (st.mode === 'salt') { s = stat('염분', PL[st.pl][1], ' psu') + stat('해수 1 kg 속 염류', PL[st.pl][1], ' g');
+    e = '<b>염류</b>: 해수에 녹아 있는 여러 가지 물질. <b>염분</b>: 해수 1 kg에 녹아 있는 염류의 총량을 g 수로 나타낸 것(단위 psu, 평균 약 35 psu). 염분은 증발량과 강수량, 강물·빙하의 유입, 결빙에 따라 장소마다 다릅니다. 가장 많은 염류는 짠맛을 내는 염화 나트륨, 그다음은 쓴맛을 내는 염화 마그네슘입니다.';
+    t = '장소를 바꾸며 염분을 비교하고, 염분이 높거나 낮은 까닭을 말해 보세요.'; }
+  else if (st.mode === 'current') { s = stat('저위도 바람', '무역풍 (→ 서)') + stat('중위도 바람', '편서풍 (→ 동)');
+    e = '대기 대순환의 <b>무역풍</b>은 <b>북적도 해류</b>를 서쪽으로, <b>편서풍</b>은 <b>북태평양 해류</b>를 동쪽으로 흐르게 합니다. 아시아 쪽에서는 대륙에 막혀 북쪽으로 흐르는 난류 <b>쿠로시오 해류</b>, 북아메리카 쪽에서는 남쪽으로 흐르는 한류 <b>캘리포니아 해류</b>가 생겨 북태평양의 표층 해류는 <b>시계 방향</b>으로 순환합니다.';
+    t = '[바람 보기]를 켜고 끄며 바람의 방향과 해류의 방향을 비교하세요. 같은 위도에서 서쪽(아시아 쪽)과 동쪽(북아메리카 쪽) 바다의 수온을 비교해 보세요.'; }
+  else if (st.mode === 'korea') { s = stat('계절', st.season ? '겨울' : '여름') + stat('난류·한류가 만나는 곳', st.season ? '남쪽으로' : '북쪽으로');
     e = '<b>해류</b>: 일정한 방향으로 지속적으로 흐르는 바닷물의 흐름. 저위도에서 고위도로 흐르는 따뜻한 해류를 <b>난류</b>, 고위도에서 저위도로 흐르는 차가운 해류를 <b>한류</b>라고 합니다. 난류와 한류가 만나는 <b>조경 수역</b>은 영양 염류와 플랑크톤이 많아 좋은 어장이 됩니다.';
-    t = '계절을 바꾸면 조경 수역의 위치가 이동합니다. 여름에는 난류가 강해 북쪽으로 올라갑니다.'; }
-  else { const h = tideH(st.hour); s = stat('해수면', (h >= 0 ? '+' : '') + h.toFixed(2), ' m') + stat('조차', (AMP[st.sea] * 2).toFixed(1), ' m');
-    e = '<b>조석</b>: 밀물과 썰물로 해수면의 높이가 주기적으로 변하는 현상. 하루에 약 두 번씩 만조와 간조가 나타납니다. 우리나라 <b>서해안</b>은 조차가 커서 갯벌이 넓게 발달하고, 동해안은 조차가 매우 작습니다.';
-    t = '시각을 바꾸며 만조와 간조 시각을 찾고, 서해안과 동해안의 조차를 비교하세요.'; }
+    t = '계절을 바꾸면 난류와 한류가 만나는 곳이 이동합니다. 여름에는 난류가 강해 북쪽으로 올라갑니다. 해류 이름은 외우지 않아도 됩니다.'; }
   $('stats').innerHTML = s; $('explain').innerHTML = e; $('tip').textContent = t;
 }
 
@@ -251,13 +255,12 @@ $('wind').oninput = e => { st.wind = +e.target.value; $('windOut').textContent =
 Kit.seg($('placeSeg'), 'pl', v => st.pl = v)('avg');
 $('season').oninput = e => { st.season = +e.target.value; $('seasonOut').textContent = st.season ? '겨울' : '여름'; };
 $('showW').onchange = e => st.showW = e.target.checked; $('showC').onchange = e => st.showC = e.target.checked;
-Kit.seg($('seaSeg'), 'sea', v => st.sea = v)('west');
-$('hour').oninput = e => { st.hour = +e.target.value; st.auto = false; $('hourOut').textContent = st.hour + '시'; };
+$('showWind').onchange = e => st.showWind = e.target.checked; $('showGyre').onchange = e => st.showGyre = e.target.checked;
 Kit.tabs(m => { st.mode = m; table();
-  $('gTitle').textContent = {water: '지구의 물 분포', layer: '위도별 깊이에 따른 수온', salt: '장소에 따른 염분', current: '해역별 표층 수온 비교', tide: '하루 동안의 해수면 높이'}[m];
-  $('gSub').textContent = {water: '', layer: '굵은 선: 선택한 위도', salt: '', current: '대략적인 값', tide: '만조와 간조가 하루 약 두 번'}[m]; }, ['water', 'layer', 'salt', 'current', 'tide']);
-Kit.loop(dt => { st.t += dt; if (st.mode === 'tide' && st.auto) { st.hour = (st.hour + dt * .8) % 24; $('hour').value = st.hour; $('hourOut').textContent = Math.floor(st.hour) + '시'; } },
-  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({water: drawWater, layer: drawLayerSea, salt: drawSalt, current: drawCurrent, tide: drawTide})[st.mode](); drawGraph(); ledger(); }, $('play'));
+  $('gTitle').textContent = {water: '지구의 물 분포', layer: '깊이에 따른 수온', salt: '장소에 따른 염분', current: '같은 위도(북위 약 35°)의 표층 수온', korea: '해역별 표층 수온 비교'}[m];
+  $('gSub').textContent = {water: '', layer: '굵은 선: 선택한 곳', salt: '', current: '여름, 대략적인 값', korea: '여름, 대략적인 값'}[m]; }, ['water', 'layer', 'salt', 'current', 'korea']);
+Kit.loop(dt => { st.t += dt; },
+  () => { S.g.fillStyle = C.surface; S.g.fillRect(0, 0, S.w, S.h); ({water: drawWater, layer: drawLayerSea, salt: drawSalt, current: drawGyre, korea: drawCurrent})[st.mode](); drawGraph(); ledger(); }, $('play'));
 })();
 </script>
 </body>
