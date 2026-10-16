@@ -15,7 +15,7 @@
   <nav class="topbar" data-topbar="3학년|21 생식과 유전" data-ws="worksheet.html"></nav>
   <header class="page">
     <div>
-      <div class="eyebrow"><i class="area-dot"></i>과학 3 · 21 생식과 유전 <span class="code">9과21</span></div>
+      <div class="eyebrow"><i class="area-dot"></i>과학 3 · 21 생식과 유전 <span class="code">9과21-01</span><span class="code">9과21-02</span><span class="code">9과21-03</span><span class="code">9과21-04</span><span class="code">9과21-05</span></div>
       <h1>생식과 유전 실험실</h1>
     </div>
     <div class="seg" role="group" aria-label="차시 고르기">
@@ -162,7 +162,7 @@ function drawMeiosis(){
 }
 
 /* ===== 4. 발생 ===== */
-const DEV = ['수정 (수란관)', '수정란', '난할: 2세포', '난할: 4세포 → 8세포', '포배 (자궁으로 이동)', '착상 (자궁 안쪽 벽)'];
+const DEV = ['수정 (수란관)', '수정란', '난할: 2세포', '난할: 4세포 → 8세포', '포배 (자궁으로 이동)', '자궁에 도착'];
 function drawDevelop(){
   const g = S.g, p = st.stage, ph = Math.min(5, Math.floor(p));
   // 생식 기관 모식도
@@ -180,7 +180,7 @@ function drawDevelop(){
     if (n <= 8) { const pos = {1: [[0, 0]], 2: [[-.5, 0], [.5, 0]], 4: [[-.5, -.5], [.5, -.5], [-.5, .5], [.5, .5]], 8: [[-.5, -.5], [.5, -.5], [-.5, .5], [.5, .5], [-.2, -.2], [.2, -.2], [-.2, .2], [.2, .2]]}[n];
       pos.forEach(([u, v]) => { g.fillStyle = '#fbe8d0'; g.strokeStyle = '#c8a070'; g.lineWidth = 1.5; g.beginPath(); g.arc(ex + u * R * .9, ey + v * R * .9, n === 1 ? R : r * 1.05, 0, TAU); g.fill(); g.stroke(); }); }
     else { g.fillStyle = 'rgba(250,232,208,.5)'; g.beginPath(); g.arc(ex, ey, R, 0, TAU); g.fill(); for (let j = 0; j < 26; j++) { const a = j * TAU / 26; g.fillStyle = '#fbe8d0'; g.strokeStyle = '#c8a070'; g.beginPath(); g.arc(ex + Math.cos(a) * R * .85, ey + Math.sin(a) * R * .85, R * .13, 0, TAU); g.fill(); g.stroke(); } for (let j = 0; j < 6; j++) { g.beginPath(); g.arc(ex - R * .45 + (j % 3) * R * .14, ey - R * .2 + Math.floor(j / 3) * R * .16, R * .1, 0, TAU); g.fill(); g.stroke(); } if (p < 5) label(g, '속이 빈 공 모양 (포배)', ex, ey + R + 22, {size: 11}); }
-    if (p >= 5) { g.fillStyle = 'rgba(220,120,140,.35)'; g.fillRect(ex - R - 30, ey + R + 8, 2 * R + 60, 24); label(g, '자궁 안쪽 벽에 파묻힘 → 태반 형성', ex, ey + R + 20, {size: 11, weight: 700}); }
+    if (p >= 5) { g.fillStyle = 'rgba(220,120,140,.35)'; g.fillRect(ex - R - 30, ey + R + 8, 2 * R + 60, 24); label(g, '이후 과정은 고등학교에서 배워요', ex, ey + R + 20, {size: 11, weight: 700}); }
     label(g, `세포 수 ${n}개`, ex, 26, {weight: 700, size: 14}); }
   label(g, DEV[ph], 30, 26, {weight: 700, size: 16, align: 'left', color: C.bio});
 }
@@ -268,7 +268,7 @@ function table(){
   if (st.mode === 'size') setTable('우무 조각의 크기 비교', ['한 변 (cm)', '표면적 (cm²)', '부피 (cm³)', '표면적/부피'], [1, 2, 3, 4].map(L => [L, 6 * L * L, L * L * L, (6 / L).toFixed(1)]));
   else if (st.mode === 'mitosis') setTable('체세포 분열 단계', ['단계', '특징'], [['간기', 'DNA 복제, 세포 성장 (핵막 뚜렷, 염색체 보이지 않음)'], ['전기', '염색체가 나타나고 핵막이 사라짐, 방추사 형성'], ['중기', '염색체가 세포 중앙에 배열 (관찰하기 가장 좋음)'], ['후기', '염색 분체가 분리되어 양쪽 끝으로 이동'], ['말기', '핵막이 다시 나타나고 세포질 분열 시작']]);
   else if (st.mode === 'meiosis') setTable('체세포 분열과 감수 분열', ['구분', '체세포 분열', '감수 분열'], [['분열 횟수', '1회', '연속 2회'], ['딸세포 수', '2개', '4개'], ['염색체 수', '변화 없음', '절반으로 줄어듦'], ['2가 염색체', '형성 안 함', '형성함'], ['일어나는 곳', '몸의 생장 부위', '생식 기관 (정소, 난소)']]);
-  else if (st.mode === 'develop') setTable('사람의 발생 과정', ['과정', '일어나는 곳·내용'], [['수정', '수란관에서 정자와 난자의 핵이 결합'], ['난할', '수정란의 체세포 분열 (세포 크기 작아짐)'], ['착상', '포배가 수정 후 약 1주일 만에 자궁 안쪽 벽에 파묻힘'], ['태반 형성', '모체와 태아 사이 물질 교환'], ['출산', '수정 후 약 266일(38주)']]);
+  else if (st.mode === 'develop') setTable('수정과 난할', ['난할 횟수', '세포 수', '세포 1개의 크기 (수정란 = 100)'], [0, 1, 2, 3, 4].map(n => [n, 2 ** n, +(100 / 2 ** n).toFixed(2)]));
   else if (st.mode === 'mendel') setTable('멘델의 유전 원리', ['원리', '내용'], [['우열의 원리', '대립 형질이 다른 순종끼리 교배하면 잡종 1대에서 우성 형질만 나타남'], ['분리의 법칙', '생식세포를 만들 때 쌍을 이룬 유전자가 분리되어 서로 다른 생식세포로 들어감 (잡종 2대 3 : 1)'], ['독립의 법칙', '두 쌍 이상의 대립 형질이 서로 영향을 주지 않고 독립적으로 유전됨 (9 : 3 : 3 : 1)']]);
   else setTable('사람의 유전 형질', ['형질', '유전자 위치', '특징'], [['미맹', '상염색체', '남녀에 관계없이 나타남'], ['ABO식 혈액형', '상염색체', '대립유전자 A, B, O 세 가지 (복대립 유전)'], ['적록 색맹', 'X 염색체', '남자에게 더 많이 나타남 (반성 유전)']]);
 }
@@ -286,7 +286,7 @@ function ledger(){
     t = '감수 1분열에서 염색체 수가 줄어드는 순간을 찾아보세요.'; }
   else if (st.mode === 'develop') { s = stat('과정', DEV[Math.min(5, Math.floor(st.stage))].split(' (')[0]) + stat('세포 수', st.stage < 2 ? 1 : st.stage < 3 ? 2 : st.stage < 4 ? (st.stage < 3.5 ? 4 : 8) : '많음');
     e = '<b>수정</b>: 정자와 난자가 만나 수정란이 되는 과정. <b>발생</b>: 수정란이 세포 분열을 거쳐 개체가 되는 과정. 초기의 빠른 체세포 분열을 <b>난할</b>이라 하며, 세포 수는 늘지만 크기는 자라지 않아 세포 하나의 크기가 점점 작아집니다.';
-    t = '[자동 진행]으로 수정부터 착상까지 따라가 보세요.'; }
+    t = '[자동 진행]으로 수정 뒤 난할이 일어나는 동안 세포 수와 세포 크기를 비교해 보세요.'; }
   else if (st.mode === 'mendel') { s = st.md === 'one' ? stat('교배', st.p1 + ' × ' + st.p2) + stat('우성', 'R (둥근 모양)') : stat('교배', 'RrYy × RrYy') + stat('표현형 비', '9:3:3:1');
     e = '멘델은 완두의 대립 형질을 연구하여 <b>우열의 원리</b>, <b>분리의 법칙</b>, <b>독립의 법칙</b>을 밝혔습니다. 대립 형질을 결정하는 유전자는 쌍으로 존재하며, 생식세포를 만들 때 분리되어 하나씩 들어갑니다.';
     t = '[자손 100개 얻기]를 여러 번 눌러, 실제 비율이 예상 비율과 얼마나 비슷한지 확인하세요.'; }
