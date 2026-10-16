@@ -15,7 +15,7 @@
   <nav class="topbar" data-topbar="통합과학1|04 지각·생명체 구성 물질과 신소재" data-ws="worksheet.html"></nav>
   <header class="page">
     <div>
-      <div class="eyebrow"><i class="area-dot"></i>통합과학1 · 04 지각·생명체 구성 물질과 신소재 <span class="code">통과1 Ⅱ</span></div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학1 · 04 지각·생명체 구성 물질과 신소재 <span class="code">10통과1-02-05</span><span class="code">10통과1-02-06</span></div>
       <h1>구성 물질과 신소재 실험실</h1>
     </div>
     <div class="seg" role="group" aria-label="차시 고르기">
@@ -58,7 +58,7 @@
 const {C, $, canvas, axes, line, label} = Kit;
 const S = canvas($('scene')), G = canvas($('graph')), TAU = Math.PI * 2;
 const st = {mode: 'silicate', s: 'iso', b: 'protein', fold: 0, dna: [], ans: [], n: 'semi', T: 300};
-const SIL = {iso: ['독립형', '감람석', 0, '1 : 4', '사면체가 따로 떨어져 있고 Mg²⁺, Fe²⁺ 등 양이온과 결합', '풍화에 약함'], chain: ['단사슬형', '휘석', 2, '1 : 3', '사면체가 산소 2개를 공유하며 한 줄로 연결', '두 방향 쪼개짐'], dchain: ['복사슬형', '각섬석', 2.5, '4 : 11', '단사슬 두 줄이 서로 연결', '두 방향 쪼개짐'], sheet: ['판상형', '흑운모', 3, '2 : 5', '사면체가 산소 3개를 공유하며 평면으로 연결', '한 방향으로 얇게 쪼개짐'], net: ['망상형', '석영', 4, '1 : 2', '사면체가 산소 4개를 모두 공유하며 입체 그물 구조', '쪼개짐 없음, 풍화에 강함']};
+const SIL = {iso: ['독립형', '감람석', 0, '따로따로', '사면체가 따로 떨어져 있고 Mg²⁺, Fe²⁺ 등 양이온과 결합', '풍화에 약함'], chain: ['단사슬형', '휘석', 2, '한 줄 사슬', '사면체가 산소 2개를 공유하며 한 줄로 연결', '두 방향 쪼개짐'], dchain: ['복사슬형', '각섬석', 2.5, '두 줄 사슬', '단사슬 두 줄이 서로 연결', '두 방향 쪼개짐'], sheet: ['판상형', '흑운모', 3, '평면(판)', '사면체가 산소 3개를 공유하며 평면으로 연결', '한 방향으로 얇게 쪼개짐'], net: ['망상형', '석영', 4, '3차원 그물', '사면체가 산소 4개를 모두 공유하며 입체 그물 구조', '쪼개짐 없음, 풍화에 강함']};
 function tetra(g, x, y, r, rot, hl){ const P = [0, 1, 2].map(k => [x + Math.cos(rot + k * TAU / 3) * r, y + Math.sin(rot + k * TAU / 3) * r]); g.fillStyle = hl ? 'rgba(242,140,122,.35)' : 'rgba(142,205,242,.35)'; g.strokeStyle = '#5a7a9a'; g.lineWidth = 1.5; g.beginPath(); P.forEach(p => g.lineTo(...p)); g.closePath(); g.fill(); g.stroke();
   P.forEach(p => { g.fillStyle = '#e04a3c'; g.beginPath(); g.arc(p[0], p[1], r * .22, 0, TAU); g.fill(); }); g.fillStyle = '#e04a3c'; g.globalAlpha = .55; g.beginPath(); g.arc(x, y, r * .26, 0, TAU); g.fill(); g.globalAlpha = 1; g.fillStyle = '#2f6fd0'; g.beginPath(); g.arc(x, y, r * .14, 0, TAU); g.fill(); }
 function tri(g, x, y, s, up, hl){ const h = s * Math.sqrt(3) / 2, P = up ? [[x, y], [x + s, y], [x + s / 2, y - h]] : [[x, y], [x + s, y], [x + s / 2, y + h]], cx = x + s / 2, cy = up ? y - h / 3 : y + h / 3;
@@ -74,8 +74,8 @@ function drawSilicate(){ const g = S.g, s = Math.min(S.w, S.h) * .1, cx = S.w * 
     else label(g, '밑면의 산소 3개를 공유하며 평면(판)으로 연결 → 판 사이가 약해 얇게 쪼개짐', cx, S.h - 20, {size: 11, color: C.muted}); }
   odots(g, pts, s);
   // 사면체 확대
-  const zx = S.w * .84, zy = S.h * .3, zr = Math.min(S.w, S.h) * .1; tetra(g, zx, zy, zr, -Math.PI / 2, true); label(g, 'SiO₄ 사면체', zx, zy + zr * 1.5, {size: 13, weight: 700}); label(g, '규소(파랑) 1 + 산소(빨강) 4', zx, zy + zr * 1.5 + 18, {size: 11, color: C.muted}); label(g, '(가운데 산소 1개는 위쪽)', zx, zy + zr * 1.5 + 34, {size: 10, color: C.muted});
-  const d = SIL[k]; label(g, `${d[0]} 구조 · ${d[1]}`, S.w * .4, 20, {size: 15, weight: 700}); label(g, `공유하는 산소 수 ${d[2]}개 · Si : O = ${d[3]}`, S.w * .84, S.h * .66, {size: 13, weight: 700, color: C.accent}); }
+  const zx = S.w * .84, zy = S.h * .3, zr = Math.min(S.w, S.h) * .1; tetra(g, zx, zy, zr, -Math.PI / 2, true); label(g, 'Si–O 사면체', zx, zy + zr * 1.5, {size: 13, weight: 700}); label(g, '규소(파랑) 1 + 산소(빨강) 4', zx, zy + zr * 1.5 + 18, {size: 11, color: C.muted}); label(g, '(가운데 산소 1개는 위쪽)', zx, zy + zr * 1.5 + 34, {size: 10, color: C.muted});
+  const d = SIL[k]; label(g, `${d[0]} 구조 · ${d[1]}`, S.w * .4, 20, {size: 15, weight: 700}); label(g, `공유하는 산소 수 ${d[2]}개 · 연결 모양: ${d[3]}`, S.w * .84, S.h * .66, {size: 13, weight: 700, color: C.accent}); }
 /* ===== 단백질과 DNA ===== */
 const AA = ['#e8a33a', '#5aa0d0', '#8fca5a', '#d06a9a', '#9a7ad0', '#d0c04a', '#4ab0a0'];
 function drawProtein(){ const g = S.g, n = 28, f = st.fold, cx = S.w * .42, cy = S.h * .5, t = performance.now() / 1000; const P = [];
@@ -114,7 +114,7 @@ function drawGraph(){ const g = G.g;
   else if (st.mode === 'bio') { const m = axes(G, {x: [0, 5, 1, ''], y: [0, 70, 10, '구성 비율 (%)']}); [['물', 65], ['단백질', 16], ['지질', 12], ['무기염류', 6], ['탄수화물·핵산', 1]].forEach(([n, v], i) => { const x = m.X(i + .5); g.fillStyle = n === '단백질' && st.b === 'protein' || n.includes('핵산') && st.b === 'dna' ? C.hot : C.accent; g.fillRect(x - 18, m.Y(v), 36, m.Y(0) - m.Y(v)); label(g, n, x, m.Y(0) + 12, {size: 10}); label(g, v + '%', x, m.Y(v) - 10, {size: 10, weight: 700}); }); }
   else { const m = axes(G, {x: [0, 300, 50, '온도 (K)'], y: [0, 2.2, .5, '전기 저항 (상대값)']}); const P = k => { const a = []; for (let T = 20; T <= 300; T += 2) a.push([T, R(k, T)]); return a; }; line(G, P('metal'), m, C.line, 1.5, [5, 4]); line(G, P(st.n === 'super' ? 'super' : 'semi'), m, C.hot, 2.5); g.fillStyle = C.ink; g.beginPath(); g.arc(m.X(st.T), m.Y(R(st.n === 'super' ? 'super' : 'semi', st.T)), 5, 0, TAU); g.fill(); label(g, '점선: 금속', m.X(260), m.Y(1.05), {size: 10, color: C.muted}); if (st.n === 'super') label(g, `임계 온도 ${TC} K`, m.X(TC), m.Y(.9), {size: 10, color: C.hot}); } }
 function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
-  if (st.mode === 'silicate') { const d = SIL[st.s]; s.innerHTML = `<div><b>${d[0]}</b><span>${d[1]}</span></div><div><b>${d[2]}개</b><span>공유하는 산소</span></div><div><b>${d[3]}</b><span>Si : O</span></div>`; $('explain').innerHTML = `지각의 대부분은 <b>규산염 광물</b>이에요. 규소 1개와 산소 4개가 결합한 <b>SiO₄ 사면체</b>가 기본 단위이고, 사면체끼리 산소를 공유하는 방식에 따라 구조와 성질이 달라져요. ${d[4]}.`; $('tip').textContent = '지각을 이루는 원소: 산소(약 46 %) > 규소(약 28 %) > 알루미늄 > 철 > 칼슘 …';
+  if (st.mode === 'silicate') { const d = SIL[st.s]; s.innerHTML = `<div><b>${d[0]}</b><span>${d[1]}</span></div><div><b>${d[2]}개</b><span>공유하는 산소</span></div><div><b>${d[3]}</b><span>연결 모양</span></div>`; $('explain').innerHTML = `지각의 대부분은 <b>규산염 광물</b>이에요. 규소 1개와 산소 4개가 결합한 <b>Si–O 사면체</b>가 기본 단위이고, 사면체끼리 산소를 공유하는 방식에 따라 구조와 성질이 달라져요. ${d[4]}.`; $('tip').textContent = '지각을 이루는 원소: 산소(약 46 %) > 규소(약 28 %) > 알루미늄 > 철 > 칼슘 …';
     th.innerHTML = '<tr><th>구조</th><th>광물</th><th>공유 산소</th><th>특징</th></tr>'; tb.innerHTML = Object.values(SIL).map(d => `<tr><td>${d[0]}</td><td>${d[1]}</td><td>${d[2]}</td><td>${d[5]}</td></tr>`).join(''); $('tTitle').textContent = '규산염 광물의 구조'; $('gTitle').textContent = '사면체가 공유하는 산소 수'; $('gSub').textContent = ''; }
   else if (st.mode === 'bio') { s.innerHTML = st.b === 'protein' ? '<div><b>아미노산</b><span>단위체 (20종류)</span></div><div><b>펩타이드 결합</b><span>연결 방식</span></div>' : `<div><b>뉴클레오타이드</b><span>단위체</span></div><div><b>${st.ans.filter((c, i) => PAIR[st.dna[i]] === c).length}/${st.dna.length}</b><span>맞춘 염기쌍</span></div>`;
     $('explain').innerHTML = st.b === 'protein' ? '<b>단백질</b>: 아미노산이 <b>펩타이드 결합</b>으로 길게 연결된 뒤 접히고 꼬여 고유한 입체 구조를 이뤄요. 몸의 구성 성분이자 효소·호르몬·항체로 생명 활동을 조절해요.' : '<b>핵산(DNA, RNA)</b>: 인산·당·염기로 된 <b>뉴클레오타이드</b>가 연결된 물질. DNA는 두 가닥이 염기 사이 결합(A–T, G–C)으로 이중 나선을 이루며 <b>유전 정보</b>를 저장해요.'; $('tip').textContent = '생명체 구성 물질은 탄소 화합물이 많아요. 탄소는 원자가 전자가 4개라 다른 원자와 최대 4개의 공유 결합을 하며 사슬·고리 등 다양한 구조를 만들어요.';

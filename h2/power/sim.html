@@ -15,14 +15,14 @@
   <nav class="topbar" data-topbar="통합과학2|05 에너지와 발전" data-ws="worksheet.html"></nav>
   <header class="page">
     <div>
-      <div class="eyebrow"><i class="area-dot"></i>통합과학2 · 05 에너지와 발전 <span class="code">통과2 Ⅱ</span></div>
+      <div class="eyebrow"><i class="area-dot"></i>통합과학2 · 05 에너지와 발전 <span class="code">10통과2-02-04</span><span class="code">10통과2-02-05</span><span class="code">10통과2-02-06</span></div>
       <h1>에너지와 발전 실험실</h1>
     </div>
     <div class="seg" role="group" aria-label="차시 고르기">
-      <button type="button" data-mode="convert">1. 에너지 전환과 효율</button>
-      <button type="button" data-mode="gen">2. 발전기</button>
-      <button type="button" data-mode="grid">3. 전력 수송</button>
-      <button type="button" data-mode="sun">4. 태양 에너지</button>
+      <button type="button" data-mode="convert">에너지 전환과 효율</button>
+      <button type="button" data-mode="gen">발전기</button>
+      <button type="button" data-mode="grid">전력 수송 (심화)</button>
+      <button type="button" data-mode="sun">태양 에너지</button>
     </div>
   </header>
   <div class="main">
@@ -113,7 +113,7 @@ function render(){ const s = $('stats'), th = $('thead'), tb = $('tbody');
     th.innerHTML = '<tr><th>발전 방식</th><th>에너지 전환</th></tr>'; tb.innerHTML = [['화력', '화학 → 열 → 운동 → 전기'], ['원자력', '핵 → 열 → 운동 → 전기'], ['수력', '위치 → 운동 → 전기'], ['풍력', '운동(바람) → 전기'], ['태양광', '빛 → 전기']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = '발전 방식과 에너지 전환'; $('gTitle').textContent = '유도 전압 그래프'; $('gSub').textContent = ''; }
   else if (st.mode === 'grid') { const R = grid(); $('kvOut').textContent = KV[st.kv] + ' kV'; s.innerHTML = `<div><b>${R.I.toFixed(0)} A</b><span>송전 전류</span></div><div><b>${(R.loss / 1e6).toFixed(2)} MW</b><span>손실 전력</span></div><div><b>${R.pct.toFixed(2)} %</b><span>손실 비율</span></div>`; $('explain').innerHTML = '같은 전력 P = VI를 보낼 때 <b>전압을 높이면 전류가 작아져</b> 송전선에서 열로 잃는 전력(P손실 = I²R)이 크게 줄어요. 그래서 발전소에서 변압기로 전압을 높여 보내고, 도시 근처에서 다시 낮춰요.'; $('tip').textContent = '우리나라 송전 전압: 154 kV, 345 kV, 765 kV. 가정에는 220 V로 낮춰 공급돼요.';
     th.innerHTML = '<tr><th>송전 전압</th><th>전류</th><th>손실 비율</th></tr>'; tb.innerHTML = KV.map(v => { const I = P / (v * 1000), pct = Math.min(100, I * I * st.R * 2 / P * 100); return `<tr><td>${v} kV</td><td>${I.toFixed(0)} A</td><td>${pct.toFixed(2)} %</td></tr>`; }).join(''); $('tTitle').textContent = '전압에 따른 손실 (100 MW 송전)'; $('gTitle').textContent = '송전 전압과 손실'; $('gSub').textContent = ''; }
-  else { s.innerHTML = '<div><b>약 0.7 %</b><span>질량 결손</span></div><div><b>약 1500만 K</b><span>중심 온도</span></div>'; $('explain').innerHTML = '태양 중심부에서는 높은 온도와 압력 때문에 <b>수소 원자핵 4개가 융합해 헬륨 원자핵 1개</b>가 돼요. 이때 줄어든 질량이 <b>E = mc²</b>에 따라 막대한 에너지로 바뀌어 빛과 열로 방출돼요.'; $('tip').textContent = '태양 에너지 → 광합성(화석 연료), 물의 순환(수력), 바람(풍력), 태양광 발전으로 전환되어 지구의 대부분 에너지원이 돼요.';
+  else { s.innerHTML = '<div><b>조금 줄어듦</b><span>반응 후 질량</span></div><div><b>약 1500만 K</b><span>중심 온도</span></div>'; $('explain').innerHTML = '태양 중심부에서는 높은 온도와 압력 때문에 <b>수소 원자핵 4개가 융합해 헬륨 원자핵 1개</b>가 돼요. 이때 줄어든 질량이 막대한 에너지로 바뀌어 빛과 열로 방출돼요.'; $('tip').textContent = '태양 에너지 → 광합성(화석 연료), 물의 순환(수력), 바람(풍력), 태양광 발전으로 전환되어 지구의 대부분 에너지원이 돼요.';
     th.innerHTML = '<tr><th>에너지원</th><th>근원</th></tr>'; tb.innerHTML = [['화석 연료', '태양 (옛 생물의 광합성)'], ['수력', '태양 (물의 순환)'], ['풍력', '태양 (불균등 가열 → 바람)'], ['태양광·태양열', '태양'], ['원자력', '우라늄 핵분열'], ['지열', '지구 내부 에너지'], ['조력', '달·태양의 인력']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); $('tTitle').textContent = '에너지원의 근원'; $('gTitle').textContent = '태양의 구성 원소 (질량비)'; $('gSub').textContent = ''; } }
 Kit.seg($('devSeg'), 'dev', v => { st.dev = v; render(); })('bulb');
 $('rpm').oninput = e => { st.rpm = +e.target.value; $('rpmOut').textContent = st.rpm + ' 회/s'; render(); }; $('turns').oninput = e => { st.turns = +e.target.value; $('turnsOut').textContent = st.turns + '회'; render(); }; Kit.seg($('magSeg'), 'mag', v => { st.mag = +v; render(); })('1');
