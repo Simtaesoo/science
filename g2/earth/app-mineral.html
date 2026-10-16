@@ -39,7 +39,7 @@ const MIN = [
   ['금', '노란 금빛', '#e6c142', ['노란색', '#e2b93b'], 2.5, 0, 0, '매우 무겁고 늘어남'],
   ['활석', '흰색·연녹색', '#dfe8d6', ['흰색', '#f4f4f4'], 1, 0, 0, '만지면 미끈미끈'],
   ['석고', '흰색', '#f2f0ea', ['흰색', '#f4f4f4'], 2, 0, 0, '손톱에 긁힘']];
-const TEST = [['streak', '조흔판', '🧱'], ['nail', '손톱(2.5)', '💅'], ['coin', '동전(3.5)', '🪙'], ['glass', '유리판(5.5)', '🔲'], ['acid', '묽은 염산', '🧪'], ['mag', '자석', '🧲']];
+const TEST = [['streak', '조흔판', '🧱'], ['nail', '손톱', '💅'], ['coin', '동전', '🪙'], ['glass', '유리판', '🔲'], ['acid', '묽은 염산', '🧪'], ['mag', '자석', '🧲']];
 const CLAIM = ['할머니가 물려준 돌이래요. 뭔지 알려 주세요!', '하천에서 주운 돌이에요. 이름이 뭐예요?', '학교 화단에서 주웠어요! 무슨 광물이에요?', '등산하다 주웠어요. 감정해 주세요!'];
 let list, idx, cur, claim, notes, done, anim, ui = {}, locked, ruled, cands;
 app.onStart = o => { const pool = MIN.slice().sort(() => Math.random() - .5); list = []; for (let i = 0; i < o.n; i++) list.push(pool[i % pool.length]);
@@ -58,8 +58,8 @@ function render(){ ui.n.innerHTML = notes.length ? notes.join('<br>') : '시험�
 function test(k){ if (locked || done[k] || performance.now() - anim.t0 < 1200) return; done[k] = 1; app.addScore(-5); anim = {k, t0: performance.now()}; sfx.click();
   setTimeout(() => { let s;
     if (k === 'streak') s = `🧱 조흔색: <b>${cur[3][0]}</b>`;
-    if (k === 'nail') s = cur[4] < 2.5 ? '💅 손톱에 <b>긁힘</b> (굳기 2.5 미만)' : '💅 손톱에 <b>긁히지 않음</b>';
-    if (k === 'coin') s = cur[4] < 3.5 ? '🪙 동전에 <b>긁힘</b> (굳기 3.5 미만)' : '🪙 동전에 <b>긁히지 않음</b>';
+    if (k === 'nail') s = cur[4] < 2.5 ? '💅 손톱에 <b>긁힘</b> (손톱보다 무름)' : '💅 손톱에 <b>긁히지 않음</b>';
+    if (k === 'coin') s = cur[4] < 3.5 ? '🪙 동전에 <b>긁힘</b> (동전보다 무름)' : '🪙 동전에 <b>긁히지 않음</b>';
     if (k === 'glass') s = cur[4] > 5.5 ? '🔲 유리판을 <b>긁음</b> (유리보다 단단함)' : '🔲 유리판을 <b>긁지 못함</b>';
     if (k === 'acid') { s = cur[5] ? '🧪 <b>거품이 생김</b> (이산화 탄소)' : '🧪 반응 <b>없음</b>'; cur[5] ? sfx.bubble() : 0; }
     if (k === 'mag') s = cur[6] ? '🧲 자석에 <b>붙음</b>' : '🧲 자석에 붙지 <b>않음</b>';
